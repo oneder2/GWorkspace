@@ -1,0 +1,47 @@
+{
+  "nav": {
+    "home": "首页",
+    "sites": "导航",
+    "tools": "工具箱",
+    "blog": "博客",
+    "portfolio": "作品集"
+  },
+  "home": {
+    "title": "早上好",
+    "subtitle": "今天你想探索什么？",
+    "searchPlaceholder": "输入搜索内容..."
+  },
+  "sites": {
+    "title": "站点导航",
+    "subtitle": "精选资源",
+    "filterPlaceholder": "筛选...",
+    "noResults": "没有找到这个星球的信号...",
+    "index": "目录"
+  },
+  "tools": {
+    "title": "工具箱",
+    "utilities": "工具",
+    "calculator": "计算器",
+    "encoder": "编码转换",
+    "json": "JSON格式化",
+    "stopwatch": "秒表",
+    "pomodoro": "番茄钟"
+  },
+  "blog": {
+    "tags": "标签",
+    "archive": "归档"
+  },
+  "portfolio": {
+    "title": "精选作品",
+    "subtitle": "设计与开发作品集"
+  },
+  "weather": {
+    "loading": "加载中...",
+    "error": "无法获取天气信息"
+  },
+  "common": {
+    "online": "在线",
+    "readArticle": "阅读文章",
+    "language": "语言"
+  }
+}

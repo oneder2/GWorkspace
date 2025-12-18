@@ -1,0 +1,47 @@
+{
+  "nav": {
+    "home": "Home",
+    "sites": "Navigation",
+    "tools": "Toolbox",
+    "blog": "Blog",
+    "portfolio": "Portfolio"
+  },
+  "home": {
+    "title": "Good Morning",
+    "subtitle": "What would you like to explore today?",
+    "searchPlaceholder": "Type to search..."
+  },
+  "sites": {
+    "title": "Site Navigation",
+    "subtitle": "Curated Resources",
+    "filterPlaceholder": "Filter...",
+    "noResults": "No signals found from this planet...",
+    "index": "Index"
+  },
+  "tools": {
+    "title": "Toolbox",
+    "utilities": "Utilities",
+    "calculator": "Calculator",
+    "encoder": "Encoder",
+    "json": "JSON Formatter",
+    "stopwatch": "Stopwatch",
+    "pomodoro": "Pomodoro"
+  },
+  "blog": {
+    "tags": "Tags",
+    "archive": "Archive"
+  },
+  "portfolio": {
+    "title": "Selected Works",
+    "subtitle": "Design & Development Portfolio"
+  },
+  "weather": {
+    "loading": "Loading...",
+    "error": "Unable to fetch weather"
+  },
+  "common": {
+    "online": "Online",
+    "readArticle": "Read Article",
+    "language": "Language"
+  }
+}

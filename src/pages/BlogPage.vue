@@ -1,0 +1,99 @@
+<!--
+  博客页面组件
+  展示个人博客文章列表
+  模块化设计，便于添加新文章和分类
+-->
+<template>
+  <div class="animate-fade-in w-full">
+    <div class="grid grid-cols-12 gap-6 lg:gap-8">
+      <!-- 左侧标签和归档 -->
+      <div class="hidden xl:block xl:col-span-2">
+        <div class="glass-card p-6 rounded-2xl sticky top-6">
+          <h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.tags') }}</h3>
+          <div class="flex flex-wrap gap-2">
+            <span 
+              v-for="tag in tags" 
+              :key="tag.name"
+              class="px-3 py-1 rounded-full text-xs font-bold"
+              :class="tag.color"
+            >
+              #{{ tag.name }}
+            </span>
+          </div>
+          <div class="mt-8">
+            <h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.archive') }}</h3>
+            <ul class="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+              <li 
+                v-for="archive in archives" 
+                :key="archive.month"
+                class="hover:text-green-600 dark:hover:text-green-400 cursor-pointer flex justify-between"
+              >
+                {{ archive.month }} <span>({{ archive.count }})</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 文章列表 -->
+      <div class="col-span-12 xl:col-span-8 space-y-6">
+        <article 
+          v-for="post in blogPosts" 
+          :key="post.id" 
+          class="glass-card p-6 rounded-2xl group cursor-pointer border-l-4 border-l-transparent hover:border-l-green-500 dark:hover:border-l-green-400 transition-all"
+        >
+          <div class="flex items-center gap-3 mb-3">
+            <span 
+              class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs rounded-md font-bold uppercase tracking-wide"
+            >
+              {{ post.category }}
+            </span>
+            <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">{{ post.date }}</span>
+          </div>
+          <h3 class="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+            {{ post.title }}
+          </h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4 opacity-80">
+            {{ post.excerpt }}
+          </p>
+          <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-4">
+            <div class="flex items-center text-sm font-bold text-green-600 dark:text-green-400 gap-1 group-hover:gap-2 transition-all">
+              {{ $t('common.readArticle') }}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </div>
+            <div class="flex items-center gap-3 text-slate-400 dark:text-slate-500 text-sm">
+              <span class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                12
+              </span>
+              <span class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                4
+              </span>
+            </div>
+          </div>
+        </article>
+      </div>
+      
+      <!-- 右侧空白 -->
+      <div class="hidden xl:block xl:col-span-2"></div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { blogPostsConfig, blogTagsConfig, blogArchivesConfig } from '../config/blog'
+
+// 从配置文件加载数据
+const blogPosts = ref(blogPostsConfig)
+const tags = blogTagsConfig
+const archives = blogArchivesConfig
+</script>
