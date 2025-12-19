@@ -4,35 +4,35 @@
 -->
 <template>
   <div class="h-full flex items-center justify-center">
-    <div class="bg-slate-900 dark:bg-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md border border-slate-700/50 dark:border-slate-600/50">
+    <div class="bg-white dark:bg-slate-800/90 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-lg md:max-w-xl border border-slate-200 dark:border-slate-600/50">
       <!-- 模式选择 -->
       <div class="flex gap-2 mb-6">
         <button 
           @click="setMode('work')"
-          class="flex-1 py-2 rounded-xl font-bold transition-colors"
+          class="flex-1 py-2 rounded-xl font-bold transition-colors border"
           :class="mode === 'work' 
-            ? 'bg-green-500 text-white' 
-            : 'bg-slate-800 dark:bg-slate-700 text-slate-300'"
+            ? 'bg-green-500 dark:bg-green-500 text-white border-green-400/30 dark:border-green-400/30' 
+            : 'bg-slate-100 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600/50 hover:bg-slate-200 dark:hover:bg-slate-600'"
         >
           工作 (25分钟)
         </button>
         <button 
           @click="setMode('break')"
-          class="flex-1 py-2 rounded-xl font-bold transition-colors"
+          class="flex-1 py-2 rounded-xl font-bold transition-colors border"
           :class="mode === 'break' 
-            ? 'bg-blue-500 text-white' 
-            : 'bg-slate-800 dark:bg-slate-700 text-slate-300'"
+            ? 'bg-blue-500 dark:bg-blue-500 text-white border-blue-400/30 dark:border-blue-400/30' 
+            : 'bg-slate-100 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600/50 hover:bg-slate-200 dark:hover:bg-slate-600'"
         >
           休息 (5分钟)
         </button>
       </div>
       
       <!-- 时间显示 -->
-      <div class="bg-black/30 dark:bg-slate-900/50 rounded-2xl p-8 mb-6 text-center">
-        <div class="text-white dark:text-slate-100 font-mono text-6xl mb-2 tracking-wider">
+      <div class="bg-slate-100 dark:bg-black/60 rounded-2xl p-8 mb-6 text-center border border-slate-300 dark:border-slate-600/30">
+        <div class="text-slate-900 dark:text-slate-100 font-mono text-6xl mb-2 tracking-wider">
           {{ formatTime(remainingTime) }}
         </div>
-        <div class="text-slate-400 dark:text-slate-500 text-sm">
+        <div class="text-slate-500 dark:text-slate-400 text-sm">
           {{ mode === 'work' ? '专注时间' : '休息时间' }}
         </div>
       </div>
@@ -41,14 +41,16 @@
       <div class="flex gap-3">
         <button 
           @click="startPause" 
-          class="flex-1 h-14 rounded-xl font-bold text-white transition-colors"
-          :class="isRunning ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'"
+          class="flex-1 h-14 rounded-xl font-bold text-white transition-colors border"
+          :class="isRunning 
+            ? 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 border-yellow-400/30 dark:border-yellow-400/30' 
+            : 'bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-600 border-green-400/30 dark:border-green-400/30'"
         >
           {{ isRunning ? '暂停' : '开始' }}
         </button>
         <button 
           @click="reset"
-          class="flex-1 h-14 rounded-xl bg-slate-800 dark:bg-slate-700 text-white font-bold hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors"
+          class="flex-1 h-14 rounded-xl bg-slate-100 dark:bg-slate-700/80 text-slate-900 dark:text-slate-100 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600/50"
         >
           重置
         </button>

@@ -40,6 +40,17 @@
         </svg>
       </button>
       
+      <!-- 主题自定义按钮 -->
+      <button
+        @click="$emit('open-theme-customizer')"
+        class="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+        :title="$t('theme.customize')"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-300">
+          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+        </svg>
+      </button>
+
       <!-- 主题切换按钮 -->
       <button
         @click="$emit('toggle-theme')"
@@ -99,7 +110,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['toggle-theme', 'toggle-lang'])
+defineEmits(['toggle-theme', 'toggle-lang', 'open-theme-customizer'])
 
 const { t } = useI18n()
 
@@ -112,6 +123,6 @@ const currentTabName = computed(() => {
     'blog': t('nav.blog'),
     'portfolio': t('nav.portfolio')
   }
-  return tabMap[props.currentTab] || 'MySpace'
+  return tabMap[props.currentTab] || 'GWorkspace'
 })
 </script>

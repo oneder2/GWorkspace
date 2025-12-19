@@ -3,7 +3,7 @@
   支持JSON格式化和压缩
 -->
 <template>
-  <div class="h-full flex flex-col pt-2">
+  <div class="h-full flex flex-col w-full max-w-5xl mx-auto">
     <div class="flex items-center justify-between mb-4">
       <h3 class="font-bold text-xl text-slate-800 dark:text-slate-200">JSON Prettier</h3>
       <div class="flex gap-2">

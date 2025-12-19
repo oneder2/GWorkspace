@@ -29,4 +29,24 @@ export const toolsConfig = [
     nameKey: 'tools.pomodoro', 
     iconName: 'TimerIcon' 
   },
+  { 
+    id: 'colorpicker', 
+    nameKey: 'tools.colorPicker', 
+    iconName: 'PaintIcon' 
+  },
+  { 
+    id: 'qrcode', 
+    nameKey: 'tools.qrCode', 
+    iconName: 'QrCodeIcon' 
+  },
+  { 
+    id: 'markdown', 
+    nameKey: 'tools.markdown', 
+    iconName: 'FileTextIcon' 
+  },
+  { 
+    id: 'todo', 
+    nameKey: 'tools.todo', 
+    iconName: 'ClockIcon' 
+  },
 ]

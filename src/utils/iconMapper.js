@@ -26,6 +26,8 @@ import TranslateIcon from '../components/icons/TranslateIcon.vue'
 import FileCodeIcon from '../components/icons/FileCodeIcon.vue'
 import StopwatchIcon from '../components/icons/StopwatchIcon.vue'
 import TimerIcon from '../components/icons/TimerIcon.vue'
+import QrCodeIcon from '../components/icons/QrCodeIcon.vue'
+import FileTextIcon from '../components/icons/FileTextIcon.vue'
 
 /**
  * 图标名称到组件的映射
@@ -54,6 +56,8 @@ const iconMap = {
   FileCodeIcon,
   StopwatchIcon,
   TimerIcon,
+  QrCodeIcon,
+  FileTextIcon,
 }
 
 /**

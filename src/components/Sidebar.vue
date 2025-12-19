@@ -11,13 +11,11 @@
     <!-- 头部 Logo -->
     <div class="py-4 px-4 flex flex-col items-center relative">
       <div class="flex items-center gap-3 transition-opacity duration-300" v-if="!collapsed">
-        <div class="w-9 h-9 rounded-xl bg-green-500 dark:bg-green-600 text-white flex items-center justify-center font-bold text-lg shadow-green-300/50 shadow-lg">
-          M
-        </div>
-        <span class="font-bold text-xl tracking-tight text-slate-800 dark:text-slate-200">MySpace</span>
+        <GWorkspaceIcon :size="60" variant="black" />
+        <span class="font-bold text-xl tracking-tight text-slate-800 dark:text-slate-200">GWorkspace</span>
       </div>
-      <div v-else class="w-10 h-10 rounded-xl bg-green-500 dark:bg-green-600 text-white flex items-center justify-center font-bold text-xl shadow-green-300/50 shadow-lg">
-        M
+      <div v-else>
+        <GWorkspaceIcon :size="48" variant="black" />
       </div>
       
       <!-- 折叠按钮 - 移到应用名下方 -->
@@ -45,7 +43,7 @@
     <nav class="flex-1 overflow-y-auto px-4 space-y-2 py-4 custom-scrollbar">
       <template v-for="item in navItems" :key="item.id">
         <div 
-          @click="$emit('tab-change', item.id)"
+          @click="handleNavClick(item)"
           class="px-4 py-3.5 rounded-xl cursor-pointer flex items-center gap-4 transition-all duration-200 group text-slate-600 dark:text-slate-300 hover:bg-green-50/40 dark:hover:bg-green-900/10 hover:text-green-700 dark:hover:text-green-300"
           :class="{'nav-active': currentTab === item.id}"
         >
@@ -70,17 +68,16 @@
         <span class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">GitHub</span>
       </a>
       
-      <!-- 联系站长 -->
+      <!-- 电子邮件 -->
       <a 
-        href="https://github.com" 
-        target="_blank"
+        href="mailto:eclospy@duck.com" 
         class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-3 flex items-center gap-3 border border-white/60 dark:border-slate-700/60 shadow-sm backdrop-blur-sm hover:bg-green-50/50 dark:hover:bg-green-900/20 transition-colors group"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-700 dark:text-slate-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
           <polyline points="22,6 12,13 2,6"/>
         </svg>
-        <span class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">联系站长</span>
+        <span class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">eclospy@duck.com</span>
       </a>
       
       <!-- 所有权声明 -->
@@ -111,11 +108,13 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import HomeIcon from './icons/HomeIcon.vue'
 import CompassIcon from './icons/CompassIcon.vue'
 import WrenchIcon from './icons/WrenchIcon.vue'
 import ArticleIcon from './icons/ArticleIcon.vue'
 import BriefcaseIcon from './icons/BriefcaseIcon.vue'
+import GWorkspaceIcon from './icons/GWorkspaceIcon.vue'
 
 const props = defineProps({
   collapsed: {
@@ -128,16 +127,26 @@ const props = defineProps({
   }
 })
 
-defineEmits(['toggle-collapse', 'tab-change'])
+defineEmits(['toggle-collapse'])
 
 const { t } = useI18n()
+const router = useRouter()
 
-// 导航项配置 - 使用国际化文本
+/**
+ * 导航项配置 - 使用国际化文本和路由
+ */
 const navItems = computed(() => [
-  { id: 'home', name: t('nav.home'), icon: HomeIcon },
-  { id: 'sites', name: t('nav.sites'), icon: CompassIcon },
-  { id: 'tools', name: t('nav.tools'), icon: WrenchIcon },
-  { id: 'blog', name: t('nav.blog'), icon: ArticleIcon },
-  { id: 'portfolio', name: t('nav.portfolio'), icon: BriefcaseIcon },
+  { id: 'home', name: t('nav.home'), icon: HomeIcon, route: '/' },
+  { id: 'sites', name: t('nav.sites'), icon: CompassIcon, route: '/sites' },
+  { id: 'tools', name: t('nav.tools'), icon: WrenchIcon, route: '/tools' },
+  { id: 'blog', name: t('nav.blog'), icon: ArticleIcon, route: '/blog' },
+  { id: 'portfolio', name: t('nav.portfolio'), icon: BriefcaseIcon, route: '/portfolio' },
 ])
+
+/**
+ * 处理导航点击
+ */
+const handleNavClick = (item) => {
+  router.push(item.route)
+}
 </script>

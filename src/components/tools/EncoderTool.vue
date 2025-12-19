@@ -3,7 +3,7 @@
   支持Base64和URL编码/解码
 -->
 <template>
-  <div class="space-y-6 max-w-3xl mx-auto pt-4">
+  <div class="space-y-6 w-full max-w-4xl mx-auto">
     <div class="flex items-center justify-between pb-4 border-b border-slate-200/50 dark:border-slate-700/50">
       <h3 class="font-bold text-xl text-slate-800 dark:text-slate-200">Encoder / Decoder</h3>
       <span class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded">UTF-8</span>
@@ -51,26 +51,26 @@
     <div class="p-4 bg-white/50 dark:bg-slate-800/50 rounded-xl border border-white/60 dark:border-slate-700/60 flex flex-wrap gap-3">
       <button 
         @click="doBase64Encode" 
-        class="px-5 py-2.5 bg-green-500 dark:bg-green-600 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-700 text-sm font-bold shadow-lg shadow-green-500/20 transition-transform active:scale-95"
+        class="px-5 py-2.5 bg-green-500 dark:bg-green-600 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-700 text-sm font-bold shadow-lg shadow-green-500/20 transition-colors"
       >
         Base64 Encode
       </button>
       <button 
         @click="doBase64Decode" 
-        class="px-5 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 text-sm font-bold shadow-sm transition-transform active:scale-95"
+        class="px-5 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 text-sm font-bold shadow-sm transition-colors"
       >
         Base64 Decode
       </button>
       <div class="w-[1px] h-10 bg-slate-300 dark:bg-slate-600 mx-2 hidden md:block"></div>
       <button 
         @click="doUrlEncode" 
-        class="px-5 py-2.5 bg-slate-800 dark:bg-slate-700 text-white dark:text-slate-100 rounded-lg hover:bg-slate-900 dark:hover:bg-slate-600 text-sm font-bold shadow-lg shadow-slate-500/20 transition-transform active:scale-95"
+        class="px-5 py-2.5 bg-slate-800 dark:bg-slate-700 text-white dark:text-slate-100 rounded-lg hover:bg-slate-900 dark:hover:bg-slate-600 text-sm font-bold shadow-lg shadow-slate-500/20 transition-colors"
       >
         URL Encode
       </button>
       <button 
         @click="doUrlDecode" 
-        class="px-5 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 text-sm font-bold shadow-sm transition-transform active:scale-95"
+        class="px-5 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 text-sm font-bold shadow-sm transition-colors"
       >
         URL Decode
       </button>

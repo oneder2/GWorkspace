@@ -2,33 +2,35 @@
   工具箱页面组件
   包含多个实用工具：计算器、编码转换、JSON格式化等
   模块化设计，便于添加新工具
+  使用 2:8:2 布局（空白：内容：空白）
 -->
 <template>
-  <div class="animate-fade-in max-w-5xl mx-auto h-full flex flex-col">
-    <div class="glass-card rounded-2xl flex-1 flex flex-col md:flex-row overflow-hidden border border-white/60 dark:border-slate-700/60 shadow-xl opacity-90">
-      <!-- 工具菜单 -->
-      <div class="w-full md:w-56 bg-white/30 dark:bg-slate-800/30 border-b md:border-b-0 md:border-r border-white/30 dark:border-slate-700/30 p-3 flex md:flex-col gap-2 overflow-x-auto backdrop-blur-md custom-scrollbar">
-        <div class="px-3 py-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1 hidden md:block">
-          {{ $t('tools.utilities') }}
+  <div class="animate-fade-in w-full">
+    <div class="grid grid-cols-12 gap-6 lg:gap-8">
+      <!-- 左侧工具导航栏 -->
+      <div class="col-span-12 xl:col-span-2">
+        <div class="glass-card p-4 rounded-2xl sticky top-6">
+          <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('tools.utilities') }}</h3>
+          <div class="space-y-2">
+            <button 
+              v-for="tool in tools" 
+              :key="tool.id"
+              @click="currentTool = tool.id"
+              class="w-full px-4 py-3 rounded-xl text-left text-sm font-bold transition-colors flex items-center gap-3"
+              :class="currentTool === tool.id 
+                ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-md' 
+                : 'text-slate-600 dark:text-slate-400'"
+            >
+              <component :is="tool.icon" class="w-5 h-5 shrink-0" />
+              <span class="truncate">{{ tool.name }}</span>
+            </button>
+          </div>
         </div>
-        <button 
-          v-for="tool in tools" 
-          :key="tool.id"
-          @click="currentTool = tool.id"
-          class="px-4 py-3 rounded-xl text-left text-sm font-bold transition-all whitespace-nowrap md:whitespace-normal flex items-center gap-3"
-          :class="currentTool === tool.id 
-            ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-md' 
-            : 'text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-700/50'"
-        >
-          <component :is="tool.icon" class="w-5 h-5" />
-          {{ tool.name }}
-        </button>
       </div>
 
-      <!-- 工具内容区 -->
-      <div class="flex-1 p-6 md:p-8 bg-white/20 dark:bg-slate-900/20 backdrop-blur-sm overflow-y-auto relative custom-scrollbar">
-        <div class="absolute inset-0 bg-white/10 dark:bg-slate-900/10 pointer-events-none"></div>
-        <div class="relative z-10 h-full">
+      <!-- 中间工具内容区 -->
+      <div class="col-span-12 xl:col-span-8">
+        <div class="glass-card p-6 md:p-8 rounded-2xl min-h-[600px] mx-auto max-w-full">
           <!-- 计算器 -->
           <CalculatorTool v-if="currentTool === 'calc'" />
           
@@ -43,8 +45,23 @@
           
           <!-- 番茄钟 -->
           <PomodoroTool v-if="currentTool === 'pomodoro'" />
+          
+          <!-- 颜色选择器 -->
+          <ColorPickerTool v-if="currentTool === 'colorpicker'" />
+          
+          <!-- 二维码生成器 -->
+          <QRCodeTool v-if="currentTool === 'qrcode'" />
+          
+          <!-- Markdown 编辑器 -->
+          <MarkdownTool v-if="currentTool === 'markdown'" />
+          
+          <!-- 待办事项 -->
+          <TodoTool v-if="currentTool === 'todo'" />
         </div>
       </div>
+
+      <!-- 右侧空白 -->
+      <div class="hidden xl:block xl:col-span-2"></div>
     </div>
   </div>
 </template>
@@ -59,6 +76,10 @@ import EncoderTool from '../components/tools/EncoderTool.vue'
 import JsonTool from '../components/tools/JsonTool.vue'
 import StopwatchTool from '../components/tools/StopwatchTool.vue'
 import PomodoroTool from '../components/tools/PomodoroTool.vue'
+import ColorPickerTool from '../components/tools/ColorPickerTool.vue'
+import QRCodeTool from '../components/tools/QRCodeTool.vue'
+import MarkdownTool from '../components/tools/MarkdownTool.vue'
+import TodoTool from '../components/tools/TodoTool.vue'
 
 const { t } = useI18n()
 const currentTool = ref('calc')

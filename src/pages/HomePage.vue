@@ -53,7 +53,10 @@
         <div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-700 mx-1"></div>
         
         <!-- 搜索输入框 -->
+        <label for="search-input" class="sr-only">{{ $t('home.searchPlaceholder') }}</label>
         <input 
+          id="search-input"
+          name="search-input"
           v-model="searchQuery" 
           @keyup.enter="performSearch"
           type="text" 
@@ -76,46 +79,113 @@
     </div>
 
     <!-- 快捷方式 -->
-    <div class="mt-16 w-full grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl">
-      <a 
-        v-for="site in quickLinks" 
-        :key="site.name" 
-        :href="site.url" 
-        target="_blank" 
-        class="glass-card flex flex-col items-center justify-center py-6 rounded-2xl cursor-pointer group hover:-translate-y-1"
-      >
-        <div 
-          class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 shadow-lg transition-transform duration-300 group-hover:scale-110" 
-          :class="site.color"
+    <div class="mt-16 w-full max-w-3xl">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('home.quickLinks') }}</h2>
+        <button 
+          @click="showEditor = true"
+          class="px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 transition-colors text-sm font-medium flex items-center gap-2"
         >
-          <component :is="site.icon" class="w-8 h-8 text-white" />
-        </div>
-        <span class="text-sm font-bold text-slate-700 dark:text-slate-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-          {{ site.name }}
-        </span>
-      </a>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          {{ $t('home.edit') }}
+        </button>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <a 
+          v-for="site in displayLinks" 
+          :key="site.id || site.name" 
+          :href="site.url" 
+          target="_blank" 
+          class="glass-card flex flex-col items-center justify-center py-6 rounded-2xl cursor-pointer group hover:-translate-y-1"
+        >
+          <div 
+            class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 shadow-lg transition-transform duration-300 group-hover:scale-110" 
+            :class="site.color"
+          >
+            <component v-if="site.icon" :is="site.icon" class="w-8 h-8 text-white" />
+            <span v-else class="text-white text-lg font-bold">{{ site.name?.[0] || '?' }}</span>
+          </div>
+          <span class="text-sm font-bold text-slate-700 dark:text-slate-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+            {{ site.name }}
+          </span>
+        </a>
+      </div>
     </div>
+
+    <!-- 编辑弹窗 -->
+    <QuickLinkEditor 
+      v-if="showEditor"
+      :links="displayLinks"
+      @close="showEditor = false"
+      @save="handleSaveLinks"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, markRaw } from 'vue'
 import { quickLinksConfig } from '../config/home'
+import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
 import GoogleIcon from '../components/icons/GoogleIcon.vue'
 import DuckIcon from '../components/icons/DuckIcon.vue'
+import QuickLinkEditor from '../components/QuickLinkEditor.vue'
 
 const searchEngine = ref('google')
 const searchQuery = ref('')
 const showEngineMenu = ref(false)
+const showEditor = ref(false)
 
-// 从配置文件加载快捷链接，并映射图标组件
-const quickLinks = computed(() => {
+// 从存储加载自定义链接（使用空数组作为默认值）
+// useLocalStorage 返回 { value: ref, update, reset }
+const customLinksStorage = useLocalStorage('customQuickLinks', [])
+const customLinks = customLinksStorage.value
+
+// 默认链接（从配置加载）
+const defaultLinks = computed(() => {
   return quickLinksConfig.map(link => ({
     ...link,
     icon: getIcon(link.iconName)
   }))
 })
+
+// 显示的链接（优先使用自定义链接）
+const displayLinks = computed(() => {
+  // customLinks 是 ref，所以访问 customLinks.value
+  const customLinksArray = Array.isArray(customLinks.value) ? customLinks.value : []
+  if (customLinksArray.length > 0) {
+    return customLinksArray.map(link => {
+      // 使用 getIcon 统一获取图标
+      const icon = getIcon(link.iconName)
+      return {
+        ...link,
+        icon: icon ? markRaw(icon) : null
+      }
+    })
+  }
+  return defaultLinks.value
+})
+
+/**
+ * 保存自定义链接
+ */
+const handleSaveLinks = (links) => {
+  console.log('[HomePage] handleSaveLinks called with:', links)
+  // 确保保存的链接包含必要的字段
+  const linksToSave = links.map(link => ({
+    id: link.id || `link-${Date.now()}-${Math.random()}`,
+    name: link.name,
+    url: link.url,
+    iconName: link.iconName || 'HomeIcon',
+    color: link.color || 'bg-slate-500'
+  }))
+  console.log('[HomePage] Links to save:', linksToSave)
+  customLinksStorage.update(linksToSave)
+  showEditor.value = false
+}
 
 /**
  * 执行搜索

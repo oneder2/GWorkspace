@@ -5,6 +5,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import { i18n } from './i18n'
+import router from './router'
 import './style.css'
 
 // 创建Vue应用实例
@@ -12,6 +13,9 @@ const app = createApp(App)
 
 // 注册国际化插件
 app.use(i18n)
+
+// 注册路由
+app.use(router)
 
 // 挂载应用
 app.mount('#app')

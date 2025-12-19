@@ -9,14 +9,23 @@
   "home": {
     "title": "Good Morning",
     "subtitle": "What would you like to explore today?",
-    "searchPlaceholder": "Type to search..."
+    "searchPlaceholder": "Type to search...",
+    "quickLinks": "Quick Links",
+    "edit": "Edit",
+    "editQuickLinks": "Edit Quick Links",
+    "addLink": "Add Link",
+    "linkName": "Link Name",
+    "linkUrl": "Link URL"
   },
   "sites": {
     "title": "Site Navigation",
     "subtitle": "Curated Resources",
     "filterPlaceholder": "Filter...",
     "noResults": "No signals found from this planet...",
-    "index": "Index"
+    "index": "Index",
+    "favorites": "Favorites",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites"
   },
   "tools": {
     "title": "Toolbox",
@@ -25,11 +34,37 @@
     "encoder": "Encoder",
     "json": "JSON Formatter",
     "stopwatch": "Stopwatch",
-    "pomodoro": "Pomodoro"
+    "pomodoro": "Pomodoro",
+    "colorPicker": "Color Picker",
+    "colorPickerDesc": "Pick colors and convert formats",
+    "selectColor": "Select Color",
+    "preview": "Preview",
+    "colorFormats": "Color Formats",
+    "colorPalette": "Color Palette",
+    "qrCode": "QR Code Generator",
+    "qrCodeDesc": "Generate QR codes for text or URLs",
+    "qrContent": "QR Code Content",
+    "qrPlaceholder": "Enter text or URL...",
+    "generate": "Generate",
+    "download": "Download",
+    "qrPreview": "QR Code Preview",
+    "markdown": "Markdown Editor",
+    "markdownDesc": "Edit and preview Markdown documents",
+    "editor": "Editor",
+    "clear": "Clear",
+    "markdownPlaceholder": "Enter Markdown content...",
+    "copyHTML": "Copy HTML",
+    "todo": "Todo List"
   },
   "blog": {
     "tags": "Tags",
-    "archive": "Archive"
+    "archive": "Archive",
+    "backToList": "Back to List",
+    "prevArticle": "Previous",
+    "nextArticle": "Next",
+    "share": "Share",
+    "notFound": "Article Not Found",
+    "searchPlaceholder": "Search articles..."
   },
   "portfolio": {
     "title": "Selected Works",
@@ -42,6 +77,36 @@
   "common": {
     "online": "Online",
     "readArticle": "Read Article",
-    "language": "Language"
+    "language": "Language",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "todo": {
+    "title": "Todo List",
+    "addPlaceholder": "Add new todo...",
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "edit": "Edit",
+    "delete": "Delete",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{days} days ago",
+    "clearCompleted": "Clear Completed",
+    "noTodos": "No todos yet",
+    "active": "Active",
+    "completed": "Completed"
+  },
+  "theme": {
+    "title": "Theme Customization",
+    "presets": "Preset Themes",
+    "custom": "Custom Colors",
+    "primaryColor": "Primary Color",
+    "primaryDark": "Primary Color (Dark)",
+    "applyCustom": "Apply Custom Theme",
+    "reset": "Reset",
+    "customize": "Customize Theme"
   }
 }

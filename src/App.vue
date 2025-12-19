@@ -19,7 +19,6 @@
         :collapsed="sidebarCollapsed"
         @toggle-collapse="sidebarCollapsed = !sidebarCollapsed"
         :current-tab="currentTab"
-        @tab-change="currentTab = $event"
       />
 
       <!-- 中间主内容区 -->
@@ -32,42 +31,40 @@
           :is-dark="isDark"
           @toggle-theme="toggleTheme"
           @toggle-lang="toggleLanguage"
+          @open-theme-customizer="showThemeCustomizer = true"
         />
 
         <!-- 内容滚动视口 -->
         <div class="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth relative custom-scrollbar" id="main-scroll">
-          <!-- 主页 -->
-          <HomePage v-if="currentTab === 'home'" />
-          
-          <!-- 常用站点 -->
-          <SitesPage v-if="currentTab === 'sites'" />
-          
-          <!-- 工具箱 -->
-          <ToolsPage v-if="currentTab === 'tools'" />
-          
-          <!-- 博客 -->
-          <BlogPage v-if="currentTab === 'blog'" />
-          
-          <!-- 作品展示 -->
-          <PortfolioPage v-if="currentTab === 'portfolio'" />
+          <!-- 使用 router-view 渲染路由组件 -->
+          <router-view />
         </div>
       </main>
     </div>
+
+    <!-- 主题自定义弹窗 -->
+    <ThemeCustomizer 
+      v-if="showThemeCustomizer"
+      @close="showThemeCustomizer = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { useTheme } from './composables/useTheme'
+import { useKeyboard } from './composables/useKeyboard'
+import { useCustomTheme } from './composables/useCustomTheme'
 import { getWeatherInfo } from './utils/weather'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
-import HomePage from './pages/HomePage.vue'
-import SitesPage from './pages/SitesPage.vue'
-import ToolsPage from './pages/ToolsPage.vue'
-import BlogPage from './pages/BlogPage.vue'
-import PortfolioPage from './pages/PortfolioPage.vue'
+import ThemeCustomizer from './components/ThemeCustomizer.vue'
+
+// 路由
+const route = useRoute()
+const router = useRouter()
 
 // 国际化
 const { locale } = useI18n()
@@ -77,9 +74,28 @@ const { isDark, toggleTheme } = useTheme()
 
 // 状态管理
 const sidebarCollapsed = ref(false)
-const currentTab = ref('home')
 const currentTime = ref('')
 const weatherInfo = ref(null)
+const showThemeCustomizer = ref(false)
+
+// 初始化自定义主题
+useCustomTheme()
+
+/**
+ * 根据当前路由获取当前标签页
+ * 映射路由名称到标签页ID
+ */
+const currentTab = computed(() => {
+  const routeToTab = {
+    'home': 'home',
+    'sites': 'sites',
+    'tools': 'tools',
+    'blog': 'blog',
+    'blog-detail': 'blog',
+    'portfolio': 'portfolio'
+  }
+  return routeToTab[route.name] || 'home'
+})
 
 /**
  * 更新当前时间
@@ -112,6 +128,19 @@ const loadWeather = async () => {
 }
 
 let timer = null
+
+/**
+ * 注册全局快捷键
+ */
+useKeyboard({
+  toggleSidebar: () => {
+    sidebarCollapsed.value = !sidebarCollapsed.value
+  },
+  toggleTheme: toggleTheme,
+  closeModal: () => {
+    // 可以在这里添加关闭弹窗的逻辑
+  }
+})
 
 onMounted(() => {
   updateTime()

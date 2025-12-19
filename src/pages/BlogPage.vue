@@ -4,7 +4,14 @@
   模块化设计，便于添加新文章和分类
 -->
 <template>
-  <div class="animate-fade-in w-full">
+  <div class="animate-fade-in w-full max-w-12xl mx-auto">
+    <!-- 搜索栏 -->
+    <div class="mb-6 flex justify-center">
+      <div class="w-full max-w-2xl">
+        <BlogSearch v-model="searchQuery" />
+      </div>
+    </div>
+    
     <div class="grid grid-cols-12 gap-6 lg:gap-8">
       <!-- 左侧标签和归档 -->
       <div class="hidden xl:block xl:col-span-2">
@@ -38,8 +45,9 @@
       <!-- 文章列表 -->
       <div class="col-span-12 xl:col-span-8 space-y-6">
         <article 
-          v-for="post in blogPosts" 
+          v-for="post in filteredPosts" 
           :key="post.id" 
+          @click="$router.push(`/blog/${post.id}`)"
           class="glass-card p-6 rounded-2xl group cursor-pointer border-l-4 border-l-transparent hover:border-l-green-500 dark:hover:border-l-green-400 transition-all"
         >
           <div class="flex items-center gap-3 mb-3">
@@ -89,11 +97,32 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { blogPostsConfig, blogTagsConfig, blogArchivesConfig } from '../config/blog'
+import BlogSearch from '../components/BlogSearch.vue'
+
+const router = useRouter()
+const searchQuery = ref('')
 
 // 从配置文件加载数据
 const blogPosts = ref(blogPostsConfig)
 const tags = blogTagsConfig
 const archives = blogArchivesConfig
+
+/**
+ * 筛选后的文章列表
+ * 根据搜索关键词过滤文章
+ */
+const filteredPosts = computed(() => {
+  if (!searchQuery.value) return blogPosts.value
+  
+  const query = searchQuery.value.toLowerCase()
+  return blogPosts.value.filter(post => 
+    post.title.toLowerCase().includes(query) ||
+    post.excerpt.toLowerCase().includes(query) ||
+    post.category.toLowerCase().includes(query) ||
+    (post.tags && post.tags.some(tag => tag.toLowerCase().includes(query)))
+  )
+})
 </script>
