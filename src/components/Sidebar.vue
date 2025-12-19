@@ -8,35 +8,25 @@
     class="glass-sidebar rounded-3xl flex flex-col shrink-0 transition-all duration-300 h-full shadow-lg" 
     :class="collapsed ? 'w-20' : 'w-64'"
   >
-    <!-- 头部 Logo -->
+    <!-- 头部 Logo - 点击可收起/展开 -->
     <div class="py-4 px-4 flex flex-col items-center relative">
-      <div class="flex items-center gap-3 transition-opacity duration-300" v-if="!collapsed">
-        <GWorkspaceIcon :size="60" variant="black" />
-        <span class="font-bold text-xl tracking-tight text-slate-800 dark:text-slate-200">GWorkspace</span>
-      </div>
-      <div v-else>
-        <GWorkspaceIcon :size="48" variant="black" />
-      </div>
-      
-      <!-- 折叠按钮 - 移到应用名下方 -->
-      <button 
+      <div 
         @click="$emit('toggle-collapse')" 
-        class="mt-3 bg-white/80 dark:bg-slate-800/80 hover:bg-green-50 dark:hover:bg-green-900/20 text-slate-400 hover:text-green-600 dark:hover:text-green-400 rounded-full p-1.5 shadow-md border border-slate-100 dark:border-slate-700 transition-colors z-50"
+        class="flex items-center gap-3 transition-opacity duration-300 cursor-pointer group hover:opacity-80 active:scale-95 transition-all"
         v-if="!collapsed"
+        title="点击收起侧边栏"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
-      </button>
-      <button 
+        <GWorkspaceIcon :size="60" variant="green" />
+        <span class="font-bold text-xl tracking-tight text-slate-800 dark:text-slate-200 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">GWorkspace</span>
+      </div>
+      <div 
         @click="$emit('toggle-collapse')" 
-        class="mt-3 bg-white/80 dark:bg-slate-800/80 hover:bg-green-50 dark:hover:bg-green-900/20 text-slate-400 hover:text-green-600 dark:hover:text-green-400 rounded-full p-1.5 shadow-md border border-slate-100 dark:border-slate-700 transition-colors z-50"
         v-else
+        class="cursor-pointer group hover:opacity-80 active:scale-95 transition-all"
+        title="点击展开侧边栏"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-          <polyline points="9 18 15 12 9 6"/>
-        </svg>
-      </button>
+        <GWorkspaceIcon :size="48" variant="green" />
+      </div>
     </div>
 
     <!-- 导航菜单 -->

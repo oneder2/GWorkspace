@@ -2,48 +2,53 @@
   博客页面组件
   展示个人博客文章列表
   模块化设计，便于添加新文章和分类
+  布局：标签和归档放在左侧空白区域，中间内容区域填充剩余空间
 -->
 <template>
-  <div class="animate-fade-in w-full max-w-12xl mx-auto">
-    <!-- 搜索栏 -->
-    <div class="mb-6 flex justify-center">
-      <div class="w-full max-w-2xl">
-        <BlogSearch v-model="searchQuery" />
-      </div>
-    </div>
-    
-    <div class="grid grid-cols-12 gap-6 lg:gap-8">
-      <!-- 左侧标签和归档 -->
-      <div class="hidden xl:block xl:col-span-2">
-        <div class="glass-card p-6 rounded-2xl sticky top-6">
-          <h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.tags') }}</h3>
-          <div class="flex flex-wrap gap-2">
-            <span 
-              v-for="tag in tags" 
-              :key="tag.name"
-              class="px-3 py-1 rounded-full text-xs font-bold"
-              :class="tag.color"
+  <div class="animate-fade-in rounded-3xl flex gap-6 xl:gap-8 min-h-full overflow-hidden">
+    <!-- 左侧标签和归档 - 放在左侧空白区域，桌面端显示 -->
+    <div class="glass-card w-56 hidden xl:block shrink-0 rounded-2xl">
+      <div class="sticky top-6 space-y-1.5 p-4">
+        <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.tags') }}</h3>
+        <div class="flex flex-wrap gap-2">
+          <span 
+            v-for="tag in tags" 
+            :key="tag.name"
+            class="px-3 py-1 rounded-full text-xs font-bold"
+            :class="tag.color"
+          >
+            #{{ tag.name }}
+          </span>
+        </div>
+        <div class="mt-6">
+          <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.archive') }}</h3>
+          <ul class="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+            <li 
+              v-for="archive in archives" 
+              :key="archive.month"
+              class="hover:text-green-600 dark:hover:text-green-400 cursor-pointer flex justify-between"
             >
-              #{{ tag.name }}
-            </span>
-          </div>
-          <div class="mt-8">
-            <h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.archive') }}</h3>
-            <ul class="space-y-2 text-sm text-slate-500 dark:text-slate-400">
-              <li 
-                v-for="archive in archives" 
-                :key="archive.month"
-                class="hover:text-green-600 dark:hover:text-green-400 cursor-pointer flex justify-between"
-              >
-                {{ archive.month }} <span>({{ archive.count }})</span>
-              </li>
-            </ul>
-          </div>
+              {{ archive.month }} <span>({{ archive.count }})</span>
+            </li>
+          </ul>
         </div>
       </div>
+    </div>
 
-      <!-- 文章列表 -->
-      <div class="col-span-12 xl:col-span-8 space-y-6">
+    <!-- 分割线 - 更精致的样式 -->
+    <div class="hidden xl:block w-px bg-gradient-to-b from-transparent via-slate-300 dark:via-slate-600 to-transparent shrink-0"></div>
+
+    <!-- 中间内容区 - 使用flex-1占据全部剩余空间，填充到底部 -->
+    <div class="flex-1 min-w-0 flex flex-col min-h-full">
+      <!-- 搜索栏 -->
+      <div class="mb-6 flex justify-center">
+        <div class="w-full max-w-2xl">
+          <BlogSearch v-model="searchQuery" />
+        </div>
+      </div>
+      
+      <!-- 文章列表 - 使用flex-1填充剩余空间 -->
+      <div class="flex-1 space-y-6">
         <article 
           v-for="post in filteredPosts" 
           :key="post.id" 
@@ -89,9 +94,6 @@
           </div>
         </article>
       </div>
-      
-      <!-- 右侧空白 -->
-      <div class="hidden xl:block xl:col-span-2"></div>
     </div>
   </div>
 </template>

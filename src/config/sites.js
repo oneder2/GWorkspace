@@ -15,7 +15,21 @@ export const sitesConfig = [
       { title: 'Vue.js', url: 'https://vuejs.org', desc: 'The Progressive JavaScript Framework' },
       { title: 'Tailwind CSS', url: 'https://tailwindcss.com', desc: 'Rapidly build modern websites' },
       { title: 'Regex101', url: 'https://regex101.com', desc: 'Regular expression tester' },
-      { title: 'Vercel', url: 'https://vercel.com', desc: 'Develop. Preview. Ship.' }
+      { title: 'Vercel', url: 'https://vercel.com', desc: 'Develop. Preview. Ship.' },
+      { title: '菜鸟教程', url: 'https://www.runoob.com', desc: '菜鸟教程，学的不仅是技术，更是梦想！' },
+    ]
+  },
+  {
+    id: 'ai',
+    name: 'AI chatbots',
+    iconName: 'BrainIcon',
+    links: [
+      { title: 'Gemini', url: 'https://gemini.google.com', desc: 'Google\'s AI model' },
+      { title: 'Qwen', url: 'https://chat.qwen.ai', desc: 'Alibaba\'s AI model' },
+      { title: 'ChatGPT', url: 'https://chat.openai.com', desc: 'OpenAI\'s AI model' },
+      { title: 'Claude', url: 'https://claude.ai', desc: 'Anthropic\'s AI model' },
+      { title: 'Perplexity', url: 'https://www.perplexity.ai', desc: 'AI search engine' },
+      { title: 'Grok', url: 'https://grok.com', desc: 'Grok\'s AI model' },
     ]
   },
   {
@@ -23,12 +37,17 @@ export const sitesConfig = [
     name: 'Design',
     iconName: 'PaintIcon',
     links: [
-      { title: 'Dribbble', url: 'https://dribbble.com', desc: 'Design inspiration' },
-      { title: 'Behance', url: 'https://www.behance.net', desc: 'Showcase creative work' },
-      { title: 'Figma', url: 'https://www.figma.com', desc: 'Interface design tool' },
-      { title: 'Unsplash', url: 'https://unsplash.com', desc: 'The internet\'s source for visuals' },
-      { title: 'Coolors', url: 'https://coolors.co', desc: 'Super fast color palettes' },
-      { title: 'Phosphor Icons', url: 'https://phosphoricons.com', desc: 'Flexible icon family' }
+      { title: 'UXBox', url: 'https://www.uxbot.cn/', desc: 'UI/UX design AI generatior' },
+      { title: 'Canva', url: 'https://www.canva.com/', desc: 'Online 2D design' },
+      { title: 'Krita', url: 'https://docs.krita.org/en/', desc: 'Open-source digital painting' },
+      { title: 'Inkscape', url: 'https://inkscape.org/', desc: 'Open-source vector graphics editor' },
+      { title: 'GIMP', url: 'https://www.gimp.org/', desc: 'Open-source image editor' },
+      { title: 'Blender', url: 'https://www.blender.org/', desc: 'Open-source 3D modeling' },
+      { title: 'Kdenlive', url: 'https://kdenlive.org/', desc: 'Open-source video editor' },
+      { title: 'Audacity', url: 'https://www.audacityteam.org/', desc: 'Open-source audio editor' },
+      { title: 'OBS', url: 'https://obsproject.com/', desc: 'Open-source video recording' },
+      { title: 'Handbrake', url: 'https://handbrake.fr/', desc: 'Open-source video transcoder' },
+      { title: 'VLC', url: 'https://www.videolan.org/vlc/', desc: 'Open-source media player' },
     ]
   },
   {

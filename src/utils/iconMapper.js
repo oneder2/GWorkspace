@@ -7,6 +7,7 @@ import HomeIcon from '../components/icons/HomeIcon.vue'
 import CompassIcon from '../components/icons/CompassIcon.vue'
 import WrenchIcon from '../components/icons/WrenchIcon.vue'
 import ArticleIcon from '../components/icons/ArticleIcon.vue'
+import BrainIcon from '../components/icons/BrainIcon.vue'
 import BriefcaseIcon from '../components/icons/BriefcaseIcon.vue'
 import GoogleIcon from '../components/icons/GoogleIcon.vue'
 import DuckIcon from '../components/icons/DuckIcon.vue'
@@ -58,6 +59,7 @@ const iconMap = {
   TimerIcon,
   QrCodeIcon,
   FileTextIcon,
+  BrainIcon,
 }
 
 /**

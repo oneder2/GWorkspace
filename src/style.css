@@ -45,7 +45,7 @@
 /* 核心毛玻璃效果类 - 支持亮色和暗色模式 */
 @layer components {
   .glass-sidebar {
-    background: rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-right: 1px solid rgba(255, 255, 255, 0.4);
@@ -57,7 +57,7 @@
   }
   
   .glass-main {
-    background: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.55);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.5);
@@ -71,7 +71,7 @@
   }
 
   .glass-card {
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.6);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
@@ -85,14 +85,66 @@
   }
   
   .glass-card:hover {
-    background: rgba(255, 255, 255, 0.85);
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.65);
+    /* transform: translateY(-1px); */
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
   }
   
   .dark .glass-card:hover {
     background: rgba(15, 23, 42, 0.85);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  /* 工具箱专用卡片样式 - 使用更透明的磨砂效果，带主题色微调 */
+  .glass-card-tools {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .dark .glass-card-tools {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .glass-card-tools:hover {
+    background: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+  
+  .dark .glass-card-tools:hover {
+    background: rgba(15, 23, 42, 0.5);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  /* 导航栏专用样式 - 更透明的磨砂效果 */
+  .glass-card-nav {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s ease;
+  }
+  
+  .dark .glass-card-nav {
+    background: rgba(15, 23, 42, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .glass-card-nav:hover {
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  }
+  
+  .dark .glass-card-nav:hover {
+    background: rgba(15, 23, 42, 0.35);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   }
 
   /* 导航激活状态 - 使用主题颜色变量 */
