@@ -3,7 +3,51 @@
   包含页面标题、天气信息、时间、主题切换、语言切换等功能
 -->
 <template>
-  <header class="h-16 px-8 flex items-center justify-between border-b border-white/30 dark:border-slate-700/30 shrink-0">
+  <header class="h-16 px-8 flex items-center justify-between border-b border-white/30 dark:border-slate-700/30 shrink-0 relative">
+    <!-- 新文章通知横幅 -->
+    <transition
+      enter-active-class="transition ease-out duration-300"
+      enter-from-class="transform opacity-0 -translate-y-full"
+      enter-to-class="transform opacity-100 translate-y-0"
+      leave-active-class="transition ease-in duration-200"
+      leave-from-class="transform opacity-100 translate-y-0"
+      leave-to-class="transform opacity-0 -translate-y-full"
+    >
+      <div 
+        v-if="newArticleNotification"
+        class="absolute top-full left-0 right-0 bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-600 dark:to-emerald-600 text-white px-6 py-3 shadow-lg z-50 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 animate-pulse">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <div>
+            <span class="font-semibold">{{ $t('blog.newArticleNotification') }}:</span>
+            <span class="ml-2">{{ newArticleNotification.title }}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button
+            @click="viewNewArticle"
+            class="px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition-colors"
+          >
+            {{ $t('blog.viewNewArticle') }}
+          </button>
+          <button
+            @click="dismissNotification"
+            class="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+            :title="$t('common.close')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </transition>
+
     <div class="flex items-center gap-4">
       <h2 class="text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight">{{ currentTabName }}</h2>
       <span 
@@ -88,8 +132,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   currentTab: {
@@ -110,9 +155,72 @@ const props = defineProps({
   }
 })
 
-defineEmits(['toggle-theme', 'toggle-lang', 'open-theme-customizer'])
+const emit = defineEmits(['toggle-theme', 'toggle-lang', 'open-theme-customizer'])
 
 const { t } = useI18n()
+const router = useRouter()
+
+/**
+ * 新文章通知
+ */
+const newArticleNotification = ref(null)
+
+/**
+ * 检查并显示新文章通知
+ */
+const checkNewArticles = () => {
+  try {
+    const notifications = JSON.parse(localStorage.getItem('blog-new-articles') || '[]')
+    
+    if (notifications.length > 0) {
+      // 获取最新的通知（第一条）
+      const latest = notifications[0]
+      
+      // 检查通知是否在24小时内（避免显示过旧的通知）
+      const notificationAge = Date.now() - latest.timestamp
+      const oneDay = 24 * 60 * 60 * 1000
+      
+      if (notificationAge < oneDay) {
+        newArticleNotification.value = latest
+      } else {
+        // 清除过期通知
+        localStorage.setItem('blog-new-articles', JSON.stringify([]))
+      }
+    }
+  } catch (error) {
+    console.error('Failed to check new articles:', error)
+  }
+}
+
+/**
+ * 监听新文章创建事件
+ */
+const handleArticleCreated = (event) => {
+  const articleInfo = event.detail
+  newArticleNotification.value = articleInfo
+  
+  // 更新localStorage
+  const notifications = JSON.parse(localStorage.getItem('blog-new-articles') || '[]')
+  notifications.unshift(articleInfo)
+  localStorage.setItem('blog-new-articles', JSON.stringify(notifications.slice(0, 5)))
+}
+
+/**
+ * 查看新文章
+ */
+const viewNewArticle = () => {
+  if (newArticleNotification.value) {
+    router.push(`/blog/${newArticleNotification.value.id}`)
+    dismissNotification()
+  }
+}
+
+/**
+ * 关闭通知
+ */
+const dismissNotification = () => {
+  newArticleNotification.value = null
+}
 
 // 获取当前标签页名称
 const currentTabName = computed(() => {
@@ -124,5 +232,16 @@ const currentTabName = computed(() => {
     'portfolio': t('nav.portfolio')
   }
   return tabMap[props.currentTab] || 'GWorkspace'
+})
+
+// 初始化
+onMounted(() => {
+  checkNewArticles()
+  // 监听新文章创建事件
+  window.addEventListener('blog-article-created', handleArticleCreated)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('blog-article-created', handleArticleCreated)
 })
 </script>

@@ -80,7 +80,31 @@
     "sortViewsDesc": "阅读量（高→低）",
     "sortViewsAsc": "阅读量（低→高）",
     "notFound": "文章未找到",
-    "searchPlaceholder": "搜索文章..."
+    "searchPlaceholder": "搜索文章...",
+    "createArticle": "创建文章",
+    "create": "创建",
+    "editArticle": "编辑文章",
+    "articleMeta": "文章信息",
+    "title": "标题",
+    "titlePlaceholder": "输入文章标题...",
+    "date": "发布日期",
+    "excerpt": "摘要",
+    "excerptPlaceholder": "输入文章摘要...",
+    "genrePlaceholder": "输入分类，如：Design, Tech...",
+    "addTag": "添加",
+    "addTagPlaceholder": "输入标签后按Enter",
+    "content": "正文内容",
+    "contentPlaceholder": "输入Markdown格式的文章内容...",
+    "validationErrors": "表单验证错误",
+    "contentRequired": "文章内容不能为空",
+    "saveHint": "保存后文章将提交到GitHub，Vercel会自动部署",
+    "submitting": "提交中...",
+    "submitError": "提交失败，请检查网络连接或GitHub配置",
+    "confirmClearContent": "确定要清空内容吗？",
+    "articleCreated": "文章创建成功",
+    "articleUpdated": "文章更新成功",
+    "newArticleNotification": "新文章已发布",
+    "viewNewArticle": "查看新文章"
   },
   "portfolio": {
     "title": "精选作品",
@@ -95,7 +119,9 @@
     "readArticle": "阅读文章",
     "language": "语言",
     "save": "保存",
-    "cancel": "取消"
+    "cancel": "取消",
+    "close": "关闭",
+    "clear": "清空"
   },
   "todo": {
     "title": "待办事项",

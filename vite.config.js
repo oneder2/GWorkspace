@@ -62,6 +62,15 @@ export default defineConfig({
   ],
   server: {
     port: 3000,
-    open: true
-  }
+    open: true,
+    // 配置代理，用于开发环境
+    // 将 /api 请求代理到后端服务器
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true
+      }
+    }
+  },
+  publicDir: 'public'
 })

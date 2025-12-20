@@ -80,7 +80,31 @@
     "sortViewsDesc": "Views (High-Low)",
     "sortViewsAsc": "Views (Low-High)",
     "notFound": "Article Not Found",
-    "searchPlaceholder": "Search articles..."
+    "searchPlaceholder": "Search articles...",
+    "createArticle": "Create Article",
+    "create": "Create",
+    "editArticle": "Edit Article",
+    "articleMeta": "Article Metadata",
+    "title": "Title",
+    "titlePlaceholder": "Enter article title...",
+    "date": "Publish Date",
+    "excerpt": "Excerpt",
+    "excerptPlaceholder": "Enter article excerpt...",
+    "genrePlaceholder": "Enter genre, e.g.: Design, Tech...",
+    "addTag": "Add",
+    "addTagPlaceholder": "Enter tag and press Enter",
+    "content": "Content",
+    "contentPlaceholder": "Enter article content in Markdown format...",
+    "validationErrors": "Validation Errors",
+    "contentRequired": "Article content cannot be empty",
+    "saveHint": "After saving, the article will be submitted to GitHub and Vercel will auto-deploy",
+    "submitting": "Submitting...",
+    "submitError": "Failed to submit, please check network connection or GitHub configuration",
+    "confirmClearContent": "Are you sure you want to clear the content?",
+    "articleCreated": "Article created successfully",
+    "articleUpdated": "Article updated successfully",
+    "newArticleNotification": "New article published",
+    "viewNewArticle": "View New Article"
   },
   "portfolio": {
     "title": "Selected Works",
@@ -95,7 +119,9 @@
     "readArticle": "Read Article",
     "language": "Language",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "close": "Close",
+    "clear": "Clear"
   },
   "todo": {
     "title": "Todo List",

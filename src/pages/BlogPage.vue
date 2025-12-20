@@ -76,10 +76,51 @@
 
     <!-- 中间内容区 - 使用flex-1占据全部剩余空间，填充到底部 -->
     <div class="flex-1 min-w-0 flex flex-col min-h-full">
-      <!-- 搜索栏 - 固定在顶部 -->
-      <div class="mb-6 flex justify-center shrink-0">
-        <div class="w-full max-w-2xl">
-          <BlogSearch v-model="searchQuery" />
+      <!-- 搜索栏和创建按钮 - 固定在顶部，水平排列 -->
+      <div class="mb-6 shrink-0">
+        <div class="glass-card p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+          <!-- 搜索框 - 占据剩余空间 -->
+          <div class="flex-1 min-w-0">
+            <div class="relative">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+              <label for="blog-search-input" class="sr-only">{{ $t('blog.searchPlaceholder') }}</label>
+              <input 
+                id="blog-search-input"
+                name="blog-search-input"
+                v-model="searchQuery"
+                type="text"
+                :placeholder="$t('blog.searchPlaceholder')"
+                class="glass-input w-full pl-10 pr-10 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 dark:focus:ring-green-400/50 transition-all"
+              >
+              <button 
+                v-if="searchQuery"
+                @click="searchQuery = ''"
+                class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                :title="$t('common.clear')"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <!-- 创建文章按钮 - 固定在右侧 -->
+          <button 
+            @click="showEditor = true"
+            class="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-600 dark:to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 dark:hover:from-green-700 dark:hover:to-emerald-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 dark:shadow-green-600/20 hover:shadow-xl hover:shadow-green-500/30 dark:hover:shadow-green-600/30 font-semibold text-sm whitespace-nowrap group"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span class="hidden sm:inline">{{ $t('blog.createArticle') }}</span>
+            <span class="sm:hidden">{{ $t('blog.create') }}</span>
+          </button>
         </div>
       </div>
       
@@ -154,16 +195,25 @@
         </article>
       </div>
     </div>
+
+    <!-- 博客编辑器 -->
+    <BlogEditor 
+      v-if="showEditor"
+      :is-edit-mode="false"
+      :existing-posts="blogPosts"
+      @close="showEditor = false"
+      @success="handleArticleSuccess"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Fuse from 'fuse.js'
-import { blogPostsConfig } from '../config/blog'
 import { useLocalStorage } from '../composables/useStorage'
-import BlogSearch from '../components/BlogSearch.vue'
+import BlogEditor from '../components/BlogEditor.vue'
+import { blogApi } from '../utils/api'
 
 const router = useRouter()
 const searchQuery = ref('')
@@ -172,10 +222,67 @@ const selectedTag = ref(null)
 const selectedArchive = ref(null)
 const showFavorites = ref(false)
 const sortBy = ref('date-desc')
+const showEditor = ref(false)
+const latestArticle = ref(null) // 用于推广最新文章
 
-// 从配置文件加载数据
-// 注意：blogPostsConfig 已经是数组，直接使用
-const blogPosts = ref(blogPostsConfig || [])
+// 从后端API加载数据
+const blogPosts = ref([])
+const isLoading = ref(false)
+
+/**
+ * 加载文章列表
+ * 从后端API获取文章数据
+ */
+const loadPosts = async () => {
+  isLoading.value = true
+  try {
+    const posts = await blogApi.getList({
+      status: 'published',
+      sortBy: 'published_at',
+      sortOrder: 'desc'
+    })
+    blogPosts.value = posts || []
+    // 重新初始化Fuse搜索
+    initFuse()
+  } catch (error) {
+    console.error('Failed to load posts:', error)
+    blogPosts.value = []
+  } finally {
+    isLoading.value = false
+  }
+}
+
+/**
+ * 刷新文章列表
+ * 重新从后端API加载文章
+ */
+const refreshPosts = () => {
+  loadPosts()
+}
+
+/**
+ * 处理文章创建/更新成功
+ * @param {Object} result - API返回结果
+ */
+/**
+ * 处理文章创建/更新成功
+ * @param {Object} result - API返回结果
+ */
+const handleArticleSuccess = (result) => {
+  console.log('Article saved successfully:', result)
+  
+  // 刷新文章列表
+  refreshPosts()
+  
+  // 设置最新文章用于推广
+  if (result.article) {
+    latestArticle.value = result.article
+    // 自动关闭推广信息
+    setTimeout(() => {
+      latestArticle.value = null
+    }, 10000) // 10秒后自动关闭
+  }
+}
 
 // 阅读历史管理
 const { value: readingHistory } = useLocalStorage('blog-reading-history', [])
@@ -503,8 +610,9 @@ const recentReadPosts = computed(() => {
     .slice(0, 3) // 最多显示3篇
 })
 
-// 组件挂载时初始化Fuse
+// 初始化文章列表
 onMounted(() => {
-  initFuse()
+  loadPosts()
 })
 </script>
+

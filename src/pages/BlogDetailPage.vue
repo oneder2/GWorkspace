@@ -196,7 +196,7 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { marked } from 'marked'
 import { useLocalStorage } from '../composables/useStorage'
-import { blogPostsConfig } from '../config/blog'
+import { blogApi, likesApi, analyticsApi } from '../utils/api'
 
 const route = useRoute()
 const shareSuccess = ref(false)
@@ -233,21 +233,66 @@ const postId = ref(parsePostId())
 /**
  * 当前文章
  */
-const post = computed(() => {
-  if (postId.value === null) return null
-  return blogPostsConfig.find(p => p.id === postId.value)
-})
+const post = ref(null)
+const isLoading = ref(false)
+const allPosts = ref([]) // 用于相关文章推荐
 
 /**
- * 监听路由变化，更新文章ID
+ * 加载文章数据
+ */
+const loadPost = async () => {
+  if (postId.value === null) return
+  
+  isLoading.value = true
+  try {
+    const article = await blogApi.getById(postId.value)
+    post.value = article
+    
+    // 记录访问统计
+    if (article) {
+      try {
+        await analyticsApi.recordVisit({
+          blog_id: article.id,
+          path: route.path
+        })
+      } catch (error) {
+        console.error('Failed to record visit:', error)
+      }
+      
+      // 增加浏览量
+      try {
+        await blogApi.incrementViews(article.id)
+        if (post.value) {
+          post.value.views = (post.value.views || 0) + 1
+        }
+      } catch (error) {
+        console.error('Failed to increment views:', error)
+      }
+    }
+    
+    // 加载所有文章用于相关推荐
+    const posts = await blogApi.getList({ status: 'published' })
+    allPosts.value = posts || []
+  } catch (error) {
+    console.error('Failed to load post:', error)
+    post.value = null
+  } finally {
+    isLoading.value = false
+  }
+}
+
+/**
+ * 监听路由变化，更新文章ID并重新加载
  * 解决路由切换时内容不更新的问题
  */
 watch(() => route.params.id, (newId) => {
   const parsedId = parseInt(newId, 10)
   if (!isNaN(parsedId) && isFinite(parsedId)) {
     postId.value = parsedId
+    loadPost()
   } else {
     postId.value = null
+    post.value = null
   }
 }, { immediate: true })
 
@@ -255,18 +300,18 @@ watch(() => route.params.id, (newId) => {
  * 上一篇文章
  */
 const prevPost = computed(() => {
-  if (postId.value === null) return null
-  const currentIndex = blogPostsConfig.findIndex(p => p.id === postId.value)
-  return currentIndex > 0 ? blogPostsConfig[currentIndex - 1] : null
+  if (postId.value === null || allPosts.value.length === 0) return null
+  const currentIndex = allPosts.value.findIndex(p => p.id === postId.value)
+  return currentIndex > 0 ? allPosts.value[currentIndex - 1] : null
 })
 
 /**
  * 下一篇文章
  */
 const nextPost = computed(() => {
-  if (postId.value === null) return null
-  const currentIndex = blogPostsConfig.findIndex(p => p.id === postId.value)
-  return currentIndex < blogPostsConfig.length - 1 ? blogPostsConfig[currentIndex + 1] : null
+  if (postId.value === null || allPosts.value.length === 0) return null
+  const currentIndex = allPosts.value.findIndex(p => p.id === postId.value)
+  return currentIndex < allPosts.value.length - 1 ? allPosts.value[currentIndex + 1] : null
 })
 
 /**
@@ -307,10 +352,10 @@ const calculateSimilarity = (post1, post2) => {
  * 基于标签和分类计算相似度，推荐最相似的文章
  */
 const relatedPosts = computed(() => {
-  if (!post.value) return []
+  if (!post.value || allPosts.value.length === 0) return []
   
   // 排除当前文章
-  const otherPosts = blogPostsConfig.filter(p => p.id !== postId.value)
+  const otherPosts = allPosts.value.filter(p => p.id !== postId.value)
   
   // 计算每篇文章的相似度
   const postsWithScore = otherPosts.map(p => ({
@@ -454,7 +499,7 @@ const toggleFavorite = () => {
  * 当文章加载时，将文章ID添加到阅读历史
  */
 const recordReadingHistory = () => {
-  if (!post.value || postId === null) return
+  if (!post.value || postId.value === null) return
   
   // 检查是否已在历史记录中
   const history = readingHistory.value || []
@@ -485,6 +530,7 @@ watch(() => post.value, () => {
 
 // 监听滚动事件
 onMounted(() => {
+  loadPost() // 初始加载文章
   window.addEventListener('scroll', handleScroll, { passive: true })
   // 初始计算一次
   setTimeout(calculateReadingProgress, 100)
