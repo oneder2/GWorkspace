@@ -2,6 +2,8 @@
 
 一个基于 Vue.js 的个人工作空间静态网站，采用 Glassmorphism（玻璃态）设计风格，支持暗色模式和中英双语切换。
 
+该项目受到YYsuni大佬的启发：https://github.com/YYsuni/2025-blog-public/tree/main，学到了很多东西，包括单篇博客资源管理和后续想实现的通过github的CI/CD机制实现等价后端的技巧，十分感谢！
+
 ## 功能特性
 
 ### ✨ 核心功能

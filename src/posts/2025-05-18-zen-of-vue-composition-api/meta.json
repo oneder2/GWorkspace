@@ -1,0 +1,13 @@
+{
+  "id": 2,
+  "title": "The Zen of Vue Composition API",
+  "genre": "Code",
+  "category": "Code",
+  "date": "2025-05-18",
+  "excerpt": "Moving away from Options API was difficult at first, but the logic reuse capabilities are unmatched in large applications.",
+  "tags": ["Vue", "JavaScript", "Coding"],
+  "views": 0,
+  "likes": 0,
+  "comments": 0
+}
+
