@@ -39,7 +39,8 @@ export class Blog {
       params.push(genre)
     }
 
-    if (status) {
+    // status为null时不过滤状态（用于获取所有博客）
+    if (status !== null && status !== undefined) {
       query += ' AND status = ?'
       params.push(status)
     }

@@ -32,7 +32,7 @@ router.get('/', (req, res) => {
 
     const options = {
       genre: genre || null,
-      status,
+      status: status === 'all' ? null : status, // 'all'表示获取所有状态
       limit: limit ? parseInt(limit) : null,
       offset: parseInt(offset),
       sortBy,

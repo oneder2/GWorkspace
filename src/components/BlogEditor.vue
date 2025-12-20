@@ -2,12 +2,13 @@
   博客编辑器组件
   提供完整的博客文章编辑功能，包括元数据编辑和Markdown内容编辑
   支持创建新文章和编辑现有文章
+  支持弹窗模式和页面模式
 -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm p-4" @click.self="handleClose">
-    <div class="glass-card-panel rounded-3xl p-6 md:p-8 w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in">
-      <!-- 头部 -->
-      <div class="flex items-center justify-between mb-6 shrink-0">
+  <div :class="isPageMode ? 'w-full' : 'fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm p-4'" @click.self="!isPageMode && handleClose">
+    <div :class="isPageMode ? 'w-full space-y-6' : 'glass-card-panel rounded-3xl p-6 md:p-8 w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in'">
+      <!-- 头部（仅弹窗模式显示） -->
+      <div v-if="!isPageMode" class="flex items-center justify-between mb-6 shrink-0">
         <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">
           {{ isEditMode ? $t('blog.editArticle') : $t('blog.createArticle') }}
         </h2>
@@ -24,7 +25,7 @@
       </div>
 
       <!-- 内容区域 - 可滚动 -->
-      <div class="flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-2">
+      <div :class="isPageMode ? 'space-y-6' : 'flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-2'">
         <!-- 元数据表单 -->
         <div class="glass-card p-6 rounded-2xl space-y-4">
           <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">{{ $t('blog.articleMeta') }}</h3>
@@ -132,7 +133,40 @@
         <div class="glass-card p-6 rounded-2xl flex flex-col">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('blog.content') }}</h3>
-            <div class="flex gap-2">
+            <div class="flex items-center gap-3">
+              <!-- 视图切换开关 -->
+              <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                <button
+                  @click="viewMode = 'split'"
+                  :class="viewMode === 'split' 
+                    ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm' 
+                    : 'text-slate-600 dark:text-slate-400'"
+                  class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
+                  :title="$t('blog.viewSplit')"
+                >
+                  {{ $t('blog.viewSplit') }}
+                </button>
+                <button
+                  @click="viewMode = 'editor'"
+                  :class="viewMode === 'editor' 
+                    ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm' 
+                    : 'text-slate-600 dark:text-slate-400'"
+                  class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
+                  :title="$t('blog.viewEditor')"
+                >
+                  {{ $t('blog.viewEditor') }}
+                </button>
+                <button
+                  @click="viewMode = 'preview'"
+                  :class="viewMode === 'preview' 
+                    ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm' 
+                    : 'text-slate-600 dark:text-slate-400'"
+                  class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
+                  :title="$t('blog.viewPreview')"
+                >
+                  {{ $t('blog.viewPreview') }}
+                </button>
+              </div>
               <button 
                 @click="clearContent"
                 class="px-3 py-1 text-sm text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
@@ -141,7 +175,9 @@
               </button>
             </div>
           </div>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-[400px]">
+          
+          <!-- 分屏视图 -->
+          <div v-if="viewMode === 'split'" class="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-[400px]">
             <!-- 编辑区域 -->
             <div class="flex flex-col">
               <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{{ $t('tools.editor') }}</label>
@@ -159,6 +195,23 @@
                 v-html="previewContent"
               ></div>
             </div>
+          </div>
+          
+          <!-- 纯编辑器视图 -->
+          <div v-else-if="viewMode === 'editor'" class="flex-1" style="min-height: 600px;">
+            <textarea 
+              v-model="formData.content"
+              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-mono text-sm resize-none custom-scrollbar"
+              :placeholder="$t('blog.contentPlaceholder')"
+            ></textarea>
+          </div>
+          
+          <!-- 纯预览视图 -->
+          <div v-else-if="viewMode === 'preview'" class="flex-1" style="min-height: 600px;">
+            <div 
+              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none"
+              v-html="previewContent"
+            ></div>
           </div>
         </div>
 
@@ -181,7 +234,7 @@
       </div>
 
       <!-- 底部操作栏 -->
-      <div class="flex items-center justify-between gap-4 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 shrink-0">
+      <div :class="isPageMode ? 'flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700' : 'flex items-center justify-between gap-4 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 shrink-0'">
         <div class="text-sm text-slate-500 dark:text-slate-400">
           {{ $t('blog.saveHint') }}
         </div>
@@ -242,6 +295,13 @@ const props = defineProps({
   existingPosts: {
     type: Array,
     default: () => []
+  },
+  /**
+   * 是否为页面模式（非弹窗）
+   */
+  isPageMode: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -275,6 +335,11 @@ const formData = ref({
  * 新标签输入
  */
 const newTag = ref('')
+
+/**
+ * 视图模式：split（分屏）、editor（纯编辑）、preview（纯预览）
+ */
+const viewMode = ref('split')
 
 /**
  * 提交状态
@@ -353,6 +418,15 @@ watch(() => formData.value.title, (newTitle) => {
     formData.value.slug = generateSlug(newTitle)
   }
 })
+
+/**
+ * 监听article变化，更新表单数据（编辑模式）
+ */
+watch(() => props.article, (newArticle) => {
+  if (newArticle && props.isEditMode) {
+    initFormData()
+  }
+}, { deep: true, immediate: true })
 
 /**
  * 添加标签

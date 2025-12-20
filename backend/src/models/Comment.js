@@ -91,6 +91,7 @@ export class Comment {
     const {
       blog_id,
       parent_id = null,
+      user_id = null,
       author_name,
       author_email = null,
       content,
@@ -100,11 +101,12 @@ export class Comment {
     const now = new Date().toISOString()
 
     const result = db.prepare(`
-      INSERT INTO comments (blog_id, parent_id, author_name, author_email, content, status, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO comments (blog_id, parent_id, user_id, author_name, author_email, content, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       blog_id,
       parent_id,
+      user_id,
       author_name,
       author_email,
       content,

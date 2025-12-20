@@ -18,6 +18,8 @@ import blogRoutes from './routes/blog.js'
 import likesRoutes from './routes/likes.js'
 import commentsRoutes from './routes/comments.js'
 import analyticsRoutes from './routes/analytics.js'
+import authRoutes from './routes/auth.js'
+import adminRoutes from './routes/admin.js'
 
 // 加载环境变量
 dotenv.config()
@@ -39,27 +41,56 @@ app.use(express.urlencoded({ extended: true })) // URL编码解析
 const db = getDatabase()
 
 // 执行数据库迁移
+const migrationFiles = [
+  '001_initial_schema.sql',
+  '002_user_system.sql'
+]
+
 try {
-  const migrationSQL = readFileSync(
-    join(__dirname, '../database/migrations/001_initial_schema.sql'),
-    'utf-8'
-  )
-  
-  // 执行迁移SQL（按语句分割执行）
-  const statements = migrationSQL
-    .split(';')
-    .map(s => s.trim())
-    .filter(s => s.length > 0 && !s.startsWith('--') && !s.startsWith('/*'))
-  
-  statements.forEach(statement => {
-    if (statement) {
-      try {
-        db.exec(statement)
-      } catch (error) {
-        // 忽略已存在的表/索引错误
-        if (!error.message.includes('already exists')) {
-          console.warn('Migration warning:', error.message)
+  migrationFiles.forEach(migrationFile => {
+    try {
+      const migrationSQL = readFileSync(
+        join(__dirname, '../database/migrations', migrationFile),
+        'utf-8'
+      )
+      
+      // 移除注释和多行注释
+      let cleanSQL = migrationSQL
+        .replace(/\/\*[\s\S]*?\*\//g, '') // 移除多行注释
+        .split('\n')
+        .map(line => {
+          // 移除单行注释
+          const commentIndex = line.indexOf('--')
+          if (commentIndex >= 0) {
+            return line.substring(0, commentIndex)
+          }
+          return line
+        })
+        .join('\n')
+      
+      // 执行迁移SQL（按语句分割执行）
+      const statements = cleanSQL
+        .split(';')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+      
+      statements.forEach(statement => {
+        if (statement) {
+          try {
+            db.exec(statement + ';')
+          } catch (error) {
+            // 忽略已存在的表/索引/列错误
+            if (!error.message.includes('already exists') && 
+                !error.message.includes('duplicate column name')) {
+              console.warn(`Migration ${migrationFile} warning:`, error.message)
+            }
+          }
         }
+      })
+    } catch (error) {
+      // 如果文件不存在，忽略（可能是新迁移）
+      if (error.code !== 'ENOENT') {
+        console.warn(`Migration ${migrationFile} error:`, error.message)
       }
     }
   })
@@ -70,11 +101,13 @@ try {
 }
 
 // API路由
+app.use('/api/auth', authRoutes)
 app.use('/api/blogs', blogRoutes)
 app.use('/api/blogs', likesRoutes)
 app.use('/api/blogs', commentsRoutes) // 博客相关的评论路由
 app.use('/api/comments', commentsRoutes) // 评论管理路由
 app.use('/api/analytics', analyticsRoutes)
+app.use('/api/admin', adminRoutes) // 管理后台路由
 
 // 健康检查端点
 app.get('/health', (req, res) => {

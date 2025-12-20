@@ -13,7 +13,17 @@
       <div class="absolute inset-0 bg-gradient-to-br from-green-50/30 to-slate-100/40 dark:from-slate-900/60 dark:to-slate-800/70"></div>
     </div>
 
-    <div class="relative z-10 flex h-full w-full p-4 gap-4 box-border">
+    <!-- 管理后台路由：使用完全独立的布局 -->
+    <div v-if="isAdminRoute" class="relative z-10 flex h-full w-full p-4 gap-4 box-border">
+      <main class="flex-1 glass-main rounded-3xl flex flex-col min-w-0 relative overflow-hidden shadow-2xl">
+        <div class="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth relative custom-scrollbar">
+          <router-view />
+        </div>
+      </main>
+    </div>
+
+    <!-- 普通路由：使用标准布局（侧边栏 + 顶部栏） -->
+    <div v-else class="relative z-10 flex h-full w-full p-4 gap-4 box-border">
       <!-- 左侧导航栏 -->
       <Sidebar 
         :collapsed="sidebarCollapsed"
@@ -80,6 +90,13 @@ const showThemeCustomizer = ref(false)
 
 // 初始化自定义主题
 useCustomTheme()
+
+/**
+ * 检查是否为管理后台路由
+ */
+const isAdminRoute = computed(() => {
+  return route.path.startsWith('/admin')
+})
 
 /**
  * 根据当前路由获取当前标签页

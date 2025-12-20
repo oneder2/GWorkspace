@@ -109,18 +109,6 @@
             </div>
           </div>
           
-          <!-- 创建文章按钮 - 固定在右侧 -->
-          <button 
-            @click="showEditor = true"
-            class="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-600 dark:to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 dark:hover:from-green-700 dark:hover:to-emerald-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 dark:shadow-green-600/20 hover:shadow-xl hover:shadow-green-500/30 dark:hover:shadow-green-600/30 font-semibold text-sm whitespace-nowrap group"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 group-hover:rotate-90 transition-transform duration-300">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            <span class="hidden sm:inline">{{ $t('blog.createArticle') }}</span>
-            <span class="sm:hidden">{{ $t('blog.create') }}</span>
-          </button>
         </div>
       </div>
       
@@ -196,14 +184,6 @@
       </div>
     </div>
 
-    <!-- 博客编辑器 -->
-    <BlogEditor 
-      v-if="showEditor"
-      :is-edit-mode="false"
-      :existing-posts="blogPosts"
-      @close="showEditor = false"
-      @success="handleArticleSuccess"
-    />
   </div>
 </template>
 
@@ -212,7 +192,6 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Fuse from 'fuse.js'
 import { useLocalStorage } from '../composables/useStorage'
-import BlogEditor from '../components/BlogEditor.vue'
 import { blogApi } from '../utils/api'
 
 const router = useRouter()
@@ -222,7 +201,6 @@ const selectedTag = ref(null)
 const selectedArchive = ref(null)
 const showFavorites = ref(false)
 const sortBy = ref('date-desc')
-const showEditor = ref(false)
 const latestArticle = ref(null) // 用于推广最新文章
 
 // 从后端API加载数据

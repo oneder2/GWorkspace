@@ -5,6 +5,7 @@
 
 import express from 'express'
 import { Comment } from '../models/Comment.js'
+import { optionalAuthenticate } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -42,8 +43,9 @@ router.get('/:id/comments', (req, res) => {
 /**
  * 发表评论
  * POST /api/blogs/:id/comments
+ * 支持用户登录和匿名用户
  */
-router.post('/:id/comments', (req, res) => {
+router.post('/:id/comments', optionalAuthenticate, (req, res) => {
   try {
     const blogId = parseInt(req.params.id)
     const {
@@ -53,16 +55,22 @@ router.post('/:id/comments', (req, res) => {
       parent_id = null
     } = req.body
 
+    // 如果用户已登录，使用用户信息；否则使用提供的作者信息
+    const userId = req.user?.id || null
+    const finalAuthorName = req.user ? req.user.username : author_name
+    const finalAuthorEmail = req.user ? req.user.email : author_email
+
     // 基础验证
-    if (!author_name || !content) {
+    if (!finalAuthorName || !content) {
       return res.status(400).json({ error: 'Missing required fields: author_name and content' })
     }
 
     const comment = Comment.create({
       blog_id: blogId,
       parent_id,
-      author_name,
-      author_email,
+      user_id: userId,
+      author_name: finalAuthorName,
+      author_email: finalAuthorEmail,
       content,
       status: 'approved' // 初期自动批准，后续可添加审核机制
     })

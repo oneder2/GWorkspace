@@ -71,6 +71,66 @@
         <span>{{ weather.temp }}°C</span>
       </div>
       
+      <!-- 用户菜单 -->
+      <div class="relative">
+        <button
+          v-if="!user"
+          @click="showAuthModal = true"
+          class="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+          :title="$t('auth.login')"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-300">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </button>
+        <div v-else class="relative" ref="userMenuContainer">
+          <button
+            @click.stop="toggleUserMenu"
+            class="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors flex items-center gap-2"
+            :title="user.username"
+            ref="userMenuButton"
+          >
+            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white font-semibold text-sm">
+              {{ user.username.charAt(0).toUpperCase() }}
+            </div>
+          </button>
+          <!-- 用户下拉菜单 -->
+          <transition
+            enter-active-class="transition ease-out duration-200"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition ease-in duration-150"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
+          >
+            <div
+              v-if="showUserMenu"
+              v-click-outside="handleClickOutside"
+              class="absolute right-0 top-full mt-2 w-48 glass-card rounded-xl shadow-lg py-2 z-50"
+            >
+              <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">{{ user.username }}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">{{ user.email }}</p>
+              </div>
+              <button
+                v-if="isAdmin"
+                @click.stop="goToAdmin"
+                class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+              >
+                {{ $t('auth.adminPanel') }}
+              </button>
+              <button
+                @click.stop="handleLogout"
+                class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                {{ $t('auth.logout') }}
+              </button>
+            </div>
+          </transition>
+        </div>
+      </div>
+
       <!-- 语言切换按钮 -->
       <button
         @click="$emit('toggle-lang')"
@@ -128,6 +188,13 @@
         {{ currentTime }}
       </div>
     </div>
+
+    <!-- 认证弹窗 -->
+    <AuthModal
+      v-if="showAuthModal"
+      @close="showAuthModal = false"
+      @success="showAuthModal = false"
+    />
   </header>
 </template>
 
@@ -135,6 +202,8 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { useAuth } from '../composables/useAuth'
+import AuthModal from './AuthModal.vue'
 
 const props = defineProps({
   currentTab: {
@@ -159,6 +228,34 @@ const emit = defineEmits(['toggle-theme', 'toggle-lang', 'open-theme-customizer'
 
 const { t } = useI18n()
 const router = useRouter()
+const { user, isAdmin, logout } = useAuth()
+
+const showAuthModal = ref(false)
+const showUserMenu = ref(false)
+const userMenuContainer = ref(null)
+const userMenuButton = ref(null)
+
+/**
+ * 切换用户菜单
+ */
+const toggleUserMenu = () => {
+  showUserMenu.value = !showUserMenu.value
+}
+
+/**
+ * 处理点击外部关闭菜单
+ */
+const handleClickOutside = (event) => {
+  // 如果点击的是用户菜单容器内的元素（包括按钮），不关闭
+  if (userMenuContainer.value && userMenuContainer.value.contains(event.target)) {
+    return
+  }
+  // 如果点击的是按钮本身，也不关闭（因为已经用@click.stop处理了）
+  if (userMenuButton.value && userMenuButton.value.contains(event.target)) {
+    return
+  }
+  showUserMenu.value = false
+}
 
 /**
  * 新文章通知
@@ -220,6 +317,49 @@ const viewNewArticle = () => {
  */
 const dismissNotification = () => {
   newArticleNotification.value = null
+}
+
+/**
+ * 处理登出
+ */
+const handleLogout = async () => {
+  await logout()
+  showUserMenu.value = false
+}
+
+/**
+ * 跳转到管理后台
+ */
+const goToAdmin = () => {
+  router.push('/admin')
+  showUserMenu.value = false
+}
+
+/**
+ * 点击外部关闭菜单的指令
+ * 改进版：使用nextTick延迟检查，避免点击按钮时立即关闭
+ */
+const vClickOutside = {
+  mounted(el, binding) {
+    el.clickOutsideEvent = (event) => {
+      // 使用nextTick确保DOM更新完成后再检查
+      setTimeout(() => {
+        if (!(el === event.target || el.contains(event.target))) {
+          // 如果绑定的是函数，直接调用；如果是值，则调用函数
+          if (typeof binding.value === 'function') {
+            binding.value(event)
+          } else {
+            binding.value()
+          }
+        }
+      }, 0)
+    }
+    // 使用捕获阶段，确保在其他事件之前处理
+    document.addEventListener('click', el.clickOutsideEvent, true)
+  },
+  unmounted(el) {
+    document.removeEventListener('click', el.clickOutsideEvent, true)
+  }
 }
 
 // 获取当前标签页名称

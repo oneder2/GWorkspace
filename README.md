@@ -37,10 +37,10 @@
 #### 4. 博客 (Blog)
 - 文章列表展示
 - 标签和归档功能
-- **在线编辑器**：支持通过前端直接创建和编辑文章
 - **后端API**：基于 Express + SQLite 的全栈架构
 - **数据持久化**：博客文章、点赞、评论、访问统计
-- **新文章通知**：创建文章后在页面顶部显示推广通知
+- **用户系统**：支持用户注册/登录，点赞和评论功能
+- **管理后台**：管理员可以管理博客、查看统计数据、审核评论
 - 模块化设计，易于扩展
 
 #### 5. 作品集 (Portfolio)
@@ -62,6 +62,8 @@
 - **数据库**：SQLite (better-sqlite3)
 - **ORM**：原生 SQL（使用 better-sqlite3）
 - **API**：RESTful API
+- **认证**：JWT Token 认证
+- **安全**：bcrypt 密码加密、Helmet 安全头、CORS 配置
 
 ## 项目结构
 
@@ -72,14 +74,24 @@ GWorkspace/
 │   │   ├── icons/         # SVG 图标组件
 │   │   ├── tools/         # 工具箱子组件
 │   │   ├── Header.vue      # 顶部状态栏
-│   │   └── Sidebar.vue    # 侧边栏导航
+│   │   ├── Sidebar.vue    # 侧边栏导航
+│   │   ├── AuthModal.vue  # 登录/注册弹窗
+│   │   └── BlogEditor.vue # 博客编辑器
 │   ├── pages/             # 页面组件
 │   │   ├── HomePage.vue
 │   │   ├── SitesPage.vue
 │   │   ├── ToolsPage.vue
 │   │   ├── BlogPage.vue
-│   │   └── BlogDetailPage.vue
+│   │   ├── BlogDetailPage.vue
+│   │   └── admin/         # 管理后台页面
+│   │       ├── AdminLayout.vue
+│   │       ├── AdminDashboard.vue
+│   │       ├── AdminBlogList.vue
+│   │       ├── AdminBlogEditor.vue
+│   │       ├── AdminAnalytics.vue
+│   │       └── AdminComments.vue
 │   ├── composables/       # 组合式函数
+│   │   └── useAuth.js     # 用户认证组合式函数
 │   ├── i18n/              # 国际化配置
 │   ├── utils/             # 工具函数
 │   │   └── api.js         # API客户端
@@ -93,12 +105,17 @@ GWorkspace/
 │   │   │   ├── Blog.js
 │   │   │   ├── Comment.js
 │   │   │   ├── Like.js
-│   │   │   └── Visit.js
+│   │   │   ├── Visit.js
+│   │   │   └── User.js
 │   │   ├── routes/         # API路由
 │   │   │   ├── blog.js
 │   │   │   ├── comments.js
 │   │   │   ├── likes.js
-│   │   │   └── analytics.js
+│   │   │   ├── analytics.js
+│   │   │   ├── auth.js
+│   │   │   └── admin.js
+│   │   ├── middleware/      # 中间件
+│   │   │   └── auth.js      # 认证中间件
 │   │   └── server.js       # 服务器入口
 │   ├── database/
 │   │   ├── migrations/     # 数据库迁移
@@ -253,39 +270,234 @@ npm run preview
 
 本项目采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。
 
-## 博客文章管理
+## 使用指南
 
-### 在线编辑器
+### 1. 用户系统
 
-项目集成了博客在线编辑器，支持：
+#### 注册和登录
 
-- **创建新文章**：点击博客页面的"创建文章"按钮
-- **Markdown 编辑**：实时预览 Markdown 内容
-- **元数据管理**：标题、分类、标签、摘要等
-- **自动提交**：文章自动提交到 GitHub 仓库
+1. **注册新用户**：
+   - 点击页面右上角的用户图标
+   - 选择"注册"（如果没有账号）
+   - 填写用户名、邮箱和密码（至少6位）
+   - 点击"注册"完成注册
 
-### GitHub 集成配置
+2. **登录**：
+   - 点击页面右上角的用户图标
+   - 输入用户名和密码
+   - 点击"登录"
 
-要使用在线编辑器功能，需要配置 GitHub App。详细配置步骤请参考：
+3. **登出**：
+   - 点击用户头像
+   - 在下拉菜单中选择"登出"
 
-📖 [GitHub API 集成配置指南](./docs/GITHUB_SETUP.md)
+#### 创建管理员账户
 
-### 文章存储结构
+管理员账户需要通过数据库直接创建。有两种方式：
 
-文章采用解耦存储结构，每篇文章使用独立文件夹：
+**方式一：使用 SQLite 命令行工具**
 
+```bash
+cd backend
+sqlite3 database/gworkspace.db
+
+# 在 SQLite 命令行中执行：
+INSERT INTO users (username, email, password_hash, role, created_at, updated_at)
+VALUES ('admin', 'admin@example.com', '<bcrypt_hash>', 'admin', datetime('now'), datetime('now'));
 ```
-src/posts/
-  └── YYYY-MM-DD-article-slug/
-      ├── meta.json          # 文章元数据
-      └── index.md          # 文章内容（Markdown）
+
+**方式二：使用提供的脚本（推荐）**
+
+项目已提供创建管理员账户的脚本：
+
+1. 编辑 `backend/scripts/create-admin.js`，修改管理员信息：
+   ```javascript
+   const ADMIN_CONFIG = {
+     username: 'admin',           // 修改为你的用户名
+     email: 'admin@example.com',  // 修改为你的邮箱
+     password: 'admin123456',      // 修改为你的密码
+     role: 'admin'
+   }
+   ```
+
+2. 运行脚本：
+   ```bash
+   cd backend
+   npm run create-admin
+   ```
+   或者：
+   ```bash
+   cd backend
+   node scripts/create-admin.js
+   ```
+
+脚本会自动检查用户是否已存在，避免重复创建。
+
+### 2. 管理后台
+
+#### 访问管理后台
+
+1. 使用管理员账户登录
+2. 点击用户头像，选择"管理后台"
+3. 或直接访问 `http://localhost:3000/admin`
+
+#### 管理后台功能
+
+**仪表盘** (`/admin`)
+- 查看总体统计：总文章数、总浏览量、总点赞数、总评论数
+- 快速操作：创建博客、管理博客、查看统计
+
+**博客管理** (`/admin/blogs`)
+- 查看所有博客（包括草稿）
+- 创建新博客：点击"创建博客"按钮
+- 编辑博客：点击文章行的编辑图标
+- 删除博客：点击文章行的删除图标
+
+**数据分析** (`/admin/analytics`)
+- 查看访问统计：总访问量、独立访客数
+- 查看热门文章排行
+
+**评论管理** (`/admin/comments`)
+- 查看所有评论
+- 批准评论：点击"批准"按钮
+- 标记垃圾评论：点击"标记垃圾"按钮
+- 删除评论：点击"删除"按钮
+
+### 3. 博客管理
+
+#### 创建新博客
+
+1. 登录管理员账户
+2. 进入管理后台 → 博客管理
+3. 点击"创建博客"按钮
+4. 填写文章信息：
+   - **标题**：文章标题
+   - **分类 (Genre)**：文章分类，如 Tech、Design 等
+   - **发布日期**：文章发布日期
+   - **摘要**：文章摘要
+   - **标签**：输入标签后按 Enter 添加
+   - **内容**：Markdown 格式的文章内容
+5. 点击"保存"提交
+
+#### 编辑博客
+
+1. 在博客管理页面找到要编辑的文章
+2. 点击文章行的编辑图标
+3. 修改文章信息
+4. 点击"保存"提交更改
+
+#### 删除博客
+
+1. 在博客管理页面找到要删除的文章
+2. 点击文章行的删除图标
+3. 确认删除操作
+
+### 4. 用户功能
+
+#### 点赞文章
+
+- **登录用户**：点击文章详情页的点赞按钮，点赞会与账户关联
+- **匿名用户**：也可以点赞，但基于 IP 地址（同一 IP 只能点赞一次）
+
+#### 评论文章
+
+- **登录用户**：在文章详情页底部填写评论，评论会显示用户名
+- **匿名用户**：需要填写姓名和邮箱（可选），评论会显示提供的姓名
+
+### 5. 数据迁移
+
+如果已有文件系统的博客文章，需要迁移到数据库：
+
+```bash
+npm run migrate
 ```
 
-详细说明请参考：
+迁移脚本会：
+1. 读取 `src/posts/` 目录下的所有文章
+2. 将文章元数据和内容插入到数据库
+3. 显示迁移结果统计
 
-📖 [博客文章编写指南](./docs/BLOG_GUIDE.md)
+### 6. 环境配置
+
+#### 后端环境变量
+
+在 `backend/` 目录创建 `.env` 文件（可选）：
+
+```env
+# JWT 密钥（生产环境必须修改）
+JWT_SECRET=your-secret-key-change-in-production
+
+# JWT 过期时间（默认7天）
+JWT_EXPIRES_IN=7d
+
+# 数据库路径（默认：database/gworkspace.db）
+DATABASE_PATH=database/gworkspace.db
+```
+
+#### 前端环境变量
+
+在项目根目录创建 `.env` 文件（可选）：
+
+```env
+# API 服务器地址（默认：http://localhost:3001/api）
+VITE_API_URL=http://localhost:3001/api
+```
+
+### 7. 生产部署
+
+#### 构建前端
+
+```bash
+npm run build
+```
+
+构建产物在 `dist/` 目录。
+
+#### 启动后端
+
+```bash
+cd backend
+npm start
+```
+
+或使用 PM2 等进程管理器：
+
+```bash
+pm2 start backend/src/server.js --name gworkspace-backend
+```
+
+#### 配置反向代理
+
+如果使用 Nginx，配置示例：
+
+```nginx
+# 前端静态文件
+location / {
+    root /path/to/dist;
+    try_files $uri $uri/ /index.html;
+}
+
+# 后端 API
+location /api {
+    proxy_pass http://localhost:3001;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}
+```
 
 ## 更新日志
+
+### v2.0.0 (2025-01-XX)
+
+- 🔐 **用户系统**：完整的用户注册/登录功能，JWT Token 认证
+- 👥 **管理后台**：管理员专用的后台管理系统
+  - 博客管理：创建、编辑、删除博客
+  - 数据分析：访问统计、热门文章排行
+  - 评论管理：审核、删除、标记垃圾评论
+- 💾 **数据持久化**：从文件系统迁移到 SQLite 数据库
+- 🎯 **API 重构**：完整的 RESTful API，支持用户关联
+- 🔒 **安全增强**：密码加密、认证中间件、权限控制
+- 🚫 **移除前端编辑入口**：博客编辑功能仅限管理后台
 
 ### v1.1.0 (2025-12-20)
 

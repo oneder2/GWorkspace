@@ -6,21 +6,41 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 /**
+ * 获取认证token
+ * @returns {string|null} token或null
+ */
+function getToken() {
+  return localStorage.getItem('token')
+}
+
+/**
  * 通用请求函数
  * @param {string} url - API端点
  * @param {Object} options - 请求选项
  * @returns {Promise<Response>}
  */
 async function request(url, options = {}) {
+  const token = getToken()
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  }
+
+  // 如果存在token，添加到请求头
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
   const response = await fetch(`${API_BASE_URL}${url}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers
-    },
-    ...options
+    ...options,
+    headers
   })
 
   if (!response.ok) {
+    // 如果是401错误，清除token
+    if (response.status === 401) {
+      localStorage.removeItem('token')
+    }
     const error = await response.json().catch(() => ({ error: response.statusText }))
     throw new Error(error.error || error.message || `HTTP ${response.status}`)
   }
@@ -226,6 +246,53 @@ export const analyticsApi = {
     const queryString = new URLSearchParams(params).toString()
     return request(`/analytics/overview${queryString ? `?${queryString}` : ''}`)
   }
+}
+
+/**
+ * 认证API
+ */
+export const authApi = {
+  /**
+   * 用户注册
+   * @param {Object} data - 注册数据
+   * @returns {Promise<Object>}
+   */
+  register: (data) => request('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
+  /**
+   * 用户登录
+   * @param {Object} data - 登录数据
+   * @returns {Promise<Object>}
+   */
+  login: (data) => request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
+  /**
+   * 用户登出
+   * @returns {Promise<Object>}
+   */
+  logout: () => request('/auth/logout', {
+    method: 'POST'
+  }),
+
+  /**
+   * 验证token
+   * @returns {Promise<Object>}
+   */
+  verify: () => request('/auth/verify'),
+
+  /**
+   * 刷新token
+   * @returns {Promise<Object>}
+   */
+  refresh: () => request('/auth/refresh', {
+    method: 'POST'
+  })
 }
 
 /**
