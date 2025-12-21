@@ -9,7 +9,8 @@
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:backend\"",
     "build": "vite build",
     "preview": "vite preview",
-    "migrate": "cd backend && npm run migrate"
+    "migrate": "cd backend && npm run migrate",
+    "generate-sitemap": "node scripts/generate-sitemap.js"
   },
   "dependencies": {
     "fuse.js": "^7.1.0",

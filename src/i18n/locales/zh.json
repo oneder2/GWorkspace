@@ -107,7 +107,8 @@
     "viewNewArticle": "查看新文章",
     "viewSplit": "分屏",
     "viewEditor": "编辑",
-    "viewPreview": "预览"
+    "viewPreview": "预览",
+    "filters": "筛选"
   },
   "portfolio": {
     "title": "精选作品",
@@ -125,7 +126,10 @@
     "cancel": "取消",
     "close": "关闭",
     "clear": "清空",
-    "processing": "处理中..."
+    "processing": "处理中...",
+    "collapse": "收起",
+    "expand": "展开",
+    "menu": "菜单"
   },
   "auth": {
     "login": "登录",

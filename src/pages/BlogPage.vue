@@ -5,7 +5,71 @@
   布局：标签和归档放在左侧空白区域，中间内容区域填充剩余空间
 -->
 <template>
-  <div class="animate-fade-in rounded-3xl flex gap-6 xl:gap-8 min-h-full overflow-hidden">
+  <div class="animate-fade-in rounded-2xl sm:rounded-3xl flex flex-col xl:flex-row gap-4 sm:gap-6 xl:gap-8 min-h-full overflow-hidden">
+    <!-- 移动端筛选按钮 - 显示在顶部 -->
+    <div class="xl:hidden mb-4">
+      <button
+        @click="showMobileFilters = !showMobileFilters"
+        class="w-full glass-card p-3 rounded-xl flex items-center justify-between hover:bg-green-50/50 dark:hover:bg-green-900/20 transition-colors"
+      >
+        <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $t('blog.filters') }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-400" :class="{ 'rotate-180': showMobileFilters }">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- 移动端筛选面板 -->
+    <transition
+      enter-active-class="transition-all duration-300"
+      enter-from-class="opacity-0 max-h-0"
+      enter-to-class="opacity-100 max-h-screen"
+      leave-active-class="transition-all duration-300"
+      leave-from-class="opacity-100 max-h-screen"
+      leave-to-class="opacity-0 max-h-0"
+    >
+      <div v-if="showMobileFilters" class="xl:hidden glass-card p-4 rounded-xl mb-4 space-y-4">
+        <!-- Genre分类筛选 -->
+        <div>
+          <h3 class="text-sm font-bold mb-3 text-slate-800 dark:text-slate-200">{{ $t('blog.genre') }}</h3>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="genre in genres" 
+              :key="genre"
+              @click="toggleGenreFilter(genre)"
+              class="px-3 py-1 rounded-md text-xs font-bold transition-all duration-200 uppercase tracking-wide"
+              :class="selectedGenre === genre 
+                ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 ring-2 ring-green-500 dark:ring-green-400' 
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'"
+            >
+              {{ genre }}
+            </button>
+          </div>
+        </div>
+        
+        <!-- 标签筛选 -->
+        <div>
+          <h3 class="text-sm font-bold mb-3 text-slate-800 dark:text-slate-200">{{ $t('blog.tags') }}</h3>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="tag in tags" 
+              :key="tag.name"
+              @click="toggleTagFilter(tag.name)"
+              class="px-3 py-1 rounded-full text-xs font-bold transition-all duration-200"
+              :class="[
+                tag.color,
+                selectedTag === tag.name 
+                  ? 'ring-2 ring-green-500 dark:ring-green-400' 
+                  : 'hover:scale-105 cursor-pointer'
+              ]"
+            >
+              #{{ tag.name }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
     <!-- 左侧标签和归档 - 放在左侧空白区域，桌面端显示 -->
     <div class="glass-card w-56 hidden xl:block shrink-0 rounded-2xl">
       <div class="sticky top-6 space-y-1.5 p-4">
@@ -200,6 +264,7 @@ const selectedGenre = ref(null)
 const selectedTag = ref(null)
 const selectedArchive = ref(null)
 const showFavorites = ref(false)
+const showMobileFilters = ref(false) // 移动端筛选面板显示状态
 const sortBy = ref('date-desc')
 const latestArticle = ref(null) // 用于推广最新文章
 

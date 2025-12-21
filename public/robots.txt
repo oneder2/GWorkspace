@@ -1,0 +1,17 @@
+# robots.txt for GWorkspace
+# 允许所有搜索引擎爬虫访问
+
+User-agent: *
+Allow: /
+
+# 禁止访问管理后台
+Disallow: /admin
+
+# 禁止访问API端点
+Disallow: /api
+
+# Sitemap位置
+Sitemap: https://your-domain.com/sitemap.xml
+
+# 注意：部署时需要将 your-domain.com 替换为实际域名
+

@@ -3,7 +3,7 @@
   包含页面标题、天气信息、时间、主题切换、语言切换等功能
 -->
 <template>
-  <header class="h-16 px-8 flex items-center justify-between border-b border-white/30 dark:border-slate-700/30 shrink-0 relative">
+  <header class="h-14 sm:h-16 px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-white/30 dark:border-slate-700/30 shrink-0 relative gap-2 sm:gap-4">
     <!-- 新文章通知横幅 -->
     <transition
       enter-active-class="transition ease-out duration-300"
@@ -48,8 +48,44 @@
       </div>
     </transition>
 
-    <div class="flex items-center gap-4">
-      <h2 class="text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight">{{ currentTabName }}</h2>
+    <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+      <!-- 移动端菜单按钮 -->
+      <button
+        @click="$emit('toggle-mobile-menu')"
+        class="md:hidden p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors flex-shrink-0"
+        :title="$t('common.menu')"
+      >
+        <svg 
+          v-if="!showMobileMenu"
+          xmlns="http://www.w3.org/2000/svg" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" 
+          class="w-6 h-6 text-slate-600 dark:text-slate-300"
+        >
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        <svg 
+          v-else
+          xmlns="http://www.w3.org/2000/svg" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" 
+          class="w-6 h-6 text-slate-600 dark:text-slate-300"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight truncate">{{ currentTabName }}</h2>
       <span 
         v-if="currentTab === 'tools'" 
         class="px-2 py-0.5 rounded-md bg-green-100/50 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-mono"
@@ -183,8 +219,8 @@
         </svg>
       </button>
       
-      <!-- 时间显示 -->
-      <div class="text-2xl font-light text-slate-700 dark:text-slate-300 font-mono tracking-wider w-24 text-right">
+      <!-- 时间显示 - 移动端隐藏 -->
+      <div class="hidden sm:block text-xl sm:text-2xl font-light text-slate-700 dark:text-slate-300 font-mono tracking-wider w-20 sm:w-24 text-right">
         {{ currentTime }}
       </div>
     </div>
@@ -221,10 +257,14 @@ const props = defineProps({
   isDark: {
     type: Boolean,
     default: false
+  },
+  showMobileMenu: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['toggle-theme', 'toggle-lang', 'open-theme-customizer'])
+const emit = defineEmits(['toggle-theme', 'toggle-lang', 'open-theme-customizer', 'toggle-mobile-menu'])
 
 const { t } = useI18n()
 const router = useRouter()

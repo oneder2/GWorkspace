@@ -78,3 +78,4 @@ CREATE INDEX IF NOT EXISTS idx_visits_blog_id ON visits(blog_id);
 CREATE INDEX IF NOT EXISTS idx_visits_created_at ON visits(created_at);
 CREATE INDEX IF NOT EXISTS idx_visits_path ON visits(path);
 
+

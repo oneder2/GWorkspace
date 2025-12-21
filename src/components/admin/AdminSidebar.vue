@@ -3,10 +3,37 @@
   提供独立的管理后台导航系统
 -->
 <template>
-  <aside class="glass-card w-64 shrink-0 rounded-2xl p-4">
-    <div class="mb-6 pb-4 border-b border-slate-200 dark:border-slate-700">
-      <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.title') }}</h2>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ $t('admin.adminOnly') }}</p>
+  <aside 
+    class="glass-card shrink-0 rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all duration-300"
+    :class="collapsed ? 'w-16 lg:w-20' : 'w-full lg:w-64'"
+  >
+    <!-- 头部 - 可折叠 -->
+    <div class="mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-200 dark:border-slate-700">
+      <div v-if="!collapsed" class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.title') }}</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 hidden sm:block">{{ $t('admin.adminOnly') }}</p>
+        </div>
+        <button
+          @click="$emit('toggle-collapse')"
+          class="lg:hidden p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          :title="$t('common.collapse')"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-400">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+      <button
+        v-else
+        @click="$emit('toggle-collapse')"
+        class="w-full flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        :title="$t('common.expand')"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-400">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
     </div>
     
     <nav class="space-y-1">
@@ -14,13 +41,14 @@
         v-for="item in navItems"
         :key="item.path"
         :to="item.path"
-        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group"
+        class="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 group"
         :class="isActive(item.path)
           ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-semibold'
           : 'text-slate-600 dark:text-slate-400 hover:bg-green-50/50 dark:hover:bg-green-900/10 hover:text-green-600 dark:hover:text-green-400'"
+        :title="collapsed ? item.name : ''"
       >
-        <span v-html="item.icon" class="w-5 h-5 shrink-0"></span>
-        <span>{{ item.name }}</span>
+        <span v-html="item.icon" class="w-4 sm:w-5 h-4 sm:h-5 shrink-0"></span>
+        <span v-if="!collapsed" class="text-sm sm:text-base">{{ item.name }}</span>
       </router-link>
     </nav>
   </aside>
@@ -30,6 +58,15 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+
+const props = defineProps({
+  collapsed: {
+    type: Boolean,
+    default: false
+  }
+})
+
+defineEmits(['toggle-collapse'])
 
 const route = useRoute()
 const { t } = useI18n()

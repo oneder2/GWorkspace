@@ -4,34 +4,34 @@
 -->
 <template>
   <div class="animate-fade-in min-h-full flex flex-col">
-    <!-- 管理后台头部 -->
-    <header class="glass-card p-4 mb-6 rounded-2xl flex items-center justify-between shrink-0">
-      <div class="flex items-center gap-4">
-        <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.title') }}</h1>
-        <span class="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-semibold rounded-full">
+    <!-- 管理后台头部 - 响应式布局 -->
+    <header class="glass-card p-3 sm:p-4 mb-4 sm:mb-6 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shrink-0">
+      <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
+        <h1 class="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.title') }}</h1>
+        <span class="px-2 sm:px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-semibold rounded-full">
           {{ $t('admin.adminOnly') }}
         </span>
       </div>
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
         <button
           @click="$router.push('/blog')"
-          class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+          class="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
         >
           {{ $t('admin.backToBlog') }}
         </button>
         <button
           @click="handleLogout"
-          class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-700 transition-colors text-sm font-semibold"
+          class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-700 transition-colors text-xs sm:text-sm font-semibold"
         >
           {{ $t('auth.logout') }}
         </button>
       </div>
     </header>
 
-    <!-- 主内容区域 -->
-    <div class="flex-1 flex gap-6 min-h-0">
-      <!-- 侧边栏导航 -->
-      <AdminSidebar />
+    <!-- 主内容区域 - 响应式布局 -->
+    <div class="flex-1 flex flex-col lg:flex-row gap-4 sm:gap-6 min-h-0">
+      <!-- 侧边栏导航 - 移动端可折叠 -->
+      <AdminSidebar :collapsed="sidebarCollapsed" @toggle-collapse="sidebarCollapsed = !sidebarCollapsed" />
 
       <!-- 内容区域 -->
       <main class="flex-1 min-w-0">
@@ -42,6 +42,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '../../composables/useAuth'
@@ -50,6 +51,9 @@ import AdminSidebar from '../../components/admin/AdminSidebar.vue'
 const router = useRouter()
 const { t } = useI18n()
 const { logout, isAdmin } = useAuth()
+
+// 侧边栏折叠状态
+const sidebarCollapsed = ref(false)
 
 // 检查是否是管理员
 if (!isAdmin.value) {

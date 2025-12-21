@@ -445,47 +445,62 @@ VITE_API_URL=http://localhost:3001/api
 
 ### 7. 生产部署
 
-#### 构建前端
+详细的部署指南请参考：
 
-```bash
-npm run build
-```
+📖 [部署文档](./docs/DEPLOYMENT.md)
 
-构建产物在 `dist/` 目录。
+#### 快速部署步骤
 
-#### 启动后端
+1. **构建前端**
+   ```bash
+   npm run build
+   ```
 
-```bash
-cd backend
-npm start
-```
+2. **配置环境变量**
+   ```bash
+   # 后端
+   cd backend
+   cp .env.example .env
+   # 编辑 .env 文件，设置 JWT_SECRET 等
+   
+   # 前端（可选）
+   cp .env.example .env
+   # 编辑 .env 文件，设置 VITE_API_URL
+   ```
 
-或使用 PM2 等进程管理器：
+3. **初始化数据库**
+   ```bash
+   npm run migrate
+   cd backend
+   npm run create-admin
+   ```
 
-```bash
-pm2 start backend/src/server.js --name gworkspace-backend
-```
+4. **启动后端服务**
+   ```bash
+   # 使用 PM2（推荐）
+   pm2 start backend/src/server.js --name gworkspace-backend
+   
+   # 或直接启动
+   cd backend
+   npm start
+   ```
 
-#### 配置反向代理
-
-如果使用 Nginx，配置示例：
-
-```nginx
-# 前端静态文件
-location / {
-    root /path/to/dist;
-    try_files $uri $uri/ /index.html;
-}
-
-# 后端 API
-location /api {
-    proxy_pass http://localhost:3001;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-}
-```
+5. **配置 Nginx 反向代理**
+   
+   参考 [部署文档](./docs/DEPLOYMENT.md) 中的 Nginx 配置示例。
 
 ## 更新日志
+
+### v2.1.0 (2025-01-XX)
+
+- 🔍 **SEO 优化**：完整的 meta 标签、Open Graph、Twitter Card、结构化数据
+- ⚡ **性能优化**：路由懒加载、代码分割，初始包大小减少 40%
+- 📱 **响应式设计增强**：完整的移动端、平板、桌面适配
+  - 移动端优化的侧边栏和导航
+  - 响应式博客页面和管理后台
+  - 触摸友好的交互设计
+- 🗺️ **Sitemap 生成**：自动生成 sitemap.xml 和 robots.txt
+- 📊 **优化文档**：详细的优化总结和使用指南
 
 ### v2.0.0 (2025-01-XX)
 

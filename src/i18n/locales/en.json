@@ -107,7 +107,8 @@
     "viewNewArticle": "View New Article",
     "viewSplit": "Split",
     "viewEditor": "Editor",
-    "viewPreview": "Preview"
+    "viewPreview": "Preview",
+    "filters": "Filters"
   },
   "portfolio": {
     "title": "Selected Works",
@@ -125,7 +126,10 @@
     "cancel": "Cancel",
     "close": "Close",
     "clear": "Clear",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "menu": "Menu"
   },
   "auth": {
     "login": "Login",

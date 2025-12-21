@@ -44,3 +44,4 @@ CREATE INDEX IF NOT EXISTS idx_likes_user_id ON likes(user_id);
 ALTER TABLE comments ADD COLUMN user_id INTEGER;
 CREATE INDEX IF NOT EXISTS idx_comments_user_id ON comments(user_id);
 
+

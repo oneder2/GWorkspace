@@ -1,20 +1,28 @@
 /**
  * 路由配置文件
  * 定义应用的所有路由规则
+ * 使用懒加载优化性能，减少初始包大小
  */
 import { createRouter, createWebHistory } from 'vue-router'
-import HomePage from '../pages/HomePage.vue'
-import SitesPage from '../pages/SitesPage.vue'
-import ToolsPage from '../pages/ToolsPage.vue'
-import BlogPage from '../pages/BlogPage.vue'
-import BlogDetailPage from '../pages/BlogDetailPage.vue'
-import PortfolioPage from '../pages/PortfolioPage.vue'
-import AdminLayout from '../pages/admin/AdminLayout.vue'
-import AdminDashboard from '../pages/admin/AdminDashboard.vue'
-import AdminBlogList from '../pages/admin/AdminBlogList.vue'
-import AdminBlogEditorPage from '../pages/admin/AdminBlogEditorPage.vue'
-import AdminAnalytics from '../pages/admin/AdminAnalytics.vue'
-import AdminComments from '../pages/admin/AdminComments.vue'
+
+/**
+ * 路由懒加载函数
+ * 使用动态 import 实现代码分割，提升首屏加载速度
+ */
+const HomePage = () => import('../pages/HomePage.vue')
+const SitesPage = () => import('../pages/SitesPage.vue')
+const ToolsPage = () => import('../pages/ToolsPage.vue')
+const BlogPage = () => import('../pages/BlogPage.vue')
+const BlogDetailPage = () => import('../pages/BlogDetailPage.vue')
+const PortfolioPage = () => import('../pages/PortfolioPage.vue')
+
+// 管理后台路由 - 按需加载，减少初始包大小
+const AdminLayout = () => import('../pages/admin/AdminLayout.vue')
+const AdminDashboard = () => import('../pages/admin/AdminDashboard.vue')
+const AdminBlogList = () => import('../pages/admin/AdminBlogList.vue')
+const AdminBlogEditorPage = () => import('../pages/admin/AdminBlogEditorPage.vue')
+const AdminAnalytics = () => import('../pages/admin/AdminAnalytics.vue')
+const AdminComments = () => import('../pages/admin/AdminComments.vue')
 
 /**
  * 路由配置
@@ -112,7 +120,28 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  // 滚动行为：切换路由时滚动到顶部
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0, behavior: 'smooth' }
+    }
+  }
+})
+
+/**
+ * 路由守卫：更新页面标题
+ */
+router.beforeEach((to, from, next) => {
+  // 根据路由 meta 更新标题
+  if (to.meta.title) {
+    document.title = `${to.meta.title} - GWorkspace`
+  } else {
+    document.title = 'GWorkspace - Personal Workspace'
+  }
+  next()
 })
 
 export default router

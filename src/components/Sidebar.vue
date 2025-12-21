@@ -5,25 +5,36 @@
 -->
 <template>
   <aside 
-    class="glass-sidebar rounded-3xl flex flex-col shrink-0 transition-all duration-300 h-full shadow-lg" 
-    :class="collapsed ? 'w-20' : 'w-64'"
+    class="glass-sidebar rounded-none md:rounded-2xl sm:md:rounded-3xl flex flex-col shrink-0 transition-all duration-300 h-full shadow-lg" 
+    :class="collapsed ? 'w-16 sm:w-20' : 'w-full md:w-56 sm:md:w-64'"
   >
-    <!-- 头部 Logo - 点击可收起/展开 -->
+    <!-- 头部 Logo - 点击可收起/展开（桌面端）或关闭（移动端） -->
     <div class="py-4 px-4 flex flex-col items-center relative">
       <div 
         @click="$emit('toggle-collapse')" 
-        class="flex items-center gap-3 transition-opacity duration-300 cursor-pointer group hover:opacity-80 active:scale-95 transition-all"
+        class="flex items-center gap-3 transition-opacity duration-300 cursor-pointer group hover:opacity-80 active:scale-95 transition-all w-full"
         v-if="!collapsed"
-        title="点击收起侧边栏"
+        :title="$t('common.collapse')"
       >
         <GWorkspaceIcon :size="60" variant="green" />
         <span class="font-bold text-xl tracking-tight text-slate-800 dark:text-slate-200 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">GWorkspace</span>
+        <!-- 移动端关闭按钮 -->
+        <button
+          @click.stop="$emit('nav-click')"
+          class="md:hidden ml-auto p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          :title="$t('common.close')"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-400">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
       <div 
         @click="$emit('toggle-collapse')" 
         v-else
         class="cursor-pointer group hover:opacity-80 active:scale-95 transition-all"
-        title="点击展开侧边栏"
+        :title="$t('common.expand')"
       >
         <GWorkspaceIcon :size="48" variant="green" />
       </div>
@@ -117,7 +128,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['toggle-collapse'])
+defineEmits(['toggle-collapse', 'nav-click'])
 
 const { t } = useI18n()
 const router = useRouter()
@@ -138,5 +149,7 @@ const navItems = computed(() => [
  */
 const handleNavClick = (item) => {
   router.push(item.route)
+  // 触发 nav-click 事件，用于移动端关闭菜单
+  emit('nav-click')
 }
 </script>

@@ -23,8 +23,8 @@
       <span>{{ $t('blog.backToList') }}</span>
     </button>
 
-    <!-- 文章内容 -->
-    <article v-if="post" class="glass-card p-8 md:p-12 rounded-2xl">
+    <!-- 文章内容 - 响应式内边距 -->
+    <article v-if="post" class="glass-card p-4 sm:p-6 md:p-8 lg:p-12 rounded-2xl">
       <!-- 文章头部 -->
       <header class="mb-8">
         <div class="flex items-center gap-3 mb-4 flex-wrap">
@@ -46,7 +46,7 @@
             </span>
           </div>
         </div>
-        <h1 class="text-4xl md:text-5xl font-bold text-slate-800 dark:text-slate-200 mb-6">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 dark:text-slate-200 mb-4 sm:mb-6">
           {{ post.title }}
         </h1>
         <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -196,6 +196,7 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { marked } from 'marked'
 import { useLocalStorage } from '../composables/useStorage'
+import { useSEO, generateBlogStructuredData } from '../composables/useSEO'
 import { blogApi, likesApi, analyticsApi } from '../utils/api'
 
 const route = useRoute()
@@ -238,6 +239,11 @@ const isLoading = ref(false)
 const allPosts = ref([]) // 用于相关文章推荐
 
 /**
+ * SEO 管理
+ */
+const { applySEO } = useSEO()
+
+/**
  * 加载文章数据
  */
 const loadPost = async () => {
@@ -247,6 +253,23 @@ const loadPost = async () => {
   try {
     const article = await blogApi.getById(postId.value)
     post.value = article
+    
+    // 更新 SEO 信息
+    if (article) {
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+      const articleUrl = `${baseUrl}/blog/${article.id}`
+      const articleImage = article.image || `${baseUrl}/og-image.jpg`
+      
+      applySEO({
+        title: `${article.title} - GWorkspace`,
+        description: article.excerpt || article.title,
+        keywords: article.tags ? article.tags.join(', ') : 'blog, article',
+        image: articleImage,
+        url: articleUrl,
+        type: 'article',
+        structuredData: generateBlogStructuredData(article)
+      })
+    }
     
     // 记录访问统计
     if (article) {

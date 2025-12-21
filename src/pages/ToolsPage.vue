@@ -40,25 +40,79 @@
 
     <!-- 中间工具内容区 - 使用flex-1占据全部剩余空间，填充到底部 -->
     <div class="flex-1 min-w-0 flex flex-col min-h-full">
-      <!-- 移动端工具选择器 -->
-      <div class="xl:hidden mb-6">
-        <div class="glass-card-tools p-4 rounded-2xl shadow-lg">
-          <h3 class="text-base font-bold mb-4 text-slate-800 dark:text-slate-200 uppercase tracking-wider text-xs">
-            {{ $t('tools.utilities') }}
-          </h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            <button 
-              v-for="tool in tools" 
-              :key="tool.id"
-              @click="currentTool = tool.id"
-              class="px-4 py-4 text-left text-sm font-semibold transition-all duration-300 flex items-center gap-2"
-              :class="currentTool === tool.id 
-                ? 'bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/30 dark:to-emerald-900/20 text-green-700 dark:text-green-400 shadow-md border border-green-200/50 dark:border-green-700/50 rounded-2xl' 
-                : 'text-slate-600 dark:text-slate-400 bg-slate-100/40 dark:bg-slate-800/40 hover:bg-green-50/50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-400 border border-transparent hover:border-green-200/30 dark:hover:border-green-700/20 rounded-xl'"
+      <!-- 移动端工具选择器 - 下拉栏形式 -->
+      <div class="xl:hidden mb-4 sm:mb-6">
+        <div class="glass-card-tools rounded-xl sm:rounded-2xl shadow-lg overflow-hidden" data-tool-dropdown>
+          <div class="relative">
+            <!-- 下拉按钮 -->
+            <button
+              @click="showToolDropdown = !showToolDropdown"
+              class="w-full px-4 py-3 sm:py-4 flex items-center justify-between text-left transition-all duration-200 hover:bg-green-50/30 dark:hover:bg-green-900/20"
             >
-              <component :is="tool.icon" class="w-4 h-4 shrink-0" />
-              <span class="truncate text-xs">{{ tool.name }}</span>
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <component 
+                  :is="currentToolData.icon" 
+                  class="w-5 h-5 shrink-0 text-green-600 dark:text-green-400"
+                />
+                <span class="font-semibold text-sm sm:text-base text-slate-800 dark:text-slate-200 truncate">
+                  {{ currentToolData.name }}
+                </span>
+              </div>
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round" 
+                class="w-5 h-5 text-slate-500 dark:text-slate-400 transition-transform duration-200 flex-shrink-0 ml-2"
+                :class="{ 'rotate-180': showToolDropdown }"
+              >
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
             </button>
+
+            <!-- 下拉选项列表 -->
+            <transition
+              enter-active-class="transition-all duration-200 ease-out"
+              enter-from-class="opacity-0 max-h-0"
+              enter-to-class="opacity-100 max-h-96"
+              leave-active-class="transition-all duration-200 ease-in"
+              leave-from-class="opacity-100 max-h-96"
+              leave-to-class="opacity-0 max-h-0"
+            >
+              <div
+                v-if="showToolDropdown"
+                class="border-t border-slate-200/50 dark:border-slate-700/50 overflow-hidden"
+              >
+                <div class="max-h-64 overflow-y-auto custom-scrollbar">
+                  <button
+                    v-for="tool in tools"
+                    :key="tool.id"
+                    @click="selectTool(tool.id)"
+                    class="w-full px-4 py-3 sm:py-3.5 flex items-center gap-3 text-left transition-all duration-200 hover:bg-green-50/50 dark:hover:bg-green-900/20"
+                    :class="currentTool === tool.id 
+                      ? 'bg-green-50/80 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-semibold' 
+                      : 'text-slate-600 dark:text-slate-400 hover:text-green-700 dark:hover:text-green-400'"
+                  >
+                    <component 
+                      :is="tool.icon" 
+                      class="w-5 h-5 shrink-0"
+                      :class="currentTool === tool.id 
+                        ? 'text-green-600 dark:text-green-400' 
+                        : 'text-slate-500 dark:text-slate-400'"
+                    />
+                    <span class="text-sm sm:text-base flex-1 truncate">{{ tool.name }}</span>
+                    <!-- 选中指示器 -->
+                    <div 
+                      v-if="currentTool === tool.id"
+                      class="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 flex-shrink-0"
+                    ></div>
+                  </button>
+                </div>
+              </div>
+            </transition>
           </div>
         </div>
       </div>
@@ -103,7 +157,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toolsConfig } from '../config/tools'
 import { getIcon } from '../utils/iconMapper'
@@ -119,6 +173,7 @@ import TodoTool from '../components/tools/TodoTool.vue'
 
 const { t } = useI18n()
 const currentTool = ref('calc')
+const showToolDropdown = ref(false) // 移动端下拉栏显示状态
 
 // 从配置文件加载工具列表，并映射图标组件和国际化名称
 const tools = computed(() => {
@@ -127,5 +182,42 @@ const tools = computed(() => {
     name: t(tool.nameKey),
     icon: getIcon(tool.iconName)
   }))
+})
+
+/**
+ * 当前选中的工具数据
+ */
+const currentToolData = computed(() => {
+  return tools.value.find(tool => tool.id === currentTool.value) || tools.value[0]
+})
+
+/**
+ * 选择工具
+ * 移动端选择后自动关闭下拉栏
+ */
+const selectTool = (toolId) => {
+  currentTool.value = toolId
+  showToolDropdown.value = false
+}
+
+/**
+ * 点击外部关闭下拉栏
+ */
+const handleClickOutside = (event) => {
+  // 检查点击是否在下拉栏外部
+  const dropdownElement = event.target.closest('[data-tool-dropdown]')
+  if (!dropdownElement && showToolDropdown.value) {
+    showToolDropdown.value = false
+  }
+}
+
+onMounted(() => {
+  // 监听点击事件，用于关闭下拉栏
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  // 清理事件监听
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>

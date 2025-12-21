@@ -23,13 +23,53 @@
     </div>
 
     <!-- 普通路由：使用标准布局（侧边栏 + 顶部栏） -->
-    <div v-else class="relative z-10 flex h-full w-full p-4 gap-4 box-border">
-      <!-- 左侧导航栏 -->
+    <div v-else class="relative z-10 flex h-full w-full p-2 sm:p-4 gap-2 sm:gap-4 box-border">
+      <!-- 左侧导航栏 - 移动端隐藏，平板和桌面显示 -->
       <Sidebar 
         :collapsed="sidebarCollapsed"
         @toggle-collapse="sidebarCollapsed = !sidebarCollapsed"
         :current-tab="currentTab"
+        class="hidden md:flex"
       />
+
+      <!-- 移动端抽屉式导航遮罩层 -->
+      <transition
+        enter-active-class="transition-opacity duration-300"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-opacity duration-300"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="showMobileMenu"
+          @click="showMobileMenu = false"
+          class="fixed inset-0 bg-black/50 dark:bg-black/70 z-40 md:hidden"
+        ></div>
+      </transition>
+
+      <!-- 移动端抽屉式导航 -->
+      <transition
+        enter-active-class="transition-transform duration-300 ease-out"
+        enter-from-class="-translate-x-full"
+        enter-to-class="translate-x-0"
+        leave-active-class="transition-transform duration-300 ease-in"
+        leave-from-class="translate-x-0"
+        leave-to-class="-translate-x-full"
+      >
+        <div
+          v-if="showMobileMenu"
+          class="fixed left-0 top-0 bottom-0 w-64 z-50 md:hidden shadow-2xl"
+        >
+          <Sidebar 
+            :collapsed="false"
+            @toggle-collapse="showMobileMenu = false"
+            :current-tab="currentTab"
+            @nav-click="showMobileMenu = false"
+            class="h-full"
+          />
+        </div>
+      </transition>
 
       <!-- 中间主内容区 -->
       <main class="flex-1 glass-main rounded-3xl flex flex-col min-w-0 relative overflow-hidden shadow-2xl">
@@ -39,13 +79,15 @@
           :weather="weatherInfo"
           :current-time="currentTime"
           :is-dark="isDark"
+          :show-mobile-menu="showMobileMenu"
+          @toggle-mobile-menu="showMobileMenu = !showMobileMenu"
           @toggle-theme="toggleTheme"
           @toggle-lang="toggleLanguage"
           @open-theme-customizer="showThemeCustomizer = true"
         />
 
-        <!-- 内容滚动视口 -->
-        <div class="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth relative custom-scrollbar" id="main-scroll">
+        <!-- 内容滚动视口 - 响应式内边距 -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 scroll-smooth relative custom-scrollbar" id="main-scroll">
           <!-- 使用 router-view 渲染路由组件 -->
           <router-view />
         </div>
@@ -67,6 +109,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useTheme } from './composables/useTheme'
 import { useKeyboard } from './composables/useKeyboard'
 import { useCustomTheme } from './composables/useCustomTheme'
+import { useSEO } from './composables/useSEO'
 import { getWeatherInfo } from './utils/weather'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
@@ -84,12 +127,21 @@ const { isDark, toggleTheme } = useTheme()
 
 // 状态管理
 const sidebarCollapsed = ref(false)
+const showMobileMenu = ref(false) // 移动端菜单显示状态
 const currentTime = ref('')
 const weatherInfo = ref(null)
 const showThemeCustomizer = ref(false)
 
 // 初始化自定义主题
 useCustomTheme()
+
+// 初始化 SEO（默认配置）
+useSEO({
+  title: 'GWorkspace - Personal Workspace',
+  description: 'Personal workspace website with Vue.js, featuring blog, tools, and portfolio management.',
+  keywords: 'workspace, blog, tools, portfolio, vue.js',
+  type: 'website'
+})
 
 /**
  * 检查是否为管理后台路由
