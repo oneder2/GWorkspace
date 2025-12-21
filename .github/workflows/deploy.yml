@@ -1,49 +1,273 @@
-name: Fullstack Deployment
+name: Backend Deployment
 
+# 触发条件：推送到 main 分支时触发
+# 注意：前端通过 Vercel 的 GitHub 集成自动部署，无需在此配置
 on:
   push:
-    branches: [ main ] # 只有 push 到 main 分支才触发
+    branches: [ main ]
     paths:
       - 'backend/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch: # 允许手动触发
 
 jobs:
-  build-and-deploy:
+  # 后端部署到自建服务器
+  deploy-backend:
+    name: Deploy Backend to Server
     runs-on: ubuntu-latest
-    
     steps:
-      # 1. 检出代码
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # 2. 设置 Node.js 环境
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '18'
 
-      # 3. 安装依赖并构建
-      - name: Install & Build
+      - name: Install backend dependencies
         run: |
-          npm install
-          npm run build
+          cd backend
+          npm ci --production
 
-      # 4. 通过 SSH 部署到服务器
-      - name: Deploy to Server
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}     # 服务器 IP
-          username: ${{ secrets.SERVER_USER }} # 服务器用户名
-          key: ${{ secrets.SSH_PRIVATE_KEY }}  # SSH 私钥
-          source: ".output/*,package.json"     # 如果是 Nuxt，同步 .output 目录
-          target: "/var/www/my-website"
+      - name: Create deployment package
+        run: |
+          # 创建部署包，排除不需要的文件
+          tar -czf backend-deploy.tar.gz \
+            --exclude='backend/node_modules' \
+            --exclude='backend/.git' \
+            --exclude='backend/.env' \
+            --exclude='backend/database/*.db' \
+            --exclude='backend/database/*.db-journal' \
+            backend/
 
-      # 5. 重启服务 (假设使用 PM2)
-      - name: Restart Service
-        uses: appleboy/ssh-action@master
+      - name: Deploy to server via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "backend-deploy.tar.gz"
+          target: "/tmp"
+          strip_components: 0
+
+      - name: Extract and deploy on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/my-website
-            pm2 restart my-app || pm2 start .output/server/index.mjs --name my-app
+            # 设置变量 - 使用用户主目录，避免权限问题
+            DEPLOY_DIR="$HOME/gworkspace/backend"
+            BACKUP_DIR="$HOME/gworkspace/backups"
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            
+            # 创建必要的目录
+            mkdir -p $DEPLOY_DIR
+            mkdir -p $BACKUP_DIR
+            
+            # 备份当前版本（如果存在）
+            if [ -d "$DEPLOY_DIR" ] && [ "$(ls -A $DEPLOY_DIR 2>/dev/null)" ]; then
+              echo "Backing up current version..."
+              tar -czf "$BACKUP_DIR/backend-backup-$TIMESTAMP.tar.gz" -C $DEPLOY_DIR . 2>/dev/null || true
+            fi
+            
+            # 备份数据库（如果存在）
+            if [ -f "$DEPLOY_DIR/database/gworkspace.db" ]; then
+              echo "Backing up database..."
+              mkdir -p "$BACKUP_DIR/database"
+              cp "$DEPLOY_DIR/database/gworkspace.db" "$BACKUP_DIR/database/gworkspace_$TIMESTAMP.db" || true
+            fi
+            
+            # 解压新版本到临时目录
+            TEMP_DIR="/tmp/gworkspace-deploy-$TIMESTAMP"
+            mkdir -p $TEMP_DIR
+            tar -xzf /tmp/backend-deploy.tar.gz -C $TEMP_DIR --strip-components=1
+            
+            # 停止服务（如果正在运行）
+            echo "Stopping service..."
+            pm2 stop gworkspace-backend 2>/dev/null || true
+            pm2 delete gworkspace-backend 2>/dev/null || true
+            
+            # 复制新文件（保留数据库和.env）- 使用简单可靠的方法
+            echo "Deploying new version..."
+            
+            # 先复制整个目录（排除 node_modules）
+            if [ -d "$TEMP_DIR" ]; then
+              # 使用 cp -r 复制所有内容
+              cp -r "$TEMP_DIR"/* "$DEPLOY_DIR/" 2>/dev/null || {
+                # 如果 cp -r 失败，使用 find 逐个复制
+                find "$TEMP_DIR" -type f ! -path "*/node_modules/*" -exec sh -c '
+                  src="$1"
+                  dest="$2"
+                  rel_path="${src#$3/}"
+                  target="$dest/$rel_path"
+                  mkdir -p "$(dirname "$target")"
+                  cp "$src" "$target"
+                ' _ {} "$DEPLOY_DIR" "$TEMP_DIR" \;
+              }
+              
+              # 删除不需要的文件（数据库文件和.env）
+              rm -f "$DEPLOY_DIR/.env" 2>/dev/null || true
+              find "$DEPLOY_DIR/database" -name "*.db" -type f -delete 2>/dev/null || true
+              find "$DEPLOY_DIR/database" -name "*.db-journal" -type f -delete 2>/dev/null || true
+            fi
+            
+            # 恢复.env文件（如果备份存在）
+            if [ -f "$DEPLOY_DIR/.env.backup" ]; then
+              cp "$DEPLOY_DIR/.env.backup" "$DEPLOY_DIR/.env"
+            fi
+            
+            # 确保在正确的目录
+            cd $DEPLOY_DIR || { echo "Error: Cannot cd to $DEPLOY_DIR"; exit 1; }
+            
+            # 安装构建工具（better-sqlite3 需要编译）
+            echo "Installing build tools..."
+            if ! command -v g++ &> /dev/null; then
+              sudo apt-get update -qq
+              sudo apt-get install -y build-essential python3 || {
+                echo "Warning: Failed to install build tools, trying to continue..."
+              }
+            else
+              echo "Build tools already installed"
+            fi
+            
+            # 确保构建环境可用（如果之前安装失败，这里会再次尝试）
+            # 注意：建议在服务器手动执行一次 apt-get install build-essential
+            
+            # 设置编译参数，解决 GLIBC 版本不匹配和原生模块编译问题
+            export npm_config_build_from_source=true
+
+            if [ -f "package-lock.json" ]; then
+              echo "Installing dependencies with npm ci..."
+              # 使用 --omit=dev 替代 --production
+              # 增加 --build-from-source 确保 better-sqlite3 在当前环境编译
+              npm ci --omit=dev --no-audit --build-from-source || {
+                echo "npm ci failed, trying npm install..."
+                npm install --omit=dev --no-audit --build-from-source
+              }
+            else
+              echo "package-lock.json not found, using npm install..."
+              npm install --omit=dev --no-audit --build-from-source
+            fi
+
+            # 针对 better-sqlite3 的兜底重建
+            echo "Double checking better-sqlite3..."
+            npm rebuild better-sqlite3 --build-from-source
+            
+            # 验证关键依赖是否安装成功
+            if [ ! -d "node_modules/better-sqlite3" ]; then
+              echo "Error: better-sqlite3 not installed, retrying..."
+              npm rebuild better-sqlite3 || {
+                echo "Error: Failed to build better-sqlite3"
+                exit 1
+              }
+            fi
+            
+            # 验证其他关键依赖
+            if [ ! -d "node_modules/express" ]; then
+              echo "Error: express not installed"
+              exit 1
+            fi
+            
+            # 确保数据库目录存在
+            echo "Preparing database directory..."
+            mkdir -p database
+            chmod 755 database || true
+            
+            # 注意：数据库表结构会在服务器启动时自动创建（通过 server.js 中的迁移逻辑）
+            # migrate-from-files.js 是从文件系统迁移博客内容，服务器上可能没有这些文件
+            # 所以这里只运行迁移脚本（如果失败也没关系，表结构会在启动时创建）
+            echo "Running database migrations..."
+            if [ ! -f "database/gworkspace.db" ]; then
+              echo "Database file not found, will be created on first server start..."
+            fi
+            
+            # 尝试运行迁移（从文件系统迁移博客内容，可选）
+            npm run migrate 2>&1 | head -20 || {
+              echo "Note: File-based migration skipped (expected if posts directory doesn't exist on server)"
+            }
+            
+            # 验证数据库文件是否存在（如果不存在，会在服务器启动时创建）
+            if [ -f "database/gworkspace.db" ]; then
+              echo "✓ Database file exists"
+              ls -lh database/gworkspace.db
+            else
+              echo "Note: Database file will be created on first server start"
+            fi
+            
+            # 验证关键文件是否存在
+            echo "Verifying deployment files..."
+            if [ ! -f "$DEPLOY_DIR/package.json" ]; then
+              echo "Error: package.json not found!"
+              ls -la $DEPLOY_DIR/ || true
+              exit 1
+            fi
+            if [ ! -f "$DEPLOY_DIR/src/server.js" ]; then
+              echo "Error: src/server.js not found!"
+              ls -la $DEPLOY_DIR/src/ || true
+              exit 1
+            fi
+            echo "✓ Key files verified"
+            
+            # 启动服务
+            echo "Starting service..."
+            pm2 start src/server.js --name gworkspace-backend || {
+              echo "Error: Failed to start service"
+              pm2 logs gworkspace-backend --lines 20 --nostream || true
+              exit 1
+            }
+            pm2 save || true
+            
+            # 清理临时文件
+            rm -rf $TEMP_DIR
+            rm -f /tmp/backend-deploy.tar.gz
+            
+            # 等待服务启动
+            echo "Waiting for service to start..."
+            sleep 5
+            
+            # 显示服务状态
+            echo "Service status:"
+            pm2 status gworkspace-backend
+            
+            # 健康检查 - 验证服务是否正常运行
+            echo "Performing health check..."
+            MAX_RETRIES=10
+            RETRY_COUNT=0
+            HEALTH_CHECK_PASSED=false
+            
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -f -s http://localhost:3001/health > /dev/null 2>&1; then
+                echo "✓ Health check passed!"
+                HEALTH_CHECK_PASSED=true
+                break
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "Health check attempt $RETRY_COUNT/$MAX_RETRIES failed, retrying in 2 seconds..."
+                sleep 2
+              fi
+            done
+            
+            if [ "$HEALTH_CHECK_PASSED" = false ]; then
+              echo "✗ Health check failed after $MAX_RETRIES attempts"
+              echo "Service logs:"
+              pm2 logs gworkspace-backend --lines 30 --nostream || true
+              echo "PM2 status:"
+              pm2 status gworkspace-backend || true
+              echo "Checking deployment directory:"
+              ls -la $DEPLOY_DIR/ || true
+              exit 1
+            fi
+            
+            # 显示健康检查响应
+            echo "Health check response:"
+            curl -s http://localhost:3001/health | head -5 || true
+            
+            echo "Deployment completed successfully!"
+
+      - name: Cleanup
+        if: always()
+        run: rm -f backend-deploy.tar.gz

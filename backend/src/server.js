@@ -32,7 +32,36 @@ const PORT = process.env.PORT || 3001
 
 // 中间件配置
 app.use(helmet()) // 安全头
-app.use(cors()) // 跨域支持
+
+// CORS 配置 - 支持环境变量配置允许的源
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+  : (process.env.NODE_ENV === 'production' 
+      ? ['https://gworkspace.xyz', 'https://www.gworkspace.xyz']
+      : ['*'])
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // 允许无源请求（如移动应用、Postman等）
+    if (!origin) return callback(null, true)
+    
+    // 开发环境允许所有来源
+    if (process.env.NODE_ENV !== 'production' || allowedOrigins.includes('*')) {
+      return callback(null, true)
+    }
+    
+    // 生产环境检查是否在允许列表中
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true)
+    }
+    
+    callback(new Error('Not allowed by CORS'))
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}))
+
 app.use(morgan('dev')) // 请求日志
 app.use(express.json()) // JSON解析
 app.use(express.urlencoded({ extended: true })) // URL编码解析

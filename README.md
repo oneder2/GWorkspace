@@ -489,6 +489,27 @@ VITE_API_URL=http://localhost:3001/api
    
    参考 [部署文档](./docs/DEPLOYMENT.md) 中的 Nginx 配置示例。
 
+### 8. 自动部署（GitHub Actions）
+
+项目已配置 GitHub Actions 实现自动部署：
+
+- **前端**：自动部署到 Vercel
+- **后端**：自动部署到自建服务器
+
+详细配置说明请参考：
+
+📖 [GitHub Actions 部署配置指南](./docs/GITHUB_ACTIONS_SETUP.md)
+
+**快速配置步骤**：
+
+1. **前端（Vercel）**：
+   - 在 Vercel 上连接 GitHub 仓库（自动部署）
+   - 在 Vercel 项目设置中添加环境变量 `VITE_API_URL`
+
+2. **后端（服务器）**：
+   - 在 GitHub 仓库设置 Secrets：`SERVER_HOST`, `SERVER_USER`, `SSH_PRIVATE_KEY`
+   - 推送代码到 `main` 分支，后端会自动部署（当 `backend/` 目录有变更时）
+
 ## 更新日志
 
 ### v2.1.0 (2025-01-XX)
