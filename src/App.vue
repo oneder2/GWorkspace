@@ -7,10 +7,11 @@
     <!-- 全局背景图 -->
     <div 
       class="fixed inset-0 z-0 bg-cover bg-center transition-all duration-1000 transform scale-105" 
-      :style="{ backgroundImage: `url('https://images.unsplash.com/photo-1497250681960-ef046c08a56e?q=80&w=2574&auto=format&fit=crop')` }"
+      :style="{ backgroundImage: `url('/backgrounds/default.jpg')` }"
     >
-      <!-- 遮罩层，让文字更清晰 - 支持暗色模式 -->
-      <div class="absolute inset-0 bg-gradient-to-br from-green-50/30 to-slate-100/40 dark:from-slate-900/60 dark:to-slate-800/70"></div>
+      <!-- 遮罩层，让文字更清晰 - 支持暗色模式，使用主题色 -->
+      <div class="absolute inset-0 bg-gradient-to-br" style="background: linear-gradient(to bottom right, color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent), color-mix(in srgb, var(--theme-primary-lighter) 40%, rgba(241, 245, 249, 0.4)));"></div>
+      <div class="absolute inset-0 dark:bg-gradient-to-br dark:opacity-60" style="background: linear-gradient(to bottom right, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.7));"></div>
     </div>
 
     <!-- 管理后台路由：使用完全独立的布局 -->
@@ -86,6 +87,9 @@
           @open-theme-customizer="showThemeCustomizer = true"
         />
 
+        <!-- 最新文章推荐栏 -->
+        <LatestArticlesBar />
+
         <!-- 内容滚动视口 - 响应式内边距 -->
         <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 scroll-smooth relative custom-scrollbar" id="main-scroll">
           <!-- 使用 router-view 渲染路由组件 -->
@@ -114,6 +118,7 @@ import { getWeatherInfo } from './utils/weather'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
 import ThemeCustomizer from './components/ThemeCustomizer.vue'
+import LatestArticlesBar from './components/LatestArticlesBar.vue'
 
 // 路由
 const route = useRoute()

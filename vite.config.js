@@ -28,19 +28,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,jpg,jpeg,webp}'],
         runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'unsplash-images',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-              }
-            }
-          },
           {
             urlPattern: /^https:\/\/.*\.wttr\.in\/.*/i,
             handler: 'NetworkFirst',

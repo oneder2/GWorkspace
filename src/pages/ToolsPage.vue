@@ -15,8 +15,36 @@
           @click="currentTool = tool.id"
           class="w-full px-5 py-4 text-left text-sm font-semibold transition-all duration-300 flex items-center gap-3 group relative"
           :class="currentTool === tool.id 
-            ? 'bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/30 dark:to-emerald-900/20 text-green-700 dark:text-green-400 shadow-md shadow-green-500/10 dark:shadow-green-500/20 border border-green-200/50 dark:border-green-700/50 rounded-2xl' 
-            : 'text-slate-600 dark:text-slate-400 hover:bg-green-50/40 dark:hover:bg-green-900/15 hover:text-green-700 dark:hover:text-green-400 hover:shadow-sm hover:border-green-200/30 dark:hover:border-green-700/20 border border-transparent rounded-xl'"
+            ? 'rounded-2xl border shadow-md' 
+            : 'text-slate-600 dark:text-slate-400 border border-transparent rounded-xl hover:shadow-sm'"
+            :style="currentTool === tool.id 
+              ? { 
+                  background: 'linear-gradient(to right, color-mix(in srgb, var(--theme-primary-lighter) 80%, transparent), color-mix(in srgb, var(--theme-primary-emerald-lighter) 80%, transparent))',
+                  color: 'var(--theme-primary-darker)',
+                  boxShadow: '0 4px 6px -1px color-mix(in srgb, var(--theme-primary) 10%, transparent)',
+                  borderColor: 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)'
+                }
+              : {
+                  '--hover-bg': 'color-mix(in srgb, var(--theme-primary-lighter) 40%, transparent)',
+                  '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 15%, transparent)',
+                  '--hover-text': 'var(--theme-primary-darker)',
+                  '--hover-text-dark': 'var(--theme-primary-dark)',
+                  '--hover-border': 'color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent)',
+                  '--hover-border-dark': 'color-mix(in srgb, var(--theme-primary) 20%, transparent)'
+                }"
+            @mouseenter="if (currentTool !== tool.id) { 
+              const el = $event.currentTarget;
+              const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+              el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)';
+              el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)';
+              el.style.borderColor = isDark ? 'var(--hover-border-dark)' : 'var(--hover-border)';
+            }"
+            @mouseleave="if (currentTool !== tool.id) { 
+              const el = $event.currentTarget;
+              el.style.backgroundColor = '';
+              el.style.color = '';
+              el.style.borderColor = '';
+            }"
         >
           <component 
             :is="tool.icon" 
@@ -29,7 +57,8 @@
           <!-- 选中指示器 -->
           <div 
             v-if="currentTool === tool.id"
-            class="absolute right-2 w-1.5 h-1.5 rounded-full bg-green-500 dark:bg-green-400"
+            class="absolute right-2 w-1.5 h-1.5 rounded-full"
+            style="background-color: var(--theme-primary);"
           ></div>
         </button>
       </div>
@@ -47,12 +76,17 @@
             <!-- 下拉按钮 -->
             <button
               @click="showToolDropdown = !showToolDropdown"
-              class="w-full px-4 py-3 sm:py-4 flex items-center justify-between text-left transition-all duration-200 hover:bg-green-50/30 dark:hover:bg-green-900/20"
+              class="w-full px-4 py-3 sm:py-4 flex items-center justify-between text-left transition-all duration-200"
+              style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
+              @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'"
+              @mouseleave="$event.currentTarget.style.backgroundColor = ''"
             >
               <div class="flex items-center gap-3 flex-1 min-w-0">
                 <component 
                   :is="currentToolData.icon" 
-                  class="w-5 h-5 shrink-0 text-green-600 dark:text-green-400"
+                  class="w-5 h-5 shrink-0"
+                  style="color: var(--theme-primary-darker);"
+                  :style="{ '--dark-color': 'var(--theme-primary-dark)' }"
                 />
                 <span class="font-semibold text-sm sm:text-base text-slate-800 dark:text-slate-200 truncate">
                   {{ currentToolData.name }}
@@ -91,23 +125,47 @@
                     v-for="tool in tools"
                     :key="tool.id"
                     @click="selectTool(tool.id)"
-                    class="w-full px-4 py-3 sm:py-3.5 flex items-center gap-3 text-left transition-all duration-200 hover:bg-green-50/50 dark:hover:bg-green-900/20"
+                    class="w-full px-4 py-3 sm:py-3.5 flex items-center gap-3 text-left transition-all duration-200"
+                    style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
+                    @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'"
+                    @mouseleave="$event.currentTarget.style.backgroundColor = ''"
                     :class="currentTool === tool.id 
-                      ? 'bg-green-50/80 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-semibold' 
-                      : 'text-slate-600 dark:text-slate-400 hover:text-green-700 dark:hover:text-green-400'"
+                      ? 'font-semibold' 
+                      : 'text-slate-600 dark:text-slate-400'"
+                    :style="currentTool === tool.id 
+                      ? { 
+                          backgroundColor: 'color-mix(in srgb, var(--theme-primary-lighter) 80%, transparent)',
+                          color: 'var(--theme-primary-darker)',
+                          '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)',
+                          '--dark-color': 'var(--theme-primary-dark)'
+                        }
+                      : {
+                          '--hover-text': 'var(--theme-primary-darker)',
+                          '--hover-text-dark': 'var(--theme-primary-dark)'
+                        }"
+                    @mouseenter="if (currentTool !== tool.id) { 
+                      const el = $event.currentTarget;
+                      const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+                      el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)';
+                    }"
+                    @mouseleave="if (currentTool !== tool.id) { 
+                      $event.currentTarget.style.color = '';
+                    }"
                   >
                     <component 
                       :is="tool.icon" 
                       class="w-5 h-5 shrink-0"
                       :class="currentTool === tool.id 
-                        ? 'text-green-600 dark:text-green-400' 
+                        ? ''"
+                        :style="currentTool === tool.id ? { color: 'var(--theme-primary-darker)', '--dark-color': 'var(--theme-primary-dark)' } : {}" 
                         : 'text-slate-500 dark:text-slate-400'"
                     />
                     <span class="text-sm sm:text-base flex-1 truncate">{{ tool.name }}</span>
                     <!-- 选中指示器 -->
                     <div 
                       v-if="currentTool === tool.id"
-                      class="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400 flex-shrink-0"
+                      class="w-2 h-2 rounded-full flex-shrink-0"
+                      style="background-color: var(--theme-primary);"
                     ></div>
                   </button>
                 </div>

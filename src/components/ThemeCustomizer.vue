@@ -28,8 +28,24 @@
             @click="selectPreset(key)"
             class="p-4 rounded-xl border-2 transition-all"
             :class="currentPreset === key 
-              ? 'border-green-500 dark:border-green-400 bg-green-50 dark:bg-green-900/20' 
-              : 'border-slate-200 dark:border-slate-700 hover:border-green-300 dark:hover:border-green-700'"
+              ? '' 
+              : 'border-slate-200 dark:border-slate-700'"
+            :style="currentPreset === key 
+              ? {
+                  borderColor: 'var(--theme-primary)',
+                  backgroundColor: 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)',
+                  '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 20%, transparent)'
+                }
+              : {
+                  '--hover-border': 'var(--theme-primary-light)',
+                  '--hover-border-dark': 'var(--theme-primary-darker)'
+                }"
+            @mouseenter="if (currentPreset !== key) {
+              $event.currentTarget.style.borderColor = document.documentElement.classList.contains('dark') ? 'var(--hover-border-dark)' : 'var(--hover-border)';
+            }"
+            @mouseleave="if (currentPreset !== key) {
+              $event.currentTarget.style.borderColor = '';
+            }"
           >
             <div class="flex items-center gap-3 mb-2">
               <div class="w-8 h-8 rounded-lg" :style="{ backgroundColor: theme.primary }"></div>

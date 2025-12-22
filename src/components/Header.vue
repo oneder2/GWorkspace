@@ -15,7 +15,8 @@
     >
       <div 
         v-if="newArticleNotification"
-        class="absolute top-full left-0 right-0 bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-600 dark:to-emerald-600 text-white px-6 py-3 shadow-lg z-50 flex items-center justify-between"
+        class="absolute top-full left-0 right-0 text-white px-6 py-3 shadow-lg z-50 flex items-center justify-between"
+        style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-emerald)); box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-primary) 30%, transparent);"
       >
         <div class="flex items-center gap-3">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 animate-pulse">
@@ -88,7 +89,11 @@
       <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight truncate">{{ currentTabName }}</h2>
       <span 
         v-if="currentTab === 'tools'" 
-        class="px-2 py-0.5 rounded-md bg-green-100/50 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-mono"
+        class="px-2 py-0.5 rounded-md text-xs font-mono"
+        style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); color: var(--theme-primary-darker);"
+        :style="{ '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)', '--dark-text': 'var(--theme-primary-light)' }"
+        @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); if (isDark) { el.style.backgroundColor = 'var(--dark-bg)'; el.style.color = 'var(--dark-text)'; }"
+        @mouseleave="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); if (isDark) { el.style.backgroundColor = ''; el.style.color = ''; }"
       >
         v2.0
       </span>
@@ -152,7 +157,10 @@
               <button
                 v-if="isAdmin"
                 @click.stop="goToAdmin"
-                class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+                class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 transition-colors"
+                style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
+                @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'"
+                @mouseleave="$event.currentTarget.style.backgroundColor = ''"
               >
                 {{ $t('auth.adminPanel') }}
               </button>

@@ -8,14 +8,18 @@
     <!-- 阅读进度条 -->
     <div 
       v-if="post"
-      class="fixed top-0 left-0 right-0 h-1 bg-green-500/20 dark:bg-green-500/30 z-50 transition-all duration-300"
+      class="fixed top-0 left-0 right-0 h-1 z-50 transition-all duration-300"
+      style="background-color: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
       :style="{ width: readingProgress + '%' }"
     ></div>
     
     <!-- 返回按钮 -->
     <button 
       @click="$router.push('/blog')"
-      class="mb-6 flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+      class="mb-6 flex items-center gap-2 text-slate-600 dark:text-slate-400 transition-colors"
+      style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
+      @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'"
+      @mouseleave="$event.currentTarget.style.color = ''"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
         <polyline points="15 18 9 12 15 6"/>
@@ -40,7 +44,9 @@
             <span 
               v-for="tag in post.tags" 
               :key="tag"
-              class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs rounded-full font-semibold"
+              class="px-2 py-0.5 text-xs rounded-full font-semibold"
+              style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 100%, transparent); color: var(--theme-primary-darker);"
+              :style="{ '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)', '--dark-color': 'var(--theme-primary-dark)' }"
             >
               #{{ tag }}
             </span>
@@ -70,7 +76,9 @@
             <span 
               v-for="tag in post.tags" 
               :key="tag"
-              class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full text-xs font-bold"
+              class="px-3 py-1 rounded-full text-xs font-bold"
+              style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 100%, transparent); color: var(--theme-primary-darker);"
+              :style="{ '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)', '--dark-color': 'var(--theme-primary-dark)' }"
             >
               #{{ tag }}
             </span>
@@ -81,7 +89,10 @@
             <div class="relative">
               <button 
                 @click="shareArticle"
-                class="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                class="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-slate-600 dark:text-slate-400 transition-colors"
+                style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-dark);"
+                @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)'"
+                @mouseleave="$event.currentTarget.style.backgroundColor = ''; $event.currentTarget.style.color = ''"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
@@ -101,10 +112,12 @@
               >
                 <div 
                   v-if="shareSuccess"
-                  class="absolute -top-12 left-1/2 -translate-x-1/2 bg-green-500 dark:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-lg z-10"
+                  class="absolute -top-12 left-1/2 -translate-x-1/2 text-white px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-lg z-10"
+                  style="background-color: var(--theme-primary);"
                 >
                   {{ $t('blog.linkCopied') }}
-                  <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-green-500 dark:border-t-green-600"></div>
+                  <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent"
+                       style="border-top-color: var(--theme-primary);"></div>
                 </div>
               </transition>
             </div>
@@ -135,7 +148,10 @@
           v-for="relatedPost in relatedPosts"
           :key="relatedPost.id"
           @click="$router.push(`/blog/${relatedPost.id}`)"
-          class="glass-card p-5 rounded-xl cursor-pointer hover:bg-green-50/50 dark:hover:bg-green-900/20 transition-all group border-l-4 border-l-transparent hover:border-l-green-500 dark:hover:border-l-green-400"
+          class="glass-card p-5 rounded-xl cursor-pointer transition-all group border-l-4 border-l-transparent"
+          style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-border: var(--theme-primary);"
+          @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; el.style.borderLeftColor = 'var(--hover-border)'"
+          @mouseleave="$event.currentTarget.style.backgroundColor = ''; $event.currentTarget.style.borderLeftColor = 'transparent'"
         >
           <div class="flex items-center gap-2 mb-2">
             <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs rounded-md font-bold uppercase">
@@ -143,7 +159,10 @@
             </span>
             <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">{{ relatedPost.date }}</span>
           </div>
-          <h4 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+          <h4 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 transition-colors"
+              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
+              @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'"
+              @mouseleave="$event.currentTarget.style.color = ''"
             {{ relatedPost.title }}
           </h4>
           <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
@@ -158,10 +177,16 @@
       <button 
         v-if="prevPost"
         @click="$router.push(`/blog/${prevPost.id}`)"
-        class="glass-card p-4 rounded-xl text-left hover:bg-green-50/50 dark:hover:bg-green-900/20 transition-colors group"
+        class="glass-card p-4 rounded-xl text-left transition-colors group"
+        style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
+        @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'"
+        @mouseleave="$event.currentTarget.style.backgroundColor = ''"
       >
         <div class="text-xs text-slate-400 dark:text-slate-500 mb-2">{{ $t('blog.prevArticle') }}</div>
-        <div class="font-bold text-slate-700 dark:text-slate-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+        <div class="font-bold text-slate-700 dark:text-slate-300 transition-colors"
+             style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
+             @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'"
+             @mouseleave="$event.currentTarget.style.color = ''"
           {{ prevPost.title }}
         </div>
       </button>
@@ -169,10 +194,16 @@
       <button 
         v-if="nextPost"
         @click="$router.push(`/blog/${nextPost.id}`)"
-        class="glass-card p-4 rounded-xl text-left hover:bg-green-50/50 dark:hover:bg-green-900/20 transition-colors group md:text-right"
+        class="glass-card p-4 rounded-xl text-left transition-colors group md:text-right"
+        style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
+        @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'"
+        @mouseleave="$event.currentTarget.style.backgroundColor = ''"
       >
         <div class="text-xs text-slate-400 dark:text-slate-500 mb-2">{{ $t('blog.nextArticle') }}</div>
-        <div class="font-bold text-slate-700 dark:text-slate-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+        <div class="font-bold text-slate-700 dark:text-slate-300 transition-colors"
+             style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
+             @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'"
+             @mouseleave="$event.currentTarget.style.color = ''"
           {{ nextPost.title }}
         </div>
       </button>
@@ -183,7 +214,10 @@
       <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4">{{ $t('blog.notFound') }}</h2>
       <button 
         @click="$router.push('/blog')"
-        class="px-6 py-3 bg-green-500 dark:bg-green-600 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors"
+        class="px-6 py-3 text-white rounded-lg transition-colors"
+        style="background-color: var(--theme-primary);"
+        @mouseenter="$event.currentTarget.style.backgroundColor = 'var(--theme-primary-darker)'"
+        @mouseleave="$event.currentTarget.style.backgroundColor = 'var(--theme-primary)'"
       >
         {{ $t('blog.backToList') }}
       </button>

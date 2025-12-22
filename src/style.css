@@ -10,6 +10,14 @@
 :root {
   --theme-primary: #22c55e; /* green-500 */
   --theme-primary-dark: #4ade80; /* green-400 */
+  --theme-primary-light: #86efac; /* green-300 */
+  --theme-primary-lighter: #dcfce7; /* green-100 */
+  --theme-primary-darker: #16a34a; /* green-600 */
+  --theme-primary-darkest: #15803d; /* green-700 */
+  --theme-primary-emerald: #10b981; /* emerald-500 */
+  --theme-primary-emerald-dark: #059669; /* emerald-600 */
+  --theme-primary-emerald-light: #6ee7b7; /* emerald-300 */
+  --theme-primary-emerald-lighter: #d1fae5; /* emerald-100 */
 }
 
 /* 自定义滚动条样式 - 支持亮色和暗色模式 */
@@ -57,7 +65,7 @@
   }
   
   .glass-main {
-    background: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.45);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.5);
@@ -149,16 +157,16 @@
 
   /* 导航激活状态 - 使用主题颜色变量 */
   .nav-active {
-    background: rgba(240, 253, 250, 0.8) !important;
+    background: color-mix(in srgb, var(--theme-primary) 15%, transparent) !important;
     color: var(--theme-primary) !important;
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-primary) 20%, transparent);
     font-weight: 600;
   }
   
   .dark .nav-active {
-    background: rgba(34, 197, 94, 0.2) !important;
+    background: color-mix(in srgb, var(--theme-primary) 25%, transparent) !important;
     color: var(--theme-primary-dark) !important;
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-primary) 30%, transparent);
   }
 
   /* 输入框样式 */
@@ -176,12 +184,12 @@
   
   .glass-input:focus {
     background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-primary) 30%, transparent);
   }
   
   .dark .glass-input:focus {
     background: rgba(15, 23, 42, 0.8);
-    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-primary) 40%, transparent);
   }
 }
 

@@ -10,7 +10,10 @@
     <div class="xl:hidden mb-4">
       <button
         @click="showMobileFilters = !showMobileFilters"
-        class="w-full glass-card p-3 rounded-xl flex items-center justify-between hover:bg-green-50/50 dark:hover:bg-green-900/20 transition-colors"
+        class="w-full glass-card p-3 rounded-xl flex items-center justify-between transition-colors"
+        style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
+        @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'"
+        @mouseleave="$event.currentTarget.style.backgroundColor = ''"
       >
         <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $t('blog.filters') }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-400" :class="{ 'rotate-180': showMobileFilters }">
@@ -39,7 +42,7 @@
               @click="toggleGenreFilter(genre)"
               class="px-3 py-1 rounded-md text-xs font-bold transition-all duration-200 uppercase tracking-wide"
               :class="selectedGenre === genre 
-                ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 ring-2 ring-green-500 dark:ring-green-400' 
+                ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 ring-2 ring-[var(--theme-primary)]' 
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'"
             >
               {{ genre }}
@@ -59,7 +62,7 @@
               :class="[
                 tag.color,
                 selectedTag === tag.name 
-                  ? 'ring-2 ring-green-500 dark:ring-green-400' 
+                  ? 'ring-2 ring-[var(--theme-primary)]' 
                   : 'hover:scale-105 cursor-pointer'
               ]"
             >
@@ -73,6 +76,29 @@
     <!-- 左侧标签和归档 - 放在左侧空白区域，桌面端显示 -->
     <div class="glass-card w-56 hidden xl:block shrink-0 rounded-2xl">
       <div class="sticky top-6 space-y-1.5 p-4">
+        <!-- 统计信息卡片 -->
+        <div class="mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
+          <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.statistics') }}</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('blog.totalArticles') }}</span>
+              <span class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ blogStats.totalArticles || 0 }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('blog.totalComments') }}</span>
+              <span class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ blogStats.totalComments || 0 }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('blog.totalViews') }}</span>
+              <span class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ formatNumber(blogStats.totalViews || 0) }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('blog.totalLikes') }}</span>
+              <span class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ blogStats.totalLikes || 0 }}</span>
+            </div>
+          </div>
+        </div>
+        
         <!-- Genre分类筛选 -->
         <div>
           <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.genre') }}</h3>
@@ -122,10 +148,32 @@
               v-for="archive in archives" 
               :key="archive.month"
               @click="toggleArchiveFilter(archive.month)"
-              class="hover:text-green-600 dark:hover:text-green-400 cursor-pointer flex justify-between px-2 py-1.5 rounded-lg transition-all duration-200"
+              class="cursor-pointer flex justify-between px-2 py-1.5 rounded-lg transition-all duration-200"
               :class="selectedArchive === archive.month 
-                ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-semibold' 
-                : 'text-slate-500 dark:text-slate-400 hover:bg-green-50/50 dark:hover:bg-green-900/10'"
+                ? 'font-semibold' 
+                : 'text-slate-500 dark:text-slate-400'"
+              :style="selectedArchive === archive.month 
+                ? { 
+                    backgroundColor: 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)',
+                    color: 'var(--theme-primary-darker)',
+                    '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 20%, transparent)',
+                    '--dark-color': 'var(--theme-primary-dark)'
+                  }
+                : {
+                    '--hover-bg': 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)',
+                    '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 10%, transparent)',
+                    '--hover-text': 'var(--theme-primary-darker)',
+                    '--hover-text-dark': 'var(--theme-primary-dark)'
+                  }"
+              @mouseenter="if (selectedArchive !== archive.month) { 
+                const el = $event.currentTarget;
+                el.style.backgroundColor = document.documentElement.classList.contains('dark') ? 'var(--hover-bg-dark)' : 'var(--hover-bg)';
+                el.style.color = document.documentElement.classList.contains('dark') ? 'var(--hover-text-dark)' : 'var(--hover-text)';
+              }"
+              @mouseleave="if (selectedArchive !== archive.month) { 
+                $event.currentTarget.style.backgroundColor = '';
+                $event.currentTarget.style.color = '';
+              }"
               :title="selectedArchive === archive.month ? '点击取消筛选' : '点击筛选此月份'"
             >
               {{ archive.month }} <span>({{ archive.count }})</span>
@@ -157,7 +205,9 @@
                 v-model="searchQuery"
                 type="text"
                 :placeholder="$t('blog.searchPlaceholder')"
-                class="glass-input w-full pl-10 pr-10 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/50 dark:focus:ring-green-400/50 transition-all"
+                class="glass-input w-full pl-10 pr-10 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all"
+                style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+                @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
               >
               <button 
                 v-if="searchQuery"
@@ -182,7 +232,10 @@
           v-for="post in filteredPosts" 
           :key="post.id" 
           @click="$router.push(`/blog/${post.id}`)"
-          class="glass-card p-6 rounded-2xl group cursor-pointer border-l-4 border-l-transparent hover:border-l-green-500 dark:hover:border-l-green-400 transition-all"
+          class="glass-card p-6 rounded-2xl group cursor-pointer border-l-4 border-l-transparent transition-all"
+          style="--hover-border: var(--theme-primary);"
+          @mouseenter="$event.currentTarget.style.borderLeftColor = 'var(--hover-border)'"
+          @mouseleave="$event.currentTarget.style.borderLeftColor = 'transparent'"
         >
           <div class="flex items-center gap-3 mb-3 flex-wrap">
             <!-- Genre分类 - 显示在日期前 -->
@@ -197,14 +250,19 @@
               <span 
                 v-for="tag in post.tags" 
                 :key="tag"
-                class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs rounded-full font-semibold"
+                class="px-2 py-0.5 text-xs rounded-full font-semibold"
+                style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 100%, transparent); color: var(--theme-primary-darker);"
+                :style="{ '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)', '--dark-color': 'var(--theme-primary-dark)' }"
               >
                 #{{ tag }}
               </span>
             </div>
           </div>
           <h3 
-            class="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors"
+            class="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3 transition-colors"
+            style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
+            @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'"
+            @mouseleave="$event.currentTarget.style.color = ''"
             v-html="highlightText(post.title, searchQuery)"
           ></h3>
           <p 
@@ -212,7 +270,9 @@
             v-html="highlightText(post.excerpt, searchQuery)"
           ></p>
           <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-4">
-            <div class="flex items-center text-sm font-bold text-green-600 dark:text-green-400 gap-1 group-hover:gap-2 transition-all">
+            <div class="flex items-center text-sm font-bold gap-1 group-hover:gap-2 transition-all"
+                 style="color: var(--theme-primary-darker);"
+                 :style="{ '--dark-color': 'var(--theme-primary-dark)' }">
               {{ $t('common.readArticle') }}
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -248,6 +308,12 @@
       </div>
     </div>
 
+    <!-- 右侧留言板 - 桌面端显示（2xl及以上屏幕） -->
+    <div class="hidden 2xl:block w-80 shrink-0">
+      <div class="sticky top-6">
+        <Guestbook />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -257,6 +323,7 @@ import { useRouter } from 'vue-router'
 import Fuse from 'fuse.js'
 import { useLocalStorage } from '../composables/useStorage'
 import { blogApi } from '../utils/api'
+import Guestbook from '../components/Guestbook.vue'
 
 const router = useRouter()
 const searchQuery = ref('')
@@ -271,6 +338,14 @@ const latestArticle = ref(null) // 用于推广最新文章
 // 从后端API加载数据
 const blogPosts = ref([])
 const isLoading = ref(false)
+
+// 博客统计信息
+const blogStats = ref({
+  totalArticles: 0,
+  totalComments: 0,
+  totalViews: 0,
+  totalLikes: 0
+})
 
 /**
  * 加载文章列表
@@ -293,6 +368,33 @@ const loadPosts = async () => {
   } finally {
     isLoading.value = false
   }
+}
+
+/**
+ * 加载博客统计信息
+ * 从后端API获取统计数据
+ */
+const loadBlogStats = async () => {
+  try {
+    const stats = await blogApi.getStats()
+    blogStats.value = stats || {
+      totalArticles: 0,
+      totalComments: 0,
+      totalViews: 0,
+      totalLikes: 0
+    }
+  } catch (error) {
+    console.error('Failed to load blog stats:', error)
+  }
+}
+
+/**
+ * 格式化数字（添加千位分隔符）
+ * @param {number} num - 要格式化的数字
+ * @returns {string} 格式化后的字符串
+ */
+const formatNumber = (num) => {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
 /**
@@ -338,11 +440,11 @@ const { value: favorites } = useLocalStorage('blog-favorites', [])
  * 为不同标签分配不同的颜色样式
  */
 const tagColorMap = {
-  'Tech': 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+  'Tech': '',
   'Life': 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
   'Coding': 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
   'Design': 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-  'Vue': 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
+  'Vue': '',
   'JavaScript': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
   'Frontend': 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
   'UI/UX': 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',
@@ -653,9 +755,10 @@ const recentReadPosts = computed(() => {
     .slice(0, 3) // 最多显示3篇
 })
 
-// 初始化文章列表
+// 初始化文章列表和统计信息
 onMounted(() => {
   loadPosts()
+  loadBlogStats()
 })
 </script>
 

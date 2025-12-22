@@ -57,13 +57,90 @@ export function useCustomTheme() {
   })
 
   /**
+   * 从主色生成完整的主题色系
+   * @param {string} primary - 主色（如 #22c55e）
+   * @returns {object} 完整的主题色对象
+   */
+  const generateThemeColors = (primary) => {
+    // 将十六进制颜色转换为 RGB
+    const hexToRgb = (hex) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null
+    }
+
+    // RGB 转十六进制
+    const rgbToHex = (r, g, b) => {
+      return '#' + [r, g, b].map(x => {
+        const hex = x.toString(16)
+        return hex.length === 1 ? '0' + hex : hex
+      }).join('')
+    }
+
+    // 调整亮度
+    const adjustBrightness = (rgb, factor) => {
+      return {
+        r: Math.min(255, Math.max(0, Math.round(rgb.r * factor))),
+        g: Math.min(255, Math.max(0, Math.round(rgb.g * factor))),
+        b: Math.min(255, Math.max(0, Math.round(rgb.b * factor)))
+      }
+    }
+
+    const rgb = hexToRgb(primary)
+    if (!rgb) return { primary, primaryDark: primary }
+
+    return {
+      primary: primary,
+      primaryDark: rgbToHex(...Object.values(adjustBrightness(rgb, 1.15))), // 更亮
+      primaryLight: rgbToHex(...Object.values(adjustBrightness(rgb, 1.4))), // 更亮
+      primaryLighter: rgbToHex(...Object.values(adjustBrightness(rgb, 1.8))), // 最亮
+      primaryDarker: rgbToHex(...Object.values(adjustBrightness(rgb, 0.85))), // 更暗
+      primaryDarkest: rgbToHex(...Object.values(adjustBrightness(rgb, 0.7))), // 最暗
+      // Emerald 变体（稍微偏蓝）
+      primaryEmerald: rgbToHex(
+        Math.min(255, rgb.r - 10),
+        Math.min(255, rgb.g + 5),
+        Math.min(255, rgb.b - 5)
+      ),
+      primaryEmeraldDark: rgbToHex(
+        Math.min(255, rgb.r - 15),
+        Math.min(255, rgb.g),
+        Math.min(255, rgb.b - 10)
+      ),
+      primaryEmeraldLight: rgbToHex(
+        Math.min(255, rgb.r + 20),
+        Math.min(255, rgb.g + 30),
+        Math.min(255, rgb.b + 10)
+      ),
+      primaryEmeraldLighter: rgbToHex(
+        Math.min(255, rgb.r + 50),
+        Math.min(255, rgb.g + 80),
+        Math.min(255, rgb.b + 40)
+      )
+    }
+  }
+
+  /**
    * 应用主题颜色
-   * @param {object} colors - 颜色对象 { primary, primaryDark }
+   * @param {object} colors - 颜色对象 { primary, primaryDark } 或完整色系
    */
   const applyTheme = (colors) => {
     const root = document.documentElement
-    root.style.setProperty('--theme-primary', colors.primary)
-    root.style.setProperty('--theme-primary-dark', colors.primaryDark)
+    const themeColors = colors.primaryLight ? colors : generateThemeColors(colors.primary)
+    
+    root.style.setProperty('--theme-primary', themeColors.primary)
+    root.style.setProperty('--theme-primary-dark', themeColors.primaryDark || colors.primaryDark)
+    root.style.setProperty('--theme-primary-light', themeColors.primaryLight)
+    root.style.setProperty('--theme-primary-lighter', themeColors.primaryLighter)
+    root.style.setProperty('--theme-primary-darker', themeColors.primaryDarker)
+    root.style.setProperty('--theme-primary-darkest', themeColors.primaryDarkest)
+    root.style.setProperty('--theme-primary-emerald', themeColors.primaryEmerald)
+    root.style.setProperty('--theme-primary-emerald-dark', themeColors.primaryEmeraldDark)
+    root.style.setProperty('--theme-primary-emerald-light', themeColors.primaryEmeraldLight)
+    root.style.setProperty('--theme-primary-emerald-lighter', themeColors.primaryEmeraldLighter)
   }
 
   /**

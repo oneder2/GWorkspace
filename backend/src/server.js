@@ -20,6 +20,7 @@ import commentsRoutes from './routes/comments.js'
 import analyticsRoutes from './routes/analytics.js'
 import authRoutes from './routes/auth.js'
 import adminRoutes from './routes/admin.js'
+import guestbookRoutes from './routes/guestbook.js'
 
 // 加载环境变量
 dotenv.config()
@@ -72,7 +73,8 @@ const db = getDatabase()
 // 执行数据库迁移
 const migrationFiles = [
   '001_initial_schema.sql',
-  '002_user_system.sql'
+  '002_user_system.sql',
+  '003_guestbook.sql'
 ]
 
 try {
@@ -137,6 +139,7 @@ app.use('/api/blogs', commentsRoutes) // 博客相关的评论路由
 app.use('/api/comments', commentsRoutes) // 评论管理路由
 app.use('/api/analytics', analyticsRoutes)
 app.use('/api/admin', adminRoutes) // 管理后台路由
+app.use('/api/guestbook', guestbookRoutes) // 留言板路由
 
 // 健康检查端点
 app.get('/health', (req, res) => {
@@ -156,7 +159,8 @@ app.get('/', (req, res) => {
       blogs: '/api/blogs',
       likes: '/api/blogs/:id/likes',
       comments: '/api/blogs/:id/comments',
-      analytics: '/api/analytics'
+      analytics: '/api/analytics',
+      guestbook: '/api/guestbook'
     }
   })
 })

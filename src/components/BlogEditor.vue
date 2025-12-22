@@ -97,7 +97,9 @@
               <span 
                 v-for="(tag, index) in formData.tags" 
                 :key="index"
-                class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full text-sm font-semibold flex items-center gap-2"
+                class="px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2"
+                style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 100%, transparent); color: var(--theme-primary-darker);"
+                :style="{ '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)', '--dark-text': 'var(--theme-primary-dark)' }"
               >
                 #{{ tag }}
                 <button 
@@ -121,7 +123,10 @@
               />
               <button 
                 @click="addTag"
-                class="px-4 py-2 bg-green-500 dark:bg-green-600 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors"
+                class="px-4 py-2 text-white rounded-lg transition-colors"
+                style="background-color: var(--theme-primary);"
+                @mouseenter="$event.currentTarget.style.backgroundColor = 'var(--theme-primary-darker)'"
+                @mouseleave="$event.currentTarget.style.backgroundColor = 'var(--theme-primary)'"
               >
                 {{ $t('blog.addTag') }}
               </button>
@@ -139,7 +144,8 @@
                 <button
                   @click="viewMode = 'split'"
                   :class="viewMode === 'split' 
-                    ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm' 
+                    ? 'bg-white dark:bg-slate-700 shadow-sm'
+                    :style="viewMode === 'split' ? { color: 'var(--theme-primary-darker)', '--dark-color': 'var(--theme-primary-dark)' } : {}" 
                     : 'text-slate-600 dark:text-slate-400'"
                   class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
                   :title="$t('blog.viewSplit')"
@@ -149,7 +155,8 @@
                 <button
                   @click="viewMode = 'editor'"
                   :class="viewMode === 'editor' 
-                    ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm' 
+                    ? 'bg-white dark:bg-slate-700 shadow-sm'
+                    :style="viewMode === 'split' ? { color: 'var(--theme-primary-darker)', '--dark-color': 'var(--theme-primary-dark)' } : {}" 
                     : 'text-slate-600 dark:text-slate-400'"
                   class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
                   :title="$t('blog.viewEditor')"
@@ -159,7 +166,8 @@
                 <button
                   @click="viewMode = 'preview'"
                   :class="viewMode === 'preview' 
-                    ? 'bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm' 
+                    ? 'bg-white dark:bg-slate-700 shadow-sm'
+                    :style="viewMode === 'split' ? { color: 'var(--theme-primary-darker)', '--dark-color': 'var(--theme-primary-dark)' } : {}" 
                     : 'text-slate-600 dark:text-slate-400'"
                   class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
                   :title="$t('blog.viewPreview')"
@@ -191,7 +199,7 @@
             <div class="flex flex-col">
               <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{{ $t('tools.preview') }}</label>
               <div 
-                class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none"
+                class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ol:list-decimal prose-li:ml-6"
                 v-html="previewContent"
               ></div>
             </div>
@@ -209,7 +217,7 @@
           <!-- 纯预览视图 -->
           <div v-else-if="viewMode === 'preview'" class="flex-1" style="min-height: 600px;">
             <div 
-              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none"
+              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ol:list-decimal prose-li:ml-6"
               v-html="previewContent"
             ></div>
           </div>
@@ -248,7 +256,10 @@
           <button 
             @click="handleSubmit"
             :disabled="isSubmitting"
-            class="px-6 py-2 bg-green-500 dark:bg-green-600 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            class="px-6 py-2 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            style="background-color: var(--theme-primary);"
+            @mouseenter="!isSubmitting && ($event.currentTarget.style.backgroundColor = 'var(--theme-primary-darker)')"
+            @mouseleave="!isSubmitting && ($event.currentTarget.style.backgroundColor = 'var(--theme-primary)')"
           >
             <svg 
               v-if="isSubmitting"
@@ -309,13 +320,38 @@ const emit = defineEmits(['close', 'success'])
 
 const { t } = useI18n()
 
-// 配置 marked
+// 配置 marked - 启用 GFM 支持（包括表格、任务列表等）
 marked.setOptions({
   breaks: true,
   gfm: true,
   headerIds: true,
-  mangle: false
+  mangle: false,
+  pedantic: false,
+  sanitize: false,
+  smartLists: true,
+  smartypants: false
 })
+
+// 配置代码块渲染器（添加代码高亮类）
+const renderer = new marked.Renderer()
+renderer.code = function(code, language) {
+  const lang = language || 'text'
+  return `<pre class="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 overflow-x-auto"><code class="language-${lang}">${code}</code></pre>`
+}
+renderer.table = function(header, body) {
+  return `<div class="overflow-x-auto my-4">
+    <table class="min-w-full border-collapse border border-slate-300 dark:border-slate-600">
+      <thead class="bg-slate-100 dark:bg-slate-800">${header}</thead>
+      <tbody>${body}</tbody>
+    </table>
+  </div>`
+}
+renderer.tablecell = function(content, flags) {
+  const tag = flags.header ? 'th' : 'td'
+  const align = flags.align ? ` style="text-align: ${flags.align}"` : ''
+  return `<${tag}${align} class="border border-slate-300 dark:border-slate-600 px-4 py-2">${content}</${tag}>`
+}
+marked.setOptions({ renderer })
 
 /**
  * 表单数据
@@ -501,16 +537,43 @@ const handleSubmit = async () => {
   errors.value = []
 
   try {
-    // 准备数据
-    const slug = formData.value.slug || generateSlug(formData.value.title)
+    // 准备数据 - 确保所有必需字段都有值并去除空白
+    const slug = (formData.value.slug || generateSlug(formData.value.title)).trim()
     const publishedAt = formData.value.date ? `${formData.value.date}T00:00:00.000Z` : null
 
+    // 再次验证所有必需字段（双重检查）
+    if (!formData.value.title?.trim()) {
+      errors.value.push(t('blog.titleRequired') || 'Title is required')
+      isSubmitting.value = false
+      return
+    }
+    if (!formData.value.genre?.trim()) {
+      errors.value.push(t('blog.genreRequired') || 'Genre is required')
+      isSubmitting.value = false
+      return
+    }
+    if (!formData.value.content?.trim()) {
+      errors.value.push(t('blog.contentRequired') || 'Content is required')
+      isSubmitting.value = false
+      return
+    }
+    if (!formData.value.excerpt?.trim()) {
+      errors.value.push(t('blog.excerptRequired') || 'Excerpt is required')
+      isSubmitting.value = false
+      return
+    }
+    if (!Array.isArray(formData.value.tags) || formData.value.tags.length === 0) {
+      errors.value.push(t('blog.tagsRequired') || 'At least one tag is required')
+      isSubmitting.value = false
+      return
+    }
+
     const articleData = {
-      title: formData.value.title,
+      title: formData.value.title.trim(),
       slug: slug,
-      genre: formData.value.genre,
-      content: formData.value.content,
-      excerpt: formData.value.excerpt,
+      genre: formData.value.genre.trim(),
+      content: formData.value.content.trim(),
+      excerpt: formData.value.excerpt.trim(),
       tags: formData.value.tags,
       status: 'published',
       published_at: publishedAt

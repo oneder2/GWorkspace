@@ -113,7 +113,13 @@ export const blogApi = {
    */
   incrementViews: (id) => request(`/blogs/${id}/views`, {
     method: 'POST'
-  })
+  }),
+
+  /**
+   * 获取博客统计信息
+   * @returns {Promise<Object>}
+   */
+  getStats: () => request('/blogs/stats')
 }
 
 /**
@@ -293,6 +299,68 @@ export const authApi = {
   refresh: () => request('/auth/refresh', {
     method: 'POST'
   })
+}
+
+/**
+ * 留言板API
+ */
+export const guestbookApi = {
+  /**
+   * 获取留言列表
+   * @param {Object} params - 查询参数
+   * @returns {Promise<Array>}
+   */
+  getList: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/guestbook${queryString ? `?${queryString}` : ''}`)
+  },
+
+  /**
+   * 根据ID获取留言
+   * @param {number} id - 留言ID
+   * @returns {Promise<Object>}
+   */
+  getById: (id) => request(`/guestbook/${id}`),
+
+  /**
+   * 创建新留言
+   * @param {Object} data - 留言数据
+   * @returns {Promise<Object>}
+   */
+  create: (data) => request('/guestbook', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
+  /**
+   * 更新留言
+   * @param {number} id - 留言ID
+   * @param {Object} data - 更新数据
+   * @returns {Promise<Object>}
+   */
+  update: (id, data) => request(`/guestbook/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+
+  /**
+   * 删除留言
+   * @param {number} id - 留言ID
+   * @returns {Promise<Object>}
+   */
+  delete: (id) => request(`/guestbook/${id}`, {
+    method: 'DELETE'
+  }),
+
+  /**
+   * 获取留言总数
+   * @param {Object} params - 查询参数
+   * @returns {Promise<Object>}
+   */
+  getCount: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/guestbook/stats/count${queryString ? `?${queryString}` : ''}`)
+  }
 }
 
 /**

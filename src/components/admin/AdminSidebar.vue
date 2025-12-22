@@ -43,8 +43,30 @@
         :to="item.path"
         class="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 group"
         :class="isActive(item.path)
-          ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 font-semibold'
-          : 'text-slate-600 dark:text-slate-400 hover:bg-green-50/50 dark:hover:bg-green-900/10 hover:text-green-600 dark:hover:text-green-400'"
+          ? 'font-semibold' 
+          : 'text-slate-600 dark:text-slate-400'"
+        :style="isActive(item.path)
+          ? {
+              backgroundColor: 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)',
+              color: 'var(--theme-primary-darker)',
+              '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 20%, transparent)',
+              '--dark-color': 'var(--theme-primary-dark)'
+            }
+          : {
+              '--hover-bg': 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)',
+              '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 10%, transparent)',
+              '--hover-text': 'var(--theme-primary-darker)',
+              '--hover-text-dark': 'var(--theme-primary-dark)'
+            }"
+        @mouseenter="if (!isActive(item.path)) {
+          const el = $event.currentTarget;
+          el.style.backgroundColor = document.documentElement.classList.contains('dark') ? 'var(--hover-bg-dark)' : 'var(--hover-bg)';
+          el.style.color = document.documentElement.classList.contains('dark') ? 'var(--hover-text-dark)' : 'var(--hover-text)';
+        }"
+        @mouseleave="if (!isActive(item.path)) {
+          $event.currentTarget.style.backgroundColor = '';
+          $event.currentTarget.style.color = '';
+        }"
         :title="collapsed ? item.name : ''"
       >
         <span v-html="item.icon" class="w-4 sm:w-5 h-4 sm:h-5 shrink-0"></span>

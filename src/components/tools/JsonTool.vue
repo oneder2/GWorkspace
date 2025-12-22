@@ -9,7 +9,10 @@
       <div class="flex gap-2">
         <button 
           @click="formatJson" 
-          class="px-4 py-1.5 bg-green-500 dark:bg-green-600 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-700 text-sm font-medium shadow-md shadow-green-500/20 flex items-center gap-2"
+          class="px-4 py-1.5 text-white rounded-lg text-sm font-medium shadow-md flex items-center gap-2 transition-colors"
+          style="background-color: var(--theme-primary); box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--theme-primary) 20%, transparent), 0 2px 4px -1px color-mix(in srgb, var(--theme-primary) 30%, transparent);"
+          @mouseenter="$event.currentTarget.style.backgroundColor = 'var(--theme-primary-darker)'"
+          @mouseleave="$event.currentTarget.style.backgroundColor = 'var(--theme-primary)'"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -40,7 +43,10 @@
     <textarea 
       v-model="jsonInput" 
       placeholder="Paste JSON here..." 
-      class="flex-1 p-4 glass-input rounded-xl focus:border-green-500 dark:focus:border-green-400 outline-none text-sm font-mono resize-none shadow-inner leading-relaxed"
+      class="flex-1 p-4 glass-input rounded-xl outline-none text-sm font-mono resize-none shadow-inner leading-relaxed"
+      style="--focus-border: var(--theme-primary);"
+      @focus="$event.currentTarget.style.borderColor = 'var(--focus-border)'"
+      @blur="$event.currentTarget.style.borderColor = ''"
     ></textarea>
   </div>
 </template>

@@ -15,7 +15,10 @@
       <div class="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
         <button
           @click="$router.push('/blog')"
-          class="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+          class="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 transition-colors"
+          style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
+          @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'"
+          @mouseleave="$event.currentTarget.style.color = ''"
         >
           {{ $t('admin.backToBlog') }}
         </button>

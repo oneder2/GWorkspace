@@ -82,7 +82,10 @@
         </button>
         <button 
           @click="calcEqual" 
-          class="row-span-2 h-[7.5rem] rounded-xl bg-gradient-to-b from-green-500 to-green-600 dark:from-green-500 dark:to-green-600 text-white font-bold hover:from-green-400 hover:to-green-500 dark:hover:from-green-400 dark:hover:to-green-500 shadow-lg shadow-green-500/20 dark:shadow-green-500/30 text-xl border border-green-400/20 dark:border-green-400/30"
+          class="row-span-2 h-[7.5rem] rounded-xl text-white font-bold shadow-lg text-xl border transition-all"
+          style="background: linear-gradient(to bottom, var(--theme-primary), var(--theme-primary-darker)); box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--theme-primary) 20%, transparent), 0 4px 6px -2px color-mix(in srgb, var(--theme-primary) 30%, transparent); border-color: color-mix(in srgb, var(--theme-primary-light) 20%, transparent);"
+          @mouseenter="$event.currentTarget.style.background = 'linear-gradient(to bottom, var(--theme-primary-light), var(--theme-primary))'"
+          @mouseleave="$event.currentTarget.style.background = 'linear-gradient(to bottom, var(--theme-primary), var(--theme-primary-darker))'"
         >
           =
         </button>
@@ -135,15 +138,137 @@ const calcDelete = () => {
 }
 
 /**
+ * 安全的数学表达式计算
+ * 手动解析表达式，只支持基本的四则运算，完全避免eval和Function
+ * @param {string} expression - 数学表达式字符串
+ * @returns {number} 计算结果
+ */
+const safeCalculate = (expression) => {
+  try {
+    // 将显示的操作符转换为标准操作符
+    let expr = expression.replace(/×/g, '*').replace(/÷/g, '/')
+    
+    // 移除所有空格
+    expr = expr.replace(/\s/g, '')
+    
+    // 验证表达式只包含数字、运算符和小数点
+    if (!/^[0-9+\-*/.]+$/.test(expr)) {
+      throw new Error('Invalid characters')
+    }
+    
+    // 使用正则表达式匹配数字（包括小数）和运算符
+    // 处理负数开头的情况
+    const tokens = []
+    let i = 0
+    while (i < expr.length) {
+      if (expr[i] >= '0' && expr[i] <= '9' || expr[i] === '.') {
+        // 匹配数字（包括小数）
+        let num = ''
+        while (i < expr.length && (expr[i] >= '0' && expr[i] <= '9' || expr[i] === '.')) {
+          num += expr[i]
+          i++
+        }
+        tokens.push(parseFloat(num))
+      } else if (expr[i] === '+' || expr[i] === '-' || expr[i] === '*' || expr[i] === '/') {
+        tokens.push(expr[i])
+        i++
+      } else {
+        i++
+      }
+    }
+    
+    if (tokens.length === 0) {
+      throw new Error('Invalid expression')
+    }
+    
+    // 处理负数开头的情况
+    if (tokens[0] === '-' && tokens.length > 1) {
+      tokens[1] = -tokens[1]
+      tokens.shift()
+    }
+    
+    // 先处理乘除（从左到右）
+    const processMulDiv = (tokens) => {
+      const result = []
+      let i = 0
+      while (i < tokens.length) {
+        if (typeof tokens[i] === 'number') {
+          result.push(tokens[i])
+          i++
+        } else if (tokens[i] === '*' || tokens[i] === '/') {
+          const op = tokens[i]
+          const prev = result.pop()
+          i++
+          const next = tokens[i]
+          if (typeof next !== 'number') {
+            throw new Error('Invalid expression')
+          }
+          if (op === '*') {
+            result.push(prev * next)
+          } else {
+            if (next === 0) throw new Error('Division by zero')
+            result.push(prev / next)
+          }
+          i++
+        } else {
+          result.push(tokens[i])
+          i++
+        }
+      }
+      return result
+    }
+    
+    // 处理加减（从左到右）
+    const processAddSub = (tokens) => {
+      let result = tokens[0]
+      if (typeof result !== 'number') {
+        throw new Error('Invalid expression')
+      }
+      for (let i = 1; i < tokens.length; i += 2) {
+        const op = tokens[i]
+        const num = tokens[i + 1]
+        if (typeof num !== 'number') {
+          throw new Error('Invalid expression')
+        }
+        if (op === '+') {
+          result += num
+        } else if (op === '-') {
+          result -= num
+        } else {
+          throw new Error('Invalid operator')
+        }
+      }
+      return result
+    }
+    
+    // 先处理乘除，再处理加减
+    const afterMulDiv = processMulDiv(tokens)
+    return processAddSub(afterMulDiv)
+  } catch (e) {
+    throw new Error('Invalid expression')
+  }
+}
+
+/**
  * 计算结果
- * 注意：使用eval存在安全风险，生产环境应使用更安全的表达式解析器
- * TODO: 替换为安全的数学表达式解析库
+ * 使用安全的数学表达式计算函数，完全避免eval
  */
 const calcEqual = () => {
   try {
-    const res = eval(calcDisplay.value).toString()
+    const res = safeCalculate(calcDisplay.value)
+    
+    // 处理结果，保留合理的小数位数
+    let result = res.toString()
+    if (result.includes('.')) {
+      // 限制小数位数为10位，避免过长
+      const parts = result.split('.')
+      if (parts[1] && parts[1].length > 10) {
+        result = res.toFixed(10).replace(/\.?0+$/, '')
+      }
+    }
+    
     calcHistory.value = calcDisplay.value + ' ='
-    calcDisplay.value = res
+    calcDisplay.value = result
   } catch (e) {
     calcDisplay.value = 'Error'
     setTimeout(() => calcDisplay.value = '0', 1000)
