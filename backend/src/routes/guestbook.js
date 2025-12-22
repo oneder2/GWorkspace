@@ -5,6 +5,8 @@
 
 import express from 'express'
 import { Guestbook } from '../models/Guestbook.js'
+import { authenticate } from '../middleware/auth.js'
+import { containsSensitiveWords, filterSensitiveWords } from '../utils/contentFilter.js'
 
 const router = express.Router()
 
@@ -47,29 +49,40 @@ router.get('/', (req, res) => {
 /**
  * 创建新留言
  * POST /api/guestbook
+ * 需要登录认证，自动关联用户信息
  */
-router.post('/', (req, res) => {
+router.post('/', authenticate, (req, res) => {
   try {
-    const {
-      author_name,
-      author_email,
-      content
-    } = req.body
+    const { content } = req.body
 
     // 基础验证
     if (!content || !content.trim()) {
       return res.status(400).json({ error: 'Content is required' })
     }
 
+    // 敏感词检查
+    if (containsSensitiveWords(content)) {
+      return res.status(400).json({ error: 'Content contains inappropriate words' })
+    }
+
+    // 过滤敏感词（双重保护）
+    const filteredContent = filterSensitiveWords(content.trim())
+
+    // 获取用户信息（从认证中间件中获取）
+    const userId = req.user.id
+    const authorName = req.user.username
+    const authorEmail = req.user.email
+
     // 获取用户IP和User-Agent
     const userIp = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress
     const userAgent = req.headers['user-agent'] || null
 
     const message = Guestbook.create({
-      author_name: author_name || null,
-      author_email: author_email || null,
-      content,
-      status: 'approved', // 默认审核通过，可以根据需要改为pending
+      user_id: userId, // 关联用户ID
+      author_name: authorName, // 使用登录用户的用户名
+      author_email: authorEmail, // 使用登录用户的邮箱
+      content: filteredContent, // 使用过滤后的内容
+      status: 'approved', // 默认审核通过
       ip_address: userIp,
       user_agent: userAgent
     })

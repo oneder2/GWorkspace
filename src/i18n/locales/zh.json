@@ -73,6 +73,8 @@
     "guestbookSubtitle": "欢迎在此留下你的足迹",
     "guestbookPlaceholder": "写下你想说的话...",
     "guestbookSubmit": "提交留言",
+    "guestbookLoginRequired": "请先登录后再留言",
+    "guestbookPostingAs": "以",
     "guestbookAuthorPlaceholder": "你的名字（可选）",
     "guestbookEmailPlaceholder": "你的邮箱（可选）",
     "guestbookRules": "留言规范",
@@ -201,7 +203,8 @@
     "primaryDark": "暗色模式主色调",
     "applyCustom": "应用自定义主题",
     "reset": "重置",
-    "customize": "自定义主题"
+    "customize": "自定义主题",
+    "comingSoon": "主题自定义功能即将推出，敬请期待！"
   },
   "admin": {
     "title": "管理后台",

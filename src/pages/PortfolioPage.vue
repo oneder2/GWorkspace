@@ -19,13 +19,21 @@
       >
         <!-- 作品预览图 -->
         <div class="h-48 rounded-xl relative overflow-hidden bg-slate-100 dark:bg-slate-800">
-          <!-- 渐变背景模拟图片 -->
+          <!-- 实际预览图（如果存在） -->
+          <img 
+            v-if="work.image"
+            :src="work.image"
+            :alt="work.title"
+            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <!-- 渐变背景模拟图片（如果没有预览图） -->
           <div 
+            v-else
             class="absolute inset-0 bg-gradient-to-br transition-transform duration-700 group-hover:scale-110" 
             :class="work.color"
           ></div>
-          <!-- Icon 浮层 -->
-          <div class="absolute inset-0 flex items-center justify-center">
+          <!-- Icon 浮层（仅在无预览图时显示） -->
+          <div v-if="!work.image" class="absolute inset-0 flex items-center justify-center">
             <div class="w-20 h-20 bg-white/20 dark:bg-slate-900/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/30 dark:border-slate-700/30 shadow-lg group-hover:scale-110 transition-transform duration-300">
               <component :is="work.icon" class="w-10 h-10" />
             </div>

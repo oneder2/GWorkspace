@@ -115,9 +115,9 @@
             >
               {{ genre }}
             </button>
-          </div>
-        </div>
-        
+      </div>
+    </div>
+    
         <!-- 标签筛选 -->
         <div class="mt-6">
           <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.tags') }}</h3>
@@ -144,9 +144,9 @@
         <div class="mt-6">
           <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.archive') }}</h3>
           <ul class="space-y-2 text-sm">
-            <li 
-              v-for="archive in archives" 
-              :key="archive.month"
+              <li 
+                v-for="archive in archives" 
+                :key="archive.month"
               @click="toggleArchiveFilter(archive.month)"
               class="cursor-pointer flex justify-between px-2 py-1.5 rounded-lg transition-all duration-200"
               :class="selectedArchive === archive.month 
@@ -175,13 +175,13 @@
                 $event.currentTarget.style.color = '';
               }"
               :title="selectedArchive === archive.month ? '点击取消筛选' : '点击筛选此月份'"
-            >
-              {{ archive.month }} <span>({{ archive.count }})</span>
-            </li>
-          </ul>
+              >
+                {{ archive.month }} <span>({{ archive.count }})</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
 
     <!-- 分割线 - 更精致的样式 -->
     <div class="hidden xl:block w-px bg-gradient-to-b from-transparent via-slate-300 dark:via-slate-600 to-transparent shrink-0"></div>
@@ -306,15 +306,18 @@
           </div>
         </article>
       </div>
-    </div>
-
+      </div>
+      
     <!-- 右侧留言板 - 桌面端显示（2xl及以上屏幕） -->
     <div class="hidden 2xl:block w-80 shrink-0">
       <div class="sticky top-6">
-        <Guestbook />
+        <Guestbook @show-login="showAuthModal = true" />
       </div>
     </div>
   </div>
+
+  <!-- 认证弹窗 -->
+  <AuthModal v-if="showAuthModal" @close="showAuthModal = false" />
 </template>
 
 <script setup>
@@ -324,6 +327,7 @@ import Fuse from 'fuse.js'
 import { useLocalStorage } from '../composables/useStorage'
 import { blogApi } from '../utils/api'
 import Guestbook from '../components/Guestbook.vue'
+import AuthModal from '../components/AuthModal.vue'
 
 const router = useRouter()
 const searchQuery = ref('')
@@ -334,6 +338,7 @@ const showFavorites = ref(false)
 const showMobileFilters = ref(false) // 移动端筛选面板显示状态
 const sortBy = ref('date-desc')
 const latestArticle = ref(null) // 用于推广最新文章
+const showAuthModal = ref(false) // 认证弹窗显示状态
 
 // 从后端API加载数据
 const blogPosts = ref([])

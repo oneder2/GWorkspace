@@ -49,6 +49,40 @@ router.get('/', (req, res) => {
 })
 
 /**
+ * 获取博客统计信息
+ * GET /api/blogs/stats
+ * 返回文章总数、评论总数、访问量等统计信息
+ * 注意：必须在 /:id 路由之前定义，否则会被当作ID处理
+ */
+router.get('/stats', (req, res) => {
+  try {
+    const db = getDatabase()
+    
+    // 获取已发布文章总数
+    const totalArticles = db.prepare('SELECT COUNT(*) as count FROM blogs WHERE status = ?').get('published').count
+    
+    // 获取评论总数（已审核通过）
+    const totalComments = db.prepare('SELECT COUNT(*) as count FROM comments WHERE status = ?').get('approved').count
+    
+    // 获取总访问量
+    const totalViews = db.prepare('SELECT SUM(views) as total FROM blogs WHERE status = ?').get('published').total || 0
+    
+    // 获取总点赞数
+    const totalLikes = db.prepare('SELECT COUNT(*) as count FROM likes').get().count
+    
+    res.json({
+      totalArticles,
+      totalComments,
+      totalViews,
+      totalLikes
+    })
+  } catch (error) {
+    console.error('Error fetching blog stats:', error)
+    res.status(500).json({ error: 'Failed to fetch blog stats' })
+  }
+})
+
+/**
  * 获取单篇博客详情
  * GET /api/blogs/:id
  */
@@ -208,39 +242,6 @@ router.post('/:id/views', (req, res) => {
   } catch (error) {
     console.error('Error incrementing views:', error)
     res.status(500).json({ error: 'Failed to increment views' })
-  }
-})
-
-/**
- * 获取博客统计信息
- * GET /api/blogs/stats
- * 返回文章总数、评论总数、访问量等统计信息
- */
-router.get('/stats', (req, res) => {
-  try {
-    const db = getDatabase()
-    
-    // 获取已发布文章总数
-    const totalArticles = db.prepare('SELECT COUNT(*) as count FROM blogs WHERE status = ?').get('published').count
-    
-    // 获取评论总数（已审核通过）
-    const totalComments = db.prepare('SELECT COUNT(*) as count FROM comments WHERE status = ?').get('approved').count
-    
-    // 获取总访问量
-    const totalViews = db.prepare('SELECT SUM(views) as total FROM blogs WHERE status = ?').get('published').total || 0
-    
-    // 获取总点赞数
-    const totalLikes = db.prepare('SELECT COUNT(*) as count FROM likes').get().count
-    
-    res.json({
-      totalArticles,
-      totalComments,
-      totalViews,
-      totalLikes
-    })
-  } catch (error) {
-    console.error('Error fetching blog stats:', error)
-    res.status(500).json({ error: 'Failed to fetch blog stats' })
   }
 })
 

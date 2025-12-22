@@ -33,7 +33,7 @@
             @click.prevent="$router.push(`/blog/${article.id}`)"
             class="shrink-0 px-3 py-1.5 rounded-lg text-sm transition-all duration-200 whitespace-nowrap"
             style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-            @mouseenter="$event.currentTarget.style.backgroundColor = document.documentElement.classList.contains('dark') ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'"
+            @mouseenter="const el = $event.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; }"
             @mouseleave="$event.currentTarget.style.backgroundColor = ''"
             :class="{
               'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200': true

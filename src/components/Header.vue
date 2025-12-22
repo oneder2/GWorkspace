@@ -99,7 +99,54 @@
       </span>
     </div>
     
+    <!-- 最新文章推荐 - 仅在桌面端显示，当有文章时显示，移到左侧 -->
+    <div 
+      v-if="latestArticles.length > 0 && showLatestArticles"
+      class="hidden lg:flex items-center gap-2 mr-4 pr-4 border-r border-white/30 dark:border-slate-700/30"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      <div class="flex items-center gap-2 max-w-xs overflow-x-auto scrollbar-hide">
+        <a
+          v-for="article in latestArticles"
+          :key="article.id"
+          :href="`/blog/${article.id}`"
+          @click.prevent="goToArticle(article.id)"
+          class="shrink-0 px-2 py-1 rounded text-xs transition-all duration-200 whitespace-nowrap text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+          style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
+          @mouseenter="const el = $event.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; }"
+          @mouseleave="$event.currentTarget.style.backgroundColor = ''"
+        >
+          {{ article.title }}
+        </a>
+      </div>
+      <button
+        @click="showLatestArticles = false"
+        class="shrink-0 p-1 rounded hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+        :title="$t('common.close')"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 text-slate-500 dark:text-slate-400">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    
     <div class="flex items-center gap-4">
+      <!-- 位置信息 -->
+      <div 
+        v-if="weather && (weather.city || weather.country)" 
+        class="hidden md:flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 bg-white/40 dark:bg-slate-800/40 px-3 py-1.5 rounded-full border border-white/50 dark:border-slate-700/50"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <span>{{ formatLocation(weather) }}</span>
+      </div>
+      
       <!-- 天气信息 -->
       <div 
         v-if="weather" 
@@ -226,11 +273,6 @@
           <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
         </svg>
       </button>
-      
-      <!-- 时间显示 - 移动端隐藏 -->
-      <div class="hidden sm:block text-xl sm:text-2xl font-light text-slate-700 dark:text-slate-300 font-mono tracking-wider w-20 sm:w-24 text-right">
-        {{ currentTime }}
-      </div>
     </div>
 
     <!-- 认证弹窗 -->
@@ -247,6 +289,7 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
+import { blogApi } from '../utils/api'
 import AuthModal from './AuthModal.vue'
 
 const props = defineProps({
@@ -282,6 +325,10 @@ const showAuthModal = ref(false)
 const showUserMenu = ref(false)
 const userMenuContainer = ref(null)
 const userMenuButton = ref(null)
+
+// 最新文章
+const latestArticles = ref([])
+const showLatestArticles = ref(true)
 
 /**
  * 切换用户菜单
@@ -422,9 +469,50 @@ const currentTabName = computed(() => {
   return tabMap[props.currentTab] || 'GWorkspace'
 })
 
+/**
+ * 格式化位置信息
+ * @param {Object} weather - 天气信息对象
+ * @returns {string} 格式化后的位置字符串
+ */
+const formatLocation = (weather) => {
+  if (weather.city && weather.country) {
+    return `${weather.city}, ${weather.country}`
+  } else if (weather.city) {
+    return weather.city
+  } else if (weather.country) {
+    return weather.country
+  }
+  return ''
+}
+
+/**
+ * 加载最新文章
+ */
+const loadLatestArticles = async () => {
+  try {
+    const articles = await blogApi.getList({
+      status: 'published',
+      limit: 3, // 只显示3篇最新文章，避免Header过长
+      sortBy: 'published_at',
+      sortOrder: 'desc'
+    })
+    latestArticles.value = articles || []
+  } catch (error) {
+    console.error('Failed to load latest articles:', error)
+  }
+}
+
+/**
+ * 跳转到文章
+ */
+const goToArticle = (articleId) => {
+  router.push(`/blog/${articleId}`)
+}
+
 // 初始化
 onMounted(() => {
   checkNewArticles()
+  loadLatestArticles()
   // 监听新文章创建事件
   window.addEventListener('blog-article-created', handleArticleCreated)
 })
@@ -433,3 +521,13 @@ onUnmounted(() => {
   window.removeEventListener('blog-article-created', handleArticleCreated)
 })
 </script>
+
+<style scoped>
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+</style>

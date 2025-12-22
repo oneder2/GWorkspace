@@ -73,6 +73,8 @@
     "guestbookSubtitle": "Welcome to leave your footprint here",
     "guestbookPlaceholder": "Write what you want to say...",
     "guestbookSubmit": "Submit",
+    "guestbookLoginRequired": "Please login to leave a message",
+    "guestbookPostingAs": "Posting as",
     "guestbookAuthorPlaceholder": "Your name (optional)",
     "guestbookEmailPlaceholder": "Your email (optional)",
     "guestbookRules": "Rules",
@@ -193,7 +195,8 @@
     "primaryDark": "Primary Color (Dark)",
     "applyCustom": "Apply Custom Theme",
     "reset": "Reset",
-    "customize": "Customize Theme"
+    "customize": "Customize Theme",
+    "comingSoon": "Theme customization feature coming soon!"
   },
   "admin": {
     "title": "Admin Panel",

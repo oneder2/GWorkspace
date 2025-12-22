@@ -144,8 +144,7 @@
                 <button
                   @click="viewMode = 'split'"
                   :class="viewMode === 'split' 
-                    ? 'bg-white dark:bg-slate-700 shadow-sm'
-                    :style="viewMode === 'split' ? { color: 'var(--theme-primary-darker)', '--dark-color': 'var(--theme-primary-dark)' } : {}" 
+                    ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-slate-200'
                     : 'text-slate-600 dark:text-slate-400'"
                   class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
                   :title="$t('blog.viewSplit')"
@@ -155,8 +154,7 @@
                 <button
                   @click="viewMode = 'editor'"
                   :class="viewMode === 'editor' 
-                    ? 'bg-white dark:bg-slate-700 shadow-sm'
-                    :style="viewMode === 'split' ? { color: 'var(--theme-primary-darker)', '--dark-color': 'var(--theme-primary-dark)' } : {}" 
+                    ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-slate-200'
                     : 'text-slate-600 dark:text-slate-400'"
                   class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
                   :title="$t('blog.viewEditor')"
@@ -166,8 +164,7 @@
                 <button
                   @click="viewMode = 'preview'"
                   :class="viewMode === 'preview' 
-                    ? 'bg-white dark:bg-slate-700 shadow-sm'
-                    :style="viewMode === 'split' ? { color: 'var(--theme-primary-darker)', '--dark-color': 'var(--theme-primary-dark)' } : {}" 
+                    ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-slate-200'
                     : 'text-slate-600 dark:text-slate-400'"
                   class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
                   :title="$t('blog.viewPreview')"

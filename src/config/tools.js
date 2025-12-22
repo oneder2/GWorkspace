@@ -5,6 +5,11 @@
 
 export const toolsConfig = [
   { 
+    id: 'todo', 
+    nameKey: 'tools.todo', 
+    iconName: 'ClockIcon' 
+  },
+  { 
     id: 'calc', 
     nameKey: 'tools.calculator', 
     iconName: 'CalculatorIcon' 
@@ -43,10 +48,5 @@ export const toolsConfig = [
     id: 'markdown', 
     nameKey: 'tools.markdown', 
     iconName: 'FileTextIcon' 
-  },
-  { 
-    id: 'todo', 
-    nameKey: 'tools.todo', 
-    iconName: 'ClockIcon' 
   },
 ]

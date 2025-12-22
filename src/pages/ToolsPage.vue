@@ -17,13 +17,29 @@
           :class="currentTool === tool.id 
             ? 'rounded-2xl border shadow-md' 
             : 'text-slate-600 dark:text-slate-400 border border-transparent rounded-xl hover:shadow-sm'"
-            :style="currentTool === tool.id 
-              ? { 
-                  background: 'linear-gradient(to right, color-mix(in srgb, var(--theme-primary-lighter) 80%, transparent), color-mix(in srgb, var(--theme-primary-emerald-lighter) 80%, transparent))',
-                  color: 'var(--theme-primary-darker)',
-                  boxShadow: '0 4px 6px -1px color-mix(in srgb, var(--theme-primary) 10%, transparent)',
-                  borderColor: 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)'
-                }
+          :style="currentTool === tool.id 
+            ? (isThemeTransparent 
+                ? (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+                    ? {
+                        background: 'rgba(148, 163, 184, 0.3)',
+                        color: '#cbd5e1',
+                        boxShadow: '0 4px 6px -1px rgba(148, 163, 184, 0.35)',
+                        borderColor: 'rgba(148, 163, 184, 0.4)'
+                      }
+                    : {
+                        background: 'rgba(100, 116, 139, 0.2)',
+                        color: '#475569',
+                        boxShadow: '0 4px 6px -1px rgba(100, 116, 139, 0.25)',
+                        borderColor: 'rgba(100, 116, 139, 0.3)'
+                      }
+                  )
+                : {
+                    background: 'linear-gradient(to right, color-mix(in srgb, var(--theme-primary-lighter) 80%, transparent), color-mix(in srgb, var(--theme-primary-emerald-lighter) 80%, transparent))',
+                    color: 'var(--theme-primary-darker)',
+                    boxShadow: '0 4px 6px -1px color-mix(in srgb, var(--theme-primary) 10%, transparent)',
+                    borderColor: 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)'
+                  }
+              )
               : {
                   '--hover-bg': 'color-mix(in srgb, var(--theme-primary-lighter) 40%, transparent)',
                   '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 15%, transparent)',
@@ -58,7 +74,9 @@
           <div 
             v-if="currentTool === tool.id"
             class="absolute right-2 w-1.5 h-1.5 rounded-full"
-            style="background-color: var(--theme-primary);"
+                      :style="isThemeTransparent 
+                        ? { backgroundColor: '#475569' }
+                        : { backgroundColor: 'var(--theme-primary)' }"
           ></div>
         </button>
       </div>
@@ -127,45 +145,69 @@
                     @click="selectTool(tool.id)"
                     class="w-full px-4 py-3 sm:py-3.5 flex items-center gap-3 text-left transition-all duration-200"
                     style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-                    @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'"
-                    @mouseleave="$event.currentTarget.style.backgroundColor = ''"
                     :class="currentTool === tool.id 
                       ? 'font-semibold' 
                       : 'text-slate-600 dark:text-slate-400'"
                     :style="currentTool === tool.id 
-                      ? { 
-                          backgroundColor: 'color-mix(in srgb, var(--theme-primary-lighter) 80%, transparent)',
-                          color: 'var(--theme-primary-darker)',
-                          '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)',
-                          '--dark-color': 'var(--theme-primary-dark)'
-                        }
+                      ? (isThemeTransparent 
+                          ? (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+                              ? {
+                                  backgroundColor: 'rgba(148, 163, 184, 0.3)',
+                                  color: '#cbd5e1'
+                                }
+                              : {
+                                  backgroundColor: 'rgba(100, 116, 139, 0.2)',
+                                  color: '#475569'
+                                }
+                            )
+                          : {
+                              backgroundColor: 'color-mix(in srgb, var(--theme-primary-lighter) 80%, transparent)',
+                              color: 'var(--theme-primary-darker)',
+                              '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)',
+                              '--dark-color': 'var(--theme-primary-dark)'
+                            }
+                        )
                       : {
                           '--hover-text': 'var(--theme-primary-darker)',
                           '--hover-text-dark': 'var(--theme-primary-dark)'
                         }"
                     @mouseenter="if (currentTool !== tool.id) { 
                       const el = $event.currentTarget;
-                      const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
-                      el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)';
+                      if (el) {
+                        const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+                        el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)';
+                        el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)';
+                      }
                     }"
                     @mouseleave="if (currentTool !== tool.id) { 
-                      $event.currentTarget.style.color = '';
+                      const el = $event.currentTarget;
+                      if (el) {
+                        el.style.backgroundColor = '';
+                        el.style.color = '';
+                      }
                     }"
                   >
                     <component 
                       :is="tool.icon" 
                       class="w-5 h-5 shrink-0"
                       :class="currentTool === tool.id 
-                        ? ''"
-                        :style="currentTool === tool.id ? { color: 'var(--theme-primary-darker)', '--dark-color': 'var(--theme-primary-dark)' } : {}" 
+                        ? '' 
                         : 'text-slate-500 dark:text-slate-400'"
+                      :style="currentTool === tool.id 
+                        ? (isThemeTransparent 
+                            ? { color: '#475569', '--dark-color': '#cbd5e1' }
+                            : { color: 'var(--theme-primary-darker)', '--dark-color': 'var(--theme-primary-dark)' }
+                          )
+                        : {}"
                     />
                     <span class="text-sm sm:text-base flex-1 truncate">{{ tool.name }}</span>
                     <!-- 选中指示器 -->
                     <div 
                       v-if="currentTool === tool.id"
                       class="w-2 h-2 rounded-full flex-shrink-0"
-                      style="background-color: var(--theme-primary);"
+                      :style="isThemeTransparent 
+                        ? { backgroundColor: '#475569' }
+                        : { backgroundColor: 'var(--theme-primary)' }"
                     ></div>
                   </button>
                 </div>
@@ -230,8 +272,23 @@ import MarkdownTool from '../components/tools/MarkdownTool.vue'
 import TodoTool from '../components/tools/TodoTool.vue'
 
 const { t } = useI18n()
-const currentTool = ref('calc')
+const currentTool = ref('todo') // 默认工具改为 todo
 const showToolDropdown = ref(false) // 移动端下拉栏显示状态
+
+/**
+ * 检查主题色是否为透明
+ */
+const isThemeTransparent = ref(false)
+
+/**
+ * 检查主题色状态
+ */
+const checkThemeTransparent = () => {
+  if (typeof document !== 'undefined') {
+    const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim()
+    isThemeTransparent.value = themePrimary === 'transparent'
+  }
+}
 
 // 从配置文件加载工具列表，并映射图标组件和国际化名称
 const tools = computed(() => {
@@ -272,6 +329,18 @@ const handleClickOutside = (event) => {
 onMounted(() => {
   // 监听点击事件，用于关闭下拉栏
   document.addEventListener('click', handleClickOutside)
+  // 检查主题色状态
+  checkThemeTransparent()
+  // 监听主题变化
+  const observer = new MutationObserver(() => {
+    checkThemeTransparent()
+  })
+  if (typeof document !== 'undefined') {
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    })
+  }
 })
 
 onUnmounted(() => {

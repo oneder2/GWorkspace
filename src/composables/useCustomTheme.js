@@ -8,32 +8,13 @@ import { useLocalStorage } from './useStorage'
 
 /**
  * 预设主题配置
+ * 当前仅支持透明主题（无主题色）
  */
 const presetThemes = {
-  default: {
-    name: 'Default',
-    primary: '#22c55e', // green-500
-    primaryDark: '#4ade80', // green-400
-  },
-  blue: {
-    name: 'Blue',
-    primary: '#3b82f6', // blue-500
-    primaryDark: '#60a5fa', // blue-400
-  },
-  purple: {
-    name: 'Purple',
-    primary: '#a855f7', // purple-500
-    primaryDark: '#c084fc', // purple-400
-  },
-  orange: {
-    name: 'Orange',
-    primary: '#f97316', // orange-500
-    primaryDark: '#fb923c', // orange-400
-  },
-  pink: {
-    name: 'Pink',
-    primary: '#ec4899', // pink-500
-    primaryDark: '#f472b6', // pink-400
+  none: {
+    name: 'None',
+    primary: 'transparent', // 透明主题色
+    primaryDark: 'transparent',
   }
 }
 
@@ -42,84 +23,54 @@ const presetThemes = {
  * @returns {object} 主题相关的方法和状态
  */
 export function useCustomTheme() {
-  // 从存储加载自定义主题
+  // 从存储加载自定义主题（当前功能已禁用，保留接口以供未来扩展）
   const customTheme = useLocalStorage('customTheme', null)
-  const currentPreset = useLocalStorage('themePreset', 'default')
+  const currentPreset = useLocalStorage('themePreset', 'none') // 默认使用无主题色主题
 
   /**
    * 当前主题颜色
+   * 当前仅支持透明主题
    */
   const themeColors = computed(() => {
-    if (customTheme.value) {
-      return customTheme.value
-    }
-    return presetThemes[currentPreset.value] || presetThemes.default
+    // 当前禁用自定义主题功能，始终使用透明主题
+    return presetThemes.none
   })
 
   /**
    * 从主色生成完整的主题色系
-   * @param {string} primary - 主色（如 #22c55e）
+   * 当前仅支持透明主题，所有颜色都返回transparent
+   * @param {string} primary - 主色（当前仅支持transparent）
    * @returns {object} 完整的主题色对象
    */
   const generateThemeColors = (primary) => {
-    // 将十六进制颜色转换为 RGB
-    const hexToRgb = (hex) => {
-      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-      return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-      } : null
-    }
-
-    // RGB 转十六进制
-    const rgbToHex = (r, g, b) => {
-      return '#' + [r, g, b].map(x => {
-        const hex = x.toString(16)
-        return hex.length === 1 ? '0' + hex : hex
-      }).join('')
-    }
-
-    // 调整亮度
-    const adjustBrightness = (rgb, factor) => {
+    // 如果主色是transparent，所有变体都返回transparent
+    if (primary === 'transparent') {
       return {
-        r: Math.min(255, Math.max(0, Math.round(rgb.r * factor))),
-        g: Math.min(255, Math.max(0, Math.round(rgb.g * factor))),
-        b: Math.min(255, Math.max(0, Math.round(rgb.b * factor)))
+        primary: 'transparent',
+        primaryDark: 'transparent',
+        primaryLight: 'transparent',
+        primaryLighter: 'transparent',
+        primaryDarker: 'transparent',
+        primaryDarkest: 'transparent',
+        primaryEmerald: 'transparent',
+        primaryEmeraldDark: 'transparent',
+        primaryEmeraldLight: 'transparent',
+        primaryEmeraldLighter: 'transparent'
       }
     }
-
-    const rgb = hexToRgb(primary)
-    if (!rgb) return { primary, primaryDark: primary }
-
+    
+    // 保留原有逻辑以支持未来扩展（如果需要）
     return {
       primary: primary,
-      primaryDark: rgbToHex(...Object.values(adjustBrightness(rgb, 1.15))), // 更亮
-      primaryLight: rgbToHex(...Object.values(adjustBrightness(rgb, 1.4))), // 更亮
-      primaryLighter: rgbToHex(...Object.values(adjustBrightness(rgb, 1.8))), // 最亮
-      primaryDarker: rgbToHex(...Object.values(adjustBrightness(rgb, 0.85))), // 更暗
-      primaryDarkest: rgbToHex(...Object.values(adjustBrightness(rgb, 0.7))), // 最暗
-      // Emerald 变体（稍微偏蓝）
-      primaryEmerald: rgbToHex(
-        Math.min(255, rgb.r - 10),
-        Math.min(255, rgb.g + 5),
-        Math.min(255, rgb.b - 5)
-      ),
-      primaryEmeraldDark: rgbToHex(
-        Math.min(255, rgb.r - 15),
-        Math.min(255, rgb.g),
-        Math.min(255, rgb.b - 10)
-      ),
-      primaryEmeraldLight: rgbToHex(
-        Math.min(255, rgb.r + 20),
-        Math.min(255, rgb.g + 30),
-        Math.min(255, rgb.b + 10)
-      ),
-      primaryEmeraldLighter: rgbToHex(
-        Math.min(255, rgb.r + 50),
-        Math.min(255, rgb.g + 80),
-        Math.min(255, rgb.b + 40)
-      )
+      primaryDark: primary,
+      primaryLight: primary,
+      primaryLighter: primary,
+      primaryDarker: primary,
+      primaryDarkest: primary,
+      primaryEmerald: primary,
+      primaryEmeraldDark: primary,
+      primaryEmeraldLight: primary,
+      primaryEmeraldLighter: primary
     }
   }
 
@@ -145,32 +96,34 @@ export function useCustomTheme() {
 
   /**
    * 设置预设主题
-   * @param {string} preset - 预设主题名称
+   * @param {string} preset - 预设主题名称（当前仅支持'none'）
    */
   const setPresetTheme = (preset) => {
-    if (presetThemes[preset]) {
-      currentPreset.update(preset)
-      customTheme.update(null)
-      applyTheme(presetThemes[preset])
-    }
+    // 当前禁用主题切换功能，始终使用透明主题
+    currentPreset.update('none')
+    customTheme.update(null)
+    applyTheme(presetThemes.none)
   }
 
   /**
    * 设置自定义主题
+   * 当前功能已禁用，保留接口以供未来扩展
    * @param {object} colors - 颜色对象
    */
   const setCustomTheme = (colors) => {
-    customTheme.update(colors)
-    applyTheme(colors)
+    // 当前禁用自定义主题功能，始终使用透明主题
+    customTheme.update(null)
+    currentPreset.update('none')
+    applyTheme(presetThemes.none)
   }
 
   /**
-   * 重置为默认主题
+   * 重置为默认主题（透明主题）
    */
   const resetTheme = () => {
     customTheme.update(null)
-    currentPreset.update('default')
-    applyTheme(presetThemes.default)
+    currentPreset.update('none')
+    applyTheme(presetThemes.none)
   }
 
   // 初始化时应用主题

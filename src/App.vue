@@ -87,9 +87,6 @@
           @open-theme-customizer="showThemeCustomizer = true"
         />
 
-        <!-- 最新文章推荐栏 -->
-        <LatestArticlesBar />
-
         <!-- 内容滚动视口 - 响应式内边距 -->
         <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 scroll-smooth relative custom-scrollbar" id="main-scroll">
           <!-- 使用 router-view 渲染路由组件 -->
@@ -118,7 +115,6 @@ import { getWeatherInfo } from './utils/weather'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
 import ThemeCustomizer from './components/ThemeCustomizer.vue'
-import LatestArticlesBar from './components/LatestArticlesBar.vue'
 
 // 路由
 const route = useRoute()

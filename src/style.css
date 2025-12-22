@@ -7,17 +7,18 @@
 @tailwind utilities;
 
 /* CSS 变量定义 - 支持动态主题 */
+/* 默认使用透明主题（无主题色） */
 :root {
-  --theme-primary: #22c55e; /* green-500 */
-  --theme-primary-dark: #4ade80; /* green-400 */
-  --theme-primary-light: #86efac; /* green-300 */
-  --theme-primary-lighter: #dcfce7; /* green-100 */
-  --theme-primary-darker: #16a34a; /* green-600 */
-  --theme-primary-darkest: #15803d; /* green-700 */
-  --theme-primary-emerald: #10b981; /* emerald-500 */
-  --theme-primary-emerald-dark: #059669; /* emerald-600 */
-  --theme-primary-emerald-light: #6ee7b7; /* emerald-300 */
-  --theme-primary-emerald-lighter: #d1fae5; /* emerald-100 */
+  --theme-primary: transparent;
+  --theme-primary-dark: transparent;
+  --theme-primary-light: transparent;
+  --theme-primary-lighter: transparent;
+  --theme-primary-darker: transparent;
+  --theme-primary-darkest: transparent;
+  --theme-primary-emerald: transparent;
+  --theme-primary-emerald-dark: transparent;
+  --theme-primary-emerald-light: transparent;
+  --theme-primary-emerald-lighter: transparent;
 }
 
 /* 自定义滚动条样式 - 支持亮色和暗色模式 */
@@ -156,17 +157,33 @@
   }
 
   /* 导航激活状态 - 使用主题颜色变量 */
+  /* 当主题色为透明时，使用 slate 色系作为 fallback */
   .nav-active {
-    background: color-mix(in srgb, var(--theme-primary) 15%, transparent) !important;
-    color: var(--theme-primary) !important;
+    /* 使用 fallback 值，当主题色为 transparent 时使用 slate-500 */
+    background: color-mix(in srgb, var(--theme-primary) 15%, transparent);
+    color: var(--theme-primary);
     box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-primary) 20%, transparent);
     font-weight: 600;
   }
   
+  /* 当主题色为透明时的特殊处理 - 使用更深的 slate 色系以提高对比度 */
+  .nav-active.nav-active-fallback {
+    background: rgba(100, 116, 139, 0.2) !important; /* slate-500 with higher opacity */
+    color: #475569 !important; /* slate-600 - 更深的颜色以提高对比度 */
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25) !important;
+  }
+  
   .dark .nav-active {
-    background: color-mix(in srgb, var(--theme-primary) 25%, transparent) !important;
-    color: var(--theme-primary-dark) !important;
+    background: color-mix(in srgb, var(--theme-primary) 25%, transparent);
+    color: var(--theme-primary-dark);
     box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-primary) 30%, transparent);
+  }
+  
+  /* 暗色模式下，当主题色为透明时的特殊处理 - 使用更亮的颜色 */
+  .dark .nav-active.nav-active-fallback {
+    background: rgba(148, 163, 184, 0.3) !important; /* slate-400 with higher opacity */
+    color: #cbd5e1 !important; /* slate-300 - 更亮的颜色以提高对比度 */
+    box-shadow: 0 4px 12px rgba(148, 163, 184, 0.35) !important;
   }
 
   /* 输入框样式 */

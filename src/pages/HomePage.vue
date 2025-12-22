@@ -5,18 +5,6 @@
 -->
 <template>
   <div class="max-w-4xl mx-auto mt-12 flex flex-col items-center animate-fade-in">
-    <!-- 访客信息卡片 -->
-    <div v-if="visitorLocation" class="mb-8 w-full max-w-2xl">
-      <div class="glass-card p-4 rounded-2xl text-center">
-        <p class="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">
-          {{ $t('home.visitorWelcome') }}
-        </p>
-        <p class="text-sm text-slate-600 dark:text-slate-400">
-          {{ $t('home.visitorGreeting', { location: visitorLocation }) }}
-        </p>
-      </div>
-    </div>
-    
     <div class="mb-12 text-center">
       <h1 class="text-5xl font-bold text-slate-800 dark:text-slate-200 mb-4 tracking-tight drop-shadow-sm">
         {{ $t('home.title') }}
@@ -138,39 +126,13 @@
 </template>
 
 <script setup>
-import { ref, computed, markRaw, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { ref, computed, markRaw } from 'vue'
 import { quickLinksConfig } from '../config/home'
 import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
-import { getLocationByIP } from '../utils/weather'
 import GoogleIcon from '../components/icons/GoogleIcon.vue'
 import DuckIcon from '../components/icons/DuckIcon.vue'
 import QuickLinkEditor from '../components/QuickLinkEditor.vue'
-
-const { t } = useI18n()
-
-const searchEngine = ref('google')
-const searchQuery = ref('')
-const showEngineMenu = ref(false)
-const showEditor = ref(false)
-const visitorLocation = ref('')
-
-/**
- * 加载访客位置信息
- */
-const loadVisitorLocation = async () => {
-  try {
-    const location = await getLocationByIP()
-    if (location.city && location.country) {
-      visitorLocation.value = `${location.city}, ${location.country}`
-    } else if (location.country) {
-      visitorLocation.value = location.country
-    }
-  } catch (error) {
-    console.error('Failed to load visitor location:', error)
-  }
-}
 
 // 从存储加载自定义链接（使用空数组作为默认值）
 // useLocalStorage 返回 { value: ref, update, reset }
@@ -231,9 +193,4 @@ const performSearch = () => {
     : `https://duckduckgo.com/?q=${encodeURIComponent(searchQuery.value)}`
   window.open(url, '_blank')
 }
-
-// 初始化时加载访客位置
-onMounted(() => {
-  loadVisitorLocation()
-})
 </script>

@@ -15,24 +15,28 @@
 
     <!-- 留言表单 -->
     <div class="mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
-      <div class="space-y-3">
-        <div class="grid grid-cols-2 gap-3">
-          <input
-            v-model="formData.author_name"
-            type="text"
-            :placeholder="$t('blog.guestbookAuthorPlaceholder')"
-            class="glass-input px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 transition-all"
-            style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
-            @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
-          >
-          <input
-            v-model="formData.author_email"
-            type="email"
-            :placeholder="$t('blog.guestbookEmailPlaceholder')"
-            class="glass-input px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 transition-all"
-            style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
-            @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
-          >
+      <!-- 未登录提示 -->
+      <div v-if="!user" class="text-center py-8">
+        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">
+          {{ $t('blog.guestbookLoginRequired') }}
+        </p>
+        <button
+          @click="handleShowLogin"
+          class="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+          style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-emerald)); color: white;"
+        >
+          {{ $t('auth.login') }}
+        </button>
+      </div>
+      
+      <!-- 已登录表单 -->
+      <div v-else class="space-y-3">
+        <div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span>{{ $t('blog.guestbookPostingAs') }}: <strong class="text-slate-800 dark:text-slate-200">{{ user.username }}</strong></span>
         </div>
         <textarea
           v-model="formData.content"
@@ -47,8 +51,8 @@
           :disabled="!formData.content || formData.content.trim().length === 0 || isSubmitting"
           class="w-full px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-emerald)); color: white;"
-          @mouseenter="if (!$event.currentTarget.disabled) { $event.currentTarget.style.opacity = '0.9' }"
-          @mouseleave="if (!$event.currentTarget.disabled) { $event.currentTarget.style.opacity = '1' }"
+          @mouseenter="handleButtonHover"
+          @mouseleave="handleButtonLeave"
         >
           {{ isSubmitting ? $t('common.submitting') : $t('blog.guestbookSubmit') }}
         </button>
@@ -105,19 +109,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAuth } from '../composables/useAuth'
 import { guestbookApi } from '../utils/api'
 
 const { t } = useI18n()
+const { user } = useAuth()
 
 const messages = ref([])
 const formData = ref({
-  author_name: '',
-  author_email: '',
   content: ''
 })
 const isSubmitting = ref(false)
+const showLoginModal = ref(false)
+
+// 监听登录状态变化
+const emit = defineEmits(['show-login'])
+
+// 当需要登录时，触发父组件显示登录弹窗
+const handleShowLogin = () => {
+  emit('show-login')
+  showLoginModal.value = true
+}
 
 /**
  * 加载留言列表
@@ -140,6 +154,12 @@ const loadMessages = async () => {
  * 提交留言
  */
 const submitMessage = async () => {
+  // 检查是否已登录
+  if (!user.value) {
+    handleShowLogin()
+    return
+  }
+
   if (!formData.value.content || !formData.value.content.trim()) {
     return
   }
@@ -147,8 +167,6 @@ const submitMessage = async () => {
   isSubmitting.value = true
   try {
     const newMessage = await guestbookApi.create({
-      author_name: formData.value.author_name || null,
-      author_email: formData.value.author_email || null,
       content: formData.value.content.trim()
     })
 
@@ -157,13 +175,12 @@ const submitMessage = async () => {
 
     // 清空表单
     formData.value = {
-      author_name: '',
-      author_email: '',
       content: ''
     }
   } catch (error) {
     console.error('Failed to submit message:', error)
-    alert(error.message || t('common.submitError'))
+    const errorMessage = error.response?.data?.error || error.message || t('common.submitError')
+    alert(errorMessage)
   } finally {
     isSubmitting.value = false
   }
@@ -189,6 +206,24 @@ const formatDate = (dateStr) => {
   if (days < 7) return `${days}${t('common.daysAgo')}`
 
   return date.toLocaleDateString()
+}
+
+/**
+ * 处理按钮悬停效果
+ */
+const handleButtonHover = (event) => {
+  if (!event.currentTarget.disabled) {
+    event.currentTarget.style.opacity = '0.9'
+  }
+}
+
+/**
+ * 处理按钮离开效果
+ */
+const handleButtonLeave = (event) => {
+  if (!event.currentTarget.disabled) {
+    event.currentTarget.style.opacity = '1'
+  }
 }
 
 // 初始化时加载留言

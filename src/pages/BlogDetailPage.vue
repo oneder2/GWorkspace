@@ -163,6 +163,7 @@
               style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
               @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'"
               @mouseleave="$event.currentTarget.style.color = ''"
+          >
             {{ relatedPost.title }}
           </h4>
           <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
@@ -187,6 +188,7 @@
              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
              @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'"
              @mouseleave="$event.currentTarget.style.color = ''"
+        >
           {{ prevPost.title }}
         </div>
       </button>
@@ -204,6 +206,7 @@
              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
              @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'"
              @mouseleave="$event.currentTarget.style.color = ''"
+        >
           {{ nextPost.title }}
         </div>
       </button>
@@ -587,7 +590,7 @@ watch(() => post.value, () => {
 
 // 监听滚动事件
 onMounted(() => {
-  loadPost() // 初始加载文章
+  // loadPost() 已在 watch 中通过 immediate: true 调用，不需要重复调用
   window.addEventListener('scroll', handleScroll, { passive: true })
   // 初始计算一次
   setTimeout(calculateReadingProgress, 100)

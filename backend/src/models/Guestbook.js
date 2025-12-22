@@ -70,6 +70,7 @@ export class Guestbook {
   static create(data) {
     const db = getDatabase()
     const {
+      user_id = null,
       author_name = null,
       author_email = null,
       content,
@@ -84,19 +85,31 @@ export class Guestbook {
 
     const now = new Date().toISOString()
 
-    const result = db.prepare(`
-      INSERT INTO guestbook (author_name, author_email, content, status, ip_address, user_agent, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      author_name,
-      author_email,
-      content.trim(),
-      status,
-      ip_address,
-      user_agent,
-      now,
-      now
-    )
+    // 检查user_id列是否存在（兼容旧数据库）
+    let hasUserIdColumn = false
+    try {
+      const tableInfo = db.prepare("PRAGMA table_info(guestbook)").all()
+      hasUserIdColumn = tableInfo.some(col => col.name === 'user_id')
+    } catch (error) {
+      // 忽略错误
+    }
+
+    let query, params
+    if (hasUserIdColumn) {
+      query = `
+        INSERT INTO guestbook (user_id, author_name, author_email, content, status, ip_address, user_agent, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `
+      params = [user_id, author_name, author_email, content.trim(), status, ip_address, user_agent, now, now]
+    } else {
+      query = `
+        INSERT INTO guestbook (author_name, author_email, content, status, ip_address, user_agent, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `
+      params = [author_name, author_email, content.trim(), status, ip_address, user_agent, now, now]
+    }
+
+    const result = db.prepare(query).run(...params)
 
     return this.getById(result.lastInsertRowid)
   }

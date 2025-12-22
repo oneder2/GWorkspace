@@ -74,7 +74,8 @@ const db = getDatabase()
 const migrationFiles = [
   '001_initial_schema.sql',
   '002_user_system.sql',
-  '003_guestbook.sql'
+  '003_guestbook.sql',
+  '004_guestbook_user_id.sql'
 ]
 
 try {
