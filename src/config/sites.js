@@ -20,6 +20,17 @@ export const sitesConfig = [
     ]
   },
   {
+    id: 'tools',
+    name: 'Tools',
+    iconName: 'ToolIcon',
+    links: [
+      { title: 'Strudel', url: 'https://strudel.cc', desc: 'Strudel is a tool for creating music by coding.' },
+      { title: 'Beepbox', url:"https://beepbox.co/", desc: 'Beepbox is a online music maker.' },
+      { title: 'WolframAlpha', url:"https://www.wolframalpha.com/", desc: 'WolframAlpha is a computational knowledge engine.' },
+      { title: '工具蛙', url:"https://toolwa.com", desc: '工具蛙是一个线上工具箱，提供了丰富的在线工具。' },
+    ]
+  },
+  {
     id: 'ai',
     name: 'AI chatbots',
     iconName: 'BrainIcon',

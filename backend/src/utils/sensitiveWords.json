@@ -1,0 +1,18 @@
+{
+  "words": [
+    "spam",
+    "advertisement",
+    "promotion",
+    "scam",
+    "fraud",
+    "phishing",
+    "clickbait",
+    "垃圾邮件",
+    "广告",
+    "推广",
+    "诈骗",
+    "钓鱼"
+  ],
+  "notes": "敏感词库 - 每行一个词，支持中英文。添加新词后需要重启服务器。"
+}
+

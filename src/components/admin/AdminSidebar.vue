@@ -46,12 +46,7 @@
           ? 'font-semibold' 
           : 'text-slate-600 dark:text-slate-400'"
         :style="isActive(item.path)
-          ? {
-              backgroundColor: 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)',
-              color: 'var(--theme-primary-darker)',
-              '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 20%, transparent)',
-              '--dark-color': 'var(--theme-primary-dark)'
-            }
+          ? getActiveStyle(item.path)
           : {
               '--hover-bg': 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)',
               '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 10%, transparent)',
@@ -91,7 +86,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
@@ -106,6 +101,36 @@ defineEmits(['toggle-collapse'])
 
 const route = useRoute()
 const { t } = useI18n()
+
+/**
+ * 检查主题色是否为透明
+ */
+const isThemeTransparent = ref(false)
+
+/**
+ * 检查主题色状态
+ */
+const checkThemeTransparent = () => {
+  if (typeof document !== 'undefined') {
+    const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim()
+    isThemeTransparent.value = themePrimary === 'transparent'
+  }
+}
+
+// 初始化时检查
+onMounted(() => {
+  checkThemeTransparent()
+  // 监听主题变化
+  const observer = new MutationObserver(() => {
+    checkThemeTransparent()
+  })
+  if (typeof document !== 'undefined') {
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    })
+  }
+})
 
 /**
  * 图标SVG
@@ -151,6 +176,45 @@ const isActive = (path) => {
     return route.path === '/admin'
   }
   return route.path.startsWith(path)
+}
+
+/**
+ * 获取激活状态的样式
+ */
+const getActiveStyle = (itemPath) => {
+  if (!isActive(itemPath)) return {}
+  
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  
+  if (isThemeTransparent.value) {
+    return {
+      backgroundColor: isDark ? 'rgba(148, 163, 184, 0.3)' : 'rgba(100, 116, 139, 0.2)',
+      color: isDark ? '#cbd5e1' : '#475569',
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.15)'
+    }
+  }
+  
+  // 获取主题色并确保不是透明的
+  let themeColorDarker = ''
+  let themeColorDark = ''
+  if (typeof document !== 'undefined') {
+    themeColorDarker = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-darker').trim()
+    themeColorDark = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-dark').trim()
+  }
+  
+  const finalColor = isDark 
+    ? (themeColorDark && themeColorDark !== 'transparent' ? themeColorDark : '#cbd5e1')
+    : (themeColorDarker && themeColorDarker !== 'transparent' ? themeColorDarker : '#475569')
+  
+  const bgColor = isDark 
+    ? 'color-mix(in srgb, var(--theme-primary) 20%, transparent)'
+    : 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)'
+  
+  return {
+    backgroundColor: bgColor,
+    color: finalColor,
+    borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.15)'
+  }
 }
 </script>
 

@@ -138,10 +138,22 @@
               />
               <button 
                 @click="addTag"
-                class="px-4 py-2 text-white rounded-lg transition-colors"
-                style="background-color: var(--theme-primary);"
-                @mouseenter="$event.currentTarget.style.backgroundColor = 'var(--theme-primary-darker)'"
-                @mouseleave="$event.currentTarget.style.backgroundColor = 'var(--theme-primary)'"
+                class="px-4 py-2 rounded-lg transition-colors font-semibold"
+                :style="isThemeTransparent
+                  ? {
+                      backgroundColor: '#10b981',
+                      color: '#ffffff'
+                    }
+                  : {
+                      backgroundColor: 'var(--theme-primary)',
+                      color: '#ffffff'
+                    }"
+                @mouseenter="const el = $event.currentTarget; if (el) {
+                  el.style.backgroundColor = isThemeTransparent ? '#059669' : 'var(--theme-primary-darker)';
+                }"
+                @mouseleave="const el = $event.currentTarget; if (el) {
+                  el.style.backgroundColor = isThemeTransparent ? '#10b981' : 'var(--theme-primary)';
+                }"
               >
                 {{ $t('blog.addTag') }}
               </button>
@@ -211,7 +223,7 @@
             <div class="flex flex-col">
               <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{{ $t('tools.preview') }}</label>
               <div 
-                class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ol:list-decimal prose-li:ml-6"
+                class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2"
                 v-html="previewContent"
               ></div>
             </div>
@@ -228,8 +240,8 @@
           
           <!-- 纯预览视图 -->
           <div v-else-if="viewMode === 'preview'" class="flex-1" style="min-height: 600px;">
-            <div 
-              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ol:list-decimal prose-li:ml-6"
+            <div
+              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2"
               v-html="previewContent"
             ></div>
           </div>
@@ -268,10 +280,28 @@
           <button 
             @click="handleSubmit"
             :disabled="isSubmitting"
-            class="px-6 py-2 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            style="background-color: var(--theme-primary);"
-            @mouseenter="!isSubmitting && ($event.currentTarget.style.backgroundColor = 'var(--theme-primary-darker)')"
-            @mouseleave="!isSubmitting && ($event.currentTarget.style.backgroundColor = 'var(--theme-primary)')"
+            class="px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
+            :style="isThemeTransparent
+              ? {
+                  backgroundColor: '#10b981',
+                  color: '#ffffff'
+                }
+              : {
+                  backgroundColor: 'var(--theme-primary)',
+                  color: '#ffffff'
+                }"
+            @mouseenter="!isSubmitting && (() => {
+              const el = $event.currentTarget;
+              if (el) {
+                el.style.backgroundColor = isThemeTransparent ? '#059669' : 'var(--theme-primary-darker)';
+              }
+            })()"
+            @mouseleave="!isSubmitting && (() => {
+              const el = $event.currentTarget;
+              if (el) {
+                el.style.backgroundColor = isThemeTransparent ? '#10b981' : 'var(--theme-primary)';
+              }
+            })()"
           >
             <svg 
               v-if="isSubmitting"
@@ -361,23 +391,46 @@ marked.setOptions({
 
 // 配置代码块渲染器（添加代码高亮类）
 const renderer = new marked.Renderer()
+
 renderer.code = function(code, language) {
   const lang = language || 'text'
   return `<pre class="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 overflow-x-auto"><code class="language-${lang}">${code}</code></pre>`
 }
-renderer.table = function(header, body) {
+
+// marked v17的table函数接收一个token对象，包含header和rows数组
+renderer.table = function(token) {
+  // 先使用默认的table渲染逻辑，然后包装样式
+  let header = ''
+  for (let i = 0; i < token.header.length; i++) {
+    header += renderer.tablecell(token.header[i])
+  }
+  
+  let body = ''
+  for (let i = 0; i < token.rows.length; i++) {
+    let row = ''
+    for (let j = 0; j < token.rows[i].length; j++) {
+      row += renderer.tablecell(token.rows[i][j])
+    }
+    body += `<tr>${row}</tr>`
+  }
+  
   return `<div class="overflow-x-auto my-4">
     <table class="min-w-full border-collapse border border-slate-300 dark:border-slate-600">
-      <thead class="bg-slate-100 dark:bg-slate-800">${header}</thead>
+      <thead class="bg-slate-100 dark:bg-slate-800"><tr>${header}</tr></thead>
       <tbody>${body}</tbody>
     </table>
   </div>`
 }
-renderer.tablecell = function(content, flags) {
-  const tag = flags.header ? 'th' : 'td'
-  const align = flags.align ? ` style="text-align: ${flags.align}"` : ''
+
+// marked v17的tablecell函数接收一个token对象
+renderer.tablecell = function(token) {
+  // 使用parser来解析inline tokens（如粗体、斜体等）
+  const content = renderer.parser.parseInline(token.tokens)
+  const tag = token.header ? 'th' : 'td'
+  const align = token.align ? ` style="text-align: ${token.align}"` : ''
   return `<${tag}${align} class="border border-slate-300 dark:border-slate-600 px-4 py-2">${content}</${tag}>`
 }
+
 marked.setOptions({ renderer })
 
 /**
