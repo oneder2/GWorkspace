@@ -98,8 +98,23 @@
                 v-for="(tag, index) in formData.tags" 
                 :key="index"
                 class="px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2"
-                style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 100%, transparent); color: var(--theme-primary-darker);"
-                :style="{ '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)', '--dark-text': 'var(--theme-primary-dark)' }"
+                :style="isThemeTransparent 
+                  ? (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+                      ? {
+                          backgroundColor: 'rgba(148, 163, 184, 0.3)',
+                          color: '#cbd5e1'
+                        }
+                      : {
+                          backgroundColor: 'rgba(100, 116, 139, 0.2)',
+                          color: '#475569'
+                        }
+                    )
+                  : {
+                      backgroundColor: 'color-mix(in srgb, var(--theme-primary-lighter) 100%, transparent)',
+                      color: 'var(--theme-primary-darker)',
+                      '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)',
+                      '--dark-color': 'var(--theme-primary-dark)'
+                    }"
               >
                 #{{ tag }}
                 <button 
@@ -316,6 +331,21 @@ const props = defineProps({
 const emit = defineEmits(['close', 'success'])
 
 const { t } = useI18n()
+
+/**
+ * 检查主题色是否为透明
+ */
+const isThemeTransparent = ref(false)
+
+/**
+ * 检查主题色状态
+ */
+const checkThemeTransparent = () => {
+  if (typeof document !== 'undefined') {
+    const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim()
+    isThemeTransparent.value = themePrimary === 'transparent'
+  }
+}
 
 // 配置 marked - 启用 GFM 支持（包括表格、任务列表等）
 marked.setOptions({
@@ -609,6 +639,17 @@ const handleClose = () => {
 // 初始化
 onMounted(() => {
   initFormData()
+  checkThemeTransparent()
+  // 监听主题变化
+  const observer = new MutationObserver(() => {
+    checkThemeTransparent()
+  })
+  if (typeof document !== 'undefined') {
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    })
+  }
 })
 </script>
 

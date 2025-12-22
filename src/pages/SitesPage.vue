@@ -37,10 +37,12 @@
           class="scroll-mt-28"
         >
           <div class="flex items-center gap-3 mb-4">
-            <div class="p-2 bg-white/60 dark:bg-slate-800/60 rounded-lg text-green-600 dark:text-green-400 shadow-sm">
-              <component :is="category.icon" class="w-5 h-5" />
+            <!-- 分类图标容器：使用明确的颜色，避免透明色问题 -->
+            <div class="p-2 bg-white/60 dark:bg-slate-800/60 rounded-lg shadow-sm">
+              <component :is="category.icon" class="w-5 h-5 text-slate-700 dark:text-slate-200" />
             </div>
-            <h3 class="text-xl font-bold text-slate-800 dark:text-slate-200">{{ category.name }}</h3>
+            <!-- 分类标题：使用深色确保在背景遮罩上有足够对比度 -->
+            <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 drop-shadow-sm">{{ category.name }}</h3>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div 

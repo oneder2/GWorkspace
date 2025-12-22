@@ -16,7 +16,8 @@
         v-if="!collapsed"
         :title="$t('common.collapse')"
       >
-        <GWorkspaceIcon :size="60" variant="black" />
+        <!-- Logo图标：亮色模式使用黑色，暗色模式使用白色 -->
+        <GWorkspaceIcon :size="60" variant="black" class="dark:brightness-0 dark:invert" />
         <span class="font-bold text-xl tracking-tight text-slate-800 dark:text-slate-200 transition-colors group-hover:[color:var(--theme-primary)]">GWorkspace</span>
         <!-- 移动端关闭按钮 -->
         <button
@@ -36,7 +37,8 @@
         class="cursor-pointer group hover:opacity-80 active:scale-95 transition-all"
         :title="$t('common.expand')"
       >
-        <GWorkspaceIcon :size="48" variant="black" />
+        <!-- Logo图标（折叠状态）：亮色模式使用黑色，暗色模式使用白色 -->
+        <GWorkspaceIcon :size="48" variant="black" class="dark:brightness-0 dark:invert" />
       </div>
     </div>
 
@@ -45,10 +47,18 @@
       <template v-for="item in navItems" :key="item.id">
         <div 
           @click="handleNavClick(item)"
-          class="px-4 py-3.5 rounded-xl cursor-pointer flex items-center gap-4 transition-all duration-200 group text-slate-600 dark:text-slate-300"
-          style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 40%, transparent); --hover-text: var(--theme-primary-darker); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 10%, transparent); --hover-text-dark: var(--theme-primary-dark);"
-          @mouseenter="const el = $event.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)'; }"
-          @mouseleave="const el = $event.currentTarget; if (el) { el.style.backgroundColor = ''; el.style.color = ''; }"
+          data-nav-item
+          class="px-4 py-3.5 rounded-xl cursor-pointer flex items-center gap-4 transition-all duration-200 group text-slate-600 dark:text-slate-400 border border-transparent"
+          :style="currentTab !== item.id 
+            ? {
+                '--hover-bg': 'color-mix(in srgb, var(--theme-primary-lighter) 40%, transparent)',
+                '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 15%, transparent)',
+                '--hover-border': 'rgba(0, 0, 0, 0.15)',
+                '--hover-border-dark': 'rgba(255, 255, 255, 0.1)'
+              }
+            : {}"
+          @mouseenter="handleNavHoverEnter($event, item.id)"
+          @mouseleave="handleNavHoverLeave($event, item.id)"
           :class="{
             'nav-active': currentTab === item.id,
             'nav-active-fallback': currentTab === item.id && isThemeTransparent
@@ -210,9 +220,74 @@ const isDarkMode = () => {
 }
 
 /**
+ * 处理导航hover进入
+ */
+/**
+ * 处理导航hover进入
+ */
+/**
+ * 处理导航hover进入
+ */
+const handleNavHoverEnter = (event, itemId) => {
+  if (props.currentTab === itemId) return // 当前激活项不处理hover
+  
+  const el = event?.currentTarget
+  if (!el) return
+  
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  if (isDark) {
+    el.style.backgroundColor = 'var(--hover-bg-dark)'
+    // 使用明确的颜色，避免主题色为透明时文字变透明
+    if (isThemeTransparent.value) {
+      el.style.color = '#cbd5e1' // slate-300
+    } else {
+      // 获取主题色并确保不是透明的
+      const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-dark').trim()
+      el.style.color = themePrimary && themePrimary !== 'transparent' ? themePrimary : '#cbd5e1'
+    }
+    el.style.borderColor = 'var(--hover-border-dark)'
+  } else {
+    el.style.backgroundColor = 'var(--hover-bg)'
+    // 使用明确的颜色，避免主题色为透明时文字变透明
+    if (isThemeTransparent.value) {
+      el.style.color = '#475569' // slate-600
+    } else {
+      // 获取主题色并确保不是透明的
+      const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-darker').trim()
+      el.style.color = themePrimary && themePrimary !== 'transparent' ? themePrimary : '#475569'
+    }
+    el.style.borderColor = 'var(--hover-border)'
+  }
+}
+
+/**
+ * 处理导航hover离开
+ */
+const handleNavHoverLeave = (event, itemId) => {
+  if (props.currentTab === itemId) return // 当前激活项不处理hover
+  
+  const el = event?.currentTarget
+  if (!el) return
+  
+  el.style.backgroundColor = ''
+  el.style.color = ''
+  el.style.borderColor = ''
+}
+
+/**
  * 处理导航点击
  */
 const handleNavClick = (item) => {
+  // 清除所有导航项的hover状态
+  if (typeof document !== 'undefined') {
+    const navElements = document.querySelectorAll('[data-nav-item]')
+    navElements.forEach((el) => {
+      el.style.backgroundColor = ''
+      el.style.color = ''
+      el.style.borderColor = ''
+    })
+  }
+  
   router.push(item.route)
   // 如果是移动端抽屉模式，关闭侧边栏
   if (props.isMobileDrawer) {

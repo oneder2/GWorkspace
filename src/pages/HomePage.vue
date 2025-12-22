@@ -6,23 +6,25 @@
 <template>
   <div class="max-w-4xl mx-auto mt-12 flex flex-col items-center animate-fade-in">
     <div class="mb-12 text-center">
-      <h1 class="text-5xl font-bold text-slate-800 dark:text-slate-200 mb-4 tracking-tight drop-shadow-sm">
+      <!-- 标题：亮色模式使用深色以确保在浅色背景遮罩上有足够对比度，暗色模式使用浅色 -->
+      <h1 class="text-5xl font-bold text-slate-800 dark:text-slate-100 mb-4 tracking-tight">
         {{ $t('home.title') }}
       </h1>
-      <p class="text-slate-600 dark:text-slate-400 text-lg">{{ $t('home.subtitle') }}</p>
+      <!-- 副标题：使用中等深度颜色，确保可读性 -->
+      <p class="text-slate-700 dark:text-slate-300 text-lg">{{ $t('home.subtitle') }}</p>
     </div>
 
     <!-- 搜索组件 -->
     <div class="w-full max-w-2xl relative z-20">
-      <div class="glass-card rounded-2xl p-2 flex items-center gap-2 transition-all duration-300 ring-4 ring-transparent focus-within:ring-green-200/50 dark:focus-within:ring-green-800/50">
+      <div class="glass-card rounded-2xl p-2 flex items-center gap-2 transition-all duration-300 ring-4 ring-transparent focus-within:ring-theme-primary/50 dark:focus-within:ring-theme-primary-darker/50">
         <!-- 搜索引擎选择 -->
         <div class="relative group shrink-0">
           <button 
             class="px-4 py-3 rounded-xl hover:bg-slate-100/80 dark:hover:bg-slate-700/80 flex items-center gap-2 text-slate-700 dark:text-slate-300 font-bold transition-colors"
             @click="showEngineMenu = !showEngineMenu"
           >
-            <component :is="searchEngine === 'google' ? GoogleIcon : DuckIcon" class="w-5 h-5" />
-            <span class="hidden sm:inline">{{ searchEngine === 'google' ? 'Google' : 'DuckDuckGo' }}</span>
+            <component :is="getEngineIcon(searchEngine)" class="w-5 h-5" />
+            <span class="hidden sm:inline">{{ getEngineName(searchEngine) }}</span>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 opacity-50">
               <polyline points="6 9 12 15 18 9"/>
             </svg>
@@ -30,7 +32,7 @@
           <!-- 引擎切换下拉菜单 -->
           <div 
             v-if="showEngineMenu"
-            class="absolute top-full left-0 mt-2 w-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-xl shadow-xl border border-white/50 dark:border-slate-700/50 overflow-hidden z-30 p-1"
+            class="absolute top-full left-0 mt-2 w-44 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-xl shadow-xl border border-white/50 dark:border-slate-700/50 overflow-hidden z-30 p-1"
             @click.stop
           >
             <div 
@@ -41,11 +43,25 @@
               Google
             </div>
             <div 
-              @click="searchEngine = 'ddg'; showEngineMenu = false" 
+              @click="searchEngine = 'duckduckgo'; showEngineMenu = false" 
               class="px-3 py-2 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-lg cursor-pointer flex items-center gap-3 text-sm transition-colors"
             >
               <component :is="DuckIcon" class="w-5 h-5 text-orange-500" />
               DuckDuckGo
+            </div>
+            <div 
+              @click="searchEngine = 'baidu'; showEngineMenu = false" 
+              class="px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg cursor-pointer flex items-center gap-3 text-sm transition-colors"
+            >
+              <component :is="BaiduIcon" class="w-5 h-5 text-blue-600" />
+              百度
+            </div>
+            <div 
+              @click="searchEngine = 'edge'; showEngineMenu = false" 
+              class="px-3 py-2 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 rounded-lg cursor-pointer flex items-center gap-3 text-sm transition-colors"
+            >
+              <component :is="EdgeIcon" class="w-5 h-5 text-cyan-600" />
+              Edge
             </div>
           </div>
         </div>
@@ -68,7 +84,7 @@
         <!-- 搜索按钮 -->
         <button 
           @click="performSearch" 
-          class="w-12 h-12 rounded-xl bg-green-500 dark:bg-green-600 text-white flex items-center justify-center hover:bg-green-600 dark:hover:bg-green-700 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-green-500/30"
+          class="w-12 h-12 rounded-xl bg-theme-primary dark:bg-theme-primary-darker flex items-center justify-center hover:bg-theme-primary-darker dark:hover:bg-theme-primary-darker hover:scale-105 active:scale-95 transition-all shadow-lg shadow-theme-primary/30"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
             <circle cx="11" cy="11" r="8"/>
@@ -132,7 +148,17 @@ import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
 import GoogleIcon from '../components/icons/GoogleIcon.vue'
 import DuckIcon from '../components/icons/DuckIcon.vue'
+import BaiduIcon from '../components/icons/BaiduIcon.vue'
+import EdgeIcon from '../components/icons/EdgeIcon.vue'
 import QuickLinkEditor from '../components/QuickLinkEditor.vue'
+
+// 搜索相关
+const searchEngine = ref('google')
+const searchQuery = ref('')
+const showEngineMenu = ref(false)
+
+// 编辑器显示状态
+const showEditor = ref(false)
 
 // 从存储加载自定义链接（使用空数组作为默认值）
 // useLocalStorage 返回 { value: ref, update, reset }
@@ -183,14 +209,65 @@ const handleSaveLinks = (links) => {
 }
 
 /**
+ * 获取搜索引擎图标
+ */
+const getEngineIcon = (engine) => {
+  switch (engine) {
+    case 'google':
+      return GoogleIcon
+    case 'duckduckgo':
+      return DuckIcon
+    case 'baidu':
+      return BaiduIcon
+    case 'edge':
+      return EdgeIcon
+    default:
+      return GoogleIcon
+  }
+}
+
+/**
+ * 获取搜索引擎名称
+ */
+const getEngineName = (engine) => {
+  switch (engine) {
+    case 'google':
+      return 'Google'
+    case 'duckduckgo':
+      return 'DuckDuckGo'
+    case 'baidu':
+      return '百度'
+    case 'edge':
+      return 'Edge'
+    default:
+      return 'Google'
+  }
+}
+
+/**
  * 执行搜索
  * 根据选择的搜索引擎打开搜索结果
  */
 const performSearch = () => {
   if (!searchQuery.value) return
-  const url = searchEngine.value === 'google' 
-    ? `https://www.google.com/search?q=${encodeURIComponent(searchQuery.value)}`
-    : `https://duckduckgo.com/?q=${encodeURIComponent(searchQuery.value)}`
+  
+  let url = ''
+  switch (searchEngine.value) {
+    case 'google':
+      url = `https://www.google.com/search?q=${encodeURIComponent(searchQuery.value)}`
+      break
+    case 'duckduckgo':
+      url = `https://duckduckgo.com/?q=${encodeURIComponent(searchQuery.value)}`
+      break
+    case 'baidu':
+      url = `https://www.baidu.com/s?wd=${encodeURIComponent(searchQuery.value)}`
+      break
+    case 'edge':
+      url = `https://www.bing.com/search?q=${encodeURIComponent(searchQuery.value)}`
+      break
+    default:
+      url = `https://www.google.com/search?q=${encodeURIComponent(searchQuery.value)}`
+  }
   window.open(url, '_blank')
 }
 </script>

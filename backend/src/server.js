@@ -134,8 +134,9 @@ try {
 
 // API路由
 app.use('/api/auth', authRoutes)
-app.use('/api/blogs', blogRoutes)
+// 注意：likesRoutes 必须在 blogRoutes 之前注册，否则 /:id 路由会拦截 /:id/likes 请求
 app.use('/api/blogs', likesRoutes)
+app.use('/api/blogs', blogRoutes)
 app.use('/api/blogs', commentsRoutes) // 博客相关的评论路由
 app.use('/api/comments', commentsRoutes) // 评论管理路由
 app.use('/api/analytics', analyticsRoutes)

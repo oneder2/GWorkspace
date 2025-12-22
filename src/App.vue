@@ -9,9 +9,11 @@
       class="fixed inset-0 z-0 bg-cover bg-center transition-all duration-1000 transform scale-105" 
       :style="{ backgroundImage: `url('/backgrounds/default.jpg')` }"
     >
-      <!-- 遮罩层，让文字更清晰 - 支持暗色模式，使用主题色 -->
-      <div class="absolute inset-0 bg-gradient-to-br" style="background: linear-gradient(to bottom right, color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent), color-mix(in srgb, var(--theme-primary-lighter) 40%, rgba(241, 245, 249, 0.4)));"></div>
-      <div class="absolute inset-0 dark:bg-gradient-to-br dark:opacity-60" style="background: linear-gradient(to bottom right, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.7));"></div>
+      <!-- 背景遮罩层 - 优化文本可读性和对比度 -->
+      <!-- 亮色模式：使用浅色渐变提供基础对比度，确保深色文字清晰可读 -->
+      <div class="absolute inset-0 bg-gradient-to-br from-white/45 via-white/35 to-white/55 transition-opacity duration-500 dark:opacity-0"></div>
+      <!-- 暗色模式：使用深色渐变提供基础对比度，确保浅色文字清晰可读 -->
+      <div class="absolute inset-0 bg-gradient-to-br from-slate-900/75 via-slate-800/80 to-slate-900/85 transition-opacity duration-500 opacity-0 dark:opacity-100"></div>
     </div>
 
     <!-- 管理后台路由：使用完全独立的布局 -->
@@ -78,7 +80,6 @@
         <Header 
           :current-tab="currentTab"
           :weather="weatherInfo"
-          :current-time="currentTime"
           :is-dark="isDark"
           :show-mobile-menu="showMobileMenu"
           @toggle-mobile-menu="showMobileMenu = !showMobileMenu"
@@ -129,7 +130,6 @@ const { isDark, toggleTheme } = useTheme()
 // 状态管理
 const sidebarCollapsed = ref(false)
 const showMobileMenu = ref(false) // 移动端菜单显示状态
-const currentTime = ref('')
 const weatherInfo = ref(null)
 const showThemeCustomizer = ref(false)
 
@@ -167,14 +167,6 @@ const currentTab = computed(() => {
   return routeToTab[route.name] || 'home'
 })
 
-/**
- * 更新当前时间
- * 每秒更新一次，格式为 HH:MM
- */
-const updateTime = () => {
-  const now = new Date()
-  currentTime.value = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
-}
 
 /**
  * 切换语言
@@ -197,8 +189,6 @@ const loadWeather = async () => {
   }
 }
 
-let timer = null
-
 /**
  * 注册全局快捷键
  */
@@ -213,14 +203,10 @@ useKeyboard({
 })
 
 onMounted(() => {
-  updateTime()
-  timer = setInterval(updateTime, 1000)
   loadWeather()
 })
 
 onUnmounted(() => {
-  if (timer) {
-    clearInterval(timer)
-  }
+  // 清理工作
 })
 </script>

@@ -44,7 +44,9 @@
         
         <!-- 作品信息 -->
         <div class="p-4 flex-1 flex flex-col">
-          <h3 class="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+          <!-- 作品标题：使用深色确保在玻璃卡片上有足够对比度 -->
+          <!-- 作品标题：hover时使用明确的颜色，避免透明问题 -->
+          <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
             {{ work.title }}
           </h3>
           <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-3 leading-relaxed">

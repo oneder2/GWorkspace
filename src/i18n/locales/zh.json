@@ -57,7 +57,18 @@
     "clear": "清空",
     "markdownPlaceholder": "输入Markdown内容...",
     "copyHTML": "复制HTML",
-    "todo": "待办事项"
+    "todo": "待办事项",
+    "worldClock": {
+      "title": "世界时钟",
+      "desc": "查看不同时区的时间",
+      "local": "本地时间",
+      "china": "中国时间",
+      "chinaTimezone": "UTC+8",
+      "usEast": "美国东部",
+      "usEastTimezone": "EST/EDT",
+      "usWest": "美国西部",
+      "usWestTimezone": "PST/PDT"
+    }
   },
   "blog": {
     "genre": "分类",

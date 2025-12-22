@@ -57,7 +57,18 @@
     "clear": "Clear",
     "markdownPlaceholder": "Enter Markdown content...",
     "copyHTML": "Copy HTML",
-    "todo": "Todo List"
+    "todo": "Todo List",
+    "worldClock": {
+      "title": "World Clock",
+      "desc": "View time in different timezones",
+      "local": "Local Time",
+      "china": "China Time",
+      "chinaTimezone": "UTC+8",
+      "usEast": "US East",
+      "usEastTimezone": "EST/EDT",
+      "usWest": "US West",
+      "usWestTimezone": "PST/PDT"
+    }
   },
   "blog": {
     "genre": "Genre",

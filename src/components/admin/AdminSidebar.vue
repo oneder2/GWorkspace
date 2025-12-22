@@ -41,7 +41,7 @@
         v-for="item in navItems"
         :key="item.path"
         :to="item.path"
-        class="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 group"
+        class="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 group border border-transparent"
         :class="isActive(item.path)
           ? 'font-semibold' 
           : 'text-slate-600 dark:text-slate-400'"
@@ -59,13 +59,27 @@
               '--hover-text-dark': 'var(--theme-primary-dark)'
             }"
         @mouseenter="if (!isActive(item.path)) {
-          const el = $event.currentTarget;
-          el.style.backgroundColor = document.documentElement.classList.contains('dark') ? 'var(--hover-bg-dark)' : 'var(--hover-bg)';
-          el.style.color = document.documentElement.classList.contains('dark') ? 'var(--hover-text-dark)' : 'var(--hover-text)';
+          const el = $event?.currentTarget;
+          if (el) {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+              el.style.backgroundColor = 'var(--hover-bg-dark)';
+              el.style.color = 'var(--hover-text-dark)';
+              el.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            } else {
+              el.style.backgroundColor = 'var(--hover-bg)';
+              el.style.color = 'var(--hover-text)';
+              el.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+            }
+          }
         }"
         @mouseleave="if (!isActive(item.path)) {
-          $event.currentTarget.style.backgroundColor = '';
-          $event.currentTarget.style.color = '';
+          const el = $event?.currentTarget;
+          if (el) {
+            el.style.backgroundColor = '';
+            el.style.color = '';
+            el.style.borderColor = '';
+          }
         }"
         :title="collapsed ? item.name : ''"
       >

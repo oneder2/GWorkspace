@@ -17,20 +17,20 @@
           :class="currentTool === tool.id 
             ? 'rounded-2xl border shadow-md' 
             : 'text-slate-600 dark:text-slate-400 border border-transparent rounded-xl hover:shadow-sm'"
-          :style="currentTool === tool.id 
+            :style="currentTool === tool.id 
             ? (isThemeTransparent 
                 ? (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
                     ? {
                         background: 'rgba(148, 163, 184, 0.3)',
                         color: '#cbd5e1',
                         boxShadow: '0 4px 6px -1px rgba(148, 163, 184, 0.35)',
-                        borderColor: 'rgba(148, 163, 184, 0.4)'
+                        borderColor: 'rgba(255, 255, 255, 0.1)'
                       }
                     : {
                         background: 'rgba(100, 116, 139, 0.2)',
                         color: '#475569',
                         boxShadow: '0 4px 6px -1px rgba(100, 116, 139, 0.25)',
-                        borderColor: 'rgba(100, 116, 139, 0.3)'
+                        borderColor: 'rgba(0, 0, 0, 0.15)'
                       }
                   )
                 : {
@@ -45,21 +45,28 @@
                   '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 15%, transparent)',
                   '--hover-text': 'var(--theme-primary-darker)',
                   '--hover-text-dark': 'var(--theme-primary-dark)',
-                  '--hover-border': 'color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent)',
-                  '--hover-border-dark': 'color-mix(in srgb, var(--theme-primary) 20%, transparent)'
+                  '--hover-border': 'rgba(0, 0, 0, 0.15)',
+                  '--hover-border-dark': 'rgba(255, 255, 255, 0.1)'
                 }"
             @mouseenter="if (currentTool !== tool.id) { 
-              const el = $event.currentTarget;
-              const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
-              el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)';
-              el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)';
-              el.style.borderColor = isDark ? 'var(--hover-border-dark)' : 'var(--hover-border)';
+              const el = $event?.currentTarget;
+              if (el) {
+                const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+                if (isDark) {
+                  el.style.backgroundColor = 'var(--hover-bg-dark)';
+                  el.style.borderColor = 'var(--hover-border-dark)';
+                } else {
+                  el.style.backgroundColor = 'var(--hover-bg)';
+                  el.style.borderColor = 'var(--hover-border)';
+                }
+              }
             }"
             @mouseleave="if (currentTool !== tool.id) { 
-              const el = $event.currentTarget;
-              el.style.backgroundColor = '';
-              el.style.color = '';
-              el.style.borderColor = '';
+              const el = $event?.currentTarget;
+              if (el) {
+                el.style.backgroundColor = '';
+                el.style.borderColor = '';
+              }
             }"
         >
           <component 
@@ -96,8 +103,8 @@
               @click="showToolDropdown = !showToolDropdown"
               class="w-full px-4 py-3 sm:py-4 flex items-center justify-between text-left transition-all duration-200"
               style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-              @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'"
-              @mouseleave="$event.currentTarget.style.backgroundColor = ''"
+              @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; }"
+              @mouseleave="const el = $event?.currentTarget; if (el) { el.style.backgroundColor = ''; }"
             >
               <div class="flex items-center gap-3 flex-1 min-w-0">
                 <component 
@@ -143,7 +150,7 @@
                     v-for="tool in tools"
                     :key="tool.id"
                     @click="selectTool(tool.id)"
-                    class="w-full px-4 py-3 sm:py-3.5 flex items-center gap-3 text-left transition-all duration-200"
+                    class="w-full px-4 py-3 sm:py-3.5 flex items-center gap-3 text-left transition-all duration-200 border border-transparent rounded-lg"
                     style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
                     :class="currentTool === tool.id 
                       ? 'font-semibold' 
@@ -172,18 +179,23 @@
                           '--hover-text-dark': 'var(--theme-primary-dark)'
                         }"
                     @mouseenter="if (currentTool !== tool.id) { 
-                      const el = $event.currentTarget;
+                      const el = $event?.currentTarget;
                       if (el) {
                         const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
-                        el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)';
-                        el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)';
+                        if (isDark) {
+                          el.style.backgroundColor = 'var(--hover-bg-dark)';
+                          el.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                        } else {
+                          el.style.backgroundColor = 'var(--hover-bg)';
+                          el.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+                        }
                       }
                     }"
                     @mouseleave="if (currentTool !== tool.id) { 
-                      const el = $event.currentTarget;
+                      const el = $event?.currentTarget;
                       if (el) {
                         el.style.backgroundColor = '';
-                        el.style.color = '';
+                        el.style.borderColor = '';
                       }
                     }"
                   >
@@ -221,8 +233,8 @@
       <div 
         class="glass-card-tools rounded-2xl flex-1 shadow-lg transition-all duration-300 flex flex-col"
         :class="{
-          'p-6 md:p-8 lg:p-10': !['calc', 'pomodoro', 'stopwatch'].includes(currentTool),
-          'p-4 md:p-6': ['calc', 'pomodoro', 'stopwatch'].includes(currentTool)
+          'p-6 md:p-8 lg:p-10': !['calc', 'pomodoro', 'stopwatch', 'worldclock'].includes(currentTool),
+          'p-4 md:p-6': ['calc', 'pomodoro', 'stopwatch', 'worldclock'].includes(currentTool)
         }"
       >
           <!-- 计算器 -->
@@ -251,6 +263,9 @@
           
           <!-- 待办事项 -->
           <TodoTool v-if="currentTool === 'todo'" />
+          
+          <!-- 世界时钟 -->
+          <WorldClockTool v-if="currentTool === 'worldclock'" />
         </div>
     </div>
   </div>
@@ -270,6 +285,7 @@ import ColorPickerTool from '../components/tools/ColorPickerTool.vue'
 import QRCodeTool from '../components/tools/QRCodeTool.vue'
 import MarkdownTool from '../components/tools/MarkdownTool.vue'
 import TodoTool from '../components/tools/TodoTool.vue'
+import WorldClockTool from '../components/tools/WorldClockTool.vue'
 
 const { t } = useI18n()
 const currentTool = ref('todo') // 默认工具改为 todo

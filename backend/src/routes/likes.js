@@ -63,12 +63,17 @@ router.post('/:id/likes', optionalAuthenticate, (req, res) => {
     const userIp = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress
     const userAgent = req.headers['user-agent'] || null
 
+    console.log('Like toggle request:', { blogId, userId, userIp, userAgent })
+
     const result = Like.toggle(blogId, userIp, userAgent, userId)
+    
+    console.log('Like toggle result:', result)
 
     res.json(result)
   } catch (error) {
     console.error('Error toggling like:', error)
-    res.status(500).json({ error: 'Failed to toggle like' })
+    console.error('Error stack:', error.stack)
+    res.status(500).json({ error: error.message || 'Failed to toggle like' })
   }
 })
 

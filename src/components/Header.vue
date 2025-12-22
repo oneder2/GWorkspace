@@ -4,51 +4,6 @@
 -->
 <template>
   <header class="h-14 sm:h-16 px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-white/30 dark:border-slate-700/30 shrink-0 relative gap-2 sm:gap-4">
-    <!-- 新文章通知横幅 -->
-    <transition
-      enter-active-class="transition ease-out duration-300"
-      enter-from-class="transform opacity-0 -translate-y-full"
-      enter-to-class="transform opacity-100 translate-y-0"
-      leave-active-class="transition ease-in duration-200"
-      leave-from-class="transform opacity-100 translate-y-0"
-      leave-to-class="transform opacity-0 -translate-y-full"
-    >
-      <div 
-        v-if="newArticleNotification"
-        class="absolute top-full left-0 right-0 text-white px-6 py-3 shadow-lg z-50 flex items-center justify-between"
-        style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-emerald)); box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-primary) 30%, transparent);"
-      >
-        <div class="flex items-center gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 animate-pulse">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-            <polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-          <div>
-            <span class="font-semibold">{{ $t('blog.newArticleNotification') }}:</span>
-            <span class="ml-2">{{ newArticleNotification.title }}</span>
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <button
-            @click="viewNewArticle"
-            class="px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition-colors"
-          >
-            {{ $t('blog.viewNewArticle') }}
-          </button>
-          <button
-            @click="dismissNotification"
-            class="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
-            :title="$t('common.close')"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </transition>
-
     <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
       <!-- 移动端菜单按钮 -->
       <button
@@ -86,7 +41,8 @@
           <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
-      <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200 tracking-tight truncate">{{ currentTabName }}</h2>
+      <!-- 页面标题：亮色模式使用深色，暗色模式使用浅色，确保在背景上有足够对比度 -->
+      <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight truncate drop-shadow-sm">{{ currentTabName }}</h2>
       <span 
         v-if="currentTab === 'tools'" 
         class="px-2 py-0.5 rounded-md text-xs font-mono"
@@ -99,42 +55,63 @@
       </span>
     </div>
     
-    <!-- 最新文章推荐 - 仅在桌面端显示，当有文章时显示，移到左侧 -->
-    <div 
-      v-if="latestArticles.length > 0 && showLatestArticles"
-      class="hidden lg:flex items-center gap-2 mr-4 pr-4 border-r border-white/30 dark:border-slate-700/30"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-      </svg>
-      <div class="flex items-center gap-2 max-w-xs overflow-x-auto scrollbar-hide">
-        <a
-          v-for="article in latestArticles"
-          :key="article.id"
-          :href="`/blog/${article.id}`"
-          @click.prevent="goToArticle(article.id)"
-          class="shrink-0 px-2 py-1 rounded text-xs transition-all duration-200 whitespace-nowrap text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-          style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-          @mouseenter="const el = $event.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; }"
-          @mouseleave="$event.currentTarget.style.backgroundColor = ''"
-        >
-          {{ article.title }}
-        </a>
-      </div>
-      <button
-        @click="showLatestArticles = false"
-        class="shrink-0 p-1 rounded hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
-        :title="$t('common.close')"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 text-slate-500 dark:text-slate-400">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-    
     <div class="flex items-center gap-4">
+      <!-- 世界时钟 - 显示本地时间，其他地区时间在下拉栏（放在右侧） -->
+      <div class="relative">
+        <button
+          @click.stop="showWorldClockDropdown = !showWorldClockDropdown"
+          class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+          :title="$t('tools.worldClock.local')"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-slate-600 dark:text-slate-300">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span class="text-sm font-mono text-slate-700 dark:text-slate-200">{{ localTime }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 text-slate-500 dark:text-slate-400">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+        <!-- 下拉菜单 - 显示其他地区时间 -->
+        <transition
+          enter-active-class="transition ease-out duration-200"
+          enter-from-class="opacity-0 scale-95"
+          enter-to-class="opacity-100 scale-100"
+          leave-active-class="transition ease-in duration-150"
+          leave-from-class="opacity-100 scale-100"
+          leave-to-class="opacity-0 scale-95"
+        >
+          <div
+            v-if="showWorldClockDropdown"
+            v-click-outside="() => showWorldClockDropdown = false"
+            class="absolute right-0 top-full mt-2 w-64 glass-card rounded-xl shadow-lg py-2 z-50"
+          >
+            <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">
+              <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('tools.worldClock.local') }}</div>
+              <div class="text-lg font-mono font-bold text-slate-800 dark:text-slate-200 mt-1">{{ formatLocalTimeWithSeconds() }}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ localDate }}</div>
+            </div>
+            <div class="px-4 py-2 space-y-3">
+              <div>
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ $t('tools.worldClock.china') }}</div>
+                <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTime('china') }}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDate('china') }}</div>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ $t('tools.worldClock.usEast') }}</div>
+                <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTime('usEast') }}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDate('usEast') }}</div>
+              </div>
+              <div>
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ $t('tools.worldClock.usWest') }}</div>
+                <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTime('usWest') }}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDate('usWest') }}</div>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+      
       <!-- 位置信息 -->
       <div 
         v-if="weather && (weather.city || weather.country)" 
@@ -289,7 +266,6 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
-import { blogApi } from '../utils/api'
 import AuthModal from './AuthModal.vue'
 
 const props = defineProps({
@@ -300,10 +276,6 @@ const props = defineProps({
   weather: {
     type: Object,
     default: null
-  },
-  currentTime: {
-    type: String,
-    required: true
   },
   isDark: {
     type: Boolean,
@@ -325,10 +297,93 @@ const showAuthModal = ref(false)
 const showUserMenu = ref(false)
 const userMenuContainer = ref(null)
 const userMenuButton = ref(null)
+const showWorldClockDropdown = ref(false)
 
-// 最新文章
-const latestArticles = ref([])
-const showLatestArticles = ref(true)
+
+// 世界时钟相关
+const currentTime = ref(new Date())
+let clockTimer = null
+
+// 时区配置
+const timezones = {
+  china: 'Asia/Shanghai',
+  usEast: 'America/New_York',
+  usWest: 'America/Los_Angeles'
+}
+
+/**
+ * 更新时钟时间
+ */
+const updateClock = () => {
+  currentTime.value = new Date()
+}
+
+/**
+ * 格式化本地时间（HH:MM）
+ */
+const localTime = computed(() => {
+  if (!currentTime.value) return '00:00'
+  const hours = currentTime.value.getHours().toString().padStart(2, '0')
+  const minutes = currentTime.value.getMinutes().toString().padStart(2, '0')
+  return `${hours}:${minutes}`
+})
+
+/**
+ * 格式化本地日期
+ */
+const localDate = computed(() => {
+  if (!currentTime.value) return ''
+  const year = currentTime.value.getFullYear()
+  const month = (currentTime.value.getMonth() + 1).toString().padStart(2, '0')
+  const day = currentTime.value.getDate().toString().padStart(2, '0')
+  return `${year}-${month}-${day}`
+})
+
+/**
+ * 格式化时间（HH:MM:SS）
+ * @param {string} timezone - 时区标识
+ * @returns {string} 格式化后的时间字符串
+ */
+const formatTime = (timezone) => {
+  if (!currentTime.value) return '00:00:00'
+  const timeStr = currentTime.value.toLocaleString('en-US', {
+    timeZone: timezones[timezone],
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  })
+  return timeStr
+}
+
+/**
+ * 格式化日期（YYYY-MM-DD）
+ * @param {string} timezone - 时区标识
+ * @returns {string} 格式化后的日期字符串
+ */
+const formatDate = (timezone) => {
+  if (!currentTime.value) return ''
+  const dateStr = currentTime.value.toLocaleString('en-US', {
+    timeZone: timezones[timezone],
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
+  const [month, day, year] = dateStr.split('/')
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+}
+
+/**
+ * 格式化本地时间（包含秒数，用于下拉菜单）
+ * @returns {string} 格式化后的时间字符串（HH:MM:SS）
+ */
+const formatLocalTimeWithSeconds = () => {
+  if (!currentTime.value) return '00:00:00'
+  const hours = currentTime.value.getHours().toString().padStart(2, '0')
+  const minutes = currentTime.value.getMinutes().toString().padStart(2, '0')
+  const seconds = currentTime.value.getSeconds().toString().padStart(2, '0')
+  return `${hours}:${minutes}:${seconds}`
+}
 
 /**
  * 切换用户菜单
@@ -352,67 +407,6 @@ const handleClickOutside = (event) => {
   showUserMenu.value = false
 }
 
-/**
- * 新文章通知
- */
-const newArticleNotification = ref(null)
-
-/**
- * 检查并显示新文章通知
- */
-const checkNewArticles = () => {
-  try {
-    const notifications = JSON.parse(localStorage.getItem('blog-new-articles') || '[]')
-    
-    if (notifications.length > 0) {
-      // 获取最新的通知（第一条）
-      const latest = notifications[0]
-      
-      // 检查通知是否在24小时内（避免显示过旧的通知）
-      const notificationAge = Date.now() - latest.timestamp
-      const oneDay = 24 * 60 * 60 * 1000
-      
-      if (notificationAge < oneDay) {
-        newArticleNotification.value = latest
-      } else {
-        // 清除过期通知
-        localStorage.setItem('blog-new-articles', JSON.stringify([]))
-      }
-    }
-  } catch (error) {
-    console.error('Failed to check new articles:', error)
-  }
-}
-
-/**
- * 监听新文章创建事件
- */
-const handleArticleCreated = (event) => {
-  const articleInfo = event.detail
-  newArticleNotification.value = articleInfo
-  
-  // 更新localStorage
-  const notifications = JSON.parse(localStorage.getItem('blog-new-articles') || '[]')
-  notifications.unshift(articleInfo)
-  localStorage.setItem('blog-new-articles', JSON.stringify(notifications.slice(0, 5)))
-}
-
-/**
- * 查看新文章
- */
-const viewNewArticle = () => {
-  if (newArticleNotification.value) {
-    router.push(`/blog/${newArticleNotification.value.id}`)
-    dismissNotification()
-  }
-}
-
-/**
- * 关闭通知
- */
-const dismissNotification = () => {
-  newArticleNotification.value = null
-}
 
 /**
  * 处理登出
@@ -485,40 +479,25 @@ const formatLocation = (weather) => {
   return ''
 }
 
-/**
- * 加载最新文章
- */
-const loadLatestArticles = async () => {
-  try {
-    const articles = await blogApi.getList({
-      status: 'published',
-      limit: 3, // 只显示3篇最新文章，避免Header过长
-      sortBy: 'published_at',
-      sortOrder: 'desc'
-    })
-    latestArticles.value = articles || []
-  } catch (error) {
-    console.error('Failed to load latest articles:', error)
-  }
-}
-
-/**
- * 跳转到文章
- */
-const goToArticle = (articleId) => {
-  router.push(`/blog/${articleId}`)
-}
-
 // 初始化
 onMounted(() => {
-  checkNewArticles()
-  loadLatestArticles()
-  // 监听新文章创建事件
-  window.addEventListener('blog-article-created', handleArticleCreated)
+  updateClock()
+  // 每秒更新一次时钟
+  clockTimer = setInterval(updateClock, 1000)
+  
+  // 清理localStorage中的新文章通知数据（如果存在）
+  try {
+    localStorage.removeItem('blog-new-articles')
+  } catch (error) {
+    // 忽略错误
+  }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('blog-article-created', handleArticleCreated)
+  // 清理定时器
+  if (clockTimer) {
+    clearInterval(clockTimer)
+  }
 })
 </script>
 

@@ -12,8 +12,8 @@
         @click="showMobileFilters = !showMobileFilters"
         class="w-full glass-card p-3 rounded-xl flex items-center justify-between transition-colors"
         style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-        @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'"
-        @mouseleave="$event.currentTarget.style.backgroundColor = ''"
+        @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; }"
+        @mouseleave="const el = $event?.currentTarget; if (el) { el.style.backgroundColor = ''; }"
       >
         <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $t('blog.filters') }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-400" :class="{ 'rotate-180': showMobileFilters }">
@@ -234,8 +234,8 @@
           @click="$router.push(`/blog/${post.id}`)"
           class="glass-card p-6 rounded-2xl group cursor-pointer border-l-4 border-l-transparent transition-all"
           style="--hover-border: var(--theme-primary);"
-          @mouseenter="$event.currentTarget.style.borderLeftColor = 'var(--hover-border)'"
-          @mouseleave="$event.currentTarget.style.borderLeftColor = 'transparent'"
+          @mouseenter="const el = $event?.currentTarget; if (el) { el.style.borderLeftColor = 'var(--hover-border)'; }"
+          @mouseleave="const el = $event?.currentTarget; if (el) { el.style.borderLeftColor = 'transparent'; }"
         >
           <div class="flex items-center gap-3 mb-3 flex-wrap">
             <!-- Genre分类 - 显示在日期前 -->
@@ -261,8 +261,8 @@
           <h3 
             class="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3 transition-colors"
             style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-            @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'"
-            @mouseleave="$event.currentTarget.style.color = ''"
+            @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'; }"
+            @mouseleave="const el = $event?.currentTarget; if (el) { el.style.color = ''; }"
             v-html="highlightText(post.title, searchQuery)"
           ></h3>
           <p 
@@ -280,22 +280,17 @@
               </svg>
             </div>
             <div class="flex items-center gap-3 text-slate-400 dark:text-slate-500 text-sm">
-              <button
-                @click.stop="toggleFavorite(post.id)"
-                class="flex items-center gap-1 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                :title="isFavorite(post.id) ? $t('blog.removeFavorite') : $t('blog.addFavorite')"
-              >
+              <span class="flex items-center gap-1 text-slate-400 dark:text-slate-500">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   viewBox="0 0 24 24" 
                   fill="currentColor" 
                   class="w-4 h-4"
-                  :class="isFavorite(post.id) ? 'text-red-500 dark:text-red-400' : ''"
                 >
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
-                {{ post.likes ?? 0 }}
-              </button>
+                {{ (post.likes_count !== undefined && post.likes_count !== null) ? post.likes_count : (post.likes || 0) }}
+              </span>
               <span class="flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>

@@ -49,8 +49,8 @@
         <button
           @click="submitMessage"
           :disabled="!formData.content || formData.content.trim().length === 0 || isSubmitting"
-          class="w-full px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-emerald)); color: white;"
+          class="w-full px-4 py-2.5 rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+          style="background: linear-gradient(135deg, var(--theme-primary), var(--theme-primary-emerald)); border: 2px solid rgba(255, 255, 255, 0.2);"
           @mouseenter="handleButtonHover"
           @mouseleave="handleButtonLeave"
         >
@@ -212,8 +212,10 @@ const formatDate = (dateStr) => {
  * 处理按钮悬停效果
  */
 const handleButtonHover = (event) => {
-  if (!event.currentTarget.disabled) {
-    event.currentTarget.style.opacity = '0.9'
+  const el = event?.currentTarget
+  if (el && !el.disabled) {
+    el.style.transform = 'translateY(-1px)'
+    el.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.2)'
   }
 }
 
@@ -221,8 +223,10 @@ const handleButtonHover = (event) => {
  * 处理按钮离开效果
  */
 const handleButtonLeave = (event) => {
-  if (!event.currentTarget.disabled) {
-    event.currentTarget.style.opacity = '1'
+  const el = event?.currentTarget
+  if (el && !el.disabled) {
+    el.style.transform = ''
+    el.style.boxShadow = ''
   }
 }
 

@@ -7,6 +7,11 @@ export const toolsConfig = [
   { 
     id: 'todo', 
     nameKey: 'tools.todo', 
+    iconName: 'ListIcon' 
+  },
+  { 
+    id: 'worldclock', 
+    nameKey: 'tools.worldClock.title', 
     iconName: 'ClockIcon' 
   },
   { 
@@ -17,7 +22,7 @@ export const toolsConfig = [
   { 
     id: 'encode', 
     nameKey: 'tools.encoder', 
-    iconName: 'TranslateIcon' 
+    iconName: 'CodeIcon' 
   },
   { 
     id: 'json', 
