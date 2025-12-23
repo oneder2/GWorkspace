@@ -122,10 +122,11 @@ jobs:
               echo "✓ Existing database backed up to temporary location"
             fi
             
-            # 先复制整个目录（排除 node_modules、数据库和.env）
+            # 先复制整个目录（排除 node_modules、数据库和.env，但保留 .env.example）
             if [ -d "$TEMP_DIR" ]; then
-              # 使用 find 逐个复制，排除数据库和.env相关文件
-              find "$TEMP_DIR" -type f ! -path "*/node_modules/*" ! -path "*/.env*" ! -path "*/database/*.db*" -exec sh -c '
+              # 使用 find 逐个复制，排除数据库和.env文件（但保留 .env.example）
+              # 注意：只排除 .env 和 .env.backup，不排除 .env.example
+              find "$TEMP_DIR" -type f ! -path "*/node_modules/*" ! -name ".env" ! -name ".env.backup" ! -path "*/database/*.db*" -exec sh -c '
                 src="$1"
                 dest="$2"
                 rel_path="${src#$3/}"
@@ -134,7 +135,7 @@ jobs:
                 cp "$src" "$target"
               ' _ {} "$DEPLOY_DIR" "$TEMP_DIR" \;
               
-              echo "✓ New files copied (excluding database and .env)"
+              echo "✓ New files copied (excluding database and .env, but preserving .env.example)"
             fi
             
             # 恢复.env文件 - 优先使用临时备份，其次使用.env.backup

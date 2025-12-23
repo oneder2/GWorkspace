@@ -175,6 +175,8 @@ const currentTab = computed(() => {
 const toggleLanguage = () => {
   locale.value = locale.value === 'zh' ? 'en' : 'zh'
   localStorage.setItem('locale', locale.value)
+  // 更新 HTML lang 属性，以便浏览器自动填充等功能识别当前语言
+  document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en'
 }
 
 /**
@@ -204,6 +206,13 @@ useKeyboard({
 
 onMounted(() => {
   loadWeather()
+  // 初始化 HTML lang 属性，根据当前 locale 设置
+  document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en'
+})
+
+// 监听 locale 变化，动态更新 HTML lang 属性
+watch(locale, (newLocale) => {
+  document.documentElement.lang = newLocale === 'zh' ? 'zh-CN' : 'en'
 })
 
 onUnmounted(() => {

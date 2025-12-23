@@ -562,9 +562,14 @@ const clearContent = () => {
  * @param {Event} event - 鼠标事件
  */
 const handleButtonHoverEnter = (event) => {
-  const el = event?.currentTarget
-  if (el && !isSubmitting.value) {
-    el.style.backgroundColor = isThemeTransparent.value ? '#059669' : 'var(--theme-primary-darker)'
+  try {
+    const el = event?.currentTarget
+    if (el && el.style && !isSubmitting.value) {
+      el.style.backgroundColor = isThemeTransparent.value ? '#059669' : 'var(--theme-primary-darker)'
+    }
+  } catch (error) {
+    // 忽略样式设置错误，避免中断用户操作
+    console.debug('Failed to set button hover style:', error)
   }
 }
 
@@ -573,9 +578,14 @@ const handleButtonHoverEnter = (event) => {
  * @param {Event} event - 鼠标事件
  */
 const handleButtonHoverLeave = (event) => {
-  const el = event?.currentTarget
-  if (el && !isSubmitting.value) {
-    el.style.backgroundColor = isThemeTransparent.value ? '#10b981' : 'var(--theme-primary)'
+  try {
+    const el = event?.currentTarget
+    if (el && el.style && !isSubmitting.value) {
+      el.style.backgroundColor = isThemeTransparent.value ? '#10b981' : 'var(--theme-primary)'
+    }
+  } catch (error) {
+    // 忽略样式设置错误，避免中断用户操作
+    console.debug('Failed to reset button hover style:', error)
   }
 }
 
@@ -584,9 +594,14 @@ const handleButtonHoverLeave = (event) => {
  * @param {Event} event - 鼠标事件
  */
 const handleTagButtonHoverEnter = (event) => {
-  const el = event?.currentTarget
-  if (el) {
-    el.style.backgroundColor = isThemeTransparent.value ? '#059669' : 'var(--theme-primary-darker)'
+  try {
+    const el = event?.currentTarget
+    if (el && el.style) {
+      el.style.backgroundColor = isThemeTransparent.value ? '#059669' : 'var(--theme-primary-darker)'
+    }
+  } catch (error) {
+    // 忽略样式设置错误，避免中断用户操作
+    console.debug('Failed to set tag button hover style:', error)
   }
 }
 
@@ -595,9 +610,14 @@ const handleTagButtonHoverEnter = (event) => {
  * @param {Event} event - 鼠标事件
  */
 const handleTagButtonHoverLeave = (event) => {
-  const el = event?.currentTarget
-  if (el) {
-    el.style.backgroundColor = isThemeTransparent.value ? '#10b981' : 'var(--theme-primary)'
+  try {
+    const el = event?.currentTarget
+    if (el && el.style) {
+      el.style.backgroundColor = isThemeTransparent.value ? '#10b981' : 'var(--theme-primary)'
+    }
+  } catch (error) {
+    // 忽略样式设置错误，避免中断用户操作
+    console.debug('Failed to reset tag button hover style:', error)
   }
 }
 
@@ -648,7 +668,9 @@ const handleSubmit = async () => {
 
   try {
     // 准备数据 - 确保所有必需字段都有值并去除空白
-    const slug = (formData.value.slug || generateSlug(formData.value.title)).trim()
+    // 如果 slug 为空或只包含空格，自动从标题生成
+    const rawSlug = (formData.value.slug || '').trim()
+    const slug = rawSlug || generateSlug(formData.value.title)
     const publishedAt = formData.value.date ? `${formData.value.date}T00:00:00.000Z` : null
 
     // 再次验证所有必需字段（双重检查）
