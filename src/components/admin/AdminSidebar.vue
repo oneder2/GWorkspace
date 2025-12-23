@@ -53,29 +53,8 @@
               '--hover-text': 'var(--theme-primary-darker)',
               '--hover-text-dark': 'var(--theme-primary-dark)'
             }"
-        @mouseenter="if (!isActive(item.path)) {
-          const el = $event?.currentTarget;
-          if (el) {
-            const isDark = document.documentElement.classList.contains('dark');
-            if (isDark) {
-              el.style.backgroundColor = 'var(--hover-bg-dark)';
-              el.style.color = 'var(--hover-text-dark)';
-              el.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-            } else {
-              el.style.backgroundColor = 'var(--hover-bg)';
-              el.style.color = 'var(--hover-text)';
-              el.style.borderColor = 'rgba(0, 0, 0, 0.15)';
-            }
-          }
-        }"
-        @mouseleave="if (!isActive(item.path)) {
-          const el = $event?.currentTarget;
-          if (el) {
-            el.style.backgroundColor = '';
-            el.style.color = '';
-            el.style.borderColor = '';
-          }
-        }"
+        @mouseenter="(event) => handleNavHoverEnter(event, item.path)"
+        @mouseleave="(event) => handleNavHoverLeave(event, item.path)"
         :title="collapsed ? item.name : ''"
       >
         <span v-html="item.icon" class="w-4 sm:w-5 h-4 sm:h-5 shrink-0"></span>
@@ -214,6 +193,45 @@ const getActiveStyle = (itemPath) => {
     backgroundColor: bgColor,
     color: finalColor,
     borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.15)'
+  }
+}
+
+/**
+ * 处理导航hover进入
+ * @param {Event} event - 鼠标事件
+ * @param {string} itemPath - 导航项路径
+ */
+const handleNavHoverEnter = (event, itemPath) => {
+  if (isActive(itemPath)) return
+  
+  const el = event?.currentTarget
+  if (!el || typeof document === 'undefined') return
+  
+  const isDark = document.documentElement.classList.contains('dark')
+  if (isDark) {
+    el.style.backgroundColor = 'var(--hover-bg-dark)'
+    el.style.color = 'var(--hover-text-dark)'
+    el.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+  } else {
+    el.style.backgroundColor = 'var(--hover-bg)'
+    el.style.color = 'var(--hover-text)'
+    el.style.borderColor = 'rgba(0, 0, 0, 0.15)'
+  }
+}
+
+/**
+ * 处理导航hover离开
+ * @param {Event} event - 鼠标事件
+ * @param {string} itemPath - 导航项路径
+ */
+const handleNavHoverLeave = (event, itemPath) => {
+  if (isActive(itemPath)) return
+  
+  const el = event?.currentTarget
+  if (el) {
+    el.style.backgroundColor = ''
+    el.style.color = ''
+    el.style.borderColor = ''
   }
 }
 </script>

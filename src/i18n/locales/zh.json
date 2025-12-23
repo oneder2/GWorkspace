@@ -120,6 +120,7 @@
     "articleMeta": "文章信息",
     "title": "标题",
     "titlePlaceholder": "输入文章标题...",
+    "slug": "URL别名",
     "date": "发布日期",
     "excerpt": "摘要",
     "excerptPlaceholder": "输入文章摘要...",
@@ -129,6 +130,7 @@
     "content": "正文内容",
     "contentPlaceholder": "输入Markdown格式的文章内容...",
     "validationErrors": "表单验证错误",
+    "missingFields": "缺少必填字段",
     "contentRequired": "文章内容不能为空",
     "saveHint": "保存后文章将提交到GitHub，Vercel会自动部署",
     "submitting": "提交中...",
@@ -255,17 +257,6 @@
     "markSpam": "标记垃圾",
     "blogId": "文章ID",
     "view": "查看",
-    "loading": "加载中..."
-  },
-  "common": {
-    "online": "在线",
-    "readArticle": "阅读文章",
-    "language": "语言",
-    "save": "保存",
-    "cancel": "取消",
-    "close": "关闭",
-    "clear": "清空",
-    "processing": "处理中...",
     "loading": "加载中..."
   }
 }

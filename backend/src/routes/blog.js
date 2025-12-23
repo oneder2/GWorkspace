@@ -129,6 +129,22 @@ router.get('/slug/:slug', (req, res) => {
  */
 router.post('/', (req, res) => {
   try {
+    // 记录请求信息用于调试
+    console.log('POST /api/blogs - Request received')
+    console.log('Request headers:', JSON.stringify(req.headers, null, 2))
+    console.log('Request body type:', typeof req.body)
+    console.log('Request body keys:', req.body ? Object.keys(req.body) : 'req.body is null/undefined')
+    console.log('Request body content:', JSON.stringify(req.body, null, 2))
+    
+    // 检查请求体是否存在
+    if (!req.body) {
+      console.error('Request body is missing or not parsed')
+      return res.status(400).json({ 
+        error: 'Request body is missing or not parsed',
+        message: 'The request body could not be parsed. Please check Content-Type header and request format.'
+      })
+    }
+
     const {
       title,
       slug,
@@ -140,9 +156,48 @@ router.post('/', (req, res) => {
       published_at = null
     } = req.body
 
-    // 基础验证
-    if (!title || !slug || !genre || !content || !excerpt) {
-      return res.status(400).json({ error: 'Missing required fields' })
+    // 记录每个字段的值（用于调试）
+    console.log('Extracted fields:')
+    console.log('  title:', typeof title, title ? `"${title.substring(0, 50)}..."` : title)
+    console.log('  slug:', typeof slug, slug)
+    console.log('  genre:', typeof genre, genre)
+    console.log('  content:', typeof content, content ? `[${content.length} chars]` : content)
+    console.log('  excerpt:', typeof excerpt, excerpt ? `"${excerpt.substring(0, 50)}..."` : excerpt)
+    console.log('  tags:', typeof tags, Array.isArray(tags) ? `[${tags.length} items]` : tags)
+
+    // 基础验证 - 检查所有必需字段，提供详细的错误信息
+    const missingFields = []
+    
+    // 更严格的验证：检查字段是否存在且非空
+    if (title === undefined || title === null || (typeof title === 'string' && title.trim().length === 0)) {
+      missingFields.push('title')
+      console.log('  -> title is missing or empty')
+    }
+    if (slug === undefined || slug === null || (typeof slug === 'string' && slug.trim().length === 0)) {
+      missingFields.push('slug')
+      console.log('  -> slug is missing or empty')
+    }
+    if (genre === undefined || genre === null || (typeof genre === 'string' && genre.trim().length === 0)) {
+      missingFields.push('genre')
+      console.log('  -> genre is missing or empty')
+    }
+    if (content === undefined || content === null || (typeof content === 'string' && content.trim().length === 0)) {
+      missingFields.push('content')
+      console.log('  -> content is missing or empty')
+    }
+    if (excerpt === undefined || excerpt === null || (typeof excerpt === 'string' && excerpt.trim().length === 0)) {
+      missingFields.push('excerpt')
+      console.log('  -> excerpt is missing or empty')
+    }
+
+    if (missingFields.length > 0) {
+      console.error('Validation failed. Missing fields:', missingFields)
+      return res.status(400).json({ 
+        error: 'Missing required fields',
+        missingFields: missingFields,
+        message: `Missing required fields: ${missingFields.join(', ')}`,
+        receivedFields: req.body ? Object.keys(req.body) : []
+      })
     }
 
     // 检查slug是否已存在

@@ -387,7 +387,7 @@ const toggleLike = async () => {
       // 更新点赞数量，优先使用likes_count字段
       if (post.value) {
         post.value.likes_count = result.count || 0
-        post.value.likes = result.count || 0
+      post.value.likes = result.count || 0
       }
     }
   } catch (error) {

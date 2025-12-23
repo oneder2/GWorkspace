@@ -17,7 +17,7 @@
           :class="currentTool === tool.id 
             ? 'rounded-2xl border shadow-md' 
             : 'text-slate-600 dark:text-slate-400 border border-transparent rounded-xl hover:shadow-sm'"
-            :style="currentTool === tool.id 
+          :style="currentTool === tool.id 
             ? (isThemeTransparent 
                 ? (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
                     ? {

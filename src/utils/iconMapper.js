@@ -30,6 +30,7 @@ import TimerIcon from '../components/icons/TimerIcon.vue'
 import QrCodeIcon from '../components/icons/QrCodeIcon.vue'
 import FileTextIcon from '../components/icons/FileTextIcon.vue'
 import ListIcon from '../components/icons/ListIcon.vue'
+import ToolIcon from '../components/icons/ToolIcon.vue'
 
 /**
  * 图标名称到组件的映射
@@ -38,6 +39,7 @@ const iconMap = {
   HomeIcon,
   CompassIcon,
   WrenchIcon,
+  ToolIcon,
   ArticleIcon,
   BriefcaseIcon,
   GoogleIcon,

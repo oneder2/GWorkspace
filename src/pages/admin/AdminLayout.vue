@@ -17,8 +17,8 @@
           @click="$router.push('/blog')"
           class="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 transition-colors"
           style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-          @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'"
-          @mouseleave="$event.currentTarget.style.color = ''"
+          @mouseenter="handleButtonHoverEnter"
+          @mouseleave="handleButtonHoverLeave"
         >
           {{ $t('admin.backToBlog') }}
         </button>
@@ -69,6 +69,29 @@ if (!isAdmin.value) {
 const handleLogout = async () => {
   await logout()
   router.push('/blog')
+}
+
+/**
+ * 处理按钮hover进入
+ * @param {Event} event - 鼠标事件
+ */
+const handleButtonHoverEnter = (event) => {
+  const el = event?.currentTarget
+  if (el && typeof document !== 'undefined') {
+    const isDark = document.documentElement.classList.contains('dark')
+    el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'
+  }
+}
+
+/**
+ * 处理按钮hover离开
+ * @param {Event} event - 鼠标事件
+ */
+const handleButtonHoverLeave = (event) => {
+  const el = event?.currentTarget
+  if (el) {
+    el.style.color = ''
+  }
 }
 </script>
 

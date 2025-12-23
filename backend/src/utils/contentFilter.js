@@ -76,7 +76,7 @@ export function containsSensitiveWords(content) {
   if (!content || typeof content !== 'string') {
     return false
   }
-
+  
   // 检查是否包含敏感词
   return sensitiveWords.some(word => {
     // 对于英文单词，使用单词边界匹配，避免误判
@@ -88,7 +88,7 @@ export function containsSensitiveWords(content) {
       // 英文：使用单词边界匹配（大小写不敏感）
       const lowerContent = content.toLowerCase()
       const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
-      return regex.test(lowerContent)
+    return regex.test(lowerContent)
     }
   })
 }
@@ -116,7 +116,7 @@ export function filterSensitiveWords(content) {
     } else {
       // 英文：使用单词边界匹配
       const regex = new RegExp(`\\b${escapedWord}\\b`, 'gi')
-      filteredContent = filteredContent.replace(regex, '*'.repeat(word.length))
+    filteredContent = filteredContent.replace(regex, '*'.repeat(word.length))
     }
   })
   

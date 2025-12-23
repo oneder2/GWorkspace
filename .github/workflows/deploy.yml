@@ -74,11 +74,19 @@ jobs:
               tar -czf "$BACKUP_DIR/backend-backup-$TIMESTAMP.tar.gz" -C $DEPLOY_DIR . 2>/dev/null || true
             fi
             
-            # 备份数据库（如果存在）
+            # 备份数据库（如果存在）- 确保数据库不会被丢失
+            DB_BACKUP_PATH=""
             if [ -f "$DEPLOY_DIR/database/gworkspace.db" ]; then
               echo "Backing up database..."
               mkdir -p "$BACKUP_DIR/database"
-              cp "$DEPLOY_DIR/database/gworkspace.db" "$BACKUP_DIR/database/gworkspace_$TIMESTAMP.db" || true
+              DB_BACKUP_PATH="$BACKUP_DIR/database/gworkspace_$TIMESTAMP.db"
+              cp "$DEPLOY_DIR/database/gworkspace.db" "$DB_BACKUP_PATH" || {
+                echo "ERROR: Failed to backup database! Aborting deployment to prevent data loss."
+                exit 1
+              }
+              echo "✓ Database backed up to: $DB_BACKUP_PATH"
+            else
+              echo "Note: No existing database found (first deployment or database was removed)"
             fi
             
             # 解压新版本到临时目录
@@ -94,30 +102,67 @@ jobs:
             # 复制新文件（保留数据库和.env）- 使用简单可靠的方法
             echo "Deploying new version..."
             
-            # 先复制整个目录（排除 node_modules）
-            if [ -d "$TEMP_DIR" ]; then
-              # 使用 cp -r 复制所有内容
-              cp -r "$TEMP_DIR"/* "$DEPLOY_DIR/" 2>/dev/null || {
-                # 如果 cp -r 失败，使用 find 逐个复制
-                find "$TEMP_DIR" -type f ! -path "*/node_modules/*" -exec sh -c '
-                  src="$1"
-                  dest="$2"
-                  rel_path="${src#$3/}"
-                  target="$dest/$rel_path"
-                  mkdir -p "$(dirname "$target")"
-                  cp "$src" "$target"
-                ' _ {} "$DEPLOY_DIR" "$TEMP_DIR" \;
+            # 保存现有的.env和数据库文件到临时位置（防止被覆盖）
+            ENV_TEMP=""
+            DB_TEMP=""
+            if [ -f "$DEPLOY_DIR/.env" ]; then
+              ENV_TEMP="/tmp/.env.backup-$$"
+              cp "$DEPLOY_DIR/.env" "$ENV_TEMP" || {
+                echo "WARNING: Failed to backup .env file, but continuing..."
               }
-              
-              # 删除不需要的文件（数据库文件和.env）
-              rm -f "$DEPLOY_DIR/.env" 2>/dev/null || true
-              find "$DEPLOY_DIR/database" -name "*.db" -type f -delete 2>/dev/null || true
-              find "$DEPLOY_DIR/database" -name "*.db-journal" -type f -delete 2>/dev/null || true
             fi
             
-            # 恢复.env文件（如果备份存在）
-            if [ -f "$DEPLOY_DIR/.env.backup" ]; then
+            # 保存现有数据库文件（如果存在）
+            if [ -f "$DEPLOY_DIR/database/gworkspace.db" ]; then
+              DB_TEMP="/tmp/gworkspace.db.backup-$$"
+              cp "$DEPLOY_DIR/database/gworkspace.db" "$DB_TEMP" || {
+                echo "ERROR: Failed to backup existing database! Aborting to prevent data loss."
+                exit 1
+              }
+              echo "✓ Existing database backed up to temporary location"
+            fi
+            
+            # 先复制整个目录（排除 node_modules、数据库和.env）
+            if [ -d "$TEMP_DIR" ]; then
+              # 使用 find 逐个复制，排除数据库和.env相关文件
+              find "$TEMP_DIR" -type f ! -path "*/node_modules/*" ! -path "*/.env*" ! -path "*/database/*.db*" -exec sh -c '
+                src="$1"
+                dest="$2"
+                rel_path="${src#$3/}"
+                target="$dest/$rel_path"
+                mkdir -p "$(dirname "$target")"
+                cp "$src" "$target"
+              ' _ {} "$DEPLOY_DIR" "$TEMP_DIR" \;
+              
+              echo "✓ New files copied (excluding database and .env)"
+            fi
+            
+            # 恢复.env文件 - 优先使用临时备份，其次使用.env.backup
+            if [ -n "$ENV_TEMP" ] && [ -f "$ENV_TEMP" ]; then
+              cp "$ENV_TEMP" "$DEPLOY_DIR/.env"
+              rm -f "$ENV_TEMP"
+              echo "✓ .env file restored from backup"
+            elif [ -f "$DEPLOY_DIR/.env.backup" ]; then
               cp "$DEPLOY_DIR/.env.backup" "$DEPLOY_DIR/.env"
+              echo "✓ .env file restored from .env.backup"
+            else
+              echo "WARNING: No .env file found and no backup available!"
+              echo "Please ensure .env file is configured manually on the server."
+            fi
+            
+            # 恢复数据库文件 - 优先使用临时备份
+            if [ -n "$DB_TEMP" ] && [ -f "$DB_TEMP" ]; then
+              mkdir -p "$DEPLOY_DIR/database"
+              cp "$DB_TEMP" "$DEPLOY_DIR/database/gworkspace.db"
+              rm -f "$DB_TEMP"
+              echo "✓ Database file restored from backup"
+            elif [ -n "$DB_BACKUP_PATH" ] && [ -f "$DB_BACKUP_PATH" ]; then
+              # 如果临时备份不存在，从备份目录恢复最新的备份
+              mkdir -p "$DEPLOY_DIR/database"
+              cp "$DB_BACKUP_PATH" "$DEPLOY_DIR/database/gworkspace.db"
+              echo "✓ Database file restored from backup directory"
+            else
+              echo "Note: No existing database to restore (first deployment)"
             fi
             
             # 确保在正确的目录
@@ -192,10 +237,29 @@ jobs:
             
             # 验证数据库文件是否存在（如果不存在，会在服务器启动时创建）
             if [ -f "database/gworkspace.db" ]; then
-              echo "✓ Database file exists"
+              echo "✓ Database file exists and preserved"
               ls -lh database/gworkspace.db
+              # 验证数据库文件大小（不应该为空，除非是首次部署）
+              DB_SIZE=$(stat -f%z "database/gworkspace.db" 2>/dev/null || stat -c%s "database/gworkspace.db" 2>/dev/null || echo "0")
+              if [ "$DB_SIZE" -eq 0 ]; then
+                echo "WARNING: Database file exists but is empty! This might indicate data loss."
+              else
+                echo "✓ Database file size: $DB_SIZE bytes"
+              fi
             else
-              echo "Note: Database file will be created on first server start"
+              echo "Note: Database file will be created on first server start (first deployment)"
+            fi
+            
+            # 验证.env文件是否存在
+            if [ -f ".env" ]; then
+              echo "✓ .env file exists and preserved"
+              # 检查.env文件是否有内容
+              if [ ! -s ".env" ]; then
+                echo "WARNING: .env file is empty!"
+              fi
+            else
+              echo "ERROR: .env file is missing! Deployment may fail."
+              echo "Please ensure .env file is configured on the server."
             fi
             
             # 验证关键文件是否存在

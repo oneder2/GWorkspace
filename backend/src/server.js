@@ -64,8 +64,18 @@ app.use(cors({
 }))
 
 app.use(morgan('dev')) // 请求日志
-app.use(express.json()) // JSON解析
-app.use(express.urlencoded({ extended: true })) // URL编码解析
+
+// JSON解析中间件 - 添加错误处理和大小限制
+app.use(express.json({ 
+  limit: '10mb', // 限制请求体大小为10MB
+  strict: true // 严格模式，只接受数组和对象
+}))
+
+// URL编码解析中间件
+app.use(express.urlencoded({ 
+  extended: true,
+  limit: '10mb'
+}))
 
 // 初始化数据库
 const db = getDatabase()
@@ -172,9 +182,23 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' })
 })
 
-// 错误处理中间件
+// 错误处理中间件 - 捕获所有错误，包括JSON解析错误
 app.use((err, req, res, next) => {
+  // 处理JSON解析错误
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    console.error('JSON parsing error:', err.message)
+    console.error('Request URL:', req.url)
+    console.error('Request method:', req.method)
+    return res.status(400).json({ 
+      error: 'Invalid JSON in request body',
+      message: 'The request body contains invalid JSON. Please check your data format.'
+    })
+  }
+  
+  // 处理其他错误
   console.error('Error:', err)
+  console.error('Request URL:', req.url)
+  console.error('Request method:', req.method)
   res.status(err.status || 500).json({
     error: err.message || 'Internal Server Error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })

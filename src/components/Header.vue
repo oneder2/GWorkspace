@@ -62,7 +62,7 @@
           @click.stop="showWorldClockDropdown = !showWorldClockDropdown"
           class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
           :title="$t('tools.worldClock.local')"
-        >
+    >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-slate-600 dark:text-slate-300">
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
@@ -70,7 +70,7 @@
           <span class="text-sm font-mono text-slate-700 dark:text-slate-200">{{ localTime }}</span>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 text-slate-500 dark:text-slate-400">
             <polyline points="6 9 12 15 18 9"/>
-          </svg>
+      </svg>
         </button>
         <!-- 下拉菜单 - 显示其他地区时间 -->
         <transition
@@ -96,7 +96,7 @@
                 <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ $t('tools.worldClock.china') }}</div>
                 <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTime('china') }}</div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDate('china') }}</div>
-              </div>
+      </div>
               <div>
                 <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ $t('tools.worldClock.usEast') }}</div>
                 <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTime('usEast') }}</div>
@@ -110,8 +110,8 @@
             </div>
           </div>
         </transition>
-      </div>
-      
+    </div>
+    
       <!-- 位置信息 -->
       <div 
         v-if="weather && (weather.city || weather.country)" 

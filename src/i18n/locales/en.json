@@ -120,6 +120,7 @@
     "articleMeta": "Article Metadata",
     "title": "Title",
     "titlePlaceholder": "Enter article title...",
+    "slug": "URL Slug",
     "date": "Publish Date",
     "excerpt": "Excerpt",
     "excerptPlaceholder": "Enter article excerpt...",
@@ -129,6 +130,7 @@
     "content": "Content",
     "contentPlaceholder": "Enter article content in Markdown format...",
     "validationErrors": "Validation Errors",
+    "missingFields": "Missing required fields",
     "contentRequired": "Article content cannot be empty",
     "saveHint": "After saving, the article will be submitted to GitHub and Vercel will auto-deploy",
     "submitting": "Submitting...",
@@ -248,27 +250,5 @@
     "blogId": "Blog ID",
     "view": "View",
     "loading": "Loading..."
-  },
-  "common": {
-    "online": "Online",
-    "readArticle": "Read Article",
-    "language": "Language",
-    "save": "Save",
-    "cancel": "Cancel",
-    "close": "Close",
-    "clear": "Clear",
-    "processing": "Processing...",
-    "loading": "Loading...",
-    "submitting": "Submitting...",
-    "submitError": "Submit failed",
-    "anonymous": "Anonymous",
-    "noData": "No data",
-    "justNow": "Just now",
-    "minutesAgo": " minutes ago",
-    "hoursAgo": " hours ago",
-    "daysAgo": " days ago",
-    "collapse": "Collapse",
-    "expand": "Expand",
-    "menu": "Menu"
   }
 }

@@ -42,7 +42,14 @@ async function request(url, options = {}) {
       localStorage.removeItem('token')
     }
     const error = await response.json().catch(() => ({ error: response.statusText }))
-    throw new Error(error.error || error.message || `HTTP ${response.status}`)
+    // 如果后端返回了详细的错误信息（包括missingFields），优先使用
+    const errorMessage = error.message || error.error || `HTTP ${response.status}`
+    const errorWithDetails = new Error(errorMessage)
+    // 将详细错误信息附加到错误对象上，方便前端处理
+    if (error.missingFields) {
+      errorWithDetails.missingFields = error.missingFields
+    }
+    throw errorWithDetails
   }
 
   return response.json()

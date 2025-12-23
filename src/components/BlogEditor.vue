@@ -148,12 +148,8 @@
                       backgroundColor: 'var(--theme-primary)',
                       color: '#ffffff'
                     }"
-                @mouseenter="const el = $event.currentTarget; if (el) {
-                  el.style.backgroundColor = isThemeTransparent ? '#059669' : 'var(--theme-primary-darker)';
-                }"
-                @mouseleave="const el = $event.currentTarget; if (el) {
-                  el.style.backgroundColor = isThemeTransparent ? '#10b981' : 'var(--theme-primary)';
-                }"
+                @mouseenter="handleTagButtonHoverEnter"
+                @mouseleave="handleTagButtonHoverLeave"
               >
                 {{ $t('blog.addTag') }}
               </button>
@@ -240,7 +236,7 @@
           
           <!-- 纯预览视图 -->
           <div v-else-if="viewMode === 'preview'" class="flex-1" style="min-height: 600px;">
-            <div
+            <div 
               class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2"
               v-html="previewContent"
             ></div>
@@ -290,18 +286,8 @@
                   backgroundColor: 'var(--theme-primary)',
                   color: '#ffffff'
                 }"
-            @mouseenter="!isSubmitting && (() => {
-              const el = $event.currentTarget;
-              if (el) {
-                el.style.backgroundColor = isThemeTransparent ? '#059669' : 'var(--theme-primary-darker)';
-              }
-            })()"
-            @mouseleave="!isSubmitting && (() => {
-              const el = $event.currentTarget;
-              if (el) {
-                el.style.backgroundColor = isThemeTransparent ? '#10b981' : 'var(--theme-primary)';
-              }
-            })()"
+            @mouseenter="handleButtonHoverEnter"
+            @mouseleave="handleButtonHoverLeave"
           >
             <svg 
               v-if="isSubmitting"
@@ -572,6 +558,50 @@ const clearContent = () => {
 }
 
 /**
+ * 处理按钮hover进入
+ * @param {Event} event - 鼠标事件
+ */
+const handleButtonHoverEnter = (event) => {
+  const el = event?.currentTarget
+  if (el && !isSubmitting.value) {
+    el.style.backgroundColor = isThemeTransparent.value ? '#059669' : 'var(--theme-primary-darker)'
+  }
+}
+
+/**
+ * 处理按钮hover离开
+ * @param {Event} event - 鼠标事件
+ */
+const handleButtonHoverLeave = (event) => {
+  const el = event?.currentTarget
+  if (el && !isSubmitting.value) {
+    el.style.backgroundColor = isThemeTransparent.value ? '#10b981' : 'var(--theme-primary)'
+  }
+}
+
+/**
+ * 处理标签按钮hover进入
+ * @param {Event} event - 鼠标事件
+ */
+const handleTagButtonHoverEnter = (event) => {
+  const el = event?.currentTarget
+  if (el) {
+    el.style.backgroundColor = isThemeTransparent.value ? '#059669' : 'var(--theme-primary-darker)'
+  }
+}
+
+/**
+ * 处理标签按钮hover离开
+ * @param {Event} event - 鼠标事件
+ */
+const handleTagButtonHoverLeave = (event) => {
+  const el = event?.currentTarget
+  if (el) {
+    el.style.backgroundColor = isThemeTransparent.value ? '#10b981' : 'var(--theme-primary)'
+  }
+}
+
+/**
  * 验证表单
  */
 const validateForm = () => {
@@ -659,6 +689,19 @@ const handleSubmit = async () => {
       published_at: publishedAt
     }
 
+    // 打印提交的数据（便于调试，包括生产环境）
+    console.log('Submitting article data:', {
+      title: articleData.title,
+      slug: articleData.slug,
+      genre: articleData.genre,
+      contentLength: articleData.content.length,
+      excerpt: articleData.excerpt,
+      tagsCount: articleData.tags.length,
+      status: articleData.status,
+      published_at: articleData.published_at
+    })
+    console.log('Full articleData object:', JSON.stringify(articleData, null, 2))
+
     // 调用API创建或更新文章
     let result
     if (props.isEditMode && formData.value.id) {
@@ -676,7 +719,22 @@ const handleSubmit = async () => {
     handleClose()
   } catch (error) {
     console.error('Failed to submit article:', error)
+    // 如果有详细的错误信息（如missingFields），显示详细信息
+    if (error.missingFields && Array.isArray(error.missingFields)) {
+      const missingFieldNames = error.missingFields.map(field => {
+        const fieldMap = {
+          title: t('blog.title') || 'Title',
+          slug: t('blog.slug') || 'Slug',
+          genre: t('blog.genre') || 'Genre',
+          content: t('blog.content') || 'Content',
+          excerpt: t('blog.excerpt') || 'Excerpt'
+        }
+        return fieldMap[field] || field
+      })
+      errors.value = [`${t('blog.missingFields') || 'Missing required fields'}: ${missingFieldNames.join(', ')}`]
+    } else {
     errors.value = [error.message || t('blog.submitError') || 'Failed to submit article']
+    }
   } finally {
     isSubmitting.value = false
   }
