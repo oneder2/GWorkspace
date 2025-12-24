@@ -278,11 +278,51 @@ export class User {
    * 删除用户
    * @param {number} id - 用户ID
    * @returns {boolean} 是否删除成功
+   * 
+   * 注意：删除用户前会处理所有引用该用户的数据：
+   * - admin_settings.updated_by: 设置为NULL
+   * - guestbook.user_id: 设置为NULL（保留留言，显示为"用户已注销"）
+   * - likes.user_id: 设置为NULL（保留点赞记录，但解除用户关联）
+   * - comments.user_id: 设置为NULL（保留评论，显示为"用户已注销"）
+   * - sessions: 自动删除（ON DELETE CASCADE）
    */
   static delete(id) {
     const db = getDatabase()
-    const result = db.prepare('DELETE FROM users WHERE id = ?').run(id)
-    return result.changes > 0
+    
+    // 使用事务确保所有操作的原子性
+    const transaction = db.transaction((userId) => {
+      // 1. 处理 admin_settings 表：将 updated_by 设置为 NULL
+      db.prepare('UPDATE admin_settings SET updated_by = NULL WHERE updated_by = ?').run(userId)
+      
+      // 2. 处理 guestbook 表：将 user_id 设置为 NULL（保留留言内容）
+      db.prepare('UPDATE guestbook SET user_id = NULL WHERE user_id = ?').run(userId)
+      
+      // 3. 处理 likes 表：将 user_id 设置为 NULL（保留点赞记录）
+      db.prepare('UPDATE likes SET user_id = NULL WHERE user_id = ?').run(userId)
+      
+      // 4. 处理 comments 表：将 user_id 设置为 NULL（保留评论内容）
+      db.prepare('UPDATE comments SET user_id = NULL WHERE user_id = ?').run(userId)
+      
+      // 5. 删除用户的所有会话（虽然 ON DELETE CASCADE 会自动处理，但显式删除更安全）
+      this.deleteAllSessions(userId)
+      
+      // 6. 最后删除用户记录
+      const result = db.prepare('DELETE FROM users WHERE id = ?').run(userId)
+      
+      if (result.changes === 0) {
+        throw new Error('User not found')
+      }
+      
+      return true
+    })
+    
+    try {
+      transaction(id)
+      return true
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      throw error
+    }
   }
 
   /**

@@ -23,7 +23,9 @@
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-3 mb-2">
-                <span class="font-semibold text-slate-800 dark:text-slate-200">{{ comment.author_name }}</span>
+                <span class="font-semibold text-slate-800 dark:text-slate-200">
+                  {{ comment.user_id === null ? $t('auth.deletedUser') : comment.author_name }}
+                </span>
                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ comment.created_at }}</span>
                 <span
                   class="px-2 py-1 text-xs font-semibold rounded-full"

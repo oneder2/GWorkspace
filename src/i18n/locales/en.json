@@ -192,7 +192,8 @@
     "confirmDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone.",
     "confirmDeleteAccountFinal": "Warning: This will permanently delete your account and all associated data. Are you sure you want to continue?",
     "accountDeleted": "Account deleted successfully",
-    "deleteAccountFailed": "Failed to delete account, please try again later"
+    "deleteAccountFailed": "Failed to delete account, please try again later",
+    "deletedUser": "Deleted User"
   },
   "todo": {
     "title": "Todo List",

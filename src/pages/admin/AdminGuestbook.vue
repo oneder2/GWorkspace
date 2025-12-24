@@ -23,7 +23,9 @@
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-3 mb-2">
-                <span class="font-semibold text-slate-800 dark:text-slate-200">{{ message.author_name || $t('common.anonymous') }}</span>
+                <span class="font-semibold text-slate-800 dark:text-slate-200">
+                  {{ message.user_id === null ? $t('auth.deletedUser') : (message.author_name || $t('common.anonymous')) }}
+                </span>
                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ formatDate(message.created_at) }}</span>
                 <span
                   v-if="message.status === 'deleted'"
