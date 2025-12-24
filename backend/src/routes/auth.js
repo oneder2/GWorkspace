@@ -165,8 +165,9 @@ router.post('/logout', (req, res) => {
 
 /**
  * 删除账户（注销）
- * DELETE /api/auth/account
- * 需要认证，用户只能删除自己的账户，不能删除管理员账户
+ * DELETE /api/auth/account?force=true
+ * 需要认证，用户只能删除自己的账户
+ * 删除管理员账户需要传递 force=true 参数
  */
 router.delete('/account', async (req, res) => {
   try {
@@ -195,9 +196,12 @@ router.delete('/account', async (req, res) => {
       return res.status(404).json({ error: 'User not found' })
     }
 
-    // 防止删除管理员账户
-    if (user.role === 'admin') {
-      return res.status(403).json({ error: 'Cannot delete admin account' })
+    // 如果尝试删除管理员账户，需要 force=true 参数
+    if (user.role === 'admin' && req.query.force !== 'true') {
+      return res.status(403).json({ 
+        error: 'Cannot delete admin account without force parameter',
+        hint: 'Add ?force=true to the request URL to delete admin account'
+      })
     }
 
     // 删除用户的所有会话

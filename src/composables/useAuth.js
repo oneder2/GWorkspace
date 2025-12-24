@@ -91,10 +91,11 @@ export function useAuth() {
 
   /**
    * 删除账户（注销）
+   * @param {boolean} force - 是否强制删除（用于删除admin账户）
    */
-  const deleteAccount = async () => {
+  const deleteAccount = async (force = false) => {
     try {
-      await authApi.deleteAccount()
+      await authApi.deleteAccount(force)
       // 删除成功后清除本地状态
       user.value = null
       token.value = null

@@ -198,6 +198,7 @@
     "adminPanel": "管理后台",
     "deleteAccount": "注销账户",
     "confirmDeleteAccount": "确定要注销账户吗？此操作不可撤销。",
+    "confirmDeleteAdminAccount": "您正在尝试删除管理员账户。这是一个危险操作，确定要继续吗？",
     "confirmDeleteAccountFinal": "警告：这将永久删除您的账户和所有相关数据。确定要继续吗？",
     "accountDeleted": "账户已成功注销",
     "deleteAccountFailed": "注销账户失败，请稍后重试",

@@ -295,11 +295,15 @@ export const authApi = {
 
   /**
    * 删除账户（注销）
+   * @param {boolean} force - 是否强制删除（用于删除admin账户）
    * @returns {Promise<Object>}
    */
-  deleteAccount: () => request('/auth/account', {
-    method: 'DELETE'
-  }),
+  deleteAccount: (force = false) => {
+    const url = force ? '/auth/account?force=true' : '/auth/account'
+    return request(url, {
+      method: 'DELETE'
+    })
+  },
 
   /**
    * 验证token

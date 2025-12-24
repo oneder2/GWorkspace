@@ -608,12 +608,26 @@ const handleDeleteAccount = async () => {
     return
   }
 
-  // 再次确认（删除账户是危险操作）
-  if (!confirm(t('auth.confirmDeleteAccountFinal'))) {
-    return
+  // 如果是管理员账户，需要额外确认
+  const isAdminAccount = isAdmin.value
+  const forceDelete = isAdminAccount
+  
+  if (isAdminAccount) {
+    if (!confirm(t('auth.confirmDeleteAdminAccount'))) {
+      return
+    }
+    // 管理员删除需要最终确认
+    if (!confirm(t('auth.confirmDeleteAccountFinal'))) {
+      return
+    }
+  } else {
+    // 普通用户再次确认（删除账户是危险操作）
+    if (!confirm(t('auth.confirmDeleteAccountFinal'))) {
+      return
+    }
   }
 
-  const result = await deleteAccount()
+  const result = await deleteAccount(forceDelete)
   
   if (result.success) {
     showUserMenu.value = false
