@@ -91,7 +91,7 @@
         <div class="flex items-start justify-between mb-2">
           <div class="flex items-center gap-2">
             <span class="text-sm font-semibold text-slate-800 dark:text-slate-200">
-              {{ message.author_name || (message.user_id === null ? $t('auth.deletedUser') : $t('common.anonymous')) }}
+              {{ message.user_id === null ? $t('auth.deletedUser') : (message.author_name || $t('common.anonymous')) }}
             </span>
             <span class="text-xs text-slate-400 dark:text-slate-500">
               {{ formatDate(message.created_at) }}
