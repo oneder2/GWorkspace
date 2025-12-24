@@ -8,13 +8,13 @@ import { useLocalStorage } from './useStorage'
 
 /**
  * 预设主题配置
- * 当前仅支持透明主题（无主题色）
+ * 默认使用黑白灰色主题
  */
 const presetThemes = {
   none: {
     name: 'None',
-    primary: 'transparent', // 透明主题色
-    primaryDark: 'transparent',
+    primary: '#475569', // slate-600 - 深灰色
+    primaryDark: '#cbd5e1', // slate-300 - 浅灰色
   }
 }
 
@@ -29,33 +29,33 @@ export function useCustomTheme() {
 
   /**
    * 当前主题颜色
-   * 当前仅支持透明主题
+   * 默认使用黑白灰色主题
    */
   const themeColors = computed(() => {
-    // 当前禁用自定义主题功能，始终使用透明主题
+    // 当前禁用自定义主题功能，始终使用默认的黑白灰色主题
     return presetThemes.none
   })
 
   /**
    * 从主色生成完整的主题色系
-   * 当前仅支持透明主题，所有颜色都返回transparent
-   * @param {string} primary - 主色（当前仅支持transparent）
+   * 如果主色是透明，使用黑白灰色主题作为fallback
+   * @param {string} primary - 主色
    * @returns {object} 完整的主题色对象
    */
   const generateThemeColors = (primary) => {
-    // 如果主色是transparent，所有变体都返回transparent
+    // 如果主色是transparent，使用黑白灰色主题
     if (primary === 'transparent') {
       return {
-        primary: 'transparent',
-        primaryDark: 'transparent',
-        primaryLight: 'transparent',
-        primaryLighter: 'transparent',
-        primaryDarker: 'transparent',
-        primaryDarkest: 'transparent',
-        primaryEmerald: 'transparent',
-        primaryEmeraldDark: 'transparent',
-        primaryEmeraldLight: 'transparent',
-        primaryEmeraldLighter: 'transparent'
+        primary: '#475569', // slate-600
+        primaryDark: '#cbd5e1', // slate-300
+        primaryLight: '#64748b', // slate-500
+        primaryLighter: '#94a3b8', // slate-400
+        primaryDarker: '#334155', // slate-700
+        primaryDarkest: '#1e293b', // slate-800
+        primaryEmerald: '#64748b', // slate-500
+        primaryEmeraldDark: '#94a3b8', // slate-400
+        primaryEmeraldLight: '#475569', // slate-600
+        primaryEmeraldLighter: '#64748b' // slate-500
       }
     }
     

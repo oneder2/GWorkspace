@@ -100,7 +100,7 @@ export class User {
       return null
     }
 
-    // 更新最后登录时间
+    // 更新最后登录时间（地区信息由登录API负责更新）
     const db = getDatabase()
     db.prepare('UPDATE users SET last_login_at = ? WHERE id = ?').run(new Date().toISOString(), user.id)
 

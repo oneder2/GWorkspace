@@ -6,6 +6,8 @@
 import express from 'express'
 import { body, validationResult } from 'express-validator'
 import { User } from '../models/User.js'
+import { AdminSettings } from '../models/AdminSettings.js'
+import { getLocationByIP } from '../utils/ipLocation.js'
 
 const router = express.Router()
 
@@ -94,6 +96,27 @@ router.post('/login', [
       return res.status(401).json({ error: 'Invalid username or password' })
     }
 
+    // 如果是管理员登录，根据IP地址更新管理员设置
+    if (user.role === 'admin') {
+      try {
+        const userIp = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress
+        // 如果是本地IP或私有IP，不更新
+        if (userIp && !userIp.startsWith('127.') && !userIp.startsWith('192.168.') && !userIp.startsWith('10.')) {
+          const locationInfo = await getLocationByIP(userIp.split(',')[0].trim())
+          if (locationInfo.location && locationInfo.timezone) {
+            AdminSettings.update({
+              location: locationInfo.location,
+              timezone: locationInfo.timezone,
+              ip_address: userIp.split(',')[0].trim()
+            }, user.id)
+          }
+        }
+      } catch (error) {
+        // 地区信息更新失败不影响登录
+        console.warn('Failed to update admin location:', error)
+      }
+    }
+
     // 生成token
     const token = User.generateToken(user)
 
@@ -137,6 +160,60 @@ router.post('/logout', (req, res) => {
   } catch (error) {
     console.error('Logout error:', error)
     res.status(500).json({ error: 'Failed to logout' })
+  }
+})
+
+/**
+ * 删除账户（注销）
+ * DELETE /api/auth/account
+ * 需要认证，用户只能删除自己的账户，不能删除管理员账户
+ */
+router.delete('/account', async (req, res) => {
+  try {
+    // 获取token并验证用户身份
+    const token = req.headers.authorization?.replace('Bearer ', '')
+    
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' })
+    }
+
+    // 验证token并获取用户信息
+    const decoded = User.verifyToken(token)
+    if (!decoded) {
+      return res.status(401).json({ error: 'Invalid token' })
+    }
+
+    // 检查会话是否有效
+    if (!User.isSessionValid(token)) {
+      return res.status(401).json({ error: 'Session expired' })
+    }
+
+    const userId = decoded.id
+    const user = User.getById(userId)
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    // 防止删除管理员账户
+    if (user.role === 'admin') {
+      return res.status(403).json({ error: 'Cannot delete admin account' })
+    }
+
+    // 删除用户的所有会话
+    User.deleteAllSessions(userId)
+    
+    // 删除用户账户
+    const success = User.delete(userId)
+    
+    if (!success) {
+      return res.status(500).json({ error: 'Failed to delete account' })
+    }
+
+    res.json({ message: 'Account deleted successfully' })
+  } catch (error) {
+    console.error('Delete account error:', error)
+    res.status(500).json({ error: 'Failed to delete account' })
   }
 })
 

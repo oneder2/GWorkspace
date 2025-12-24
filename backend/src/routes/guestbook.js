@@ -23,7 +23,7 @@ const router = express.Router()
 router.get('/', (req, res) => {
   try {
     const {
-      status = 'approved',
+      status = 'approved', // 默认只显示已审核的留言
       limit,
       offset = 0,
       sortBy = 'created_at',
@@ -31,6 +31,8 @@ router.get('/', (req, res) => {
     } = req.query
 
     const options = {
+      // 如果 status 为 'all'，设置为 null 以获取所有状态（包括 deleted，用于管理员查看）
+      // 否则使用指定的状态（默认 'approved'，排除 deleted）
       status: status === 'all' ? null : status,
       limit: limit ? parseInt(limit) : null,
       offset: parseInt(offset),
@@ -142,12 +144,17 @@ router.put('/:id', (req, res) => {
 })
 
 /**
- * 删除留言
+ * 删除留言（软删除）
  * DELETE /api/guestbook/:id
- * 需要认证（后续实现）
+ * 需要管理员认证
  */
-router.delete('/:id', (req, res) => {
+router.delete('/:id', authenticate, (req, res) => {
   try {
+    // 检查是否为管理员
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' })
+    }
+    
     const id = parseInt(req.params.id)
     const success = Guestbook.delete(id)
 

@@ -8,9 +8,12 @@
     <button 
       @click="$emit('toggle', todo.id)"
       class="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors shrink-0"
-      :class="todo.completed 
-        ? 'bg-green-500 dark:bg-green-600 border-green-500 dark:border-green-600' 
-        : 'border-slate-300 dark:border-slate-600 hover:border-green-500 dark:hover:border-green-400'"
+      :class="'border-slate-300 dark:border-slate-600'"
+      :style="todo.completed 
+        ? { backgroundColor: 'var(--theme-primary)', borderColor: 'var(--theme-primary)' }
+        : {}"
+      @mouseenter="handleCheckboxHoverEnter"
+      @mouseleave="handleCheckboxHoverLeave"
     >
       <svg v-if="todo.completed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3">
         <polyline points="20 6 9 17 4 12"/>
@@ -25,7 +28,8 @@
         @blur="finishEdit"
         @keyup.enter="finishEdit"
         @keyup.esc="cancelEdit"
-        class="w-full bg-transparent border-b border-green-500 dark:border-green-400 outline-none text-slate-800 dark:text-slate-200"
+        class="w-full bg-transparent border-b outline-none text-slate-800 dark:text-slate-200"
+        style="border-color: var(--theme-primary);"
         ref="editInput"
       >
       <div 
@@ -53,7 +57,10 @@
     <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
       <button 
         @click="startEdit"
-        class="p-1.5 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 transition-colors"
+        class="p-1.5 rounded-lg transition-colors"
+        style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-light);"
+        @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)';"
+        @mouseleave="const el = $event.currentTarget; el.style.backgroundColor = ''; el.style.color = '';"
         :title="$t('todo.edit')"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
@@ -101,6 +108,32 @@ const priorityColors = {
   low: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
   medium: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
   high: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+}
+
+/**
+ * 处理复选框hover进入
+ * @param {Event} event - 鼠标事件
+ */
+const handleCheckboxHoverEnter = (event) => {
+  if (!props.todo.completed) {
+    const el = event?.currentTarget
+    if (el) {
+      el.style.borderColor = 'var(--theme-primary)'
+    }
+  }
+}
+
+/**
+ * 处理复选框hover离开
+ * @param {Event} event - 鼠标事件
+ */
+const handleCheckboxHoverLeave = (event) => {
+  if (!props.todo.completed) {
+    const el = event?.currentTarget
+    if (el) {
+      el.style.borderColor = ''
+    }
+  }
 }
 
 /**

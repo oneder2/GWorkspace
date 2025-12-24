@@ -27,25 +27,25 @@
                         borderColor: 'rgba(255, 255, 255, 0.1)'
                       }
                     : {
-                        background: 'rgba(100, 116, 139, 0.2)',
-                        color: '#475569',
-                        boxShadow: '0 4px 6px -1px rgba(100, 116, 139, 0.25)',
-                        borderColor: 'rgba(0, 0, 0, 0.15)'
+                        background: 'rgba(255, 255, 255, 0.5)',
+                        color: '#1e293b',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        borderColor: 'rgba(0, 0, 0, 0.1)'
                       }
                   )
                 : {
-                    background: 'linear-gradient(to right, color-mix(in srgb, var(--theme-primary-lighter) 80%, transparent), color-mix(in srgb, var(--theme-primary-emerald-lighter) 80%, transparent))',
+                    background: 'color-mix(in srgb, var(--theme-primary-emerald-lighter) 80%, transparent))',
                     color: 'var(--theme-primary-darker)',
                     boxShadow: '0 4px 6px -1px color-mix(in srgb, var(--theme-primary) 10%, transparent)',
                     borderColor: 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)'
                   }
               )
               : {
-                  '--hover-bg': 'color-mix(in srgb, var(--theme-primary-lighter) 40%, transparent)',
+                  '--hover-bg': 'rgba(255, 255, 255, 0.6)',
                   '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 15%, transparent)',
-                  '--hover-text': 'var(--theme-primary-darker)',
+                  '--hover-text': '#1e293b',
                   '--hover-text-dark': 'var(--theme-primary-dark)',
-                  '--hover-border': 'rgba(0, 0, 0, 0.15)',
+                  '--hover-border': 'rgba(0, 0, 0, 0.1)',
                   '--hover-border-dark': 'rgba(255, 255, 255, 0.1)'
                 }"
             @mouseenter="if (currentTool !== tool.id) { 
@@ -57,6 +57,7 @@
                   el.style.borderColor = 'var(--hover-border-dark)';
                 } else {
                   el.style.backgroundColor = 'var(--hover-bg)';
+                  el.style.color = 'var(--hover-text)';
                   el.style.borderColor = 'var(--hover-border)';
                 }
               }
@@ -163,8 +164,8 @@
                                   color: '#cbd5e1'
                                 }
                               : {
-                                  backgroundColor: 'rgba(100, 116, 139, 0.2)',
-                                  color: '#475569'
+                                  backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                                  color: '#1e293b'
                                 }
                             )
                           : {

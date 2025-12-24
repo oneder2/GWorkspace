@@ -27,7 +27,10 @@
         <div class="flex gap-3">
           <button 
             @click="generateQR"
-            class="flex-1 py-3 bg-green-500 dark:bg-green-600 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-700 font-bold transition-colors"
+            class="flex-1 py-3 text-white rounded-lg font-bold transition-colors"
+            style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker));"
+            @mouseenter="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary-light), var(--theme-primary))'"
+            @mouseleave="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker))'"
           >
             {{ $t('tools.generate') }}
           </button>

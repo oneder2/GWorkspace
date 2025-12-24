@@ -85,7 +85,8 @@ const migrationFiles = [
   '001_initial_schema.sql',
   '002_user_system.sql',
   '003_guestbook.sql',
-  '004_guestbook_user_id.sql'
+  '004_guestbook_user_id.sql',
+  '005_admin_settings.sql'
 ]
 
 try {

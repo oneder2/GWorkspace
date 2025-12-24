@@ -92,11 +92,41 @@
               <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ localDate }}</div>
             </div>
             <div class="px-4 py-2 space-y-3">
+              <!-- 管理员时区 -->
+              <div v-if="adminSettings && adminSettings.timezone">
+                <div class="flex items-center justify-between mb-1">
+                  <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $t('tools.worldClock.admin') }}</div>
+                  <div v-if="adminTimeDiff !== null" class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ formatTimeDifference(adminTimeDiff) }}
+                  </div>
+                </div>
+                <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTimeByTimezone(adminSettings.timezone) }}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDateByTimezone(adminSettings.timezone) }}</div>
+                <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ adminSettings.location || adminSettings.timezone }}</div>
+              </div>
+              
+              <!-- 访客时区 -->
+              <div v-if="visitorTimezone">
+                <div class="flex items-center justify-between mb-1">
+                  <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $t('tools.worldClock.visitor') }}</div>
+                  <div v-if="visitorTimeDiff !== null" class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ formatTimeDifference(visitorTimeDiff) }}
+                  </div>
+                </div>
+                <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTimeByTimezone(visitorTimezone) }}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDateByTimezone(visitorTimezone) }}</div>
+                <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ visitorTimezone }}</div>
+              </div>
+              
+              <!-- 分隔线 -->
+              <div v-if="(adminSettings && adminSettings.timezone) || visitorTimezone" class="border-t border-slate-200 dark:border-slate-700 my-2"></div>
+              
+              <!-- 预设时区 -->
               <div>
                 <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ $t('tools.worldClock.china') }}</div>
                 <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTime('china') }}</div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDate('china') }}</div>
-      </div>
+              </div>
               <div>
                 <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ $t('tools.worldClock.usEast') }}</div>
                 <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTime('usEast') }}</div>
@@ -156,7 +186,8 @@
             :title="user.username"
             ref="userMenuButton"
           >
-            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white font-semibold text-sm">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm"
+              style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker));">
               {{ user.username.charAt(0).toUpperCase() }}
             </div>
           </button>
@@ -188,11 +219,18 @@
               >
                 {{ $t('auth.adminPanel') }}
               </button>
+              <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
               <button
                 @click.stop="handleLogout"
-                class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
               >
                 {{ $t('auth.logout') }}
+              </button>
+              <button
+                @click.stop="handleDeleteAccount"
+                class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                {{ $t('auth.deleteAccount') }}
               </button>
             </div>
           </transition>
@@ -266,6 +304,7 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
+import { adminSettingsApi } from '../utils/api'
 import AuthModal from './AuthModal.vue'
 
 const props = defineProps({
@@ -291,7 +330,7 @@ const emit = defineEmits(['toggle-theme', 'toggle-lang', 'open-theme-customizer'
 
 const { t } = useI18n()
 const router = useRouter()
-const { user, isAdmin, logout } = useAuth()
+const { user, isAdmin, logout, deleteAccount } = useAuth()
 
 const showAuthModal = ref(false)
 const showUserMenu = ref(false)
@@ -299,10 +338,15 @@ const userMenuContainer = ref(null)
 const userMenuButton = ref(null)
 const showWorldClockDropdown = ref(false)
 
-
 // 世界时钟相关
 const currentTime = ref(new Date())
 let clockTimer = null
+
+// 管理员设置
+const adminSettings = ref(null)
+
+// 访客时区（使用浏览器API获取）
+const visitorTimezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || null)
 
 // 时区配置
 const timezones = {
@@ -386,6 +430,146 @@ const formatLocalTimeWithSeconds = () => {
 }
 
 /**
+ * 根据时区格式化时间
+ * @param {string} timezone - 时区字符串（如 "Asia/Shanghai"）
+ * @returns {string} 格式化后的时间字符串（HH:MM:SS）
+ */
+const formatTimeByTimezone = (timezone) => {
+  if (!currentTime.value || !timezone) return '00:00:00'
+  try {
+    const timeStr = currentTime.value.toLocaleString('en-US', {
+      timeZone: timezone,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    })
+    return timeStr
+  } catch (error) {
+    console.warn('Failed to format time for timezone:', timezone, error)
+    return '00:00:00'
+  }
+}
+
+/**
+ * 根据时区格式化日期
+ * @param {string} timezone - 时区字符串（如 "Asia/Shanghai"）
+ * @returns {string} 格式化后的日期字符串（YYYY-MM-DD）
+ */
+const formatDateByTimezone = (timezone) => {
+  if (!currentTime.value || !timezone) return ''
+  try {
+    const dateStr = currentTime.value.toLocaleString('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    })
+    const [month, day, year] = dateStr.split('/')
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+  } catch (error) {
+    console.warn('Failed to format date for timezone:', timezone, error)
+    return ''
+  }
+}
+
+/**
+ * 计算两个时区之间的时差（小时）
+ * @param {string} timezone1 - 第一个时区
+ * @param {string} timezone2 - 第二个时区（默认为本地时区）
+ * @returns {number|null} 时差（小时），timezone1相对于timezone2，正数表示timezone1在前，负数表示在后
+ */
+const calculateTimeDifference = (timezone1, timezone2 = null) => {
+  if (!timezone1 || !currentTime.value) return null
+  
+  try {
+    const tz2 = timezone2 || Intl.DateTimeFormat().resolvedOptions().timeZone
+    if (timezone1 === tz2) return 0
+    
+    // 使用UTC时间作为基准，比较两个时区的小时数
+    const utcTime = currentTime.value
+    
+    // 获取两个时区在当前UTC时间显示的小时数
+    const parts1 = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone1,
+      hour: '2-digit',
+      hour12: false,
+      day: '2-digit'
+    }).formatToParts(utcTime)
+    
+    const parts2 = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz2,
+      hour: '2-digit',
+      hour12: false,
+      day: '2-digit'
+    }).formatToParts(utcTime)
+    
+    const hour1 = parseInt(parts1.find(p => p.type === 'hour')?.value || '0')
+    const hour2 = parseInt(parts2.find(p => p.type === 'hour')?.value || '0')
+    const day1 = parseInt(parts1.find(p => p.type === 'day')?.value || '0')
+    const day2 = parseInt(parts2.find(p => p.type === 'day')?.value || '0')
+    
+    // 计算时差
+    let diffHours = hour1 - hour2
+    
+    // 处理跨日期的情况
+    if (day1 !== day2) {
+      // 如果day1大于day2，说明timezone1更早（时间更快），需要加24小时
+      // 如果day1小于day2，说明timezone1更晚（时间更慢），需要减24小时
+      diffHours += (day1 > day2 ? 24 : -24)
+    }
+    
+    // 规范化到-12到+12的范围（处理超过24小时的情况）
+    if (diffHours > 12) diffHours -= 24
+    if (diffHours < -12) diffHours += 24
+    
+    return diffHours
+  } catch (error) {
+    console.warn('Failed to calculate time difference:', error)
+    return null
+  }
+}
+
+/**
+ * 格式化时差显示
+ * @param {number} diffHours - 时差（小时）
+ * @returns {string} 格式化后的时差字符串
+ */
+const formatTimeDifference = (diffHours) => {
+  if (diffHours === null || diffHours === undefined) return ''
+  if (diffHours === 0) return t('tools.worldClock.sameTime')
+  if (diffHours > 0) {
+    return t('tools.worldClock.hoursAhead', { hours: Math.abs(diffHours) })
+  } else {
+    return t('tools.worldClock.hoursBehind', { hours: Math.abs(diffHours) })
+  }
+}
+
+// 计算管理员和访客的时差（相对于本地时间）
+const adminTimeDiff = computed(() => {
+  if (!adminSettings.value || !adminSettings.value.timezone) return null
+  return calculateTimeDifference(adminSettings.value.timezone)
+})
+
+const visitorTimeDiff = computed(() => {
+  if (!visitorTimezone.value) return null
+  return calculateTimeDifference(visitorTimezone.value)
+})
+
+/**
+ * 加载管理员设置
+ */
+const loadAdminSettings = async () => {
+  try {
+    adminSettings.value = await adminSettingsApi.get()
+  } catch (error) {
+    // 如果获取失败（可能不是管理员或未登录），静默忽略
+    console.debug('Failed to load admin settings:', error)
+    adminSettings.value = null
+  }
+}
+
+/**
  * 切换用户菜单
  */
 const toggleUserMenu = () => {
@@ -414,6 +598,30 @@ const handleClickOutside = (event) => {
 const handleLogout = async () => {
   await logout()
   showUserMenu.value = false
+}
+
+/**
+ * 处理删除账户（注销）
+ */
+const handleDeleteAccount = async () => {
+  if (!confirm(t('auth.confirmDeleteAccount'))) {
+    return
+  }
+
+  // 再次确认（删除账户是危险操作）
+  if (!confirm(t('auth.confirmDeleteAccountFinal'))) {
+    return
+  }
+
+  const result = await deleteAccount()
+  
+  if (result.success) {
+    showUserMenu.value = false
+    // 可以显示成功消息或重定向
+    alert(t('auth.accountDeleted'))
+  } else {
+    alert(result.error || t('auth.deleteAccountFailed'))
+  }
 }
 
 /**
@@ -491,6 +699,9 @@ onMounted(() => {
   } catch (error) {
     // 忽略错误
   }
+  
+  // 加载管理员设置
+  loadAdminSettings()
 })
 
 onUnmounted(() => {

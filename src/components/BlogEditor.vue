@@ -38,7 +38,10 @@
             <input 
               v-model="formData.title"
               type="text"
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+              @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+              @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
               :placeholder="$t('blog.titlePlaceholder')"
             />
           </div>
@@ -53,7 +56,10 @@
               <input 
                 v-model="formData.genre"
                 type="text"
-                class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400"
+                class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+              @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+              @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
                 :placeholder="$t('blog.genrePlaceholder')"
                 list="genre-list"
               />
@@ -70,7 +76,10 @@
               <input 
                 v-model="formData.date"
                 type="date"
-                class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400"
+                class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+              @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+              @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
               />
             </div>
           </div>
@@ -83,7 +92,10 @@
             <textarea 
               v-model="formData.excerpt"
               rows="3"
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 resize-none"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all resize-none"
+              style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+              @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+              @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
               :placeholder="$t('blog.excerptPlaceholder')"
             ></textarea>
           </div>
@@ -99,7 +111,7 @@
                 :key="index"
                 class="px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2"
                 :style="isThemeTransparent 
-                  ? (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+                  ? (isDarkMode
                       ? {
                           backgroundColor: 'rgba(148, 163, 184, 0.3)',
                           color: '#cbd5e1'
@@ -133,17 +145,25 @@
                 v-model="newTag"
                 type="text"
                 @keyup.enter="addTag"
-                class="flex-1 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400"
+                class="flex-1 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+                style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+                @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+                @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
                 :placeholder="$t('blog.addTagPlaceholder')"
               />
               <button 
                 @click="addTag"
                 class="px-4 py-2 rounded-lg transition-colors font-semibold"
                 :style="isThemeTransparent
-                  ? {
-                      backgroundColor: '#10b981',
-                      color: '#ffffff'
-                    }
+                  ? (isDarkMode
+                      ? {
+                          backgroundColor: '#64748b',
+                          color: '#ffffff'
+                        }
+                      : {
+                          backgroundColor: '#475569',
+                          color: '#ffffff'
+                        })
                   : {
                       backgroundColor: 'var(--theme-primary)',
                       color: '#ffffff'
@@ -278,10 +298,15 @@
             :disabled="isSubmitting"
             class="px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
             :style="isThemeTransparent
-              ? {
-                  backgroundColor: '#10b981',
-                  color: '#ffffff'
-                }
+              ? (isDarkMode
+                  ? {
+                      backgroundColor: '#64748b',
+                      color: '#ffffff'
+                    }
+                  : {
+                      backgroundColor: '#475569',
+                      color: '#ffffff'
+                    })
               : {
                   backgroundColor: 'var(--theme-primary)',
                   color: '#ffffff'
@@ -308,9 +333,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github.css' // 亮色主题作为基础
 import { blogApi, generateSlug } from '../utils/api'
 
 const props = defineProps({
@@ -354,12 +381,19 @@ const { t } = useI18n()
 const isThemeTransparent = ref(false)
 
 /**
+ * 检查是否为暗色模式（用于模板中）
+ */
+const isDarkMode = ref(false)
+
+/**
  * 检查主题色状态
  */
 const checkThemeTransparent = () => {
   if (typeof document !== 'undefined') {
     const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim()
     isThemeTransparent.value = themePrimary === 'transparent'
+    // 同时更新暗色模式状态
+    isDarkMode.value = document.documentElement.classList.contains('dark')
   }
 }
 
@@ -375,12 +409,58 @@ marked.setOptions({
   smartypants: false
 })
 
-// 配置代码块渲染器（添加代码高亮类）
+// 配置代码块渲染器（使用 highlight.js 进行语法高亮）
 const renderer = new marked.Renderer()
 
-renderer.code = function(code, language) {
+/**
+ * 代码块渲染器 - 使用 highlight.js 进行语法高亮
+ * marked.js v17 使用 token 对象而不是直接参数
+ * @param {Object} token - token 对象，包含 text 和 lang 属性
+ * @returns {string} - 渲染后的 HTML
+ */
+renderer.code = function(token) {
+  // 从 token 对象中提取代码文本和语言
+  // token.text 是代码内容，token.lang 是语言（可能为 null 或 undefined）
+  const code = token.text || ''
+  const language = token.lang || null
   const lang = language || 'text'
-  return `<pre class="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 overflow-x-auto"><code class="language-${lang}">${code}</code></pre>`
+  
+  // 确保 code 是字符串类型
+  const codeStr = typeof code === 'string' ? code : String(code || '')
+  
+  // 如果语言被 highlight.js 支持，进行语法高亮
+  if (language && hljs.getLanguage(language)) {
+    try {
+      const highlighted = hljs.highlight(codeStr, { language: lang })
+      return `<pre class="hljs bg-slate-100 dark:bg-slate-800 rounded-lg p-4 overflow-x-auto"><code class="hljs language-${lang}">${highlighted.value}</code></pre>`
+    } catch (err) {
+      // 如果高亮失败，继续执行自动检测或转义逻辑
+      console.warn('Failed to highlight code:', err)
+    }
+  }
+  
+  // 对于不支持的语言或未指定语言，尝试自动检测语言
+  if (codeStr.trim()) {
+    try {
+      const highlighted = hljs.highlightAuto(codeStr)
+      if (highlighted.relevance > 0 && highlighted.language) {
+        return `<pre class="hljs bg-slate-100 dark:bg-slate-800 rounded-lg p-4 overflow-x-auto"><code class="hljs language-${highlighted.language}">${highlighted.value}</code></pre>`
+}
+    } catch (err) {
+      // 自动检测也失败，继续执行转义逻辑
+      console.warn('Failed to auto-highlight code:', err)
+    }
+  }
+  
+  // 最后的手段：转义 HTML 特殊字符
+  const escaped = codeStr
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+  
+  return `<pre class="hljs bg-slate-100 dark:bg-slate-800 rounded-lg p-4 overflow-x-auto"><code class="hljs language-${lang}">${escaped}</code></pre>`
 }
 
 // marked v17的table函数接收一个token对象，包含header和rows数组
@@ -565,7 +645,9 @@ const handleButtonHoverEnter = (event) => {
   try {
     const el = event?.currentTarget
     if (el && el.style && !isSubmitting.value) {
-      el.style.backgroundColor = isThemeTransparent.value ? '#059669' : 'var(--theme-primary-darker)'
+      el.style.backgroundColor = isThemeTransparent.value 
+        ? (isDarkMode.value ? '#475569' : '#334155')
+        : 'var(--theme-primary-darker)'
     }
   } catch (error) {
     // 忽略样式设置错误，避免中断用户操作
@@ -581,7 +663,9 @@ const handleButtonHoverLeave = (event) => {
   try {
     const el = event?.currentTarget
     if (el && el.style && !isSubmitting.value) {
-      el.style.backgroundColor = isThemeTransparent.value ? '#10b981' : 'var(--theme-primary)'
+      el.style.backgroundColor = isThemeTransparent.value 
+        ? (isDarkMode.value ? '#64748b' : '#475569')
+        : 'var(--theme-primary)'
     }
   } catch (error) {
     // 忽略样式设置错误，避免中断用户操作
@@ -597,7 +681,9 @@ const handleTagButtonHoverEnter = (event) => {
   try {
     const el = event?.currentTarget
     if (el && el.style) {
-      el.style.backgroundColor = isThemeTransparent.value ? '#059669' : 'var(--theme-primary-darker)'
+      el.style.backgroundColor = isThemeTransparent.value 
+        ? (isDarkMode.value ? '#475569' : '#334155')
+        : 'var(--theme-primary-darker)'
     }
   } catch (error) {
     // 忽略样式设置错误，避免中断用户操作
@@ -613,7 +699,9 @@ const handleTagButtonHoverLeave = (event) => {
   try {
     const el = event?.currentTarget
     if (el && el.style) {
-      el.style.backgroundColor = isThemeTransparent.value ? '#10b981' : 'var(--theme-primary)'
+      el.style.backgroundColor = isThemeTransparent.value 
+        ? (isDarkMode.value ? '#64748b' : '#475569')
+        : 'var(--theme-primary)'
     }
   } catch (error) {
     // 忽略样式设置错误，避免中断用户操作
@@ -669,8 +757,17 @@ const handleSubmit = async () => {
   try {
     // 准备数据 - 确保所有必需字段都有值并去除空白
     // 如果 slug 为空或只包含空格，自动从标题生成
+    // 注意：generateSlug 已经支持中文字符，如果结果为空会返回 'untitled'
     const rawSlug = (formData.value.slug || '').trim()
-    const slug = rawSlug || generateSlug(formData.value.title)
+    let slug = rawSlug
+    if (!slug) {
+      // 如果 slug 为空，从标题生成
+      slug = generateSlug(formData.value.title)
+      // 如果生成的 slug 仍然为空（理论上不应该发生），使用默认值
+      if (!slug) {
+        slug = 'untitled-' + Date.now()
+      }
+    }
     const publishedAt = formData.value.date ? `${formData.value.date}T00:00:00.000Z` : null
 
     // 再次验证所有必需字段（双重检查）

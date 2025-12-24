@@ -23,6 +23,7 @@ const AdminBlogList = () => import('../pages/admin/AdminBlogList.vue')
 const AdminBlogEditorPage = () => import('../pages/admin/AdminBlogEditorPage.vue')
 const AdminAnalytics = () => import('../pages/admin/AdminAnalytics.vue')
 const AdminComments = () => import('../pages/admin/AdminComments.vue')
+const AdminGuestbook = () => import('../pages/admin/AdminGuestbook.vue')
 
 /**
  * 路由配置
@@ -108,6 +109,12 @@ const routes = [
         name: 'admin-comments',
         component: AdminComments,
         meta: { title: 'Comments' }
+      },
+      {
+        path: 'guestbook',
+        name: 'admin-guestbook',
+        component: AdminGuestbook,
+        meta: { title: 'Guestbook Management' }
       }
     ]
   },

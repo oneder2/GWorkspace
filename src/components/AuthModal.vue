@@ -40,7 +40,10 @@
               v-model="formData.username"
               type="text"
               required
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+              @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+              @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
               :placeholder="$t('auth.usernamePlaceholder')"
             />
           </div>
@@ -54,7 +57,10 @@
               v-model="formData.email"
               type="email"
               required
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+              @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+              @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
               :placeholder="$t('auth.emailPlaceholder')"
             />
           </div>
@@ -68,7 +74,10 @@
               v-model="formData.username"
               type="text"
               required
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+              @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+              @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
               :placeholder="$t('auth.usernamePlaceholder')"
             />
           </div>
@@ -82,7 +91,10 @@
               v-model="formData.password"
               type="password"
               required
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+              @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+              @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
               :placeholder="$t('auth.passwordPlaceholder')"
             />
           </div>
@@ -91,7 +103,23 @@
           <button
             type="submit"
             :disabled="isSubmitting"
-            class="w-full px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-600 dark:to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 dark:hover:from-green-700 dark:hover:to-emerald-700 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            class="w-full px-4 py-2.5 text-white rounded-lg transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            :style="isThemeTransparent 
+              ? (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+                  ? {
+                      background: 'linear-gradient(to right, #64748b, #475569)',
+                      boxShadow: '0 4px 6px -1px rgba(100, 116, 139, 0.3), 0 2px 4px -1px rgba(100, 116, 139, 0.2)'
+                    }
+                  : {
+                      background: 'linear-gradient(to right, #475569, #334155)',
+                      boxShadow: '0 4px 6px -1px rgba(71, 85, 105, 0.3), 0 2px 4px -1px rgba(71, 85, 105, 0.2)'
+                    })
+              : {
+                  background: 'linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker))',
+                  boxShadow: '0 4px 6px -1px color-mix(in srgb, var(--theme-primary) 30%, transparent), 0 2px 4px -1px color-mix(in srgb, var(--theme-primary) 20%, transparent)'
+                }"
+            @mouseenter="handleButtonHoverEnter"
+            @mouseleave="handleButtonHoverLeave"
           >
             <span v-if="isSubmitting" class="animate-spin">⏳</span>
             <span>{{ isSubmitting ? $t('common.processing') : (isLogin ? $t('auth.login') : $t('auth.register')) }}</span>
@@ -103,7 +131,7 @@
           <span>{{ isLogin ? $t('auth.noAccount') : $t('auth.hasAccount') }}</span>
           <button
             @click="isLogin = !isLogin"
-            class="ml-1 text-green-600 dark:text-green-400 hover:underline font-semibold"
+            class="ml-1 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:underline font-semibold transition-colors"
           >
             {{ isLogin ? $t('auth.register') : $t('auth.login') }}
           </button>
@@ -114,7 +142,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 
@@ -140,6 +168,19 @@ const formData = ref({
   email: '',
   password: ''
 })
+
+// 检查主题色是否为透明
+const isThemeTransparent = ref(false)
+
+/**
+ * 检查主题色是否为透明
+ */
+const checkThemeTransparent = () => {
+  if (typeof document !== 'undefined') {
+    const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim()
+    isThemeTransparent.value = themePrimary === 'transparent'
+  }
+}
 
 // 切换模式时清空表单和错误
 watch(isLogin, () => {
@@ -187,6 +228,59 @@ const handleSubmit = async () => {
  */
 const handleClose = () => {
   emit('close')
+}
+
+// 初始化时检查主题色
+onMounted(() => {
+  checkThemeTransparent()
+  
+  // 监听主题色变化
+  if (typeof document !== 'undefined') {
+    const observer = new MutationObserver(() => {
+      checkThemeTransparent()
+    })
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style']
+    })
+  }
+})
+
+/**
+ * 处理按钮 hover 进入
+ */
+const handleButtonHoverEnter = (event) => {
+  const el = event?.currentTarget
+  if (el && !el.disabled) {
+    if (isThemeTransparent.value) {
+      const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+      // 暗色模式：使用较亮的灰色
+      // 亮色模式：使用稍深的灰色
+      el.style.background = isDark 
+        ? 'linear-gradient(to right, #94a3b8, #64748b)'
+        : 'linear-gradient(to right, #64748b, #475569)'
+    } else {
+      el.style.background = 'linear-gradient(to right, var(--theme-primary-light), var(--theme-primary))'
+    }
+  }
+}
+
+/**
+ * 处理按钮 hover 离开
+ */
+const handleButtonHoverLeave = (event) => {
+  const el = event?.currentTarget
+  if (el && !el.disabled) {
+    if (isThemeTransparent.value) {
+      const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+      // 恢复默认状态
+      el.style.background = isDark 
+        ? 'linear-gradient(to right, #64748b, #475569)'
+        : 'linear-gradient(to right, #475569, #334155)'
+    } else {
+      el.style.background = 'linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker))'
+    }
+  }
 }
 </script>
 

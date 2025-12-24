@@ -84,7 +84,7 @@
         <!-- 搜索按钮 -->
         <button 
           @click="performSearch" 
-          class="w-12 h-12 rounded-xl bg-theme-primary dark:bg-theme-primary-darker flex items-center justify-center hover:bg-theme-primary-darker dark:hover:bg-theme-primary-darker hover:scale-105 active:scale-95 transition-all shadow-lg shadow-theme-primary/30"
+          class="w-12 h-12 rounded-xl dark:bg-theme-primary-darker flex items-center justify-center hover:bg-theme-primary-darker dark:hover:bg-theme-primary-darker hover:scale-105 active:scale-95 transition-all shadow-lg shadow-theme-primary/30"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
             <circle cx="11" cy="11" r="8"/>
@@ -100,7 +100,10 @@
         <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('home.quickLinks') }}</h2>
         <button 
           @click="showEditor = true"
-          class="px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 transition-colors text-sm font-medium flex items-center gap-2"
+          class="px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-slate-600 dark:text-slate-400 transition-colors text-sm font-medium flex items-center gap-2"
+          style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-light);"
+          @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)';"
+          @mouseleave="const el = $event.currentTarget; el.style.backgroundColor = ''; el.style.color = '';"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>

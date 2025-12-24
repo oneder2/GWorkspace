@@ -45,8 +45,13 @@
         <!-- 作品信息 -->
         <div class="p-4 flex-1 flex flex-col">
           <!-- 作品标题：使用深色确保在玻璃卡片上有足够对比度 -->
-          <!-- 作品标题：hover时使用明确的颜色，避免透明问题 -->
-          <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+          <!-- 作品标题：hover时使用主题色 -->
+          <h3 
+            class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 transition-colors"
+            style="--hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-light);"
+            @mouseenter="handleTitleHoverEnter"
+            @mouseleave="handleTitleHoverLeave"
+          >
             {{ work.title }}
           </h3>
           <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-3 leading-relaxed">
@@ -81,4 +86,27 @@ const portfolio = computed(() => {
     icon: getIcon(work.iconName)
   }))
 })
+
+/**
+ * 处理标题hover进入
+ * @param {Event} event - 鼠标事件
+ */
+const handleTitleHoverEnter = (event) => {
+  const el = event?.currentTarget
+  if (el) {
+    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+    el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)'
+  }
+}
+
+/**
+ * 处理标题hover离开
+ * @param {Event} event - 鼠标事件
+ */
+const handleTitleHoverLeave = (event) => {
+  const el = event?.currentTarget
+  if (el) {
+    el.style.color = ''
+  }
+}
 </script>

@@ -34,7 +34,10 @@
           <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('tools.preview') }}</h3>
           <button 
             @click="copyHTML"
-            class="px-3 py-1 text-sm bg-green-500 dark:bg-green-600 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors"
+            class="px-3 py-1 text-sm text-white rounded-lg transition-colors"
+            style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker));"
+            @mouseenter="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary-light), var(--theme-primary))'"
+            @mouseleave="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker))'"
           >
             {{ $t('tools.copyHTML') }}
           </button>

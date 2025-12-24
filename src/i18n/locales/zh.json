@@ -67,7 +67,14 @@
       "usEast": "美国东部",
       "usEastTimezone": "EST/EDT",
       "usWest": "美国西部",
-      "usWestTimezone": "PST/PDT"
+      "usWestTimezone": "PST/PDT",
+      "admin": "管理员",
+      "visitor": "访客",
+      "timeDifference": "时差",
+      "hoursAhead": "{hours} 小时前",
+      "hoursBehind": "{hours} 小时后",
+      "sameTime": "同时",
+      "timezoneUnknown": "未知"
     }
   },
   "blog": {
@@ -188,7 +195,12 @@
     "hasAccount": "已有账号？",
     "loginFailed": "登录失败，请检查用户名和密码",
     "registerFailed": "注册失败，请检查输入信息",
-    "adminPanel": "管理后台"
+    "adminPanel": "管理后台",
+    "deleteAccount": "注销账户",
+    "confirmDeleteAccount": "确定要注销账户吗？此操作不可撤销。",
+    "confirmDeleteAccountFinal": "警告：这将永久删除您的账户和所有相关数据。确定要继续吗？",
+    "accountDeleted": "账户已成功注销",
+    "deleteAccountFailed": "注销账户失败，请稍后重试"
   },
   "todo": {
     "title": "待办事项",
@@ -257,6 +269,12 @@
     "markSpam": "标记垃圾",
     "blogId": "文章ID",
     "view": "查看",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "guestbook": "留言板管理",
+    "noGuestbookMessages": "暂无留言",
+    "deleted": "已删除",
+    "approved": "已审核",
+    "pending": "待审核",
+    "messageDeleted": "该留言已被删除"
   }
 }

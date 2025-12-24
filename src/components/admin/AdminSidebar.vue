@@ -96,12 +96,28 @@ const checkThemeTransparent = () => {
   }
 }
 
+/**
+ * 检查是否为暗色模式
+ */
+const isDarkMode = ref(false)
+
+/**
+ * 更新暗色模式状态
+ */
+const updateDarkMode = () => {
+  if (typeof document !== 'undefined') {
+    isDarkMode.value = document.documentElement.classList.contains('dark')
+  }
+}
+
 // 初始化时检查
 onMounted(() => {
   checkThemeTransparent()
+  updateDarkMode()
   // 监听主题变化
   const observer = new MutationObserver(() => {
     checkThemeTransparent()
+    updateDarkMode()
   })
   if (typeof document !== 'undefined') {
     observer.observe(document.documentElement, {
@@ -118,7 +134,8 @@ const icons = {
   dashboard: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
   blog: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>`,
   analytics: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>`,
-  comments: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`
+  comments: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  guestbook: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h4"/></svg>`
 }
 
 /**
@@ -144,6 +161,11 @@ const navItems = computed(() => [
     path: '/admin/comments',
     name: t('admin.comments'),
     icon: icons.comments
+  },
+  {
+    path: '/admin/guestbook',
+    name: t('admin.guestbook'),
+    icon: icons.guestbook
   }
 ])
 
@@ -207,15 +229,34 @@ const handleNavHoverEnter = (event, itemPath) => {
   const el = event?.currentTarget
   if (!el || typeof document === 'undefined') return
   
-  const isDark = document.documentElement.classList.contains('dark')
-  if (isDark) {
-    el.style.backgroundColor = 'var(--hover-bg-dark)'
-    el.style.color = 'var(--hover-text-dark)'
-    el.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+  updateDarkMode() // 更新暗色模式状态
+  
+  // 如果主题是透明的，使用固定颜色避免文字变透明
+  if (isThemeTransparent.value) {
+    if (isDarkMode.value) {
+      el.style.backgroundColor = 'rgba(148, 163, 184, 0.2)'
+      el.style.color = '#cbd5e1' // 固定颜色，确保文字可见
+      el.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+    } else {
+      el.style.backgroundColor = 'rgba(100, 116, 139, 0.15)'
+      el.style.color = '#475569' // 固定颜色，确保文字可见
+      el.style.borderColor = 'rgba(0, 0, 0, 0.15)'
+    }
   } else {
-    el.style.backgroundColor = 'var(--hover-bg)'
-    el.style.color = 'var(--hover-text)'
-    el.style.borderColor = 'rgba(0, 0, 0, 0.15)'
+    // 使用主题色，但需要检查颜色是否透明
+    if (isDarkMode.value) {
+      const hoverTextDark = getComputedStyle(document.documentElement).getPropertyValue('--hover-text-dark').trim()
+      const finalColor = hoverTextDark && hoverTextDark !== 'transparent' ? hoverTextDark : '#cbd5e1'
+      el.style.backgroundColor = 'var(--hover-bg-dark)'
+      el.style.color = finalColor
+      el.style.borderColor = 'rgba(255, 255, 255, 0.1)'
+    } else {
+      const hoverText = getComputedStyle(document.documentElement).getPropertyValue('--hover-text').trim()
+      const finalColor = hoverText && hoverText !== 'transparent' ? hoverText : '#475569'
+      el.style.backgroundColor = 'var(--hover-bg)'
+      el.style.color = finalColor
+      el.style.borderColor = 'rgba(0, 0, 0, 0.15)'
+    }
   }
 }
 

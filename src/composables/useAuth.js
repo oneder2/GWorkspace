@@ -90,6 +90,23 @@ export function useAuth() {
   }
 
   /**
+   * 删除账户（注销）
+   */
+  const deleteAccount = async () => {
+    try {
+      await authApi.deleteAccount()
+      // 删除成功后清除本地状态
+      user.value = null
+      token.value = null
+      localStorage.removeItem('token')
+      return { success: true }
+    } catch (error) {
+      console.error('Delete account error:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  /**
    * 检查是否已登录
    */
   const isAuthenticated = computed(() => !!user.value)
@@ -106,6 +123,7 @@ export function useAuth() {
     register,
     login,
     logout,
+    deleteAccount,
     isAuthenticated,
     isAdmin
   }

@@ -7,18 +7,32 @@
 @tailwind utilities;
 
 /* CSS 变量定义 - 支持动态主题 */
-/* 默认使用透明主题（无主题色） */
+/* 默认使用黑白灰色主题 */
 :root {
-  --theme-primary: transparent;
-  --theme-primary-dark: transparent;
-  --theme-primary-light: transparent;
-  --theme-primary-lighter: transparent;
-  --theme-primary-darker: transparent;
-  --theme-primary-darkest: transparent;
-  --theme-primary-emerald: transparent;
-  --theme-primary-emerald-dark: transparent;
-  --theme-primary-emerald-light: transparent;
-  --theme-primary-emerald-lighter: transparent;
+  --theme-primary: #475569; /* slate-600 - 深灰色，适用于亮色模式 */
+  --theme-primary-dark: #cbd5e1; /* slate-300 - 浅灰色，适用于暗色模式文字 */
+  --theme-primary-light: #64748b; /* slate-500 - 中等灰色 */
+  --theme-primary-lighter: #94a3b8; /* slate-400 - 较浅灰色 */
+  --theme-primary-darker: #334155; /* slate-700 - 更深灰色 */
+  --theme-primary-darkest: #1e293b; /* slate-800 - 最深灰色 */
+  --theme-primary-emerald: #64748b; /* 与 primary-light 相同，保持一致性 */
+  --theme-primary-emerald-dark: #94a3b8; /* slate-400 */
+  --theme-primary-emerald-light: #475569; /* slate-600 */
+  --theme-primary-emerald-lighter: #64748b; /* slate-500 */
+}
+
+/* 暗色模式下的主题色调整 */
+.dark {
+  --theme-primary: #64748b; /* slate-500 - 在暗色模式下使用较亮的灰色 */
+  --theme-primary-dark: #cbd5e1; /* slate-300 - 保持较亮的文字色 */
+  --theme-primary-light: #94a3b8; /* slate-400 - 更亮的灰色 */
+  --theme-primary-lighter: #cbd5e1; /* slate-300 - 最亮的灰色 */
+  --theme-primary-darker: #475569; /* slate-600 - 稍深的灰色 */
+  --theme-primary-darkest: #334155; /* slate-700 - 深灰色 */
+  --theme-primary-emerald: #94a3b8; /* slate-400 */
+  --theme-primary-emerald-dark: #cbd5e1; /* slate-300 */
+  --theme-primary-emerald-light: #64748b; /* slate-500 */
+  --theme-primary-emerald-lighter: #94a3b8; /* slate-400 */
 }
 
 /* 自定义滚动条样式 - 支持亮色和暗色模式 */
@@ -177,11 +191,11 @@
     font-weight: 600;
   }
   
-  /* 当主题色为透明时的特殊处理 - 使用更深的 slate 色系以提高对比度 */
+  /* 当主题色为透明时的特殊处理 - 使用透明白色背景和深色文字 */
   .nav-active.nav-active-fallback {
-    background: rgba(100, 116, 139, 0.2) !important; /* slate-500 with higher opacity */
-    color: #475569 !important; /* slate-600 - 更深的颜色以提高对比度 */
-    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25) !important;
+    background: rgba(255, 255, 255, 0.6) !important; /* 透明白色背景 */
+    color: #1e293b !important; /* slate-800 - 深色文字 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
   }
   
   .dark .nav-active {
@@ -325,6 +339,56 @@
 .prose pre {
   background: rgba(0, 0, 0, 0.1);
   padding: 1em;
+}
+
+/* highlight.js 代码高亮样式适配 - 亮色模式 */
+.prose pre code.hljs {
+  background: transparent;
+  padding: 0;
+}
+
+/* highlight.js 代码高亮样式适配 - 暗色模式 */
+.dark .prose pre code.hljs {
+  background: transparent;
+  color: #e1e4e8;
+}
+
+/* 暗色模式下的 highlight.js 颜色覆盖 */
+.dark .prose pre code.hljs .hljs-keyword,
+.dark .prose pre code.hljs .hljs-selector-tag,
+.dark .prose pre code.hljs .hljs-literal,
+.dark .prose pre code.hljs .hljs-title {
+  color: #79b8ff;
+}
+
+.dark .prose pre code.hljs .hljs-string,
+.dark .prose pre code.hljs .hljs-doctag {
+  color: #9ecbff;
+}
+
+.dark .prose pre code.hljs .hljs-comment,
+.dark .prose pre code.hljs .hljs-quote {
+  color: #6a737d;
+  font-style: italic;
+}
+
+.dark .prose pre code.hljs .hljs-number,
+.dark .prose pre code.hljs .hljs-literal,
+.dark .prose pre code.hljs .hljs-variable {
+  color: #79b8ff;
+}
+
+.dark .prose pre code.hljs .hljs-function,
+.dark .prose pre code.hljs .hljs-title.function_ {
+  color: #b392f0;
+}
+
+.dark .prose pre code.hljs .hljs-type {
+  color: #f97583;
+}
+
+.dark .prose pre code.hljs .hljs-property {
+  color: #b392f0;
   border-radius: 0.5em;
   overflow-x: auto;
   margin-top: 1em;

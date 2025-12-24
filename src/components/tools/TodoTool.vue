@@ -29,14 +29,20 @@
             @keyup.enter="addTodo"
             type="text"
             :placeholder="$t('todo.addPlaceholder')"
-            class="flex-1 bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-green-500 dark:focus:border-green-400 outline-none text-slate-800 dark:text-slate-200"
+            class="flex-1 bg-transparent border-b border-slate-300 dark:border-slate-600 outline-none text-slate-800 dark:text-slate-200 transition-colors"
+            style="--focus-border: var(--theme-primary);"
+            @focus="$event.currentTarget.style.borderColor = 'var(--focus-border)'"
+            @blur="$event.currentTarget.style.borderColor = ''"
           >
           <label for="new-todo-priority" class="sr-only">{{ $t('todo.priority.medium') }}</label>
           <select 
             id="new-todo-priority"
             name="new-todo-priority"
             v-model="newTodoPriority"
-            class="bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-green-500 dark:focus:border-green-400 outline-none text-slate-600 dark:text-slate-400 text-sm"
+            class="bg-transparent border-b border-slate-300 dark:border-slate-600 outline-none text-slate-600 dark:text-slate-400 text-sm transition-colors"
+            style="--focus-border: var(--theme-primary);"
+            @focus="$event.currentTarget.style.borderColor = 'var(--focus-border)'"
+            @blur="$event.currentTarget.style.borderColor = ''"
           >
             <option value="low">{{ $t('todo.priority.low') }}</option>
             <option value="medium">{{ $t('todo.priority.medium') }}</option>
@@ -44,7 +50,10 @@
           </select>
           <button 
             @click="addTodo"
-            class="px-4 py-2 bg-green-500 dark:bg-green-600 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors font-bold"
+            class="px-4 py-2 text-white rounded-lg transition-colors font-bold"
+            style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker));"
+            @mouseenter="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary-light), var(--theme-primary))'"
+            @mouseleave="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker))'"
           >
             {{ $t('common.save') }}
           </button>

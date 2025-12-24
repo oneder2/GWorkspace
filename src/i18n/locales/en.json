@@ -67,7 +67,14 @@
       "usEast": "US East",
       "usEastTimezone": "EST/EDT",
       "usWest": "US West",
-      "usWestTimezone": "PST/PDT"
+      "usWestTimezone": "PST/PDT",
+      "admin": "Admin",
+      "visitor": "Visitor",
+      "timeDifference": "Time Difference",
+      "hoursAhead": "{hours} hours ahead",
+      "hoursBehind": "{hours} hours behind",
+      "sameTime": "Same time",
+      "timezoneUnknown": "Unknown"
     }
   },
   "blog": {
@@ -180,7 +187,12 @@
     "hasAccount": "Already have an account?",
     "loginFailed": "Login failed, please check your username and password",
     "registerFailed": "Registration failed, please check your input",
-    "adminPanel": "Admin Panel"
+    "adminPanel": "Admin Panel",
+    "deleteAccount": "Delete Account",
+    "confirmDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone.",
+    "confirmDeleteAccountFinal": "Warning: This will permanently delete your account and all associated data. Are you sure you want to continue?",
+    "accountDeleted": "Account deleted successfully",
+    "deleteAccountFailed": "Failed to delete account, please try again later"
   },
   "todo": {
     "title": "Todo List",
@@ -249,6 +261,12 @@
     "markSpam": "Mark as Spam",
     "blogId": "Blog ID",
     "view": "View",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "guestbook": "Guestbook Management",
+    "noGuestbookMessages": "No guestbook messages",
+    "deleted": "Deleted",
+    "approved": "Approved",
+    "pending": "Pending",
+    "messageDeleted": "This message has been deleted"
   }
 }

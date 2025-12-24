@@ -99,8 +99,11 @@
           :key="paletteColor"
           @click="color = paletteColor"
           class="h-12 rounded-lg border-2 transition-colors"
-          :class="color === paletteColor ? 'border-green-500 dark:border-green-400' : 'border-slate-200 dark:border-slate-700'"
-          :style="{ backgroundColor: paletteColor }"
+          :class="color === paletteColor ? '' : 'border-slate-200 dark:border-slate-700'"
+          :style="{
+            backgroundColor: paletteColor,
+            ...(color === paletteColor ? { borderColor: 'var(--theme-primary)', borderWidth: '2px' } : {})
+          }"
         ></button>
       </div>
     </div>

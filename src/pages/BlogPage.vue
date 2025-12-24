@@ -109,8 +109,9 @@
               @click="toggleGenreFilter(genre)"
               class="px-3 py-1 rounded-md text-xs font-bold transition-all duration-200 uppercase tracking-wide"
               :class="selectedGenre === genre 
-                ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 ring-2 ring-green-500 dark:ring-green-400 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105' 
+                ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'"
+              :style="selectedGenre === genre ? { '--tw-ring-color': 'var(--theme-primary)' } : {}"
               :title="selectedGenre === genre ? '点击取消筛选' : '点击筛选此分类'"
             >
               {{ genre }}
@@ -130,9 +131,10 @@
               :class="[
                 tag.color,
                 selectedTag === tag.name 
-                  ? 'ring-2 ring-green-500 dark:ring-green-400 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105' 
+                  ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105' 
                   : 'hover:scale-105 cursor-pointer'
               ]"
+              :style="selectedTag === tag.name ? { '--tw-ring-color': 'var(--theme-primary)' } : {}"
               :title="selectedTag === tag.name ? '点击取消筛选' : '点击筛选此标签'"
             >
               #{{ tag.name }}
@@ -251,8 +253,7 @@
                 v-for="tag in post.tags" 
                 :key="tag"
                 class="px-2 py-0.5 text-xs rounded-full font-semibold"
-                style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 100%, transparent); color: var(--theme-primary-darker);"
-                :style="{ '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)', '--dark-color': 'var(--theme-primary-dark)' }"
+                :class="getTagColor(tag)"
               >
                 #{{ tag }}
               </span>
@@ -440,11 +441,12 @@ const { value: favorites } = useLocalStorage('blog-favorites', [])
  * 为不同标签分配不同的颜色样式
  */
 const tagColorMap = {
-  'Tech': '',
+  'Tech': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400',
   'Life': 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
   'Coding': 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
   'Design': 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-  'Vue': '',
+  'Vue': 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+  'Vibe coding': 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
   'JavaScript': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
   'Frontend': 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
   'UI/UX': 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',

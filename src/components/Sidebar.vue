@@ -48,25 +48,29 @@
         <div 
           @click="handleNavClick(item)"
           data-nav-item
-          class="px-4 py-3.5 rounded-xl cursor-pointer flex items-center gap-4 transition-all duration-200 group text-slate-600 dark:text-slate-400 border border-transparent"
+          class="px-4 py-3.5 rounded-xl cursor-pointer flex items-center gap-4 transition-all duration-200 group text-slate-800 dark:text-slate-400 border"
+          :class="{
+            'nav-active': currentTab === item.id,
+            'nav-active-fallback': currentTab === item.id && isThemeTransparent,
+            'border-transparent': currentTab !== item.id,
+            'border-slate-300 dark:border-slate-600': currentTab === item.id
+          }"
           :style="currentTab !== item.id 
             ? {
-                '--hover-bg': 'color-mix(in srgb, var(--theme-primary-lighter) 40%, transparent)',
+                '--hover-bg': 'rgba(255, 255, 255, 0.6)',
                 '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 15%, transparent)',
-                '--hover-border': 'rgba(0, 0, 0, 0.15)',
+                '--hover-text': '#1e293b',
+                '--hover-text-dark': 'var(--theme-primary-dark)',
+                '--hover-border': 'rgba(0, 0, 0, 0.1)',
                 '--hover-border-dark': 'rgba(255, 255, 255, 0.1)'
               }
             : {}"
           @mouseenter="handleNavHoverEnter($event, item.id)"
           @mouseleave="handleNavHoverLeave($event, item.id)"
-          :class="{
-            'nav-active': currentTab === item.id,
-            'nav-active-fallback': currentTab === item.id && isThemeTransparent
-          }"
         >
           <!-- 使用SVG图标替代Phosphor Icons -->
           <component :is="item.icon" class="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
-          <span v-if="!collapsed" class="font-medium whitespace-nowrap">{{ item.name }}</span>
+          <span v-if="!collapsed" :class="currentTab === item.id ? 'font-bold whitespace-nowrap' : 'font-medium whitespace-nowrap'">{{ item.name }}</span>
         </div>
       </template>
     </nav>
@@ -248,14 +252,7 @@ const handleNavHoverEnter = (event, itemId) => {
     el.style.borderColor = 'var(--hover-border-dark)'
   } else {
     el.style.backgroundColor = 'var(--hover-bg)'
-    // 使用明确的颜色，避免主题色为透明时文字变透明
-    if (isThemeTransparent.value) {
-      el.style.color = '#475569' // slate-600
-    } else {
-      // 获取主题色并确保不是透明的
-      const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-darker').trim()
-      el.style.color = themePrimary && themePrimary !== 'transparent' ? themePrimary : '#475569'
-    }
+    el.style.color = 'var(--hover-text)'
     el.style.borderColor = 'var(--hover-border)'
   }
 }

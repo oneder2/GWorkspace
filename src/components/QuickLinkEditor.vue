@@ -55,7 +55,10 @@
               v-model="link.name"
               type="text"
               :placeholder="$t('home.linkName')"
-              class="w-full bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-green-500 dark:focus:border-green-400 outline-none text-slate-800 dark:text-slate-200 font-bold mb-2"
+              class="w-full bg-transparent border-b border-slate-300 dark:border-slate-600 outline-none text-slate-800 dark:text-slate-200 font-bold mb-2 transition-colors"
+              style="--focus-border: var(--theme-primary);"
+              @focus="$event.currentTarget.style.borderColor = 'var(--focus-border)'"
+              @blur="$event.currentTarget.style.borderColor = ''"
             >
             <label :for="`link-url-${index}`" class="sr-only">{{ $t('home.linkUrl') }}</label>
             <input 
@@ -64,7 +67,10 @@
               v-model="link.url"
               type="url"
               :placeholder="$t('home.linkUrl')"
-              class="w-full bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-green-500 dark:focus:border-green-400 outline-none text-slate-600 dark:text-slate-400 text-sm"
+              class="w-full bg-transparent border-b border-slate-300 dark:border-slate-600 outline-none text-slate-600 dark:text-slate-400 text-sm transition-colors"
+              style="--focus-border: var(--theme-primary);"
+              @focus="$event.currentTarget.style.borderColor = 'var(--focus-border)'"
+              @blur="$event.currentTarget.style.borderColor = ''"
             >
           </div>
 
@@ -84,7 +90,10 @@
       <!-- 添加新链接按钮 -->
       <button 
         @click="addLink"
-        class="w-full py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-400 hover:border-green-500 dark:hover:border-green-400 hover:text-green-600 dark:hover:text-green-400 transition-colors flex items-center justify-center gap-2"
+        class="w-full py-3 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-slate-600 dark:text-slate-400 transition-colors flex items-center justify-center gap-2"
+        style="--hover-border: var(--theme-primary); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-light);"
+        @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.borderColor = 'var(--hover-border)'; el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)';"
+        @mouseleave="const el = $event.currentTarget; el.style.borderColor = ''; el.style.color = '';"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
           <line x1="12" y1="5" x2="12" y2="19"/>
@@ -97,7 +106,10 @@
       <div class="flex gap-3 mt-6">
         <button 
           @click="saveLinks"
-          class="flex-1 py-3 bg-green-500 dark:bg-green-600 text-white rounded-xl hover:bg-green-600 dark:hover:bg-green-700 font-bold transition-colors"
+          class="flex-1 py-3 text-white rounded-xl font-bold transition-colors"
+          style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker));"
+          @mouseenter="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary-light), var(--theme-primary))'"
+          @mouseleave="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker))'"
         >
           {{ $t('common.save') }}
         </button>

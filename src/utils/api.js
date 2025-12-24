@@ -294,6 +294,14 @@ export const authApi = {
   }),
 
   /**
+   * 删除账户（注销）
+   * @returns {Promise<Object>}
+   */
+  deleteAccount: () => request('/auth/account', {
+    method: 'DELETE'
+  }),
+
+  /**
    * 验证token
    * @returns {Promise<Object>}
    */
@@ -305,6 +313,27 @@ export const authApi = {
    */
   refresh: () => request('/auth/refresh', {
     method: 'POST'
+  })
+}
+
+/**
+ * 管理员设置API
+ */
+export const adminSettingsApi = {
+  /**
+   * 获取管理员设置
+   * @returns {Promise<Object>}
+   */
+  get: () => request('/admin/settings'),
+
+  /**
+   * 更新管理员设置
+   * @param {Object} data - 设置数据
+   * @returns {Promise<Object>}
+   */
+  update: (data) => request('/admin/settings', {
+    method: 'PUT',
+    body: JSON.stringify(data)
   })
 }
 
@@ -371,16 +400,26 @@ export const guestbookApi = {
 }
 
 /**
- * 生成文章slug
+ * 从标题生成 URL 友好的 slug
+ * 支持中文字符和 Unicode 字符
  * @param {string} title - 文章标题
- * @returns {string} slug
+ * @returns {string} - 生成的 slug，如果输入无效或结果为空，返回空字符串（由调用方处理）
  */
 export function generateSlug(title) {
+  if (!title || typeof title !== 'string') {
+    return ''
+  }
+  
   return title
     .toLowerCase()
-    .replace(/[^\w\s-]/g, '') // 移除特殊字符
+    // 保留字母、数字、中文字符、空格、连字符
+    // \w 匹配字母、数字、下划线，但不包含中文字符
+    // 使用 Unicode 属性来匹配中文字符：\p{L} 匹配所有字母（包括中文），\p{N} 匹配所有数字
+    // 如果浏览器不支持 Unicode 属性，使用 \u4e00-\u9fff 匹配常用中文字符
+    .replace(/[^\w\s\u4e00-\u9fff-]/g, '') // 移除特殊字符，但保留中文字符
     .replace(/\s+/g, '-') // 空格替换为连字符
     .replace(/-+/g, '-') // 多个连字符合并为一个
-    .trim()
+    .replace(/^-+|-+$/g, '') // 移除开头和结尾的连字符
+    .trim() || 'untitled' // 如果结果为空，使用默认值 'untitled'
 }
 

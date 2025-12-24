@@ -32,6 +32,8 @@ export class Guestbook {
     let query = 'SELECT * FROM guestbook WHERE 1=1'
     const params = []
 
+    // 如果指定了 status，使用该状态筛选
+    // 如果 status 为 null（管理员查看所有），则不添加筛选条件，显示所有状态包括 deleted
     if (status) {
       query += ' AND status = ?'
       params.push(status)
@@ -166,13 +168,13 @@ export class Guestbook {
   }
 
   /**
-   * 删除留言
+   * 删除留言（软删除，设置为 deleted 状态）
    * @param {number} id - 留言ID
    * @returns {boolean} 是否删除成功
    */
   static delete(id) {
     const db = getDatabase()
-    const result = db.prepare('DELETE FROM guestbook WHERE id = ?').run(id)
+    const result = db.prepare('UPDATE guestbook SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run('deleted', id)
     return result.changes > 0
   }
 

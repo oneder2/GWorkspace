@@ -9,7 +9,9 @@ import { Blog } from '../models/Blog.js'
 import { Comment } from '../models/Comment.js'
 import { Visit } from '../models/Visit.js'
 import { User } from '../models/User.js'
+import { AdminSettings } from '../models/AdminSettings.js'
 import { getDatabase } from '../config/database.js'
+import { getLocationByIP } from '../utils/ipLocation.js'
 
 const router = express.Router()
 
@@ -125,6 +127,63 @@ router.get('/stats', (req, res) => {
   } catch (error) {
     console.error('Error fetching stats:', error)
     res.status(500).json({ error: 'Failed to fetch stats' })
+  }
+})
+
+/**
+ * 获取管理员设置
+ * GET /api/admin/settings
+ */
+router.get('/settings', (req, res) => {
+  try {
+    const settings = AdminSettings.get()
+    if (!settings) {
+      return res.status(404).json({ error: 'Settings not found' })
+    }
+    res.json(settings)
+  } catch (error) {
+    console.error('Error fetching admin settings:', error)
+    res.status(500).json({ error: 'Failed to fetch settings' })
+  }
+})
+
+/**
+ * 更新管理员设置（位置、时区）
+ * PUT /api/admin/settings
+ * 请求体：
+ * - location: 地区字符串（可选，如 "Beijing, China"）
+ * - timezone: 时区字符串（可选，如 "Asia/Shanghai"）
+ * 如果都不提供，则根据当前IP自动获取
+ */
+router.put('/settings', async (req, res) => {
+  try {
+    const { location, timezone } = req.body
+    const userId = req.user.id
+
+    let locationInfo = { location, timezone }
+
+    // 如果都没有提供，根据IP自动获取
+    if (!location && !timezone) {
+      const userIp = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      if (userIp && !userIp.startsWith('127.') && !userIp.startsWith('192.168.') && !userIp.startsWith('10.')) {
+        locationInfo = await getLocationByIP(userIp.split(',')[0].trim())
+        locationInfo.ip_address = userIp.split(',')[0].trim()
+      }
+    } else {
+      // 如果提供了location或timezone，也更新IP地址
+      const userIp = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      if (userIp && !userIp.startsWith('127.') && !userIp.startsWith('192.168.') && !userIp.startsWith('10.')) {
+        locationInfo.ip_address = userIp.split(',')[0].trim()
+      }
+    }
+
+    // 更新管理员设置
+    const updatedSettings = AdminSettings.update(locationInfo, userId)
+
+    res.json(updatedSettings)
+  } catch (error) {
+    console.error('Error updating admin settings:', error)
+    res.status(500).json({ error: 'Failed to update settings' })
   }
 })
 

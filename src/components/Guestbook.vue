@@ -50,6 +50,7 @@
           @click="submitMessage"
           :disabled="!formData.content || formData.content.trim().length === 0 || isSubmitting"
           class="w-full px-4 py-2.5 rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+          :class="(!formData.content || formData.content.trim().length === 0 || isSubmitting) ? 'text-slate-400' : 'text-white'"
           style="background: linear-gradient(135deg, var(--theme-primary), var(--theme-primary-emerald)); border: 2px solid rgba(255, 255, 255, 0.2);"
           @mouseenter="handleButtonHover"
           @mouseleave="handleButtonLeave"
@@ -97,7 +98,10 @@
             </span>
           </div>
         </div>
-        <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+        <p v-if="message.status === 'deleted'" class="text-sm text-slate-400 dark:text-slate-500 italic">
+          {{ $t('admin.messageDeleted') }}
+        </p>
+        <p v-else class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
           {{ message.content }}
         </p>
       </div>
