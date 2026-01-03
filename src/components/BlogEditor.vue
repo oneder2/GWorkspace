@@ -58,12 +58,10 @@
                   v-model="formData.genre"
                   type="text"
                   @input="handleGenreInput"
-                  @focus="showGenreSuggestions = true"
-                  @blur="setTimeout(() => showGenreSuggestions = false, 200)"
                   class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
                   style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
-                  @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
-                  @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
+                  @focus="(e) => { showGenreSuggestions = true; e.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)') }"
+                  @blur="(e) => { setTimeout(() => showGenreSuggestions = false, 200); e.currentTarget.style.setProperty('--tw-ring-color', '') }"
                   :placeholder="$t('blog.genrePlaceholder')"
                 />
                 <!-- 分类建议下拉列表 -->
@@ -146,12 +144,10 @@
                   type="text"
                   @keyup.enter="addTag"
                   @input="handleTagInput"
-                  @focus="showTagSuggestions = true"
-                  @blur="setTimeout(() => showTagSuggestions = false, 200)"
                   class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
                   style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
-                  @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
-                  @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
+                  @focus="(e) => { showTagSuggestions = true; e.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)') }"
+                  @blur="(e) => { setTimeout(() => showTagSuggestions = false, 200); e.currentTarget.style.setProperty('--tw-ring-color', '') }"
                   :placeholder="$t('blog.addTagPlaceholder')"
                 />
                 <!-- 标签建议下拉列表 -->
