@@ -150,7 +150,9 @@
     "viewSplit": "分屏",
     "viewEditor": "编辑",
     "viewPreview": "预览",
-    "filters": "筛选"
+    "filters": "筛选",
+    "previewPlaceholder": "开始输入以查看预览...",
+    "previewError": "Markdown解析错误"
   },
   "portfolio": {
     "title": "精选作品",
@@ -179,7 +181,8 @@
     "justNow": "刚刚",
     "minutesAgo": "分钟前",
     "hoursAgo": "小时前",
-    "daysAgo": "天前"
+    "daysAgo": "天前",
+    "loading": "加载中..."
   },
   "auth": {
     "login": "登录",

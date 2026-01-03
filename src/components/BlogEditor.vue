@@ -53,19 +53,34 @@
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 {{ $t('blog.genre') }} <span class="text-red-500">*</span>
               </label>
-              <input 
-                v-model="formData.genre"
-                type="text"
-                class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
-              style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
-              @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
-              @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
-                :placeholder="$t('blog.genrePlaceholder')"
-                list="genre-list"
-              />
-              <datalist id="genre-list">
-                <option v-for="genre in existingGenres" :key="genre" :value="genre" />
-              </datalist>
+              <div class="relative">
+                <input 
+                  v-model="formData.genre"
+                  type="text"
+                  @input="handleGenreInput"
+                  @focus="showGenreSuggestions = true"
+                  @blur="setTimeout(() => showGenreSuggestions = false, 200)"
+                  class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+                  style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+                  @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+                  @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
+                  :placeholder="$t('blog.genrePlaceholder')"
+                />
+                <!-- 分类建议下拉列表 -->
+                <div 
+                  v-if="showGenreSuggestions && filteredGenreSuggestions.length > 0"
+                  class="absolute z-50 w-full mt-1 glass-card rounded-lg shadow-lg max-h-48 overflow-y-auto custom-scrollbar"
+                >
+                  <button
+                    v-for="genre in filteredGenreSuggestions"
+                    :key="genre"
+                    @mousedown.prevent="selectGenre(genre)"
+                    class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    {{ genre }}
+                  </button>
+                </div>
+              </div>
             </div>
 
             <!-- 日期 -->
@@ -110,23 +125,7 @@
                 v-for="(tag, index) in formData.tags" 
                 :key="index"
                 class="px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2"
-                :style="isThemeTransparent 
-                  ? (isDarkMode
-                      ? {
-                          backgroundColor: 'rgba(148, 163, 184, 0.3)',
-                          color: '#cbd5e1'
-                        }
-                      : {
-                          backgroundColor: 'rgba(100, 116, 139, 0.2)',
-                          color: '#475569'
-                        }
-                    )
-                  : {
-                      backgroundColor: 'color-mix(in srgb, var(--theme-primary-lighter) 100%, transparent)',
-                      color: 'var(--theme-primary-darker)',
-                      '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)',
-                      '--dark-color': 'var(--theme-primary-dark)'
-                    }"
+                :style="getTagStyle(tag, isDarkMode).style"
               >
                 #{{ tag }}
                 <button 
@@ -140,17 +139,36 @@
                 </button>
               </span>
             </div>
-            <div class="flex gap-2">
-              <input 
-                v-model="newTag"
-                type="text"
-                @keyup.enter="addTag"
-                class="flex-1 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
-                style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
-                @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
-                @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
-                :placeholder="$t('blog.addTagPlaceholder')"
-              />
+            <div class="flex gap-2 relative">
+              <div class="flex-1 relative">
+                <input 
+                  v-model="newTag"
+                  type="text"
+                  @keyup.enter="addTag"
+                  @input="handleTagInput"
+                  @focus="showTagSuggestions = true"
+                  @blur="setTimeout(() => showTagSuggestions = false, 200)"
+                  class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+                  style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
+                  @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+                  @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
+                  :placeholder="$t('blog.addTagPlaceholder')"
+                />
+                <!-- 标签建议下拉列表 -->
+                <div 
+                  v-if="showTagSuggestions && filteredTagSuggestions.length > 0"
+                  class="absolute z-50 w-full mt-1 glass-card rounded-lg shadow-lg max-h-48 overflow-y-auto custom-scrollbar"
+                >
+                  <button
+                    v-for="tag in filteredTagSuggestions"
+                    :key="tag"
+                    @mousedown.prevent="selectTag(tag)"
+                    class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    #{{ tag }}
+                  </button>
+                </div>
+              </div>
               <button 
                 @click="addTag"
                 class="px-4 py-2 rounded-lg transition-colors font-semibold"
@@ -339,6 +357,7 @@ import { marked } from 'marked'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css' // 亮色主题作为基础
 import { blogApi, generateSlug } from '../utils/api'
+import { getTagStyle } from '../utils/tagColor'
 
 const props = defineProps({
   /**
@@ -547,17 +566,95 @@ const existingGenres = computed(() => {
 })
 
 /**
+ * 现有标签列表（从现有文章中提取）
+ */
+const existingTags = computed(() => {
+  const tagSet = new Set()
+  props.existingPosts.forEach(post => {
+    if (post.tags && Array.isArray(post.tags)) {
+      post.tags.forEach(tag => tagSet.add(tag))
+    }
+  })
+  return Array.from(tagSet).sort()
+})
+
+/**
+ * 显示分类建议
+ */
+const showGenreSuggestions = ref(false)
+
+/**
+ * 显示标签建议
+ */
+const showTagSuggestions = ref(false)
+
+/**
+ * 过滤后的分类建议
+ */
+const filteredGenreSuggestions = computed(() => {
+  if (!formData.value.genre) return existingGenres.value.slice(0, 10)
+  const input = formData.value.genre.toLowerCase()
+  return existingGenres.value
+    .filter(genre => genre.toLowerCase().includes(input))
+    .slice(0, 10)
+})
+
+/**
+ * 过滤后的标签建议
+ */
+const filteredTagSuggestions = computed(() => {
+  if (!newTag.value) return existingTags.value.slice(0, 10)
+  const input = newTag.value.toLowerCase()
+  return existingTags.value
+    .filter(tag => tag.toLowerCase().includes(input) && !formData.value.tags.includes(tag))
+    .slice(0, 10)
+})
+
+/**
+ * 处理分类输入
+ */
+const handleGenreInput = () => {
+  showGenreSuggestions.value = true
+}
+
+/**
+ * 处理标签输入
+ */
+const handleTagInput = () => {
+  showTagSuggestions.value = true
+}
+
+/**
+ * 选择分类
+ */
+const selectGenre = (genre) => {
+  formData.value.genre = genre
+  showGenreSuggestions.value = false
+}
+
+/**
+ * 选择标签
+ */
+const selectTag = (tag) => {
+  if (!formData.value.tags.includes(tag)) {
+    formData.value.tags.push(tag)
+  }
+  newTag.value = ''
+  showTagSuggestions.value = false
+}
+
+/**
  * Markdown预览内容
  */
 const previewContent = computed(() => {
   if (!formData.value.content.trim()) {
-    return '<p class="text-slate-400 dark:text-slate-500">Start typing to see preview...</p>'
+    return `<p class="text-slate-400 dark:text-slate-500">${t('blog.previewPlaceholder')}</p>`
   }
   try {
     return marked.parse(formData.value.content)
   } catch (error) {
     console.error('Markdown parsing error:', error)
-    return '<p class="text-red-500">Error parsing Markdown</p>'
+    return `<p class="text-red-500">${t('blog.previewError')}</p>`
   }
 })
 

@@ -150,7 +150,9 @@
     "viewSplit": "Split",
     "viewEditor": "Editor",
     "viewPreview": "Preview",
-    "filters": "Filters"
+    "filters": "Filters",
+    "previewPlaceholder": "Start typing to see preview...",
+    "previewError": "Markdown parsing error"
   },
   "portfolio": {
     "title": "Selected Works",
@@ -171,7 +173,8 @@
     "processing": "Processing...",
     "collapse": "Collapse",
     "expand": "Expand",
-    "menu": "Menu"
+    "menu": "Menu",
+    "loading": "Loading..."
   },
   "auth": {
     "login": "Login",

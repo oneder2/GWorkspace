@@ -253,7 +253,7 @@
                 v-for="tag in post.tags" 
                 :key="tag"
                 class="px-2 py-0.5 text-xs rounded-full font-semibold"
-                :class="getTagColor(tag)"
+                :style="getTagColor(tag).style"
               >
                 #{{ tag }}
               </span>
@@ -437,29 +437,14 @@ const { value: readingHistory } = useLocalStorage('blog-reading-history', [])
 const { value: favorites } = useLocalStorage('blog-favorites', [])
 
 /**
- * 标签颜色映射
- * 为不同标签分配不同的颜色样式
- */
-const tagColorMap = {
-  'Tech': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400',
-  'Life': 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
-  'Coding': 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-  'Design': 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-  'Vue': 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
-  'Vibe coding': 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
-  'JavaScript': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
-  'Frontend': 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
-  'UI/UX': 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',
-  'Trends': 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
-}
-
-/**
- * 获取标签颜色，如果没有映射则使用默认颜色
+ * 获取标签颜色样式
+ * 使用哈希函数生成确定性颜色
  * @param {string} tagName - 标签名称
- * @returns {string} 颜色类名
+ * @returns {Object} 包含style对象
  */
 const getTagColor = (tagName) => {
-  return tagColorMap[tagName] || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+  const isDarkMode = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  return getTagStyle(tagName, isDarkMode)
 }
 
 /**

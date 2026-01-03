@@ -79,7 +79,7 @@
     <div class="p-5 mt-auto space-y-2" v-if="!collapsed">
       <!-- GitHub入口 -->
       <a 
-        href="https://github.com" 
+        href="https://github.com/oneder2/GWorkspace" 
         target="_blank"
         class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-3 flex items-center gap-3 border border-white/60 dark:border-slate-700/60 shadow-sm backdrop-blur-sm transition-colors group"
         style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"

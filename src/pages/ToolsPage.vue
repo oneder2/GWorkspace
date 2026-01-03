@@ -67,6 +67,7 @@
               if (el) {
                 el.style.backgroundColor = '';
                 el.style.borderColor = '';
+                el.style.color = '';
               }
             }"
         >
@@ -197,6 +198,7 @@
                       if (el) {
                         el.style.backgroundColor = '';
                         el.style.borderColor = '';
+                        el.style.color = '';
                       }
                     }"
                   >

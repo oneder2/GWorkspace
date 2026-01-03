@@ -45,8 +45,7 @@
               v-for="tag in post.tags" 
               :key="tag"
               class="px-2 py-0.5 text-xs rounded-full font-semibold"
-              style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 100%, transparent); color: var(--theme-primary-darker);"
-              :style="{ '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)', '--dark-color': 'var(--theme-primary-dark)' }"
+              :style="getTagStyle(tag, typeof document !== 'undefined' && document.documentElement.classList.contains('dark')).style"
             >
               #{{ tag }}
             </span>
@@ -77,8 +76,7 @@
               v-for="tag in post.tags" 
               :key="tag"
               class="px-3 py-1 rounded-full text-xs font-bold"
-              style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 100%, transparent); color: var(--theme-primary-darker);"
-              :style="{ '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)', '--dark-color': 'var(--theme-primary-dark)' }"
+              :style="getTagStyle(tag, typeof document !== 'undefined' && document.documentElement.classList.contains('dark')).style"
             >
               #{{ tag }}
             </span>
@@ -218,6 +216,14 @@
       </button>
     </div>
 
+    <!-- 加载中状态 -->
+    <div v-else-if="isLoading" class="text-center py-20">
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-12 h-12 border-4 border-slate-200 dark:border-slate-700 border-t-[var(--theme-primary)] rounded-full animate-spin"></div>
+        <p class="text-slate-600 dark:text-slate-400">{{ t('common.loading') }}</p>
+      </div>
+    </div>
+
     <!-- 404 状态 -->
     <div v-else class="text-center py-20">
       <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4">{{ $t('blog.notFound') }}</h2>
@@ -237,12 +243,15 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
 import { useLocalStorage } from '../composables/useStorage'
 import { useSEO, generateBlogStructuredData } from '../composables/useSEO'
 import { blogApi, likesApi, analyticsApi } from '../utils/api'
+import { getTagStyle } from '../utils/tagColor'
 
 const route = useRoute()
+const { t } = useI18n()
 const shareSuccess = ref(false)
 
 // 阅读历史管理
