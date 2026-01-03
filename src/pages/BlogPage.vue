@@ -473,10 +473,8 @@ const tags = computed(() => {
     }
   })
   
-  return Array.from(tagSet).map(tagName => ({
-    name: tagName,
-    color: getTagColor(tagName)
-  })).sort((a, b) => a.name.localeCompare(b.name))
+  // 转换为数组并排序
+  return Array.from(tagSet).sort((a, b) => a.localeCompare(b))
 })
 
 /**
