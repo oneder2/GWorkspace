@@ -324,6 +324,7 @@ import { useLocalStorage } from '../composables/useStorage'
 import { blogApi } from '../utils/api'
 import Guestbook from '../components/Guestbook.vue'
 import AuthModal from '../components/AuthModal.vue'
+import { getTagStyle } from '../utils/tagColor'
 
 const router = useRouter()
 const searchQuery = ref('')
