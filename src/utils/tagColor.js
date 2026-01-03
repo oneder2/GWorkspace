@@ -35,12 +35,12 @@ function hashString(str) {
  */
 export function generateTagColor(tagName, options = {}) {
   const {
-    hueMin = 0,
-    hueMax = 360,
-    saturationMin = 40,
-    saturationMax = 70,
-    lightnessMin = 75, // 亮色模式背景较亮
-    lightnessMax = 90,
+    hueMin = 180,      // 从青色开始，避免红色系
+    hueMax = 300,      // 到紫色结束，覆盖蓝、青、紫、粉色调
+    saturationMin = 60, // 提高饱和度，颜色更鲜艳
+    saturationMax = 85,
+    lightnessMin = 85, // 亮色模式背景更亮更柔和
+    lightnessMax = 95,
     isDarkMode = false
   } = options
 
@@ -52,20 +52,22 @@ export function generateTagColor(tagName, options = {}) {
   const saturation = (hash % (saturationMax - saturationMin + 1)) + saturationMin
   const lightness = (hash % (lightnessMax - lightnessMin + 1)) + lightnessMin
 
-  // 暗色模式使用不同的亮度范围
-  const darkLightnessMin = 25
-  const darkLightnessMax = 40
+  // 暗色模式使用不同的亮度范围，背景稍亮一些以保持可见度
+  const darkLightnessMin = 30
+  const darkLightnessMax = 50
   const darkLightness = isDarkMode 
     ? ((hash % (darkLightnessMax - darkLightnessMin + 1)) + darkLightnessMin)
     : lightness
 
   // 计算文字颜色（确保对比度）
-  // 亮色模式：深色文字；暗色模式：浅色文字
-  const textLightness = isDarkMode ? 85 : 20
+  // 亮色模式：深色文字（降低亮度但保持同色系）；暗色模式：浅色文字
+  const textLightness = isDarkMode ? 90 : 25
+  // 亮色模式下文字饱和度可以稍高，暗色模式下保持一致
+  const textSaturation = isDarkMode ? saturation : Math.min(saturation + 10, 100)
 
   // 生成HSL颜色字符串
   const bgColor = `hsl(${hue}, ${saturation}%, ${darkLightness}%)`
-  const textColor = `hsl(${hue}, ${saturation}%, ${textLightness}%)`
+  const textColor = `hsl(${hue}, ${textSaturation}%, ${textLightness}%)`
 
   return {
     backgroundColor: bgColor,
@@ -87,14 +89,14 @@ export function getTagStyle(tagName, isDarkMode = false) {
     }
   }
 
-  // 使用HSL生成颜色
+  // 使用HSL生成颜色，使用改进的HSL范围
   const colors = generateTagColor(tagName, {
-    hueMin: 0,
-    hueMax: 360,
-    saturationMin: 50,
-    saturationMax: 80,
-    lightnessMin: 75,
-    lightnessMax: 90,
+    hueMin: 180,      // 从青色开始
+    hueMax: 300,      // 到紫色结束
+    saturationMin: 60, // 更鲜艳
+    saturationMax: 85,
+    lightnessMin: 85, // 更柔和
+    lightnessMax: 95,
     isDarkMode
   })
 

@@ -56,17 +56,16 @@
           <div class="flex flex-wrap gap-2">
             <button
               v-for="tag in tags" 
-              :key="tag.name"
-              @click="toggleTagFilter(tag.name)"
+              :key="tag"
+              @click="toggleTagFilter(tag)"
               class="px-3 py-1 rounded-full text-xs font-bold transition-all duration-200"
-              :class="[
-                tag.color,
-                selectedTag === tag.name 
-                  ? 'ring-2 ring-[var(--theme-primary)]' 
-                  : 'hover:scale-105 cursor-pointer'
-              ]"
+              :class="selectedTag === tag 
+                ? 'ring-2 ring-[var(--theme-primary)] scale-105' 
+                : 'hover:scale-105 cursor-pointer'"
+              :style="getTagColor(tag).style"
+              :title="selectedTag === tag ? '点击取消筛选' : '点击筛选此标签'"
             >
-              #{{ tag.name }}
+              #{{ tag }}
             </button>
           </div>
         </div>
@@ -125,19 +124,19 @@
           <div class="flex flex-wrap gap-2">
             <button
               v-for="tag in tags" 
-              :key="tag.name"
-              @click="toggleTagFilter(tag.name)"
+              :key="tag"
+              @click="toggleTagFilter(tag)"
               class="px-3 py-1 rounded-full text-xs font-bold transition-all duration-200"
-              :class="[
-                tag.color,
-                selectedTag === tag.name 
-                  ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105' 
-                  : 'hover:scale-105 cursor-pointer'
-              ]"
-              :style="selectedTag === tag.name ? { '--tw-ring-color': 'var(--theme-primary)' } : {}"
-              :title="selectedTag === tag.name ? '点击取消筛选' : '点击筛选此标签'"
+              :class="selectedTag === tag 
+                ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105' 
+                : 'hover:scale-105 cursor-pointer'"
+              :style="{
+                ...getTagColor(tag).style,
+                ...(selectedTag === tag ? { '--tw-ring-color': 'var(--theme-primary)' } : {})
+              }"
+              :title="selectedTag === tag ? '点击取消筛选' : '点击筛选此标签'"
             >
-              #{{ tag.name }}
+              #{{ tag }}
             </button>
           </div>
         </div>
