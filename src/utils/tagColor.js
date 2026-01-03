@@ -35,8 +35,8 @@ function hashString(str) {
  */
 export function generateTagColor(tagName, options = {}) {
   const {
-    hueMin = 180,      // 从青色开始，避免红色系
-    hueMax = 300,      // 到紫色结束，覆盖蓝、青、紫、粉色调
+    hueMin = 0,        // 从红色开始，覆盖所有色相
+    hueMax = 360,      // 到红色结束（360=0），包含所有颜色
     saturationMin = 60, // 提高饱和度，颜色更鲜艳
     saturationMax = 85,
     lightnessMin = 85, // 亮色模式背景更亮更柔和
@@ -89,10 +89,10 @@ export function getTagStyle(tagName, isDarkMode = false) {
     }
   }
 
-  // 使用HSL生成颜色，使用改进的HSL范围
+  // 使用HSL生成颜色，覆盖所有色相范围（包括红色和黄色）
   const colors = generateTagColor(tagName, {
-    hueMin: 180,      // 从青色开始
-    hueMax: 300,      // 到紫色结束
+    hueMin: 0,        // 从红色开始
+    hueMax: 360,      // 到红色结束，包含所有颜色
     saturationMin: 60, // 更鲜艳
     saturationMax: 85,
     lightnessMin: 85, // 更柔和
