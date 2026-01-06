@@ -120,12 +120,31 @@
           target="_blank" 
           class="glass-card flex flex-col items-center justify-center py-6 rounded-2xl cursor-pointer group hover:-translate-y-1"
         >
+          <!-- 动态获取网站图标 -->
           <div 
-            class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 shadow-lg transition-transform duration-300 group-hover:scale-110" 
-            :class="site.color"
+            class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 shadow-lg transition-transform duration-300 group-hover:scale-110 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
           >
-            <component v-if="site.icon" :is="site.icon" class="w-8 h-8 text-white" />
-            <span v-else class="text-white text-lg font-bold">{{ site.name?.[0] || '?' }}</span>
+            <!-- 优先使用动态获取的favicon -->
+            <img 
+              v-if="site.url"
+              :src="getFaviconUrl(site.url, 64)" 
+              @error="handleIconError($event, site)"
+              class="w-10 h-10 rounded-lg opacity-90 group-hover:opacity-100 transition-opacity"
+              :alt="site.name"
+            >
+            <!-- 如果favicon加载失败，回退到SVG图标 -->
+            <component 
+              v-else-if="site.icon" 
+              :is="site.icon" 
+              class="w-8 h-8 text-slate-700 dark:text-slate-200" 
+            />
+            <!-- 最后回退到首字母 -->
+            <span 
+              v-else 
+              class="text-slate-700 dark:text-slate-200 text-lg font-bold"
+            >
+              {{ site.name?.[0] || '?' }}
+            </span>
           </div>
           <span class="text-sm font-bold text-slate-700 dark:text-slate-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
             {{ site.name }}
@@ -149,6 +168,7 @@ import { ref, computed, markRaw } from 'vue'
 import { quickLinksConfig } from '../config/home'
 import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
+import { getFaviconUrl } from '../utils/urlHelper'
 import GoogleIcon from '../components/icons/GoogleIcon.vue'
 import DuckIcon from '../components/icons/DuckIcon.vue'
 import BaiduIcon from '../components/icons/BaiduIcon.vue'
@@ -182,8 +202,8 @@ const displayLinks = computed(() => {
   const customLinksArray = Array.isArray(customLinks.value) ? customLinks.value : []
   if (customLinksArray.length > 0) {
     return customLinksArray.map(link => {
-      // 使用 getIcon 统一获取图标
-      const icon = getIcon(link.iconName)
+      // 保留iconName用于回退，但主要使用动态favicon
+      const icon = link.iconName ? getIcon(link.iconName) : null
       return {
         ...link,
         icon: icon ? markRaw(icon) : null
@@ -272,5 +292,18 @@ const performSearch = () => {
       url = `https://www.google.com/search?q=${encodeURIComponent(searchQuery.value)}`
   }
   window.open(url, '_blank')
+}
+
+/**
+ * 处理图标加载错误
+ * 当favicon加载失败时，隐藏图片元素
+ * @param {Event} event - 错误事件
+ * @param {Object} site - 网站对象
+ */
+const handleIconError = (event, site) => {
+  // 隐藏图片，让回退方案（SVG图标或首字母）显示
+  if (event.target) {
+    event.target.style.display = 'none'
+  }
 }
 </script>

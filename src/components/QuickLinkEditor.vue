@@ -37,13 +37,31 @@
             </svg>
           </div>
 
-          <!-- 图标预览 -->
+          <!-- 图标预览 - 动态获取favicon -->
           <div 
-            class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-            :class="link.color || 'bg-slate-500'"
+            class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
           >
-            <component v-if="link.icon" :is="link.icon" class="w-6 h-6 text-white" />
-            <span v-else class="text-white text-lg font-bold">{{ link.name?.[0] || '?' }}</span>
+            <!-- 优先使用动态获取的favicon -->
+            <img 
+              v-if="link.url"
+              :src="getFaviconUrl(link.url, 64)" 
+              @error="handleIconError($event, link)"
+              class="w-10 h-10 rounded-lg opacity-90 transition-opacity"
+              :alt="link.name"
+            >
+            <!-- 如果favicon加载失败，回退到SVG图标 -->
+            <component 
+              v-else-if="link.icon" 
+              :is="link.icon" 
+              class="w-6 h-6 text-slate-700 dark:text-slate-200" 
+            />
+            <!-- 最后回退到首字母 -->
+            <span 
+              v-else 
+              class="text-slate-700 dark:text-slate-200 text-lg font-bold"
+            >
+              {{ link.name?.[0] || '?' }}
+            </span>
           </div>
 
           <!-- 链接信息 -->
@@ -127,6 +145,7 @@
 <script setup>
 import { ref, watch, markRaw } from 'vue'
 import { getIcon } from '../utils/iconMapper'
+import { getFaviconUrl } from '../utils/urlHelper'
 
 const props = defineProps({
   links: {
@@ -174,17 +193,31 @@ const removeLink = (index) => {
 }
 
 /**
+ * 处理图标加载错误
+ * 当favicon加载失败时，隐藏图片元素
+ * @param {Event} event - 错误事件
+ * @param {Object} link - 链接对象
+ */
+const handleIconError = (event, link) => {
+  // 隐藏图片，让回退方案（SVG图标或首字母）显示
+  if (event.target) {
+    event.target.style.display = 'none'
+  }
+}
+
+/**
  * 保存链接
  */
 const saveLinks = () => {
   console.log('[QuickLinkEditor] saveLinks called, localLinks:', localLinks.value)
-  // 过滤掉空链接，并清理图标对象（只保留iconName）
+  // 过滤掉空链接，并清理图标对象（只保留iconName作为回退）
   const validLinks = localLinks.value
     .filter(link => link.name && link.url)
     .map(link => {
       const { icon, ...rest } = link
       return {
         ...rest,
+        // iconName保留作为回退方案，但主要使用动态favicon
         iconName: link.iconName || 'HomeIcon'
       }
     })

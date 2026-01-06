@@ -10,7 +10,7 @@
   --hover-bg: rgba(255, 255, 255, 0.6);
   --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 15%, transparent);
   --hover-text: #1e293b;
-  --hover-text-dark: var(--theme-primary-dark);
+  --hover-text-dark: rgba(255, 255, 255, 0.6);
   --hover-border: rgba(0, 0, 0, 0.1);
   --hover-border-dark: rgba(255, 255, 255, 0.1);
 }
@@ -23,12 +23,13 @@
 
 .dark .tool-select-btn:hover {
   background-color: var(--hover-bg-dark);
+  color: var(--hover-text-dark);
   border-color: var(--hover-border-dark);
 }
 
 /* 选中状态的工具按钮 */
 .tool-select-btn-selected {
-  background: color-mix(in srgb, var(--theme-primary-lighter) 80%, transparent);
+  background-color: var(--hover-bg);
   color: var(--theme-primary-darker);
   box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--theme-primary) 10%, transparent);
   border-color: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent);
@@ -36,7 +37,7 @@
 
 .dark .tool-select-btn-selected {
   background: color-mix(in srgb, var(--theme-primary) 20%, transparent);
-  color: var(--theme-primary-dark);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* 透明主题下的选中状态 */
