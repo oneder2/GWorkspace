@@ -200,8 +200,6 @@ import QRCodeTool from '../components/tools/QRCodeTool.vue'
 import MarkdownTool from '../components/tools/MarkdownTool.vue'
 import TodoTool from '../components/tools/TodoTool.vue'
 import WorldClockTool from '../components/tools/WorldClockTool.vue'
-// 导入页面样式
-import '../styles/pages/ToolsPage.css'
 
 const { t } = useI18n()
 const currentTool = ref('todo') // 默认工具改为 todo
@@ -280,3 +278,8 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
+
+<style scoped>
+/* 导入页面样式 */
+@import '../styles/pages/ToolsPage.css';
+</style>

@@ -172,8 +172,6 @@ import { ref, computed } from 'vue'
 import { sitesConfig } from '../config/sites'
 import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
-// 导入页面样式
-import '../styles/pages/SitesPage.css'
 
 const siteFilter = ref('')
 
@@ -256,3 +254,8 @@ const favoriteLinks = computed(() => {
   return getFavoritesArray()
 })
 </script>
+
+<style scoped>
+/* 导入页面样式 */
+@import '../styles/pages/SitesPage.css';
+</style>

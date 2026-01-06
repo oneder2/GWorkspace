@@ -319,8 +319,6 @@ import { blogApi } from '../utils/api'
 import Guestbook from '../components/Guestbook.vue'
 import AuthModal from '../components/AuthModal.vue'
 import { getTagStyle } from '../utils/tagColor'
-// 导入页面样式
-import '../styles/pages/BlogPage.css'
 
 const router = useRouter()
 const searchQuery = ref('')
@@ -787,4 +785,9 @@ onMounted(() => {
   loadBlogStats()
 })
 </script>
+
+<style scoped>
+/* 导入页面样式 */
+@import '../styles/pages/BlogPage.css';
+</style>
 
