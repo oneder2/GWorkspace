@@ -138,7 +138,7 @@
                 <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDate('usWest') }}</div>
               </div>
             </div>
-          </div>
+      </div>
         </transition>
     </div>
     
@@ -712,8 +712,8 @@ onMounted(() => {
     localStorage.removeItem('blog-new-articles')
   } catch (error) {
     // 忽略错误
-  }
-  
+}
+
   // 加载管理员设置
   loadAdminSettings()
 })
