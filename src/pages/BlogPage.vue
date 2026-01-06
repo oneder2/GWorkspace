@@ -10,10 +10,7 @@
     <div class="xl:hidden mb-4">
       <button
         @click="showMobileFilters = !showMobileFilters"
-        class="w-full glass-card p-3 rounded-xl flex items-center justify-between transition-colors"
-        style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-        @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; }"
-        @mouseleave="const el = $event?.currentTarget; if (el) { el.style.backgroundColor = ''; }"
+        class="blog-mobile-filter-btn w-full glass-card p-3 rounded-xl flex items-center justify-between transition-colors"
       >
         <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $t('blog.filters') }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-400" :class="{ 'rotate-180': showMobileFilters }">
@@ -107,10 +104,11 @@
               :key="genre"
               @click="toggleGenreFilter(genre)"
               class="px-3 py-1 rounded-md text-xs font-bold transition-all duration-200 uppercase tracking-wide"
-              :class="selectedGenre === genre 
-                ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'"
-              :style="selectedGenre === genre ? { '--tw-ring-color': 'var(--theme-primary)' } : {}"
+              :class="[
+                selectedGenre === genre 
+                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105 blog-genre-btn-selected'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'
+              ]"
               :title="selectedGenre === genre ? '点击取消筛选' : '点击筛选此分类'"
             >
               {{ genre }}
@@ -127,13 +125,12 @@
               :key="tag"
               @click="toggleTagFilter(tag)"
               class="px-3 py-1 rounded-full text-xs font-bold transition-all duration-200"
-              :class="selectedTag === tag 
-                ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105' 
-                : 'hover:scale-105 cursor-pointer'"
-              :style="{
-                ...getTagColor(tag).style,
-                ...(selectedTag === tag ? { '--tw-ring-color': 'var(--theme-primary)' } : {})
-              }"
+              :class="[
+                selectedTag === tag 
+                  ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105 blog-tag-btn-selected' 
+                  : 'hover:scale-105 cursor-pointer'
+              ]"
+              :style="getTagColor(tag).style"
               :title="selectedTag === tag ? '点击取消筛选' : '点击筛选此标签'"
             >
               #{{ tag }}
@@ -149,32 +146,12 @@
                 v-for="archive in archives" 
                 :key="archive.month"
               @click="toggleArchiveFilter(archive.month)"
-              class="cursor-pointer flex justify-between px-2 py-1.5 rounded-lg transition-all duration-200"
-              :class="selectedArchive === archive.month 
-                ? 'font-semibold' 
-                : 'text-slate-500 dark:text-slate-400'"
-              :style="selectedArchive === archive.month 
-                ? { 
-                    backgroundColor: 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)',
-                    color: 'var(--theme-primary-darker)',
-                    '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 20%, transparent)',
-                    '--dark-color': 'var(--theme-primary-dark)'
-                  }
-                : {
-                    '--hover-bg': 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)',
-                    '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 10%, transparent)',
-                    '--hover-text': 'var(--theme-primary-darker)',
-                    '--hover-text-dark': 'var(--theme-primary-dark)'
-                  }"
-              @mouseenter="if (selectedArchive !== archive.month) { 
-                const el = $event.currentTarget;
-                el.style.backgroundColor = document.documentElement.classList.contains('dark') ? 'var(--hover-bg-dark)' : 'var(--hover-bg)';
-                el.style.color = document.documentElement.classList.contains('dark') ? 'var(--hover-text-dark)' : 'var(--hover-text)';
-              }"
-              @mouseleave="if (selectedArchive !== archive.month) { 
-                $event.currentTarget.style.backgroundColor = '';
-                $event.currentTarget.style.color = '';
-              }"
+              class="blog-archive-item cursor-pointer flex justify-between px-2 py-1.5 rounded-lg"
+              :class="[
+                selectedArchive === archive.month 
+                  ? 'font-semibold blog-archive-item-selected' 
+                  : 'text-slate-500 dark:text-slate-400'
+              ]"
               :title="selectedArchive === archive.month ? '点击取消筛选' : '点击筛选此月份'"
               >
                 {{ archive.month }} <span>({{ archive.count }})</span>
@@ -206,9 +183,7 @@
                 v-model="searchQuery"
                 type="text"
                 :placeholder="$t('blog.searchPlaceholder')"
-                class="glass-input w-full pl-10 pr-10 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all"
-                style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
-                @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
+                class="blog-search-input glass-input w-full pl-10 pr-10 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all"
               >
               <button 
                 v-if="searchQuery"
@@ -233,10 +208,7 @@
           v-for="post in filteredPosts" 
           :key="post.id" 
           @click="$router.push(`/blog/${post.id}`)"
-          class="glass-card p-6 rounded-2xl group cursor-pointer border-l-4 border-l-transparent transition-all"
-          style="--hover-border: var(--theme-primary);"
-          @mouseenter="const el = $event?.currentTarget; if (el) { el.style.borderLeftColor = 'var(--hover-border)'; }"
-          @mouseleave="const el = $event?.currentTarget; if (el) { el.style.borderLeftColor = 'transparent'; }"
+          class="blog-article-card glass-card p-6 rounded-2xl group cursor-pointer border-l-4 transition-all"
         >
           <!-- 文章元信息区域 - 仿照参考网站样式 -->
           <div class="flex items-center gap-3 mb-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
@@ -303,10 +275,7 @@
           
           <!-- 标题 -->
           <h3 
-            class="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-colors"
-            style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-            @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'; }"
-            @mouseleave="const el = $event?.currentTarget; if (el) { el.style.color = ''; }"
+            class="blog-article-title text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2"
             v-html="highlightText(post.title, searchQuery)"
           ></h3>
           
@@ -317,9 +286,7 @@
               v-html="highlightText(post.excerpt, searchQuery)"
             ></p>
             <!-- 阅读更多按钮 - 与描述同一行 -->
-            <div class="flex items-center text-sm font-bold gap-1 group-hover:gap-2 transition-all shrink-0"
-                 style="color: var(--theme-primary-darker);"
-                 :style="{ '--dark-color': 'var(--theme-primary-dark)' }">
+            <div class="blog-read-article-btn flex items-center text-sm font-bold gap-1 group-hover:gap-2 transition-all shrink-0">
               {{ $t('common.readArticle') }}
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -352,6 +319,8 @@ import { blogApi } from '../utils/api'
 import Guestbook from '../components/Guestbook.vue'
 import AuthModal from '../components/AuthModal.vue'
 import { getTagStyle } from '../utils/tagColor'
+// 导入页面样式
+import '../styles/pages/BlogPage.css'
 
 const router = useRouter()
 const searchQuery = ref('')

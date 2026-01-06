@@ -1,0 +1,123 @@
+/**
+ * 工具页面样式文件
+ * 包含工具页面所有组件的样式定义
+ * 使用CSS变量和类来替代内联样式
+ */
+
+/* ==================== 工具选择按钮（桌面端） ==================== */
+.tool-select-btn {
+  transition: all 0.3s ease;
+  --hover-bg: rgba(255, 255, 255, 0.6);
+  --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 15%, transparent);
+  --hover-text: #1e293b;
+  --hover-text-dark: var(--theme-primary-dark);
+  --hover-border: rgba(0, 0, 0, 0.1);
+  --hover-border-dark: rgba(255, 255, 255, 0.1);
+}
+
+.tool-select-btn:hover {
+  background-color: var(--hover-bg);
+  color: var(--hover-text);
+  border-color: var(--hover-border);
+}
+
+.dark .tool-select-btn:hover {
+  background-color: var(--hover-bg-dark);
+  border-color: var(--hover-border-dark);
+}
+
+/* 选中状态的工具按钮 */
+.tool-select-btn-selected {
+  background: color-mix(in srgb, var(--theme-primary-lighter) 80%, transparent);
+  color: var(--theme-primary-darker);
+  box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--theme-primary) 10%, transparent);
+  border-color: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent);
+}
+
+.dark .tool-select-btn-selected {
+  background: color-mix(in srgb, var(--theme-primary) 20%, transparent);
+  color: var(--theme-primary-dark);
+}
+
+/* 透明主题下的选中状态 */
+.tool-select-btn-selected-transparent {
+  background: rgba(255, 255, 255, 0.5);
+  color: #1e293b;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.dark .tool-select-btn-selected-transparent {
+  background: rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(148, 163, 184, 0.35);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ==================== 工具下拉按钮（移动端） ==================== */
+.tool-dropdown-btn {
+  --hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent);
+  --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);
+  transition: all 0.2s ease;
+}
+
+.tool-dropdown-btn:hover {
+  background-color: var(--hover-bg);
+}
+
+.dark .tool-dropdown-btn:hover {
+  background-color: var(--hover-bg-dark);
+}
+
+/* ==================== 工具下拉选项（移动端） ==================== */
+.tool-dropdown-item {
+  transition: all 0.2s ease;
+  --hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent);
+  --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);
+  --hover-text: var(--theme-primary-darker);
+  --hover-text-dark: var(--theme-primary-dark);
+}
+
+.tool-dropdown-item:hover {
+  background-color: var(--hover-bg);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.dark .tool-dropdown-item:hover {
+  background-color: var(--hover-bg-dark);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 选中状态的下拉选项 */
+.tool-dropdown-item-selected {
+  background: color-mix(in srgb, var(--theme-primary-lighter) 80%, transparent);
+  color: var(--theme-primary-darker);
+  --dark-bg: color-mix(in srgb, var(--theme-primary) 30%, transparent);
+  --dark-color: var(--theme-primary-dark);
+}
+
+.dark .tool-dropdown-item-selected {
+  background: var(--dark-bg);
+  color: var(--dark-color);
+}
+
+/* 透明主题下的选中状态 */
+.tool-dropdown-item-selected-transparent {
+  background: rgba(255, 255, 255, 0.6);
+  color: #1e293b;
+}
+
+.dark .tool-dropdown-item-selected-transparent {
+  background: rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+}
+
+/* ==================== 工具选中指示器 ==================== */
+.tool-indicator {
+  background-color: var(--theme-primary);
+}
+
+.tool-indicator-transparent {
+  background-color: #475569;
+}
+

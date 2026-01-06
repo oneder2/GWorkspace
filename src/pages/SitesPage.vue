@@ -55,10 +55,7 @@
                 target="_blank" 
                 class="flex items-start gap-3 flex-1 min-w-0"
               >
-                <div class="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 transition-colors shrink-0 shadow-sm border border-slate-100 dark:border-slate-700"
-                  style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-light);"
-                  @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)';"
-                  @mouseleave="const el = $event.currentTarget; el.style.backgroundColor = ''; el.style.color = '';"
+                <div class="sites-link-icon w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0 shadow-sm border border-slate-100 dark:border-slate-700"
                 >
                   <img 
                     :src="`https://www.google.com/s2/favicons?domain=${link.url}&sz=64`" 
@@ -175,6 +172,8 @@ import { ref, computed } from 'vue'
 import { sitesConfig } from '../config/sites'
 import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
+// 导入页面样式
+import '../styles/pages/SitesPage.css'
 
 const siteFilter = ref('')
 
