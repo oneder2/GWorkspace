@@ -239,7 +239,7 @@
           @mouseleave="const el = $event?.currentTarget; if (el) { el.style.borderLeftColor = 'transparent'; }"
         >
           <!-- 文章元信息区域 - 仿照参考网站样式 -->
-          <div class="flex items-center gap-3 mb-4 flex-wrap text-xs text-slate-500 dark:text-slate-400">
+          <div class="flex items-center gap-3 mb-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
             <!-- 发布日期 -->
             <span class="font-mono">
               {{ formatDateChinese(post.published_at || post.date) }}
@@ -281,7 +281,7 @@
           </div>
           
           <!-- 分类和标签区域 -->
-          <div class="flex items-center gap-2 mb-3 flex-wrap">
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
             <!-- Genre分类 -->
             <span 
               class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs rounded-md font-bold uppercase tracking-wide"
@@ -300,20 +300,24 @@
               </span>
             </div>
           </div>
+          
+          <!-- 标题 -->
           <h3 
-            class="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-3 transition-colors"
+            class="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2 transition-colors"
             style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
             @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'; }"
             @mouseleave="const el = $event?.currentTarget; if (el) { el.style.color = ''; }"
             v-html="highlightText(post.title, searchQuery)"
           ></h3>
-          <p 
-            class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4 opacity-80"
-            v-html="highlightText(post.excerpt, searchQuery)"
-          ></p>
-          <!-- 阅读更多按钮 -->
-          <div class="flex items-center justify-end border-t border-slate-100 dark:border-slate-700 pt-4 mt-4">
-            <div class="flex items-center text-sm font-bold gap-1 group-hover:gap-2 transition-all"
+          
+          <!-- 描述和阅读按钮 - 同一行显示 -->
+          <div class="flex items-center justify-between gap-4">
+            <p 
+              class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed opacity-80 flex-1 min-w-0"
+              v-html="highlightText(post.excerpt, searchQuery)"
+            ></p>
+            <!-- 阅读更多按钮 - 与描述同一行 -->
+            <div class="flex items-center text-sm font-bold gap-1 group-hover:gap-2 transition-all shrink-0"
                  style="color: var(--theme-primary-darker);"
                  :style="{ '--dark-color': 'var(--theme-primary-dark)' }">
               {{ $t('common.readArticle') }}
