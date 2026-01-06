@@ -58,10 +58,12 @@
                 <div class="sites-link-icon w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0 shadow-sm border border-slate-100 dark:border-slate-700"
                 >
                   <img 
-                    :src="`https://www.google.com/s2/favicons?domain=${link.url}&sz=64`" 
-                    @error="$event.target.style.display='none'" 
+                    v-if="getCachedFaviconInfo(link.url).url"
+                    :src="getCachedFaviconInfo(link.url).url" 
+                    @load="handleIconLoad(link.url)"
+                    @error="handleIconError($event, link.url)"
                     class="w-6 h-6 rounded-sm opacity-90 group-hover:opacity-100 transition-opacity"
-                    alt=""
+                    :alt="link.title"
                   >
                 </div>
                 <div class="overflow-hidden min-w-0">
@@ -172,6 +174,7 @@ import { ref, computed } from 'vue'
 import { sitesConfig } from '../config/sites'
 import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
+import { getCachedFaviconUrl, markFaviconSuccess, markFaviconError } from '../utils/faviconCache'
 
 const siteFilter = ref('')
 
@@ -253,6 +256,41 @@ const toggleFavorite = (link) => {
 const favoriteLinks = computed(() => {
   return getFavoritesArray()
 })
+
+/**
+ * 获取缓存的Favicon信息
+ * @param {string} url - 网站URL
+ * @returns {Object} Favicon信息
+ */
+const getCachedFaviconInfo = (url) => {
+  return getCachedFaviconUrl(url, 64)
+}
+
+/**
+ * 处理图标加载成功
+ * 标记favicon加载成功，更新缓存
+ * @param {string} url - 网站URL
+ */
+const handleIconLoad = (url) => {
+  markFaviconSuccess(url, 64)
+}
+
+/**
+ * 处理图标加载错误
+ * 当favicon加载失败时，隐藏图片元素并标记失败
+ * @param {Event} event - 错误事件
+ * @param {string} url - 网站URL
+ */
+const handleIconError = (event, url) => {
+  // 标记加载失败
+  if (url) {
+    markFaviconError(url)
+  }
+  // 隐藏图片
+  if (event.target) {
+    event.target.style.display = 'none'
+  }
+}
 </script>
 
 <style scoped>

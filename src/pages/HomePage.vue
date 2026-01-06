@@ -120,14 +120,15 @@
           target="_blank" 
           class="glass-card flex flex-col items-center justify-center py-6 rounded-2xl cursor-pointer group hover:-translate-y-1"
         >
-          <!-- 动态获取网站图标 -->
+          <!-- 动态获取网站图标（带缓存） -->
           <div 
             class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 shadow-lg transition-transform duration-300 group-hover:scale-110 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
           >
-            <!-- 优先使用动态获取的favicon -->
+            <!-- 优先使用动态获取的favicon（带缓存） -->
             <img 
-              v-if="site.url"
-              :src="getFaviconUrl(site.url, 64)" 
+              v-if="site.url && getCachedFaviconInfo(site.url).url"
+              :src="getCachedFaviconInfo(site.url).url" 
+              @load="handleIconLoad(site.url)"
               @error="handleIconError($event, site)"
               class="w-10 h-10 rounded-lg opacity-90 group-hover:opacity-100 transition-opacity"
               :alt="site.name"
@@ -168,7 +169,7 @@ import { ref, computed, markRaw } from 'vue'
 import { quickLinksConfig } from '../config/home'
 import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
-import { getFaviconUrl } from '../utils/urlHelper'
+import { getCachedFaviconUrl, markFaviconSuccess, markFaviconError } from '../utils/faviconCache'
 import GoogleIcon from '../components/icons/GoogleIcon.vue'
 import DuckIcon from '../components/icons/DuckIcon.vue'
 import BaiduIcon from '../components/icons/BaiduIcon.vue'
@@ -295,12 +296,34 @@ const performSearch = () => {
 }
 
 /**
+ * 获取缓存的Favicon信息
+ * @param {string} url - 网站URL
+ * @returns {Object} Favicon信息
+ */
+const getCachedFaviconInfo = (url) => {
+  return getCachedFaviconUrl(url, 64)
+}
+
+/**
+ * 处理图标加载成功
+ * 标记favicon加载成功，更新缓存
+ * @param {string} url - 网站URL
+ */
+const handleIconLoad = (url) => {
+  markFaviconSuccess(url, 64)
+}
+
+/**
  * 处理图标加载错误
- * 当favicon加载失败时，隐藏图片元素
+ * 当favicon加载失败时，隐藏图片元素并标记失败
  * @param {Event} event - 错误事件
  * @param {Object} site - 网站对象
  */
 const handleIconError = (event, site) => {
+  // 标记加载失败
+  if (site.url) {
+    markFaviconError(site.url)
+  }
   // 隐藏图片，让回退方案（SVG图标或首字母）显示
   if (event.target) {
     event.target.style.display = 'none'
