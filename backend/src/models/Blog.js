@@ -255,21 +255,39 @@ export class Blog {
 
   /**
    * 获取所有分类
+   * @param {string} status - 状态筛选（可选，默认获取所有状态）
    * @returns {Array} 分类列表
    */
-  static getAllGenres() {
+  static getAllGenres(status = null) {
     const db = getDatabase()
-    const result = db.prepare('SELECT DISTINCT genre FROM blogs WHERE status = ?').all('published')
+    let query = 'SELECT DISTINCT genre FROM blogs WHERE genre IS NOT NULL'
+    const params = []
+    
+    if (status) {
+      query += ' AND status = ?'
+      params.push(status)
+    }
+    
+    const result = db.prepare(query).all(...params)
     return result.map(row => row.genre).filter(Boolean)
   }
 
   /**
    * 获取所有标签
+   * @param {string} status - 状态筛选（可选，默认获取所有状态）
    * @returns {Array} 标签列表
    */
-  static getAllTags() {
+  static getAllTags(status = null) {
     const db = getDatabase()
-    const blogs = db.prepare('SELECT tags FROM blogs WHERE status = ? AND tags IS NOT NULL').all('published')
+    let query = 'SELECT tags FROM blogs WHERE tags IS NOT NULL'
+    const params = []
+    
+    if (status) {
+      query += ' AND status = ?'
+      params.push(status)
+    }
+    
+    const blogs = db.prepare(query).all(...params)
     const tagSet = new Set()
     
     blogs.forEach(blog => {

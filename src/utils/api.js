@@ -126,7 +126,29 @@ export const blogApi = {
    * 获取博客统计信息
    * @returns {Promise<Object>}
    */
-  getStats: () => request('/blogs/stats')
+  getStats: () => request('/blogs/stats'),
+
+  /**
+   * 获取所有分类（Genre）
+   * @param {Object} params - 查询参数
+   * @param {string} params.status - 状态筛选（可选）
+   * @returns {Promise<Array>}
+   */
+  getAllGenres: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/blogs/genres${queryString ? `?${queryString}` : ''}`)
+  },
+
+  /**
+   * 获取所有标签（Tags）
+   * @param {Object} params - 查询参数
+   * @param {string} params.status - 状态筛选（可选）
+   * @returns {Promise<Array>}
+   */
+  getAllTags: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/blogs/tags${queryString ? `?${queryString}` : ''}`)
+  }
 }
 
 /**

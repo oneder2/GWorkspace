@@ -83,6 +83,46 @@ router.get('/stats', (req, res) => {
 })
 
 /**
+ * 获取所有分类（Genre）
+ * GET /api/blogs/genres
+ * 查询参数：
+ * - status: 状态筛选（可选，默认获取所有状态）
+ * 注意：必须在 /:id 路由之前定义，否则会被当作ID处理
+ */
+router.get('/genres', (req, res) => {
+  try {
+    const { status } = req.query
+    // 如果status为'all'，则获取所有状态；否则使用指定状态或null（所有状态）
+    const genreStatus = status === 'all' ? null : (status || null)
+    const genres = Blog.getAllGenres(genreStatus)
+    res.json(genres)
+  } catch (error) {
+    console.error('Error fetching genres:', error)
+    res.status(500).json({ error: 'Failed to fetch genres' })
+  }
+})
+
+/**
+ * 获取所有标签（Tags）
+ * GET /api/blogs/tags
+ * 查询参数：
+ * - status: 状态筛选（可选，默认获取所有状态）
+ * 注意：必须在 /:id 路由之前定义，否则会被当作ID处理
+ */
+router.get('/tags', (req, res) => {
+  try {
+    const { status } = req.query
+    // 如果status为'all'，则获取所有状态；否则使用指定状态或null（所有状态）
+    const tagStatus = status === 'all' ? null : (status || null)
+    const tags = Blog.getAllTags(tagStatus)
+    res.json(tags)
+  } catch (error) {
+    console.error('Error fetching tags:', error)
+    res.status(500).json({ error: 'Failed to fetch tags' })
+  }
+})
+
+/**
  * 获取单篇博客详情
  * GET /api/blogs/:id
  */

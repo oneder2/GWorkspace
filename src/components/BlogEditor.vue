@@ -27,7 +27,7 @@
       <!-- 内容区域 - 可滚动 -->
       <div :class="isPageMode ? 'space-y-6' : 'flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-2'">
         <!-- 元数据表单 -->
-        <div class="glass-card p-6 rounded-2xl space-y-4">
+        <div class="glass-card p-6 rounded-2xl space-y-4 relative z-10">
           <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">{{ $t('blog.articleMeta') }}</h3>
           
           <!-- 标题 -->
@@ -53,7 +53,7 @@
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 {{ $t('blog.genre') }} <span class="text-red-500">*</span>
               </label>
-              <div class="relative">
+              <div class="relative" ref="genreContainerRef">
                 <input 
                   v-model="formData.genre"
                   type="text"
@@ -61,13 +61,21 @@
                   class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
                   style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
                   @focus="(e) => { showGenreSuggestions = true; e.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)') }"
-                  @blur="(e) => { setTimeout(() => showGenreSuggestions = false, 200); e.currentTarget.style.setProperty('--tw-ring-color', '') }"
+                  @blur="(e) => { e.currentTarget.style.setProperty('--tw-ring-color', '') }"
                   :placeholder="$t('blog.genrePlaceholder')"
                 />
                 <!-- 分类建议下拉列表 -->
                 <div 
                   v-if="showGenreSuggestions && filteredGenreSuggestions.length > 0"
+                  ref="genreSuggestionsRef"
                   class="absolute z-50 w-full mt-1 glass-card rounded-lg shadow-lg max-h-48 overflow-y-auto custom-scrollbar"
+                  :style="{
+                    background: isDarkMode 
+                      ? 'rgba(15, 23, 42, 0.95)' 
+                      : 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)'
+                  }"
                 >
                   <button
                     v-for="genre in filteredGenreSuggestions"
@@ -138,7 +146,7 @@
               </span>
             </div>
             <div class="flex gap-2 relative">
-              <div class="flex-1 relative">
+              <div class="flex-1 relative" ref="tagContainerRef">
                 <input 
                   v-model="newTag"
                   type="text"
@@ -147,13 +155,21 @@
                   class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
                   style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
                   @focus="(e) => { showTagSuggestions = true; e.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)') }"
-                  @blur="(e) => { setTimeout(() => showTagSuggestions = false, 200); e.currentTarget.style.setProperty('--tw-ring-color', '') }"
+                  @blur="(e) => { e.currentTarget.style.setProperty('--tw-ring-color', '') }"
                   :placeholder="$t('blog.addTagPlaceholder')"
                 />
                 <!-- 标签建议下拉列表 -->
                 <div 
                   v-if="showTagSuggestions && filteredTagSuggestions.length > 0"
-                  class="absolute z-50 w-full mt-1 glass-card rounded-lg shadow-lg max-h-48 overflow-y-auto custom-scrollbar"
+                  ref="tagSuggestionsRef"
+                  class="absolute z-[9999] w-full mt-1 glass-card rounded-lg shadow-lg max-h-48 overflow-y-auto custom-scrollbar"
+                  :style="{
+                    background: isDarkMode 
+                      ? 'rgba(15, 23, 42, 0.95)' 
+                      : 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)'
+                  }"
                 >
                   <button
                     v-for="tag in filteredTagSuggestions"
@@ -192,7 +208,7 @@
         </div>
 
         <!-- Markdown编辑器 -->
-        <div class="glass-card p-6 rounded-2xl flex flex-col">
+        <div class="glass-card p-6 rounded-2xl flex flex-col relative z-0">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('blog.content') }}</h3>
             <div class="flex items-center gap-3">
@@ -347,13 +363,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css' // 亮色主题作为基础
 import { blogApi, generateSlug } from '../utils/api'
 import { getTagStyle } from '../utils/tagColor'
+import { getCachedGenres, getCachedTags, setCachedGenres, setCachedTags } from '../utils/suggestionCache'
 
 const props = defineProps({
   /**
@@ -549,30 +566,100 @@ const isSubmitting = ref(false)
 const errors = ref([])
 
 /**
- * 现有分类列表（从现有文章中提取）
+ * 从API加载的分类列表
+ */
+const apiGenres = ref([])
+
+/**
+ * 从API加载的标签列表
+ */
+const apiTags = ref([])
+
+/**
+ * 加载状态
+ */
+const isLoadingSuggestions = ref(false)
+
+/**
+ * 现有分类列表（合并API数据和现有文章数据）
  */
 const existingGenres = computed(() => {
   const genreSet = new Set()
+  
+  // 添加从API获取的分类
+  apiGenres.value.forEach(genre => {
+    if (genre) genreSet.add(genre)
+  })
+  
+  // 添加从现有文章中提取的分类
   props.existingPosts.forEach(post => {
     if (post.genre) {
       genreSet.add(post.genre)
     }
   })
+  
   return Array.from(genreSet).sort()
 })
 
 /**
- * 现有标签列表（从现有文章中提取）
+ * 现有标签列表（合并API数据和现有文章数据）
  */
 const existingTags = computed(() => {
   const tagSet = new Set()
+  
+  // 添加从API获取的标签
+  apiTags.value.forEach(tag => {
+    if (tag) tagSet.add(tag)
+  })
+  
+  // 添加从现有文章中提取的标签
   props.existingPosts.forEach(post => {
     if (post.tags && Array.isArray(post.tags)) {
       post.tags.forEach(tag => tagSet.add(tag))
     }
   })
+  
   return Array.from(tagSet).sort()
 })
+
+/**
+ * 从API加载分类和标签数据
+ */
+const loadSuggestions = async () => {
+  // 先检查缓存
+  const cachedGenres = getCachedGenres()
+  const cachedTags = getCachedTags()
+  
+  if (cachedGenres && cachedTags) {
+    apiGenres.value = cachedGenres
+    apiTags.value = cachedTags
+    return
+  }
+  
+  try {
+    isLoadingSuggestions.value = true
+    
+    // 获取所有状态的分类和标签（包括草稿）
+    const [genres, tags] = await Promise.all([
+      blogApi.getAllGenres({ status: 'all' }),
+      blogApi.getAllTags({ status: 'all' })
+    ])
+    
+    apiGenres.value = genres || []
+    apiTags.value = tags || []
+    
+    // 更新缓存
+    setCachedGenres(apiGenres.value)
+    setCachedTags(apiTags.value)
+  } catch (error) {
+    console.error('Failed to load suggestions:', error)
+    // 如果API失败，至少使用现有文章的数据
+    apiGenres.value = []
+    apiTags.value = []
+  } finally {
+    isLoadingSuggestions.value = false
+  }
+}
 
 /**
  * 显示分类建议
@@ -583,6 +670,27 @@ const showGenreSuggestions = ref(false)
  * 显示标签建议
  */
 const showTagSuggestions = ref(false)
+
+/**
+ * 分类容器引用（用于点击外部关闭）
+ */
+const genreContainerRef = ref(null)
+
+/**
+ * 分类建议下拉框引用
+ */
+const genreSuggestionsRef = ref(null)
+
+/**
+ * 标签容器引用（用于点击外部关闭）
+ */
+const tagContainerRef = ref(null)
+
+/**
+ * 标签建议下拉框引用
+ */
+const tagSuggestionsRef = ref(null)
+
 
 /**
  * 过滤后的分类建议
@@ -637,6 +745,24 @@ const selectTag = (tag) => {
   }
   newTag.value = ''
   showTagSuggestions.value = false
+}
+
+/**
+ * 处理点击外部区域关闭下拉框
+ * @param {Event} event - 点击事件
+ */
+const handleClickOutside = (event) => {
+  // 检查是否点击在分类容器外部
+  if (genreContainerRef.value && !genreContainerRef.value.contains(event.target)) {
+    showGenreSuggestions.value = false
+  }
+  
+  // 检查是否点击在标签容器或下拉框外部
+  const isClickInTagContainer = tagContainerRef.value && tagContainerRef.value.contains(event.target)
+  const isClickInTagDropdown = tagSuggestionsRef.value && tagSuggestionsRef.value.contains(event.target)
+  if (!isClickInTagContainer && !isClickInTagDropdown) {
+    showTagSuggestions.value = false
+  }
 }
 
 /**
@@ -963,6 +1089,8 @@ const handleClose = () => {
 onMounted(() => {
   initFormData()
   checkThemeTransparent()
+  // 加载自动补全建议数据
+  loadSuggestions()
   // 监听主题变化
   const observer = new MutationObserver(() => {
     checkThemeTransparent()
@@ -973,6 +1101,14 @@ onMounted(() => {
       attributeFilter: ['style', 'class']
     })
   }
+  
+  // 添加点击外部关闭下拉框的事件监听
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  // 移除点击外部关闭下拉框的事件监听
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
