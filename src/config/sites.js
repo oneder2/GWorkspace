@@ -71,5 +71,14 @@ export const sitesConfig = [
       { title: 'Coursera', url: 'https://www.coursera.org', desc: 'Build skills with courses' },
       { title: 'Dev.to', url: 'https://dev.to', desc: 'Developer community' }
     ]
+  },
+  {
+    id: 'friends',
+    name: '友站链接',
+    iconName: 'LinkIcon',
+    links: [
+      { title: 'YYSUNI', url: 'https://www.yysuni.com/', desc: 'YYSUNI的个人博客站点' },
+      { title: 'ElysiumStack', url: 'https://www.elysium-stack.cn/', desc: 'ElysiumStack的个人博客站点' }
+    ]
   }
 ]

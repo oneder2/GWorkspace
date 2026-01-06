@@ -34,7 +34,7 @@
                       }
                   )
                 : {
-                    background: 'color-mix(in srgb, var(--theme-primary-emerald-lighter) 80%, transparent))',
+                    background: 'color-mix(in srgb, var(--theme-primary-lighter) 80%, transparent)',
                     color: 'var(--theme-primary-darker)',
                     boxShadow: '0 4px 6px -1px color-mix(in srgb, var(--theme-primary) 10%, transparent)',
                     borderColor: 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)'

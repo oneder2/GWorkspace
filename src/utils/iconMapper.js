@@ -31,6 +31,7 @@ import QrCodeIcon from '../components/icons/QrCodeIcon.vue'
 import FileTextIcon from '../components/icons/FileTextIcon.vue'
 import ListIcon from '../components/icons/ListIcon.vue'
 import ToolIcon from '../components/icons/ToolIcon.vue'
+import LinkIcon from '../components/icons/LinkIcon.vue'
 
 /**
  * 图标名称到组件的映射
@@ -64,6 +65,7 @@ const iconMap = {
   FileTextIcon,
   BrainIcon,
   ListIcon,
+  LinkIcon,
 }
 
 /**

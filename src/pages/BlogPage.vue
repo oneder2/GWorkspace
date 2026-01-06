@@ -238,15 +238,57 @@
           @mouseenter="const el = $event?.currentTarget; if (el) { el.style.borderLeftColor = 'var(--hover-border)'; }"
           @mouseleave="const el = $event?.currentTarget; if (el) { el.style.borderLeftColor = 'transparent'; }"
         >
-          <div class="flex items-center gap-3 mb-3 flex-wrap">
-            <!-- Genre分类 - 显示在日期前 -->
+          <!-- 文章元信息区域 - 仿照参考网站样式 -->
+          <div class="flex items-center gap-3 mb-4 flex-wrap text-xs text-slate-500 dark:text-slate-400">
+            <!-- 发布日期 -->
+            <span class="font-mono">
+              {{ formatDateChinese(post.published_at || post.date) }}
+            </span>
+            <!-- 分隔符 -->
+            <span class="text-slate-300 dark:text-slate-600">·</span>
+            <!-- 观看数 -->
+            <span class="flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              {{ post.views || 0 }}
+            </span>
+            <!-- 分隔符 -->
+            <span class="text-slate-300 dark:text-slate-600">·</span>
+            <!-- 点赞数 -->
+            <span class="flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 text-red-400 dark:text-red-500">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              {{ (post.likes_count !== undefined && post.likes_count !== null) ? post.likes_count : (post.likes || 0) }}
+            </span>
+            <!-- 分隔符 -->
+            <span class="text-slate-300 dark:text-slate-600">·</span>
+            <!-- 评论数 -->
+            <span class="flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              {{ post.comments_count !== undefined ? post.comments_count : (post.comments || 0) }}
+            </span>
+            <!-- 分隔符 -->
+            <span class="text-slate-300 dark:text-slate-600">·</span>
+            <!-- 热度 -->
+            <span class="flex items-center gap-1 text-orange-500 dark:text-orange-400 font-semibold">
+              {{ calculateHeat(post) }}℃
+            </span>
+          </div>
+          
+          <!-- 分类和标签区域 -->
+          <div class="flex items-center gap-2 mb-3 flex-wrap">
+            <!-- Genre分类 -->
             <span 
               class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs rounded-md font-bold uppercase tracking-wide"
             >
               {{ post.genre || post.category }}
             </span>
-            <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">{{ post.date }}</span>
-            <!-- 标签列表 - 显示在日期后 -->
+            <!-- 标签列表 -->
             <div v-if="post.tags && post.tags.length > 0" class="flex items-center gap-2 flex-wrap">
               <span 
                 v-for="tag in post.tags" 
@@ -269,7 +311,8 @@
             class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-4 opacity-80"
             v-html="highlightText(post.excerpt, searchQuery)"
           ></p>
-          <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-4">
+          <!-- 阅读更多按钮 -->
+          <div class="flex items-center justify-end border-t border-slate-100 dark:border-slate-700 pt-4 mt-4">
             <div class="flex items-center text-sm font-bold gap-1 group-hover:gap-2 transition-all"
                  style="color: var(--theme-primary-darker);"
                  :style="{ '--dark-color': 'var(--theme-primary-dark)' }">
@@ -278,25 +321,6 @@
                 <line x1="5" y1="12" x2="19" y2="12"/>
                 <polyline points="12 5 19 12 12 19"/>
               </svg>
-            </div>
-            <div class="flex items-center gap-3 text-slate-400 dark:text-slate-500 text-sm">
-              <span class="flex items-center gap-1 text-slate-400 dark:text-slate-500">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="currentColor" 
-                  class="w-4 h-4"
-                >
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
-                {{ (post.likes_count !== undefined && post.likes_count !== null) ? post.likes_count : (post.likes || 0) }}
-              </span>
-              <span class="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                {{ post.comments ?? 0 }}
-              </span>
             </div>
           </div>
         </article>
@@ -396,6 +420,50 @@ const loadBlogStats = async () => {
  */
 const formatNumber = (num) => {
   return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+/**
+ * 格式化日期为中文格式
+ * 格式：2025年12月29日 17时19分
+ * @param {string} dateStr - 日期字符串，格式如 "2025-05-20" 或 ISO 8601格式
+ * @returns {string} 格式化后的日期字符串
+ */
+const formatDateChinese = (dateStr) => {
+  if (!dateStr) return ''
+  
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const hours = date.getHours()
+  const minutes = date.getMinutes()
+  
+  // 如果有时间信息（不是00:00），则显示时间
+  if (hours !== 0 || minutes !== 0) {
+    return `${year}年${month}月${day}日 ${hours}时${minutes.toString().padStart(2, '0')}分`
+  }
+  
+  return `${year}年${month}月${day}日`
+}
+
+/**
+ * 计算文章热度
+ * 根据观看数、点赞数、评论数计算热度值
+ * @param {Object} post - 文章对象
+ * @returns {number} 热度值（摄氏度）
+ */
+const calculateHeat = (post) => {
+  const views = post.views || 0
+  const likes = (post.likes_count !== undefined && post.likes_count !== null) ? post.likes_count : (post.likes || 0)
+  const comments = post.comments_count !== undefined ? post.comments_count : (post.comments || 0)
+  
+  // 热度计算公式：基础温度 + 观看数*0.01 + 点赞数*0.5 + 评论数*1
+  // 基础温度为30℃，最高温度限制在200℃
+  const baseTemp = 30
+  const heat = baseTemp + views * 0.01 + likes * 0.5 + comments * 1
+  return Math.min(Math.round(heat * 10) / 10, 200) // 保留一位小数，最高200℃
 }
 
 /**
