@@ -59,6 +59,7 @@
     "copyHTML": "复制HTML",
     "todo": "待办事项",
     "worldClock": {
+      "relocate": "重新定位",
       "title": "世界时钟",
       "desc": "查看不同时区的时间",
       "local": "本地时间",

@@ -31,6 +31,10 @@ const __dirname = dirname(__filename)
 const app = express()
 const PORT = process.env.PORT || 3001
 
+// 配置信任代理（用于正确获取客户端真实IP）
+// 如果部署在反向代理（如Nginx）后面，需要设置trust proxy
+app.set('trust proxy', true)
+
 // 中间件配置
 app.use(helmet()) // 安全头
 

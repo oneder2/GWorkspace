@@ -38,6 +38,9 @@ export function authenticate(req, res, next) {
     req.user = user
     req.token = token
 
+    // 注意：管理员位置更新已改为前端处理
+    // 前端会在访问时自动检查并更新位置信息
+
     next()
   } catch (error) {
     console.error('Authentication error:', error)

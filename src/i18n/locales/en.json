@@ -70,6 +70,7 @@
       "usWestTimezone": "PST/PDT",
       "admin": "Admin",
       "visitor": "Visitor",
+      "relocate": "Relocate",
       "timeDifference": "Time Difference",
       "hoursAhead": "{hours} hours ahead",
       "hoursBehind": "{hours} hours behind",

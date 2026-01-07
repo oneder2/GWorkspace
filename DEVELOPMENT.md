@@ -203,6 +203,31 @@ VITE_WEATHER_API_KEY=your_api_key
 const apiKey = import.meta.env.VITE_WEATHER_API_KEY
 ```
 
+## 功能扩展指南
+
+### 添加新的导航页面
+
+1. 在 `src/pages/` 目录下创建新的页面组件
+2. 在 `src/components/Sidebar.vue` 的 `navItems` 中添加新项
+3. 在 `src/App.vue` 中添加对应的路由逻辑
+4. 在 `src/i18n/locales/` 中添加翻译文本
+
+### 添加新的工具
+
+1. 在 `src/components/tools/` 目录下创建工具组件
+2. 在 `src/pages/ToolsPage.vue` 的 `tools` 数组中添加新工具配置
+3. 在 `src/components/tools/` 中添加对应的工具组件引用
+
+### 添加新的站点分类
+
+在 `src/pages/SitesPage.vue` 的 `sitesData` 数组中添加新分类，并创建对应的图标组件（如需要）。
+
+### 添加新的语言
+
+1. 在 `src/i18n/locales/` 目录下创建新的语言文件（如 `ja.json`）
+2. 在 `src/i18n/index.js` 中注册新语言
+3. 在 `src/components/Header.vue` 中添加语言切换逻辑
+
 ## 常见问题
 
 ### 1. 天气API无法获取数据

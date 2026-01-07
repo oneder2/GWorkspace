@@ -4,7 +4,8 @@
  */
 
 import { ref, computed } from 'vue'
-import { authApi } from '../utils/api'
+import { authApi, adminSettingsApi } from '../utils/api'
+import { getClientLocationInfo } from '../utils/ipLocation'
 
 // 用户状态
 const user = ref(null)
@@ -66,11 +67,51 @@ export function useAuth() {
       user.value = response.user
       token.value = response.token
       localStorage.setItem('token', response.token)
+      
+      // 如果是管理员，登录后自动获取IP并更新位置信息
+      if (response.user.role === 'admin') {
+        updateAdminLocationOnLogin().catch(error => {
+          console.debug('Failed to update admin location on login:', error)
+        })
+      }
+      
       return { success: true, user: response.user }
     } catch (error) {
       return { success: false, error: error.message }
     } finally {
       isLoading.value = false
+    }
+  }
+
+  /**
+   * 登录后更新管理员位置信息
+   * 前端获取真实公网IP并发送给后端
+   */
+  async function updateAdminLocationOnLogin() {
+    try {
+      // 获取客户端真实IP和位置信息
+      const locationInfo = await getClientLocationInfo()
+      
+      if (locationInfo && locationInfo.ip && locationInfo.location && locationInfo.timezone) {
+        // DEBUG: 输出获取到的位置信息
+        console.debug('[DEBUG] updateAdminLocationOnLogin - Client location info:', {
+          ip: locationInfo.ip,
+          location: locationInfo.location,
+          timezone: locationInfo.timezone
+        })
+        
+        // 发送给后端更新
+        await adminSettingsApi.update({
+          ip_address: locationInfo.ip,
+          location: locationInfo.location,
+          timezone: locationInfo.timezone
+        })
+        console.log('[DEBUG] Admin location updated on login:', locationInfo.location)
+      } else {
+        console.warn('[DEBUG] Failed to get location info on login:', locationInfo)
+      }
+    } catch (error) {
+      console.error('Failed to update admin location on login:', error)
     }
   }
 

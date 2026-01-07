@@ -6,8 +6,6 @@
 import express from 'express'
 import { body, validationResult } from 'express-validator'
 import { User } from '../models/User.js'
-import { AdminSettings } from '../models/AdminSettings.js'
-import { getLocationByIP } from '../utils/ipLocation.js'
 
 const router = express.Router()
 
@@ -96,26 +94,8 @@ router.post('/login', [
       return res.status(401).json({ error: 'Invalid username or password' })
     }
 
-    // 如果是管理员登录，根据IP地址更新管理员设置
-    if (user.role === 'admin') {
-      try {
-        const userIp = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress
-        // 如果是本地IP或私有IP，不更新
-        if (userIp && !userIp.startsWith('127.') && !userIp.startsWith('192.168.') && !userIp.startsWith('10.')) {
-          const locationInfo = await getLocationByIP(userIp.split(',')[0].trim())
-          if (locationInfo.location && locationInfo.timezone) {
-            AdminSettings.update({
-              location: locationInfo.location,
-              timezone: locationInfo.timezone,
-              ip_address: userIp.split(',')[0].trim()
-            }, user.id)
-          }
-        }
-      } catch (error) {
-        // 地区信息更新失败不影响登录
-        console.warn('Failed to update admin location:', error)
-      }
-    }
+    // 注意：管理员位置更新已改为前端处理
+    // 前端会在登录成功后自动获取IP并更新位置信息
 
     // 生成token
     const token = User.generateToken(user)

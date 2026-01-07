@@ -93,20 +93,57 @@
             </div>
             <div class="px-4 py-2 space-y-3">
               <!-- 管理员时区 -->
-              <div v-if="adminSettings && adminSettings.timezone">
+              <div>
                 <div class="flex items-center justify-between mb-1">
                   <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $t('tools.worldClock.admin') }}</div>
-                  <div v-if="adminTimeDiff !== null" class="text-xs text-slate-500 dark:text-slate-400">
-                    {{ formatTimeDifference(adminTimeDiff) }}
+                  <div class="flex items-center gap-2">
+                    <div v-if="isAdmin && adminTimeDiff !== null" class="text-xs text-slate-500 dark:text-slate-400">
+                      {{ formatTimeDifference(adminTimeDiff) }}
+                    </div>
+                    <button
+                      v-if="isAdmin"
+                      @click="relocateAdmin"
+                      :disabled="isRelocating"
+                      class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      :title="$t('tools.worldClock.relocate') || 'Relocate'"
+                    >
+                      <svg 
+                        v-if="!isRelocating"
+                        xmlns="http://www.w3.org/2000/svg" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        stroke-width="2" 
+                        stroke-linecap="round" 
+                        stroke-linejoin="round" 
+                        class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400"
+                      >
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                      </svg>
+                      <svg 
+                        v-else
+                        class="animate-spin w-3.5 h-3.5 text-slate-500 dark:text-slate-400"
+                        xmlns="http://www.w3.org/2000/svg" 
+                        fill="none" 
+                        viewBox="0 0 24 24"
+                      >
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </button>
                   </div>
                 </div>
-                <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTimeByTimezone(adminSettings.timezone) }}</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDateByTimezone(adminSettings.timezone) }}</div>
-                <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ adminSettings.location || adminSettings.timezone }}</div>
+                <div v-if="adminSettings?.timezone" class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTimeByTimezone(adminSettings.timezone) }}</div>
+                <div v-else class="text-base font-mono font-bold text-slate-500 dark:text-slate-400">--:--:--</div>
+                <div v-if="adminSettings?.timezone" class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDateByTimezone(adminSettings.timezone) }}</div>
+                <div v-else class="text-xs text-slate-500 dark:text-slate-400 font-mono">--</div>
+                <!-- 修复：只显示location，不要回退到timezone -->
+                <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ adminSettings?.location || 'Click to locate' }}</div>
               </div>
               
-              <!-- 访客时区 -->
-              <div v-if="visitorTimezone">
+              <!-- 访客位置 -->
+              <div v-if="weather && (weather.city || weather.country)">
                 <div class="flex items-center justify-between mb-1">
                   <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $t('tools.worldClock.visitor') }}</div>
                   <div v-if="visitorTimeDiff !== null" class="text-xs text-slate-500 dark:text-slate-400">
@@ -115,11 +152,12 @@
                 </div>
                 <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTimeByTimezone(visitorTimezone) }}</div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDateByTimezone(visitorTimezone) }}</div>
-                <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ visitorTimezone }}</div>
+                <!-- 修复：从weather获取位置信息，而不是显示时区字符串 -->
+                <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ formatLocation(weather) }}</div>
               </div>
               
               <!-- 分隔线 -->
-              <div v-if="(adminSettings && adminSettings.timezone) || visitorTimezone" class="border-t border-slate-200 dark:border-slate-700 my-2"></div>
+              <div v-if="(adminSettings && adminSettings.timezone) || (weather && (weather.city || weather.country))" class="border-t border-slate-200 dark:border-slate-700 my-2"></div>
               
               <!-- 预设时区 -->
               <div>
@@ -300,11 +338,12 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { adminSettingsApi } from '../utils/api'
+import { getClientLocationInfo } from '../utils/ipLocation'
 import AuthModal from './AuthModal.vue'
 
 const props = defineProps({
@@ -344,6 +383,9 @@ let clockTimer = null
 
 // 管理员设置
 const adminSettings = ref(null)
+
+// 重新定位状态
+const isRelocating = ref(false)
 
 // 访客时区（使用浏览器API获取）
 const visitorTimezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone || null)
@@ -570,6 +612,84 @@ const loadAdminSettings = async () => {
 }
 
 /**
+ * 重新定位管理员位置
+ * 前端获取真实公网IP并发送给后端更新
+ */
+const relocateAdmin = async () => {
+  if (isRelocating.value) return
+  
+  try {
+    isRelocating.value = true
+    
+    // 前端获取真实公网IP和位置信息
+    const locationInfo = await getClientLocationInfo()
+    
+    if (locationInfo && locationInfo.ip && locationInfo.location && locationInfo.timezone) {
+      // DEBUG: 输出获取到的位置信息
+      console.debug('[DEBUG] relocateAdmin - Client location info:', {
+        ip: locationInfo.ip,
+        location: locationInfo.location,
+        timezone: locationInfo.timezone
+      })
+      
+      // 发送给后端更新
+      const updatedSettings = await adminSettingsApi.update({
+        ip_address: locationInfo.ip,
+        location: locationInfo.location,
+        timezone: locationInfo.timezone
+      })
+      
+      // 更新本地状态
+      adminSettings.value = updatedSettings
+      
+      console.log('Admin location updated successfully:', updatedSettings.location)
+    } else {
+      throw new Error('Failed to get location information. Please try again later.')
+    }
+  } catch (error) {
+    console.error('Failed to relocate admin:', error)
+    alert(error.message || 'Failed to relocate. Please try again later.')
+  } finally {
+    isRelocating.value = false
+  }
+}
+
+/**
+ * 访问时更新管理员位置信息
+ * 检查是否需要更新（位置为空或是默认值），如果需要则自动更新
+ */
+async function updateAdminLocationOnVisit() {
+  try {
+    // 获取客户端真实IP和位置信息
+    const locationInfo = await getClientLocationInfo()
+    
+    if (locationInfo && locationInfo.ip && locationInfo.location && locationInfo.timezone) {
+      // DEBUG: 输出获取到的位置信息
+      console.debug('[DEBUG] updateAdminLocationOnVisit - Client location info:', {
+        ip: locationInfo.ip,
+        location: locationInfo.location,
+        timezone: locationInfo.timezone
+      })
+      
+      // 发送给后端更新
+      await adminSettingsApi.update({
+        ip_address: locationInfo.ip,
+        location: locationInfo.location,
+        timezone: locationInfo.timezone
+      })
+      
+      // 重新加载设置
+      await loadAdminSettings()
+      console.log('[DEBUG] Admin location updated on visit:', locationInfo.location)
+    } else {
+      console.warn('[DEBUG] Failed to get location info on visit:', locationInfo)
+    }
+  } catch (error) {
+    console.error('Failed to update admin location on visit:', error)
+  }
+}
+
+/**
  * 切换用户菜单
  */
 const toggleUserMenu = () => {
@@ -716,6 +836,29 @@ onMounted(() => {
 
   // 加载管理员设置
   loadAdminSettings()
+})
+
+// 监听管理员登录状态，登录后重新加载设置并检查是否需要更新位置
+watch([isAdmin, user], async ([newIsAdmin, newUser]) => {
+  // 加载管理员设置
+  await loadAdminSettings()
+  
+  // 如果是管理员，检查是否需要更新位置信息
+  if (newIsAdmin && newUser) {
+    const settings = adminSettings.value
+    // 定义默认位置值（可能是错误的默认值）
+    const DEFAULT_LOCATIONS = ['Beijing, China', 'Beijing', 'China']
+    const isDefaultLocation = settings?.location && 
+      DEFAULT_LOCATIONS.some(defaultLoc => settings.location.includes(defaultLoc))
+    
+    // 如果位置为空或是默认值，自动更新
+    if (!settings?.location || !settings?.timezone || isDefaultLocation) {
+      // 异步更新位置信息，不阻塞UI
+      updateAdminLocationOnVisit().catch(error => {
+        console.debug('Failed to update admin location on visit:', error)
+      })
+    }
+  }
 })
 
 onUnmounted(() => {
