@@ -216,6 +216,9 @@
       </button>
     </div>
 
+    <!-- 评论区 -->
+    <CommentList v-if="post && postId" :blog-id="postId" />
+
     <!-- 加载中状态 -->
     <div v-else-if="isLoading" class="text-center py-20">
       <div class="flex flex-col items-center gap-4">
@@ -249,6 +252,7 @@ import { useLocalStorage } from '../composables/useStorage'
 import { useSEO, generateBlogStructuredData } from '../composables/useSEO'
 import { blogApi, likesApi, analyticsApi } from '../utils/api'
 import { getTagStyle } from '../utils/tagColor'
+import CommentList from '../components/comments/CommentList.vue'
 
 const route = useRoute()
 const { t } = useI18n()

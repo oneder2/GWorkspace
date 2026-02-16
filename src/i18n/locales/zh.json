@@ -153,7 +153,21 @@
     "viewPreview": "预览",
     "filters": "筛选",
     "previewPlaceholder": "开始输入以查看预览...",
-    "previewError": "Markdown解析错误"
+    "previewError": "Markdown解析错误",
+    "leaveComment": "发表评论",
+    "loginRequired": "您需要登录后才能发表评论",
+    "reply": "回复",
+    "submit": "提交",
+    "name": "昵称",
+    "namePlaceholder": "你的昵称",
+    "email": "邮箱",
+    "emailPlaceholder": "你的邮箱（仅用于通知，不会公开）",
+    "optional": "可选",
+    "comment": "评论内容",
+    "commentPlaceholder": "写下你的想法...",
+    "comments": "评论",
+    "noComments": "暂无评论，快来抢沙发吧！",
+    "replyTo": "回复 @{name}"
   },
   "portfolio": {
     "title": "精选作品",

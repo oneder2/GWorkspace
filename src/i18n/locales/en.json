@@ -153,7 +153,21 @@
     "viewPreview": "Preview",
     "filters": "Filters",
     "previewPlaceholder": "Start typing to see preview...",
-    "previewError": "Markdown parsing error"
+    "previewError": "Markdown parsing error",
+    "leaveComment": "Leave a Comment",
+    "loginRequired": "You need to log in to leave a comment",
+    "reply": "Reply",
+    "submit": "Submit",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "email": "Email",
+    "emailPlaceholder": "Your email (for notifications only, not public)",
+    "optional": "Optional",
+    "comment": "Comment",
+    "commentPlaceholder": "Write your thoughts...",
+    "comments": "Comments",
+    "noComments": "No comments yet. Be the first to comment!",
+    "replyTo": "Reply to @{name}"
   },
   "portfolio": {
     "title": "Selected Works",
