@@ -3,56 +3,60 @@
  * 封装所有后端API调用
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+const getApiBaseUrl = () => {
+  // 优先使用环境变量
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL
+  // 生产环境自动推断 (假设后端在 workspace 子域名)
+  if (typeof window !== 'undefined' && window.location.hostname.endsWith('gellaronline.cc')) {
+    return 'https://workspace.gellaronline.cc/api'
+  }
+  // 默认开发环境
+  return 'http://localhost:3001/api'
+}
+
+const API_BASE_URL = getApiBaseUrl()
 
 /**
  * 获取认证token
- * @returns {string|null} token或null
  */
 function getToken() {
-  return localStorage.getItem('token')
+  return typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null
 }
 
 /**
  * 通用请求函数
- * @param {string} url - API端点
- * @param {Object} options - 请求选项
- * @returns {Promise<Response>}
  */
 async function request(url, options = {}) {
-  const token = getToken()
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers
-  }
-
-  // 如果存在token，添加到请求头
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
-  }
-
-  const response = await fetch(`${API_BASE_URL}${url}`, {
-    ...options,
-    headers
-  })
-
-  if (!response.ok) {
-    // 如果是401错误，清除token
-    if (response.status === 401) {
-      localStorage.removeItem('token')
+  try {
+    const token = getToken()
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
     }
-    const error = await response.json().catch(() => ({ error: response.statusText }))
-    // 如果后端返回了详细的错误信息（包括missingFields），优先使用
-    const errorMessage = error.message || error.error || `HTTP ${response.status}`
-    const errorWithDetails = new Error(errorMessage)
-    // 将详细错误信息附加到错误对象上，方便前端处理
-    if (error.missingFields) {
-      errorWithDetails.missingFields = error.missingFields
-    }
-    throw errorWithDetails
-  }
 
-  return response.json()
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      ...options,
+      headers
+    })
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem('token')
+      }
+      const error = await response.json().catch(() => ({ error: response.statusText }))
+      throw new Error(error.message || error.error || `HTTP ${response.status}`)
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error(`API Request Failed [${url}]:`, error.message)
+    // 抛出错误供上层组件捕获，但可以返回一个安全的默认值如果需要
+    throw error
+  }
 }
 
 /**

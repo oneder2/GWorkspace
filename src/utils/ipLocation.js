@@ -4,51 +4,68 @@
  * 用于管理员位置更新功能
  */
 
-const IP_API = 'https://ipapi.co/json/'
+const IP_API_PRIMARY = 'https://ipapi.co/json/'
+const IP_API_SECONDARY = 'https://ip-api.com/json'
 
 /**
  * 获取访问者的真实公网IP地址
- * @returns {Promise<string|null>} IP地址，失败返回null
  */
 export async function getClientIP() {
   try {
-    const response = await fetch(IP_API)
+    const response = await fetch(IP_API_PRIMARY)
+    if (!response.ok) throw new Error('Primary IP API failed')
     const data = await response.json()
     return data.ip || null
   } catch (error) {
-    console.error('Failed to get client IP:', error)
-    return null
+    try {
+      const response = await fetch(IP_API_SECONDARY)
+      const data = await response.json()
+      return data.query || null
+    } catch (e) {
+      console.error('All IP APIs failed:', e)
+      return null
+    }
   }
 }
 
 /**
- * 获取访问者的位置信息（包含IP、位置、时区）
- * @returns {Promise<Object|null>} 位置信息对象，包含ip, location, timezone，失败返回null
+ * 获取访问者的位置信息
  */
 export async function getClientLocationInfo() {
+  // 尝试首选 API
   try {
-    const response = await fetch(IP_API)
-    const data = await response.json()
-    
-    // 检查API是否返回错误
-    if (data.error) {
-      console.warn('IP API returned error:', data.reason || data.error)
-      return null
-    }
-    
-    // 格式化位置字符串
-    const location = data.city && data.country_name 
-      ? `${data.city}, ${data.country_name}` 
-      : data.country_name || null
-    
-    return {
-      ip: data.ip || null,
-      location: location,
-      timezone: data.timezone || null
+    const response = await fetch(IP_API_PRIMARY)
+    if (response.ok) {
+      const data = await response.json()
+      if (!data.error) {
+        return {
+          ip: data.ip,
+          location: `${data.city}, ${data.country_name}`,
+          timezone: data.timezone
+        }
+      }
     }
   } catch (error) {
-    console.error('Failed to get client location info:', error)
-    return null
+    console.warn('Primary IP API failed, trying fallback...')
   }
+
+  // 尝试备用 API
+  try {
+    const response = await fetch(IP_API_SECONDARY)
+    if (response.ok) {
+      const data = await response.json()
+      if (data.status === 'success') {
+        return {
+          ip: data.query,
+          location: `${data.city}, ${data.country}`,
+          timezone: data.timezone
+        }
+      }
+    }
+  } catch (error) {
+    console.error('All IP location APIs failed')
+  }
+
+  return null
 }
 

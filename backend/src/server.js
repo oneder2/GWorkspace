@@ -32,57 +32,38 @@ const __dirname = dirname(__filename)
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// 配置信任代理（用于正确获取客户端真实IP）
-// 如果部署在反向代理（如Nginx）后面，需要设置trust proxy
-app.set('trust proxy', true)
-
-// 中间件配置
-app.use(helmet()) // 安全头
-
-// CORS 配置
+// 1. CORS 配置 (必须在最前面)
 app.use(cors({
   origin: (origin, callback) => {
-    // 允许没有 origin 的请求（如移动端或 curl）
-    if (!origin) return callback(null, true)
-    
-    // 允许本地开发环境
-    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      return callback(null, true)
+    // 允许本地开发环境和 gellaronline.cc 及其子域名
+    if (!origin || 
+        origin.includes('localhost') || 
+        origin.includes('127.0.0.1') || 
+        origin.endsWith('gellaronline.cc')) {
+      callback(null, true)
+    } else {
+      console.warn(`CORS blocked for origin: ${origin}`)
+      callback(null, false)
     }
-
-    // 允许 gellaronline.cc 及其所有子域名
-    if (origin.endsWith('gellaronline.cc')) {
-      return callback(null, true)
-    }
-
-    // 如果在环境变量中定义了其他允许的源
-    const envAllowed = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || []
-    if (envAllowed.includes(origin) || envAllowed.includes('*')) {
-      return callback(null, true)
-    }
-
-    // 拒绝其他来源，但不抛出 Error 对象以免破坏 Header 响应
-    callback(null, false)
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200 // 兼容旧版浏览器和某些代理
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 }))
 
-app.use(morgan('dev')) // 请求日志
+// 配置信任代理
+app.set('trust proxy', true)
 
-// JSON解析中间件 - 添加错误处理和大小限制
-app.use(express.json({ 
-  limit: '10mb', // 限制请求体大小为10MB
-  strict: true // 严格模式，只接受数组和对象
+// 2. 其他安全和日志中间件
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }))
+app.use(morgan('dev'))
 
-// URL编码解析中间件
-app.use(express.urlencoded({ 
-  extended: true,
-  limit: '10mb'
-}))
+// 3. 解析中间件
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // 初始化数据库
 const db = getDatabase()
@@ -104,133 +85,68 @@ try {
         join(__dirname, '../database/migrations', migrationFile),
         'utf-8'
       )
-      
-      // 移除注释和多行注释
       let cleanSQL = migrationSQL
-        .replace(/\/\*[\s\S]*?\*\//g, '') // 移除多行注释
+        .replace(/\/\*[\s\S]*?\*\//g, '')
         .split('\n')
         .map(line => {
-          // 移除单行注释
           const commentIndex = line.indexOf('--')
-          if (commentIndex >= 0) {
-            return line.substring(0, commentIndex)
-          }
-          return line
+          return commentIndex >= 0 ? line.substring(0, commentIndex) : line
         })
         .join('\n')
       
-      // 执行迁移SQL（按语句分割执行）
-      const statements = cleanSQL
-        .split(';')
-        .map(s => s.trim())
-        .filter(s => s.length > 0)
-      
+      const statements = cleanSQL.split(';').map(s => s.trim()).filter(s => s.length > 0)
       statements.forEach(statement => {
         if (statement) {
           try {
             db.exec(statement + ';')
           } catch (error) {
-            // 忽略已存在的表/索引/列错误
-            if (!error.message.includes('already exists') && 
-                !error.message.includes('duplicate column name')) {
+            if (!error.message.includes('already exists') && !error.message.includes('duplicate column name')) {
               console.warn(`Migration ${migrationFile} warning:`, error.message)
             }
           }
         }
       })
     } catch (error) {
-      // 如果文件不存在，忽略（可能是新迁移）
-      if (error.code !== 'ENOENT') {
-        console.warn(`Migration ${migrationFile} error:`, error.message)
-      }
+      if (error.code !== 'ENOENT') console.warn(`Migration ${migrationFile} error:`, error.message)
     }
   })
-  
   console.log('Database migrations completed')
 } catch (error) {
   console.error('Database migration error:', error)
 }
 
-// API路由
+// 4. API 路由
 app.use('/api/auth', authRoutes)
-// 注意：likesRoutes 必须在 blogRoutes 之前注册，否则 /:id 路由会拦截 /:id/likes 请求
 app.use('/api/blogs', likesRoutes)
 app.use('/api/blogs', blogRoutes)
-app.use('/api/blogs', commentsRoutes) // 博客相关的评论路由
-app.use('/api/comments', commentsRoutes) // 评论管理路由
+app.use('/api/blogs', commentsRoutes)
+app.use('/api/comments', commentsRoutes)
 app.use('/api/analytics', analyticsRoutes)
-app.use('/api/admin', adminRoutes) // 管理后台路由
-app.use('/api/guestbook', guestbookRoutes) // 留言板路由
-app.use('/api/upload', uploadRoutes) // 上传路由
+app.use('/api/admin', adminRoutes)
+app.use('/api/guestbook', guestbookRoutes)
+app.use('/api/upload', uploadRoutes)
 
-// 健康检查端点
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    database: 'connected'
-  })
-})
+// 健康检查
+app.get('/health', (req, res) => res.json({ status: 'ok' }))
 
-// 根路径
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'GWorkspace API Server',
-    version: '1.0.0',
-    endpoints: {
-      blogs: '/api/blogs',
-      likes: '/api/blogs/:id/likes',
-      comments: '/api/blogs/:id/comments',
-      analytics: '/api/analytics',
-      guestbook: '/api/guestbook'
-    }
-  })
+  res.json({ message: 'GWorkspace API Server', version: '1.0.0' })
 })
 
 // 404处理
-app.use((req, res) => {
-  res.status(404).json({ error: 'Not Found' })
-})
+app.use((req, res) => res.status(404).json({ error: 'Not Found' }))
 
-// 错误处理中间件 - 捕获所有错误，包括JSON解析错误
+// 错误处理
 app.use((err, req, res, next) => {
-  // 处理JSON解析错误
-  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    console.error('JSON parsing error:', err.message)
-    console.error('Request URL:', req.url)
-    console.error('Request method:', req.method)
-    return res.status(400).json({ 
-      error: 'Invalid JSON in request body',
-      message: 'The request body contains invalid JSON. Please check your data format.'
-    })
-  }
-  
-  // 处理其他错误
   console.error('Error:', err)
-  console.error('Request URL:', req.url)
-  console.error('Request method:', req.method)
   res.status(err.status || 500).json({
-    error: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    error: err.message || 'Internal Server Error'
   })
 })
 
-// 启动服务器
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`)
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
 })
 
-// 优雅关闭
-process.on('SIGINT', () => {
-  console.log('\nShutting down server...')
-  closeDatabase()
-  process.exit(0)
-})
-
-process.on('SIGTERM', () => {
-  console.log('\nShutting down server...')
-  closeDatabase()
-  process.exit(0)
-})
-
+process.on('SIGINT', () => { closeDatabase(); process.exit(0); })
+process.on('SIGTERM', () => { closeDatabase(); process.exit(0); })
