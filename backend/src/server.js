@@ -43,24 +43,31 @@ app.use(helmet()) // 安全头
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
   : (process.env.NODE_ENV === 'production' 
-      ? ['https://gworkspace.xyz', 'https://www.gworkspace.xyz']
+      ? ['https://gellaronline.cc', 'https://www.gellaronline.cc', 'https://workspace.gellaronline.cc']
       : ['*'])
 
 app.use(cors({
   origin: (origin, callback) => {
-    // 允许无源请求（如移动应用、Postman等）
+    // 允许无源请求
     if (!origin) return callback(null, true)
     
-    // 开发环境允许所有来源
+    // 开发环境或通配符允许
     if (process.env.NODE_ENV !== 'production' || allowedOrigins.includes('*')) {
       return callback(null, true)
     }
     
-    // 生产环境检查是否在允许列表中
-    if (allowedOrigins.includes(origin)) {
+    // 检查 origin 是否在允许列表中，或者是否是 gellaronline.cc 的子域名
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (allowed === origin) return true
+      if (allowed.startsWith('.') && origin.endsWith(allowed)) return true
+      return false
+    })
+
+    if (isAllowed || origin.endsWith('gellaronline.cc')) {
       return callback(null, true)
     }
     
+    console.warn(`CORS blocked for origin: ${origin}`)
     callback(new Error('Not allowed by CORS'))
   },
   credentials: true,
