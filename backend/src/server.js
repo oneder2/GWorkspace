@@ -39,40 +39,35 @@ app.set('trust proxy', true)
 // 中间件配置
 app.use(helmet()) // 安全头
 
-// CORS 配置 - 支持环境变量配置允许的源
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-  : (process.env.NODE_ENV === 'production' 
-      ? ['https://gellaronline.cc', 'https://www.gellaronline.cc', 'https://workspace.gellaronline.cc']
-      : ['*'])
-
+// CORS 配置
 app.use(cors({
   origin: (origin, callback) => {
-    // 允许无源请求
+    // 允许没有 origin 的请求（如移动端或 curl）
     if (!origin) return callback(null, true)
     
-    // 开发环境或通配符允许
-    if (process.env.NODE_ENV !== 'production' || allowedOrigins.includes('*')) {
+    // 允许本地开发环境
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
       return callback(null, true)
     }
-    
-    // 检查 origin 是否在允许列表中，或者是否是 gellaronline.cc 的子域名
-    const isAllowed = allowedOrigins.some(allowed => {
-      if (allowed === origin) return true
-      if (allowed.startsWith('.') && origin.endsWith(allowed)) return true
-      return false
-    })
 
-    if (isAllowed || origin.endsWith('gellaronline.cc')) {
+    // 允许 gellaronline.cc 及其所有子域名
+    if (origin.endsWith('gellaronline.cc')) {
       return callback(null, true)
     }
-    
-    console.warn(`CORS blocked for origin: ${origin}`)
-    callback(new Error('Not allowed by CORS'))
+
+    // 如果在环境变量中定义了其他允许的源
+    const envAllowed = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || []
+    if (envAllowed.includes(origin) || envAllowed.includes('*')) {
+      return callback(null, true)
+    }
+
+    // 拒绝其他来源，但不抛出 Error 对象以免破坏 Header 响应
+    callback(null, false)
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200 // 兼容旧版浏览器和某些代理
 }))
 
 app.use(morgan('dev')) // 请求日志
