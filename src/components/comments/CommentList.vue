@@ -16,8 +16,8 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center py-12">
-      <div class="w-10 h-10 border-4 border-slate-200 dark:border-slate-700 border-t-[var(--theme-primary)] rounded-full animate-spin"></div>
+    <div v-if="loading" class="py-6">
+      <CommentSkeleton />
     </div>
 
     <!-- Empty State -->
@@ -39,10 +39,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { commentsApi } from '../../utils/api'
 import CommentForm from './CommentForm.vue'
 import CommentItem from './CommentItem.vue'
+import CommentSkeleton from './CommentSkeleton.vue'
 
 const props = defineProps({
   blogId: {
@@ -53,6 +54,9 @@ const props = defineProps({
 
 const loading = ref(true)
 const comments = ref([])
+const hasLoaded = ref(false)
+const containerRef = ref(null)
+let observer = null
 
 const totalComments = computed(() => {
   // Helper to count comments recursively
@@ -70,11 +74,12 @@ const totalComments = computed(() => {
 })
 
 const fetchComments = async () => {
-  if (!props.blogId) return
+  if (!props.blogId || hasLoaded.value) return
   
   loading.value = true
   try {
     comments.value = await commentsApi.getList(props.blogId)
+    hasLoaded.value = true
   } catch (error) {
     console.error('Failed to fetch comments:', error)
   } finally {
@@ -83,24 +88,49 @@ const fetchComments = async () => {
 }
 
 const handleCommentAdded = (newComment) => {
-  // For root comments, we can optimistically add it to the list
-  // But since we need nested structure for replies, re-fetching is safer and simpler for now
-  // Or we could append it if it's a root comment
   if (!newComment.parent_id) {
     comments.value.push({ ...newComment, replies: [] })
   } else {
-    // For replies, just refresh to get correct nested structure
+    // 强制重新抓取以获取嵌套结构
+    hasLoaded.value = false
     fetchComments()
   }
 }
 
 const refreshComments = () => {
+  hasLoaded.value = false
   fetchComments()
 }
 
+// 监听进入视口事件
+onMounted(() => {
+  const element = document.getElementById('comments')
+  if (element) {
+    observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        fetchComments()
+        observer.disconnect()
+      }
+    }, { threshold: 0.1 })
+    observer.observe(element)
+  }
+})
+
+onUnmounted(() => {
+  if (observer) observer.disconnect()
+})
+
 watch(() => props.blogId, (newId) => {
   if (newId) {
-    fetchComments()
+    hasLoaded.value = false
+    // 如果已经在视口中，直接加载
+    const element = document.getElementById('comments')
+    if (element) {
+      const rect = element.getBoundingClientRect()
+      if (rect.top < window.innerHeight) {
+        fetchComments()
+      }
+    }
   }
-}, { immediate: true })
+})
 </script>

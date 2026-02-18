@@ -6,8 +6,45 @@
 import express from 'express'
 import { body, validationResult } from 'express-validator'
 import { User } from '../models/User.js'
+import { authenticate } from '../middleware/auth.js'
 
 const router = express.Router()
+
+/**
+ * 获取用户收藏站点
+ * GET /api/auth/favorites
+ */
+router.get('/favorites', authenticate, (req, res) => {
+  try {
+    const favorites = User.getFavorites(req.user.id)
+    res.json(favorites)
+  } catch (error) {
+    console.error('Fetch favorites error:', error)
+    res.status(500).json({ error: 'Failed to fetch favorites' })
+  }
+})
+
+/**
+ * 更新用户收藏站点
+ * POST /api/auth/favorites
+ */
+router.post('/favorites', authenticate, (req, res) => {
+  try {
+    const { favorites } = req.body
+    if (!Array.isArray(favorites)) {
+      return res.status(400).json({ error: 'Favorites must be an array' })
+    }
+    const success = User.updateFavorites(req.user.id, favorites)
+    if (success) {
+      res.json({ message: 'Favorites updated successfully' })
+    } else {
+      res.status(500).json({ error: 'Failed to update favorites' })
+    }
+  } catch (error) {
+    console.error('Update favorites error:', error)
+    res.status(500).json({ error: 'Failed to update favorites' })
+  }
+})
 
 /**
  * 用户注册

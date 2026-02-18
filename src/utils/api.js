@@ -334,12 +334,54 @@ export const authApi = {
   verify: () => request('/auth/verify'),
 
   /**
+   * 获取用户收藏站点
+   */
+  getFavorites: () => request('/auth/favorites'),
+
+  /**
+   * 更新用户收藏站点
+   */
+  updateFavorites: (favorites) => request('/auth/favorites', {
+    method: 'POST',
+    body: JSON.stringify({ favorites })
+  }),
+
+  /**
    * 刷新token
-   * @returns {Promise<Object>}
    */
   refresh: () => request('/auth/refresh', {
     method: 'POST'
   })
+}
+
+/**
+ * 上传API
+ */
+export const uploadApi = {
+  /**
+   * 上传博客图片
+   * @param {File} file - 图片文件
+   * @returns {Promise<Object>} 上传结果
+   */
+  uploadBlogImage: (file) => {
+    const formData = new FormData()
+    formData.append('image', file)
+    
+    const token = localStorage.getItem('token')
+    const headers = {}
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    return fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/upload/blog-image`, {
+      method: 'POST',
+      headers,
+      body: formData
+    }).then(res => {
+      if (!res.ok) throw new Error('Upload failed')
+      return res.json()
+    })
+  }
 }
 
 /**

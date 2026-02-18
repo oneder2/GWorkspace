@@ -170,13 +170,16 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { sitesConfig } from '../config/sites'
 import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
 import { getCachedFaviconUrl, markFaviconSuccess, markFaviconError } from '../utils/faviconCache'
+import { useAuth } from '../composables/useAuth'
+import { authApi } from '../utils/api'
 
 const siteFilter = ref('')
+const { isAuthenticated } = useAuth()
 
 // 从配置文件加载站点数据，并映射图标组件
 const sitesData = computed(() => {
@@ -231,7 +234,7 @@ const isFavorite = (link) => {
 /**
  * 切换收藏状态
  */
-const toggleFavorite = (link) => {
+const toggleFavorite = async (link) => {
   const currentFavorites = [...getFavoritesArray()]
   const index = currentFavorites.findIndex(fav => fav.url === link.url)
   
@@ -248,6 +251,46 @@ const toggleFavorite = (link) => {
   }
   
   favorites.update(currentFavorites)
+
+  // 同步到后端
+  if (isAuthenticated.value) {
+    try {
+      await authApi.updateFavorites(currentFavorites)
+    } catch (error) {
+      console.error('Failed to sync favorites to backend:', error)
+    }
+  }
+}
+
+/**
+ * 从后端加载收藏
+ */
+const fetchBackendFavorites = async () => {
+  if (!isAuthenticated.value) return
+  try {
+    const backendFavorites = await authApi.getFavorites()
+    if (backendFavorites && Array.isArray(backendFavorites)) {
+      // 合并逻辑：以云端为准，或者合并去重
+      // 这里采用简单的合并去重
+      const local = getFavoritesArray()
+      const merged = [...backendFavorites]
+      
+      local.forEach(l => {
+        if (!merged.some(m => m.url === l.url)) {
+          merged.push(l)
+        }
+      })
+      
+      favorites.update(merged)
+      
+      // 如果本地有新增，同步回云端
+      if (merged.length > backendFavorites.length) {
+        await authApi.updateFavorites(merged)
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch backend favorites:', error)
+  }
 }
 
 /**
@@ -255,6 +298,19 @@ const toggleFavorite = (link) => {
  */
 const favoriteLinks = computed(() => {
   return getFavoritesArray()
+})
+
+onMounted(() => {
+  if (isAuthenticated.value) {
+    fetchBackendFavorites()
+  }
+})
+
+// 监听登录状态变化
+watch(isAuthenticated, (val) => {
+  if (val) {
+    fetchBackendFavorites()
+  }
 })
 
 /**

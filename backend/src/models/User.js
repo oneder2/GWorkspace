@@ -256,6 +256,39 @@ export class User {
   }
 
   /**
+   * 获取用户收藏站点
+   * @param {number} userId - 用户ID
+   * @returns {Array} 收藏站点列表
+   */
+  static getFavorites(userId) {
+    const db = getDatabase()
+    const result = db.prepare('SELECT site_favorites FROM users WHERE id = ?').get(userId)
+    if (!result || !result.site_favorites) return []
+    try {
+      return JSON.parse(result.site_favorites)
+    } catch (e) {
+      return []
+    }
+  }
+
+  /**
+   * 更新用户收藏站点
+   * @param {number} userId - 用户ID
+   * @param {Array} favorites - 收藏站点列表
+   * @returns {boolean} 是否更新成功
+   */
+  static updateFavorites(userId, favorites) {
+    const db = getDatabase()
+    const favoritesJson = JSON.stringify(favorites)
+    const result = db.prepare('UPDATE users SET site_favorites = ?, updated_at = ? WHERE id = ?').run(
+      favoritesJson,
+      new Date().toISOString(),
+      userId
+    )
+    return result.changes > 0
+  }
+
+  /**
    * 更新用户密码
    * @param {number} id - 用户ID
    * @param {string} newPassword - 新密码（明文）

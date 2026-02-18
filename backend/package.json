@@ -11,8 +11,9 @@
     "create-admin": "node scripts/create-admin.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.992.0",
     "bcrypt": "^6.0.0",
-    "better-sqlite3": "^9.0.0",
+    "better-sqlite3": "^12.6.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -20,7 +21,8 @@
     "express-validator": "^7.3.1",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.3",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "multer": "^2.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

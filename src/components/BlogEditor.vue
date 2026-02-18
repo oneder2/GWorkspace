@@ -212,6 +212,25 @@
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('blog.content') }}</h3>
             <div class="flex items-center gap-3">
+              <!-- 图片上传 -->
+              <div class="flex items-center">
+                <input 
+                  type="file" 
+                  ref="fileInputRef" 
+                  class="hidden" 
+                  accept="image/*"
+                  @change="handleFileUpload"
+                />
+                <button 
+                  @click="$refs.fileInputRef.click()"
+                  :disabled="isUploadingImage"
+                  class="flex items-center gap-1.5 px-3 py-1 text-sm font-semibold bg-white/40 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-[var(--theme-primary)] hover:text-white transition-all disabled:opacity-50"
+                >
+                  <svg v-if="!isUploadingImage" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  {{ isUploadingImage ? 'Uploading...' : 'Upload Image' }}
+                </button>
+              </div>
               <!-- 视图切换开关 -->
               <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
                 <button
@@ -368,7 +387,7 @@ import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css' // 亮色主题作为基础
-import { blogApi, generateSlug } from '../utils/api'
+import { blogApi, generateSlug, uploadApi } from '../utils/api'
 import { getTagStyle } from '../utils/tagColor'
 import { getCachedGenres, getCachedTags, setCachedGenres, setCachedTags } from '../utils/suggestionCache'
 
@@ -559,6 +578,30 @@ const viewMode = ref('split')
  * 提交状态
  */
 const isSubmitting = ref(false)
+const isUploadingImage = ref(false)
+const fileInputRef = ref(null)
+
+/**
+ * 处理图片上传
+ */
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  isUploadingImage.value = true
+  try {
+    const result = await uploadApi.uploadBlogImage(file)
+    const imageMarkdown = `\n![${file.name}](${result.url})\n`
+    formData.value.content += imageMarkdown
+  } catch (error) {
+    console.error('Image upload failed:', error)
+    alert('Image upload failed. Please ensure backend is configured with Cloudinary credentials.')
+  } finally {
+    isUploadingImage.value = false
+    // 重置input，允许重复上传同一张图
+    if (fileInputRef.value) fileInputRef.value.value = ''
+  }
+}
 
 /**
  * 验证错误

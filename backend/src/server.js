@@ -21,6 +21,7 @@ import analyticsRoutes from './routes/analytics.js'
 import authRoutes from './routes/auth.js'
 import adminRoutes from './routes/admin.js'
 import guestbookRoutes from './routes/guestbook.js'
+import uploadRoutes from './routes/upload.js'
 
 // 加载环境变量
 dotenv.config()
@@ -90,7 +91,8 @@ const migrationFiles = [
   '002_user_system.sql',
   '003_guestbook.sql',
   '004_guestbook_user_id.sql',
-  '005_admin_settings.sql'
+  '005_admin_settings.sql',
+  '006_user_favorites.sql'
 ]
 
 try {
@@ -157,6 +159,7 @@ app.use('/api/comments', commentsRoutes) // 评论管理路由
 app.use('/api/analytics', analyticsRoutes)
 app.use('/api/admin', adminRoutes) // 管理后台路由
 app.use('/api/guestbook', guestbookRoutes) // 留言板路由
+app.use('/api/upload', uploadRoutes) // 上传路由
 
 // 健康检查端点
 app.get('/health', (req, res) => {

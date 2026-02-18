@@ -4,6 +4,49 @@
 -->
 <template>
   <div class="overflow-hidden h-screen w-screen text-slate-800 dark:text-slate-200">
+    <!-- PWA 更新提示弹窗 -->
+    <transition
+      enter-active-class="transition-all duration-300 transform translate-y-0 opacity-100"
+      enter-from-class="translate-y-8 opacity-0"
+      leave-active-class="transition-all duration-200 transform opacity-0 scale-95"
+    >
+      <div v-if="offlineReady || needRefresh" class="pwa-toast glass-card p-4 rounded-2xl shadow-2xl border border-[var(--theme-primary)]/30 min-w-[300px] relative z-[9999]">
+        <div class="flex flex-col gap-3">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-full bg-[var(--theme-primary)]/10 flex items-center justify-center shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-[var(--theme-primary)]">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-800 dark:text-slate-100">
+                {{ offlineReady ? '应用已准备好离线使用' : '发现新版本内容' }}
+              </h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                {{ offlineReady ? '你可以随时随地访问此站点。' : '新版本包含功能改进和错误修复，建议立即更新。' }}
+              </p>
+            </div>
+          </div>
+          <div class="flex gap-2 justify-end">
+            <button 
+              @click="offlineReady = false; needRefresh = false"
+              class="px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+            >
+              {{ $t('common.close') }}
+            </button>
+            <button 
+              v-if="needRefresh"
+              @click="reloadApp"
+              class="px-4 py-1.5 bg-[var(--theme-primary)] text-white text-xs font-bold rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[var(--theme-primary)]/20"
+            >
+              立即更新
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
     <!-- 全局背景图 -->
     <div 
       class="fixed inset-0 z-0 bg-cover bg-center transition-all duration-1000 transform scale-105" 
@@ -113,6 +156,7 @@ import { useKeyboard } from './composables/useKeyboard'
 import { useCustomTheme } from './composables/useCustomTheme'
 import { useSEO } from './composables/useSEO'
 import { getWeatherInfo } from './utils/weather'
+import { useRegisterSW } from 'virtual:pwa-register/vue'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
 import ThemeCustomizer from './components/ThemeCustomizer.vue'
@@ -218,4 +262,35 @@ watch(locale, (newLocale) => {
 onUnmounted(() => {
   // 清理工作
 })
+
+// PWA 自动更新与提示逻辑
+const {
+  offlineReady,
+  needRefresh,
+  updateServiceWorker,
+} = useRegisterSW({
+  onRegistered(r) {
+    console.log('SW Registered:', r)
+  },
+  onRegisterError(e) {
+    console.error('SW registration error:', e)
+  },
+})
+
+/**
+ * 强制重载应用以获取最新版本
+ */
+const reloadApp = () => {
+  updateServiceWorker(true)
+}
 </script>
+
+<style>
+/* PWA 更新提示样式 */
+.pwa-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 9999;
+}
+</style>

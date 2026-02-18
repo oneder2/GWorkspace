@@ -203,102 +203,85 @@
       </div>
       
       <!-- 文章列表 - 可滚动区域 -->
-      <div class="flex-1 space-y-6 overflow-y-auto">
-        <article 
-          v-for="post in filteredPosts" 
-          :key="post.id" 
-          @click="$router.push(`/blog/${post.id}`)"
-          class="blog-article-card glass-card p-6 rounded-2xl group cursor-pointer border-l-4 transition-all"
-        >
-          <!-- 文章元信息区域 - 仿照参考网站样式 -->
-          <div class="flex items-center gap-3 mb-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
-            <!-- 发布日期 -->
-            <span class="font-mono">
-              {{ formatDateChinese(post.published_at || post.date) }}
-            </span>
-            <!-- 分隔符 -->
-            <span class="text-slate-300 dark:text-slate-600">·</span>
-            <!-- 观看数 -->
-            <span class="flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-              {{ post.views || 0 }}
-            </span>
-            <!-- 分隔符 -->
-            <span class="text-slate-300 dark:text-slate-600">·</span>
-            <!-- 点赞数 -->
-            <span class="flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 text-red-400 dark:text-red-500">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-              </svg>
-              {{ (post.likes_count !== undefined && post.likes_count !== null) ? post.likes_count : (post.likes || 0) }}
-            </span>
-            <!-- 分隔符 -->
-            <span class="text-slate-300 dark:text-slate-600">·</span>
-            <!-- 评论数 -->
-            <span class="flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-              {{ post.comments_count !== undefined ? post.comments_count : (post.comments || 0) }}
-            </span>
-            <!-- 分隔符 -->
-            <span class="text-slate-300 dark:text-slate-600">·</span>
-            <!-- 热度 -->
-            <span class="flex items-center gap-1 text-orange-500 dark:text-orange-400 font-semibold">
-              {{ calculateHeat(post) }}℃
-            </span>
-          </div>
-          
-          <!-- 分类和标签区域 -->
-          <div class="flex items-center gap-2 mb-2 flex-wrap">
-            <!-- Genre分类 -->
-            <span 
-              class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs rounded-md font-bold uppercase tracking-wide"
-            >
-              {{ post.genre || post.category }}
-            </span>
-            <!-- 标签列表 -->
-            <div v-if="post.tags && post.tags.length > 0" class="flex items-center gap-2 flex-wrap">
-              <span 
-                v-for="tag in post.tags" 
-                :key="tag"
-                class="px-2 py-0.5 text-xs rounded-full font-semibold"
-                :style="getTagColor(tag).style"
-              >
-                #{{ tag }}
+      <div class="flex-1 space-y-6">
+        <!-- 骨架屏 - 加载初始数据时显示 -->
+        <BlogSkeleton v-if="isLoading && blogPosts.length === 0" :count="3" />
+
+        <!-- 文章列表 -->
+        <template v-else>
+          <article 
+            v-for="post in filteredPosts" 
+            :key="post.id" 
+            @click="$router.push(`/blog/${post.id}`)"
+            class="blog-article-card glass-card p-6 rounded-2xl group cursor-pointer border-l-4 transition-all animate-fade-in"
+          >
+            <!-- 文章内容保持不变 -->
+            <div class="flex items-center gap-3 mb-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
+              <span class="font-mono">{{ formatDateChinese(post.published_at || post.date) }}</span>
+              <span class="text-slate-300 dark:text-slate-600">·</span>
+              <span class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                {{ post.views || 0 }}
+              </span>
+              <span class="text-slate-300 dark:text-slate-600">·</span>
+              <span class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 text-red-400 dark:text-red-500">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                {{ (post.likes_count !== undefined && post.likes_count !== null) ? post.likes_count : (post.likes || 0) }}
+              </span>
+              <span class="text-slate-300 dark:text-slate-600">·</span>
+              <span class="flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                {{ post.comments_count !== undefined ? post.comments_count : (post.comments || 0) }}
+              </span>
+              <span class="text-slate-300 dark:text-slate-600">·</span>
+              <span class="flex items-center gap-1 text-orange-500 dark:text-orange-400 font-semibold">
+                {{ calculateHeat(post) }}℃
               </span>
             </div>
-          </div>
-          
-          <!-- 标题 -->
-          <h3 
-            class="blog-article-title text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2"
-            v-html="highlightText(post.title, searchQuery)"
-          ></h3>
-          
-          <!-- 描述和阅读按钮 - 同一行显示 -->
-          <div class="flex items-center justify-between gap-4">
-            <p 
-              class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed opacity-80 flex-1 min-w-0"
-              v-html="highlightText(post.excerpt, searchQuery)"
-            ></p>
-            <!-- 阅读更多按钮 - 与描述同一行 -->
-            <div class="blog-read-article-btn flex items-center text-sm font-bold gap-1 group-hover:gap-2 transition-all shrink-0">
-              {{ $t('common.readArticle') }}
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
-              </svg>
+            <div class="flex items-center gap-2 mb-2 flex-wrap">
+              <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs rounded-md font-bold uppercase tracking-wide">{{ post.genre || post.category }}</span>
+              <div v-if="post.tags && post.tags.length > 0" class="flex items-center gap-2 flex-wrap">
+                <span v-for="tag in post.tags" :key="tag" class="px-2 py-0.5 text-xs rounded-full font-semibold" :style="getTagColor(tag).style">#{{ tag }}</span>
+              </div>
             </div>
+            <h3 class="blog-article-title text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2" v-html="highlightText(post.title, searchQuery)"></h3>
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed opacity-80 flex-1 min-w-0" v-html="highlightText(post.excerpt, searchQuery)"></p>
+              <div class="blog-read-article-btn flex items-center text-sm font-bold gap-1 group-hover:gap-2 transition-all shrink-0">
+                {{ $t('common.readArticle') }}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </div>
+            </div>
+          </article>
+
+          <!-- 加载更多 -->
+          <div v-if="hasMore" class="pt-4 pb-8 flex justify-center">
+            <button 
+              @click="loadMore" 
+              :disabled="isLoading"
+              class="px-8 py-3 bg-white/50 dark:bg-slate-800/50 hover:bg-[var(--theme-primary)] hover:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 disabled:opacity-50"
+            >
+              <span v-if="isLoading" class="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></span>
+              {{ isLoading ? $t('common.loading') : $t('blog.loadMore') || '加载更多' }}
+            </button>
           </div>
-        </article>
+
+          <!-- 无更多内容 -->
+          <div v-else-if="blogPosts.length > 0 && !searchQuery" class="py-8 text-center text-slate-400 dark:text-slate-500 text-sm">
+            {{ $t('blog.noMore') || '没有更多文章了' }}
+          </div>
+        </template>
       </div>
       </div>
       
-    <!-- 右侧留言板 - 桌面端显示（2xl及以上屏幕） -->
+    <!-- 右侧留言板 -->
     <div class="hidden 2xl:block w-80 shrink-0">
       <div class="sticky top-6">
         <Guestbook @show-login="showAuthModal = true" />
@@ -318,6 +301,7 @@ import { useLocalStorage } from '../composables/useStorage'
 import { blogApi } from '../utils/api'
 import Guestbook from '../components/Guestbook.vue'
 import AuthModal from '../components/AuthModal.vue'
+import BlogSkeleton from '../components/BlogSkeleton.vue'
 import { getTagStyle } from '../utils/tagColor'
 
 const router = useRouter()
@@ -326,14 +310,20 @@ const selectedGenre = ref(null)
 const selectedTag = ref(null)
 const selectedArchive = ref(null)
 const showFavorites = ref(false)
-const showMobileFilters = ref(false) // 移动端筛选面板显示状态
+const showMobileFilters = ref(false)
 const sortBy = ref('date-desc')
-const latestArticle = ref(null) // 用于推广最新文章
-const showAuthModal = ref(false) // 认证弹窗显示状态
+const showAuthModal = ref(false)
 
-// 从后端API加载数据
+// 分页与加载状态
 const blogPosts = ref([])
 const isLoading = ref(false)
+const page = ref(0)
+const pageSize = ref(6)
+const hasMore = ref(true)
+
+// 独立存储所有分类和标签，确保侧边栏完整性
+const allGenres = ref([])
+const allTags = ref([])
 
 // 博客统计信息
 const blogStats = ref({
@@ -344,142 +334,134 @@ const blogStats = ref({
 })
 
 /**
- * 加载文章列表
- * 从后端API获取文章数据
+ * 加载文章列表（支持分页）
  */
-const loadPosts = async () => {
+const loadPosts = async (isLoadMore = false) => {
+  if (isLoading.value) return
   isLoading.value = true
+  
+  if (!isLoadMore) {
+    page.value = 0
+    blogPosts.value = []
+  }
+
   try {
-    const posts = await blogApi.getList({
+    const params = {
       status: 'published',
       sortBy: 'published_at',
-      sortOrder: 'desc'
-    })
-    blogPosts.value = posts || []
-    // 重新初始化Fuse搜索
+      sortOrder: 'desc',
+      limit: pageSize.value,
+      offset: page.value * pageSize.value
+    }
+
+    // 如果有筛选条件，分页可能受影响，但后端目前 getAll 支持基础筛选
+    if (selectedGenre.value) params.genre = selectedGenre.value
+
+    const posts = await blogApi.getList(params)
+    
+    if (posts && posts.length > 0) {
+      blogPosts.value = isLoadMore ? [...blogPosts.value, ...posts] : posts
+      hasMore.value = posts.length === pageSize.value
+      page.value++
+    } else {
+      hasMore.value = false
+    }
+
     initFuse()
   } catch (error) {
     console.error('Failed to load posts:', error)
-    blogPosts.value = []
   } finally {
     isLoading.value = false
   }
 }
 
 /**
+ * 加载更多
+ */
+const loadMore = () => {
+  if (hasMore.value) {
+    loadPosts(true)
+  }
+}
+
+/**
+ * 监听筛选条件变化，重置列表
+ */
+watch([selectedGenre, selectedTag, selectedArchive], () => {
+  loadPosts()
+})
+
+/**
+ * 加载元数据（分类和标签）
+ */
+const loadMetadata = async () => {
+  try {
+    const [genresData, tagsData] = await Promise.all([
+      blogApi.getAllGenres({ status: 'published' }),
+      blogApi.getAllTags({ status: 'published' })
+    ])
+    allGenres.value = genresData || []
+    allTags.value = tagsData || []
+  } catch (error) {
+    console.error('Failed to load metadata:', error)
+  }
+}
+
+const genres = computed(() => allGenres.value)
+const tags = computed(() => allTags.value)
+
+/**
  * 加载博客统计信息
- * 从后端API获取统计数据
  */
 const loadBlogStats = async () => {
   try {
     const stats = await blogApi.getStats()
-    blogStats.value = stats || {
-      totalArticles: 0,
-      totalComments: 0,
-      totalViews: 0,
-      totalLikes: 0
-    }
+    blogStats.value = stats || { totalArticles: 0, totalComments: 0, totalViews: 0, totalLikes: 0 }
   } catch (error) {
     console.error('Failed to load blog stats:', error)
   }
 }
 
 /**
- * 格式化数字（添加千位分隔符）
- * @param {number} num - 要格式化的数字
- * @returns {string} 格式化后的字符串
+ * 格式化数字
  */
-const formatNumber = (num) => {
-  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-}
+const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 
 /**
  * 格式化日期为中文格式
- * 格式：2025年12月29日 17时19分
- * @param {string} dateStr - 日期字符串，格式如 "2025-05-20" 或 ISO 8601格式
- * @returns {string} 格式化后的日期字符串
  */
 const formatDateChinese = (dateStr) => {
   if (!dateStr) return ''
-  
   const date = new Date(dateStr)
   if (isNaN(date.getTime())) return dateStr
-  
   const year = date.getFullYear()
   const month = date.getMonth() + 1
   const day = date.getDate()
   const hours = date.getHours()
   const minutes = date.getMinutes()
-  
-  // 如果有时间信息（不是00:00），则显示时间
   if (hours !== 0 || minutes !== 0) {
     return `${year}年${month}月${day}日 ${hours}时${minutes.toString().padStart(2, '0')}分`
   }
-  
   return `${year}年${month}月${day}日`
 }
 
 /**
  * 计算文章热度
- * 根据观看数、点赞数、评论数计算热度值
- * @param {Object} post - 文章对象
- * @returns {number} 热度值（摄氏度）
  */
 const calculateHeat = (post) => {
   const views = post.views || 0
-  const likes = (post.likes_count !== undefined && post.likes_count !== null) ? post.likes_count : (post.likes || 0)
-  const comments = post.comments_count !== undefined ? post.comments_count : (post.comments || 0)
-  
-  // 热度计算公式：基础温度 + 观看数*0.01 + 点赞数*0.5 + 评论数*1
-  // 基础温度为30℃，最高温度限制在200℃
+  const likes = post.likes_count ?? post.likes ?? 0
+  const comments = post.comments_count ?? post.comments ?? 0
   const baseTemp = 30
   const heat = baseTemp + views * 0.01 + likes * 0.5 + comments * 1
-  return Math.min(Math.round(heat * 10) / 10, 200) // 保留一位小数，最高200℃
+  return Math.min(Math.round(heat * 10) / 10, 200)
 }
-
-/**
- * 刷新文章列表
- * 重新从后端API加载文章
- */
-const refreshPosts = () => {
-  loadPosts()
-}
-
-/**
- * 处理文章创建/更新成功
- * @param {Object} result - API返回结果
- */
-/**
- * 处理文章创建/更新成功
- * @param {Object} result - API返回结果
- */
-const handleArticleSuccess = (result) => {
-  console.log('Article saved successfully:', result)
-  
-  // 刷新文章列表
-  refreshPosts()
-  
-  // 设置最新文章用于推广
-  if (result.article) {
-    latestArticle.value = result.article
-    // 自动关闭推广信息
-    setTimeout(() => {
-      latestArticle.value = null
-    }, 10000) // 10秒后自动关闭
-  }
-}
-
-// 阅读历史管理
-const { value: readingHistory } = useLocalStorage('blog-reading-history', [])
 
 // 收藏管理
 const { value: favorites } = useLocalStorage('blog-favorites', [])
 
 /**
  * 获取标签颜色样式
- * 使用哈希函数生成确定性颜色
- * @param {string} tagName - 标签名称
- * @returns {Object} 包含style对象
  */
 const getTagColor = (tagName) => {
   const isDarkMode = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
@@ -487,39 +469,7 @@ const getTagColor = (tagName) => {
 }
 
 /**
- * 从文章配置中动态提取所有Genre分类
- */
-const genres = computed(() => {
-  const genreSet = new Set()
-  blogPosts.value.forEach(post => {
-    const genre = post.genre || post.category
-    if (genre) {
-      genreSet.add(genre)
-    }
-  })
-  
-  return Array.from(genreSet).sort()
-})
-
-/**
- * 从文章配置中动态提取所有标签
- */
-const tags = computed(() => {
-  const tagSet = new Set()
-  blogPosts.value.forEach(post => {
-    if (post.tags && Array.isArray(post.tags)) {
-      post.tags.forEach(tag => tagSet.add(tag))
-    }
-  })
-  
-  // 转换为数组并排序
-  return Array.from(tagSet).sort((a, b) => a.localeCompare(b))
-})
-
-/**
  * 解析日期字符串为月份格式
- * @param {string} dateStr - 日期字符串，格式如 "2025-05-20"
- * @returns {string} 月份字符串，格式如 "May 2025"
  */
 const parseDateToMonth = (dateStr) => {
   const date = new Date(dateStr)
@@ -529,259 +479,81 @@ const parseDateToMonth = (dateStr) => {
 }
 
 /**
- * 从文章配置中动态生成归档数据
+ * 归档筛选逻辑（保持前端计算，或后续优化为后端）
  */
 const archives = computed(() => {
   const archiveMap = new Map()
-  
   blogPosts.value.forEach(post => {
     if (post.date) {
       const month = parseDateToMonth(post.date)
       archiveMap.set(month, (archiveMap.get(month) || 0) + 1)
     }
   })
-  
-  // 转换为数组并按月份倒序排列（最新的在前）
   return Array.from(archiveMap.entries())
     .map(([month, count]) => ({ month, count }))
-    .sort((a, b) => {
-      // 解析月份字符串进行比较
-      const dateA = new Date(a.month)
-      const dateB = new Date(b.month)
-      return dateB - dateA // 倒序
-    })
+    .sort((a, b) => new Date(b.month) - new Date(a.month))
 })
 
-/**
- * 切换Genre分类筛选
- * @param {string} genre - Genre分类名称
- */
 const toggleGenreFilter = (genre) => {
-  if (selectedGenre.value === genre) {
-    // 如果点击的是已选中的分类，则取消筛选
-    selectedGenre.value = null
-  } else {
-    selectedGenre.value = genre
-    // 选择Genre时清除其他筛选
-    selectedTag.value = null
-    selectedArchive.value = null
-  }
+  selectedGenre.value = selectedGenre.value === genre ? null : genre
+  selectedTag.value = null
+  selectedArchive.value = null
 }
 
-/**
- * 切换标签筛选
- * @param {string} tagName - 标签名称
- */
 const toggleTagFilter = (tagName) => {
-  if (selectedTag.value === tagName) {
-    // 如果点击的是已选中的标签，则取消筛选
-    selectedTag.value = null
-  } else {
-    selectedTag.value = tagName
-    // 选择标签时清除其他筛选
-    selectedGenre.value = null
-    selectedArchive.value = null
-  }
+  selectedTag.value = selectedTag.value === tagName ? null : tagName
+  selectedGenre.value = null
+  selectedArchive.value = null
 }
 
-/**
- * 切换归档筛选
- * @param {string} month - 月份字符串，格式如 "May 2025"
- */
 const toggleArchiveFilter = (month) => {
-  if (selectedArchive.value === month) {
-    // 如果点击的是已选中的归档，则取消筛选
-    selectedArchive.value = null
-  } else {
-    selectedArchive.value = month
-    // 选择归档时清除其他筛选
-    selectedGenre.value = null
-    selectedTag.value = null
-  }
+  selectedArchive.value = selectedArchive.value === month ? null : month
+  selectedGenre.value = null
+  selectedTag.value = null
 }
 
 /**
  * Fuse.js 搜索实例
- * 配置搜索选项，支持模糊搜索和多字段搜索
  */
 let fuseInstance = null
-
-/**
- * 初始化Fuse搜索实例
- */
 const initFuse = () => {
   const options = {
-    keys: [
-      { name: 'title', weight: 0.7 },      // 标题权重最高
-      { name: 'excerpt', weight: 0.5 },   // 摘要权重中等
-      { name: 'content', weight: 0.3 },  // 内容权重较低
-      { name: 'category', weight: 0.4 },  // 分类权重中等
-      { name: 'tags', weight: 0.6 }       // 标签权重较高
-    ],
-    threshold: 0.3,  // 模糊匹配阈值（0-1，越小越严格）
-    includeScore: true,  // 包含匹配分数
-    minMatchCharLength: 1,  // 最小匹配字符长度
-    ignoreLocation: true,  // 忽略位置，提高搜索准确性
+    keys: [{ name: 'title', weight: 0.7 }, { name: 'excerpt', weight: 0.5 }, { name: 'content', weight: 0.3 }, { name: 'genre', weight: 0.4 }, { name: 'tags', weight: 0.6 }],
+    threshold: 0.3,
+    includeScore: true,
   }
-  
   fuseInstance = new Fuse(blogPosts.value, options)
 }
 
-/**
- * 筛选后的文章列表
- * 根据搜索关键词、选中的标签和归档过滤文章
- */
 const filteredPosts = computed(() => {
   let result = blogPosts.value
   
-  // 收藏筛选
-  if (showFavorites.value) {
-    const favIds = favorites.value || []
-    result = result.filter(post => favIds.includes(post.id))
-  }
-  
-  // Genre分类筛选
-  if (selectedGenre.value) {
-    result = result.filter(post => {
-      const genre = post.genre || post.category
-      return genre === selectedGenre.value
-    })
-  }
-  
-  // 标签筛选
   if (selectedTag.value) {
-    result = result.filter(post => 
-      post.tags && post.tags.some(tag => tag === selectedTag.value)
-    )
+    result = result.filter(post => post.tags?.includes(selectedTag.value))
   }
   
-  // 归档筛选
   if (selectedArchive.value) {
-    result = result.filter(post => {
-      const postMonth = parseDateToMonth(post.date)
-      return postMonth === selectedArchive.value
-    })
+    result = result.filter(post => parseDateToMonth(post.date) === selectedArchive.value)
   }
   
-  // 高级搜索（使用Fuse.js）
-  if (searchQuery.value && searchQuery.value.trim()) {
-    if (!fuseInstance) {
-      initFuse()
-    }
-    
-    // 更新Fuse实例的数据源（考虑已筛选的结果）
+  if (searchQuery.value?.trim()) {
+    if (!fuseInstance) initFuse()
     fuseInstance.setCollection(result)
-    
-    // 执行搜索
-    const searchResults = fuseInstance.search(searchQuery.value.trim())
-    // Fuse.js返回的是包含item和score的对象数组，提取item
-    result = searchResults.map(result => result.item)
+    result = fuseInstance.search(searchQuery.value.trim()).map(r => r.item)
   }
-  
-  // 排序
-  result = sortPosts(result, sortBy.value)
   
   return result
 })
 
-/**
- * 对文章列表进行排序
- * @param {Array} posts - 文章列表
- * @param {string} sortType - 排序类型
- * @returns {Array} 排序后的文章列表
- */
-const sortPosts = (posts, sortType) => {
-  const sorted = [...posts]
-  
-  switch (sortType) {
-    case 'date-desc':
-      return sorted.sort((a, b) => new Date(b.date) - new Date(a.date))
-    case 'date-asc':
-      return sorted.sort((a, b) => new Date(a.date) - new Date(b.date))
-    case 'title-asc':
-      return sorted.sort((a, b) => a.title.localeCompare(b.title))
-    case 'title-desc':
-      return sorted.sort((a, b) => b.title.localeCompare(a.title))
-    case 'views-desc':
-      return sorted.sort((a, b) => (b.views || 0) - (a.views || 0))
-    case 'views-asc':
-      return sorted.sort((a, b) => (a.views || 0) - (b.views || 0))
-    default:
-      return sorted
-  }
-}
-
-/**
- * 高亮搜索关键词
- * @param {string} text - 要高亮的文本
- * @param {string} query - 搜索关键词
- * @returns {string} 高亮后的HTML字符串
- */
 const highlightText = (text, query) => {
-  if (!text || !query || !query.trim()) {
-    return text || ''
-  }
-  
-  const searchTerm = query.trim()
-  // 转义HTML特殊字符
-  const escapedText = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  const escapedQuery = searchTerm.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  
-  // 使用正则表达式进行不区分大小写的匹配
-  const regex = new RegExp(`(${escapedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
-  
-  // 替换匹配的文本为高亮标记
-  return escapedText.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-900/50 text-yellow-900 dark:text-yellow-200 px-1 rounded">$1</mark>')
+  if (!text || !query?.trim()) return text || ''
+  const regex = new RegExp(`(${query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+  return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-900/50 text-yellow-900 dark:text-yellow-200 px-1 rounded">$1</mark>')
 }
 
-/**
- * 切换收藏状态
- * @param {number} postId - 文章ID
- */
-const toggleFavorite = (postId) => {
-  const favs = favorites.value || []
-  const index = favs.indexOf(postId)
-  
-  if (index > -1) {
-    // 取消收藏
-    favs.splice(index, 1)
-  } else {
-    // 添加收藏
-    favs.push(postId)
-  }
-  
-  favorites.value = favs
-}
-
-/**
- * 检查文章是否已收藏
- * @param {number} postId - 文章ID
- * @returns {boolean} 是否已收藏
- */
-const isFavorite = (postId) => {
-  return (favorites.value || []).includes(postId)
-}
-
-/**
- * 最近阅读的文章
- * 从阅读历史中获取最近阅读的文章
- */
-const recentReadPosts = computed(() => {
-  if (!readingHistory.value || readingHistory.value.length === 0) return []
-  
-  // 获取最近阅读的3篇文章ID
-  const recentIds = readingHistory.value.slice(-3).reverse()
-  
-  // 根据ID查找文章
-  return recentIds
-    .map(id => blogPosts.value.find(p => p.id === id))
-    .filter(Boolean) // 过滤掉未找到的文章
-    .slice(0, 3) // 最多显示3篇
-})
-
-// 初始化文章列表和统计信息
 onMounted(() => {
   loadPosts()
+  loadMetadata()
   loadBlogStats()
 })
 </script>
