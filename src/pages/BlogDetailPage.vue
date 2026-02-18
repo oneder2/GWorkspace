@@ -18,8 +18,8 @@
       @click="$router.push('/blog')"
       class="mb-6 flex items-center gap-2 text-slate-600 dark:text-slate-400 transition-colors"
       style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-      @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'; }"
-      @mouseleave="const el = $event?.currentTarget; if (el) { el.style.color = ''; }"
+      @mouseenter="handleBackBtnHoverEnter"
+      @mouseleave="handleBackBtnHoverLeave"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
         <polyline points="15 18 9 12 15 6"/>
@@ -89,8 +89,8 @@
                 @click="shareArticle"
                 class="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-slate-600 dark:text-slate-400 transition-colors"
                 style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-dark);"
-                @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)'; }"
-                @mouseleave="const el = $event?.currentTarget; if (el) { el.style.backgroundColor = ''; el.style.color = ''; }"
+                @mouseenter="handleShareBtnHoverEnter"
+                @mouseleave="handleShareBtnHoverLeave"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
@@ -154,8 +154,8 @@
           @click="$router.push(`/blog/${relatedPost.id}`)"
           class="glass-card p-5 rounded-xl cursor-pointer transition-all group border-l-4 border-l-transparent"
           style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-border: var(--theme-primary);"
-          @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; el.style.borderLeftColor = 'var(--hover-border)'; }"
-          @mouseleave="const el = $event?.currentTarget; if (el) { el.style.backgroundColor = ''; el.style.borderLeftColor = 'transparent'; }"
+          @mouseenter="handleRelatedPostHoverEnter"
+          @mouseleave="handleRelatedPostHoverLeave"
         >
           <div class="flex items-center gap-2 mb-2">
             <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs rounded-md font-bold uppercase">
@@ -165,8 +165,8 @@
           </div>
           <h4 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 transition-colors"
               style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-              @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'; }"
-              @mouseleave="const el = $event?.currentTarget; if (el) { el.style.color = ''; }"
+              @mouseenter="handleRelatedTitleHoverEnter"
+              @mouseleave="handleRelatedTitleHoverLeave"
           >
             {{ relatedPost.title }}
           </h4>
@@ -184,14 +184,14 @@
         @click="$router.push(`/blog/${prevPost.id}`)"
         class="glass-card p-4 rounded-xl text-left transition-colors group"
         style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-        @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; }"
-        @mouseleave="const el = $event?.currentTarget; if (el) { el.style.backgroundColor = ''; }"
+        @mouseenter="handleNavBtnHoverEnter"
+        @mouseleave="handleNavBtnHoverLeave"
       >
         <div class="text-xs text-slate-400 dark:text-slate-500 mb-2">{{ $t('blog.prevArticle') }}</div>
         <div class="font-bold text-slate-700 dark:text-slate-300 transition-colors"
              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-             @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'; }"
-             @mouseleave="const el = $event?.currentTarget; if (el) { el.style.color = ''; }"
+             @mouseenter="handleNavTitleHoverEnter"
+             @mouseleave="handleNavTitleHoverLeave"
         >
           {{ prevPost.title }}
         </div>
@@ -202,14 +202,14 @@
         @click="$router.push(`/blog/${nextPost.id}`)"
         class="glass-card p-4 rounded-xl text-left transition-colors group md:text-right"
         style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-        @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; }"
-        @mouseleave="const el = $event?.currentTarget; if (el) { el.style.backgroundColor = ''; }"
+        @mouseenter="handleNavBtnHoverEnter"
+        @mouseleave="handleNavBtnHoverLeave"
       >
         <div class="text-xs text-slate-400 dark:text-slate-500 mb-2">{{ $t('blog.nextArticle') }}</div>
         <div class="font-bold text-slate-700 dark:text-slate-300 transition-colors"
              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-             @mouseenter="const el = $event?.currentTarget; if (el) { const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'; }"
-             @mouseleave="const el = $event?.currentTarget; if (el) { el.style.color = ''; }"
+             @mouseenter="handleNavTitleHoverEnter"
+             @mouseleave="handleNavTitleHoverLeave"
         >
           {{ nextPost.title }}
         </div>
@@ -712,5 +712,76 @@ const copyLink = async () => {
     console.error('Failed to copy link:', error)
     // 如果复制失败，可以显示错误提示
   }
+}
+
+// Hover 处理函数
+const handleBackBtnHoverEnter = (e) => {
+  const el = e?.currentTarget
+  if (!el) return
+  const isDark = document.documentElement.classList.contains('dark')
+  el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'
+}
+const handleBackBtnHoverLeave = (e) => {
+  if (e?.currentTarget) e.currentTarget.style.color = ''
+}
+
+const handleShareBtnHoverEnter = (e) => {
+  const el = e?.currentTarget
+  if (!el) return
+  const isDark = document.documentElement.classList.contains('dark')
+  el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'
+  el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)'
+}
+const handleShareBtnHoverLeave = (e) => {
+  const el = e?.currentTarget
+  if (el) {
+    el.style.backgroundColor = ''
+    el.style.color = ''
+  }
+}
+
+const handleRelatedPostHoverEnter = (e) => {
+  const el = e?.currentTarget
+  if (!el) return
+  const isDark = document.documentElement.classList.contains('dark')
+  el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'
+  el.style.borderLeftColor = 'var(--hover-border)'
+}
+const handleRelatedPostHoverLeave = (e) => {
+  const el = e?.currentTarget
+  if (el) {
+    el.style.backgroundColor = ''
+    el.style.borderLeftColor = 'transparent'
+  }
+}
+
+const handleRelatedTitleHoverEnter = (e) => {
+  const el = e?.currentTarget
+  if (!el) return
+  const isDark = document.documentElement.classList.contains('dark')
+  el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'
+}
+const handleRelatedTitleHoverLeave = (e) => {
+  if (e?.currentTarget) e.currentTarget.style.color = ''
+}
+
+const handleNavBtnHoverEnter = (e) => {
+  const el = e?.currentTarget
+  if (!el) return
+  const isDark = document.documentElement.classList.contains('dark')
+  el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'
+}
+const handleNavBtnHoverLeave = (e) => {
+  if (e?.currentTarget) e.currentTarget.style.backgroundColor = ''
+}
+
+const handleNavTitleHoverEnter = (e) => {
+  const el = e?.currentTarget
+  if (!el) return
+  const isDark = document.documentElement.classList.contains('dark')
+  el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'
+}
+const handleNavTitleHoverLeave = (e) => {
+  if (e?.currentTarget) e.currentTarget.style.color = ''
 }
 </script>

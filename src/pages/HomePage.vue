@@ -102,8 +102,8 @@
           @click="showEditor = true"
           class="px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-slate-600 dark:text-slate-400 transition-colors text-sm font-medium flex items-center gap-2"
           style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-light);"
-          @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'; el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)';"
-          @mouseleave="const el = $event.currentTarget; el.style.backgroundColor = ''; el.style.color = '';"
+          @mouseenter="handleEditBtnHoverEnter"
+          @mouseleave="handleEditBtnHoverLeave"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -230,6 +230,22 @@ const handleSaveLinks = (links) => {
   console.log('[HomePage] Links to save:', linksToSave)
   customLinksStorage.update(linksToSave)
   showEditor.value = false
+}
+
+const handleEditBtnHoverEnter = (e) => {
+  const el = e?.currentTarget
+  if (!el) return
+  const isDark = document.documentElement.classList.contains('dark')
+  el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'
+  el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)'
+}
+
+const handleEditBtnHoverLeave = (e) => {
+  const el = e?.currentTarget
+  if (el) {
+    el.style.backgroundColor = ''
+    el.style.color = ''
+  }
 }
 
 /**

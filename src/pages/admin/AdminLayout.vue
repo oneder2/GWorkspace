@@ -45,7 +45,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '../../composables/useAuth'
@@ -53,15 +53,18 @@ import AdminSidebar from '../../components/admin/AdminSidebar.vue'
 
 const router = useRouter()
 const { t } = useI18n()
-const { logout, isAdmin } = useAuth()
+const { logout, isAdmin, user } = useAuth()
 
 // 侧边栏折叠状态
 const sidebarCollapsed = ref(false)
 
-// 检查是否是管理员
-if (!isAdmin.value) {
-  router.push('/blog')
-}
+// 检查是否是管理员 - 增加容错，等待用户信息加载
+watch([isAdmin, user], ([newIsAdmin, newUser], [oldIsAdmin, oldUser]) => {
+  // 只有当用户信息已加载完成且不是管理员时才跳转
+  if (newUser !== null && !newIsAdmin) {
+    router.push('/blog')
+  }
+}, { immediate: true })
 
 /**
  * 处理登出

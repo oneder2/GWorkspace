@@ -48,8 +48,8 @@
         class="px-2 py-0.5 rounded-md text-xs font-mono"
         style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); color: var(--theme-primary-darker);"
         :style="{ '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)', '--dark-text': 'var(--theme-primary-light)' }"
-        @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); if (isDark) { el.style.backgroundColor = 'var(--dark-bg)'; el.style.color = 'var(--dark-text)'; }"
-        @mouseleave="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); if (isDark) { el.style.backgroundColor = ''; el.style.color = ''; }"
+        @mouseenter="handleVersionBadgeHoverEnter"
+        @mouseleave="handleVersionBadgeHoverLeave"
       >
         v2.0
       </span>
@@ -252,8 +252,8 @@
                 @click.stop="goToAdmin"
                 class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 transition-colors"
                 style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-                @mouseenter="const el = $event.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'"
-                @mouseleave="$event.currentTarget.style.backgroundColor = ''"
+                @mouseenter="handleUserMenuItemHoverEnter"
+                @mouseleave="handleUserMenuItemHoverLeave"
               >
                 {{ $t('auth.adminPanel') }}
               </button>
@@ -755,6 +755,49 @@ const handleDeleteAccount = async () => {
     alert(t('auth.accountDeleted'))
   } else {
     alert(result.error || t('auth.deleteAccountFailed'))
+  }
+}
+
+/**
+ * 处理版本标签hover进入
+ */
+const handleVersionBadgeHoverEnter = (event) => {
+  const el = event?.currentTarget
+  if (!el) return
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  if (isDark) {
+    el.style.backgroundColor = 'var(--dark-bg)'
+    el.style.color = 'var(--dark-text)'
+  }
+}
+
+/**
+ * 处理版本标签hover离开
+ */
+const handleVersionBadgeHoverLeave = (event) => {
+  const el = event?.currentTarget
+  if (!el) return
+  el.style.backgroundColor = ''
+  el.style.color = ''
+}
+
+/**
+ * 处理用户菜单项hover进入
+ */
+const handleUserMenuItemHoverEnter = (event) => {
+  const el = event?.currentTarget
+  if (!el) return
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'
+}
+
+/**
+ * 处理用户菜单项hover离开
+ */
+const handleUserMenuItemHoverLeave = (event) => {
+  const el = event?.currentTarget
+  if (el) {
+    el.style.backgroundColor = ''
   }
 }
 

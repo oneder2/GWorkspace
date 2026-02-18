@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
         name: 'GWorkspace',
@@ -49,6 +49,18 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-ui': ['vue', 'vue-router', 'vue-i18n'],
+          'vendor-charts': ['chart.js'],
+          'vendor-utils': ['marked', 'highlight.js', 'fuse.js']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
+  },
   server: {
     port: 3000,
     open: true,
