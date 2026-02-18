@@ -34,19 +34,26 @@ const PORT = process.env.PORT || 3001
 // 配置信任代理
 app.set('trust proxy', true)
 
-// 1. 极其宽松且稳健的 CORS 配置 (优先解决访问问题)
+// 1. 极其稳健的 CORS 手动处理 + 插件
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  // 如果是来自 gellaronline.cc 的请求，强制设置 Header
+  if (origin && (origin.indexOf('gellaronline.cc') !== -1 || origin.indexOf('localhost') !== -1)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
 app.use(cors({
-  origin: function(origin, callback) {
-    // 允许：本地、无来源、或者包含 gellaronline.cc 的域名
-    if (!origin || origin.indexOf('gellaronline.cc') !== -1 || origin.indexOf('localhost') !== -1 || origin.indexOf('127.0.0.1') !== -1) {
-      callback(null, true)
-    } else {
-      callback(null, false)
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  origin: true, // 既然上面已经处理了 Header，这里设为 true 动态反射
+  credentials: true
 }))
 
 app.use(morgan('dev'))

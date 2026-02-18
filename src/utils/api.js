@@ -4,17 +4,23 @@
  */
 
 const getApiBaseUrl = () => {
-  // 优先使用环境变量
+  // 1. 优先使用注入的环境变量
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL
-  // 生产环境自动推断 (假设后端在 workspace 子域名)
-  if (typeof window !== 'undefined' && window.location.hostname.endsWith('gellaronline.cc')) {
-    return 'https://workspace.gellaronline.cc/api'
+  
+  // 2. 生产环境推断 (兼容 www 和根域名)
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname
+    if (host.includes('gellaronline.cc')) {
+      return 'https://workspace.gellaronline.cc/api'
+    }
   }
-  // 默认开发环境
+  
+  // 3. 兜底开发环境
   return 'http://localhost:3001/api'
 }
 
 const API_BASE_URL = getApiBaseUrl()
+console.log('[API] Using Base URL:', API_BASE_URL)
 
 /**
  * 获取认证token
@@ -377,7 +383,7 @@ export const uploadApi = {
       headers['Authorization'] = `Bearer ${token}`
     }
 
-    return fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/upload/blog-image`, {
+    return fetch(`${API_BASE_URL}/upload/blog-image`, {
       method: 'POST',
       headers,
       body: formData
