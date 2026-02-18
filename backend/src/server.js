@@ -5,7 +5,6 @@
 
 import express from 'express'
 import cors from 'cors'
-import helmet from 'helmet'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
 import { getDatabase, closeDatabase } from './config/database.js'
@@ -32,36 +31,27 @@ const __dirname = dirname(__filename)
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// 1. CORS 配置 (必须在最前面)
+// 配置信任代理
+app.set('trust proxy', true)
+
+// 1. 极其宽松且稳健的 CORS 配置 (优先解决访问问题)
 app.use(cors({
-  origin: (origin, callback) => {
-    // 允许本地开发环境和 gellaronline.cc 及其子域名
-    if (!origin || 
-        origin.includes('localhost') || 
-        origin.includes('127.0.0.1') || 
-        origin.endsWith('gellaronline.cc')) {
+  origin: function(origin, callback) {
+    // 允许：本地、无来源、或者包含 gellaronline.cc 的域名
+    if (!origin || origin.indexOf('gellaronline.cc') !== -1 || origin.indexOf('localhost') !== -1 || origin.indexOf('127.0.0.1') !== -1) {
       callback(null, true)
     } else {
-      console.warn(`CORS blocked for origin: ${origin}`)
       callback(null, false)
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }))
 
-// 配置信任代理
-app.set('trust proxy', true)
-
-// 2. 其他安全和日志中间件
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}))
 app.use(morgan('dev'))
 
-// 3. 解析中间件
+// 2. 解析中间件
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
@@ -115,7 +105,7 @@ try {
   console.error('Database migration error:', error)
 }
 
-// 4. API 路由
+// 3. API 路由
 app.use('/api/auth', authRoutes)
 app.use('/api/blogs', likesRoutes)
 app.use('/api/blogs', blogRoutes)
