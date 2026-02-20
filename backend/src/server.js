@@ -34,8 +34,18 @@ const PORT = process.env.PORT || 3001
 // 配置信任代理
 app.set('trust proxy', true)
 
-// 使用最宽松的 CORS (恢复 91e2b60 之前的默认稳定性)
-app.use(cors())
+/**
+ * 核心修复：极致稳健的 CORS 配置
+ * 使用 origin: true 动态反射请求来源，这是处理多子域名最可靠的方式
+ * 确保 credentials 和 headers 都能通过校验
+ */
+app.use(cors({
+  origin: true, 
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}))
+
 app.use(morgan('dev'))
 
 // 解析中间件
@@ -45,7 +55,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 // 初始化数据库
 const db = getDatabase()
 
-// 迁移列表 (包含 006)
+// 执行数据库迁移
 const migrationFiles = [
   '001_initial_schema.sql',
   '002_user_system.sql',
@@ -74,12 +84,13 @@ try {
       })
     } catch (e) { if (e.code !== 'ENOENT') console.warn(e) }
   })
-} catch (e) { console.error(e) }
+  console.log('Database migrations completed')
+} catch (e) { console.error('Database migration error:', e) }
 
 // API 路由
 app.use('/api/auth', authRoutes)
+app.use('/api/blogs', likesRoutes)
 app.use('/api/blogs', blogRoutes)
-app.use('/api/blogs', likesRoutes) // 注意：路由可能共用路径前缀
 app.use('/api/blogs', commentsRoutes)
 app.use('/api/comments', commentsRoutes)
 app.use('/api/analytics', analyticsRoutes)
@@ -87,12 +98,13 @@ app.use('/api/admin', adminRoutes)
 app.use('/api/guestbook', guestbookRoutes)
 app.use('/api/upload', uploadRoutes)
 
+// 健康检查
 app.get('/health', (req, res) => res.json({ status: 'ok' }))
 app.get('/', (req, res) => res.json({ message: 'GWorkspace API Server' }))
 
 app.use((req, res) => res.status(404).json({ error: 'Not Found' }))
 app.use((err, req, res, next) => {
-  console.error(err)
+  console.error('Server Error:', err)
   res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' })
 })
 
