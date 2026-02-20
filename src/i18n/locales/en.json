@@ -167,7 +167,9 @@
     "commentPlaceholder": "Write your thoughts...",
     "comments": "Comments",
     "noComments": "No comments yet. Be the first to comment!",
-    "replyTo": "Reply to @{name}"
+    "replyTo": "Reply to @{name}",
+    "loadMore": "Load More",
+    "noMore": "No more articles"
   },
   "portfolio": {
     "title": "Selected Works",

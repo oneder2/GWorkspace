@@ -167,7 +167,9 @@
     "commentPlaceholder": "写下你的想法...",
     "comments": "评论",
     "noComments": "暂无评论，快来抢沙发吧！",
-    "replyTo": "回复 @{name}"
+    "replyTo": "回复 @{name}",
+    "loadMore": "加载更多",
+    "noMore": "没有更多文章了"
   },
   "portfolio": {
     "title": "精选作品",
