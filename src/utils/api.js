@@ -3,7 +3,13 @@
  * 封装所有后端API调用
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL
+  if (import.meta.env.PROD) return '/api'
+  return 'http://localhost:3001/api'
+}
+
+const API_BASE_URL = getApiBaseUrl()
 
 /**
  * 获取认证token
@@ -373,8 +379,7 @@ export const uploadApi = {
       headers['Authorization'] = `Bearer ${token}`
     }
 
-    const UPLOAD_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
-    return fetch(`${UPLOAD_URL}/upload/blog-image`, {
+    return fetch(`${API_BASE_URL}/upload/blog-image`, {
       method: 'POST',
       headers,
       body: formData
@@ -491,3 +496,4 @@ export function generateSlug(title) {
     .replace(/^-+|-+$/g, '') // 移除开头和结尾的连字符
     .trim() || 'untitled' // 如果结果为空，使用默认值 'untitled'
 }
+

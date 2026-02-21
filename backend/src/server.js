@@ -34,11 +34,7 @@ const PORT = process.env.PORT || 3001
 // 配置信任代理
 app.set('trust proxy', true)
 
-/**
- * 核心修复：极致稳健的 CORS 配置
- * 使用 origin: true 动态反射请求来源，这是处理多子域名最可靠的方式
- * 确保 credentials 和 headers 都能通过校验
- */
+// 1. 极其稳健的 CORS：动态反射来源
 app.use(cors({
   origin: true, 
   credentials: true,
@@ -48,7 +44,7 @@ app.use(cors({
 
 app.use(morgan('dev'))
 
-// 解析中间件
+// 2. 解析中间件
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
@@ -84,10 +80,9 @@ try {
       })
     } catch (e) { if (e.code !== 'ENOENT') console.warn(e) }
   })
-  console.log('Database migrations completed')
-} catch (e) { console.error('Database migration error:', e) }
+} catch (e) { console.error('Migration error:', e) }
 
-// API 路由
+// 3. API 路由
 app.use('/api/auth', authRoutes)
 app.use('/api/blogs', likesRoutes)
 app.use('/api/blogs', blogRoutes)
