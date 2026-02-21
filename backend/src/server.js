@@ -31,10 +31,14 @@ const __dirname = dirname(__filename)
 const app = express()
 const PORT = process.env.PORT || 3001
 
-// 配置信任代理
+// 配置信任代理 (关键：确保能正确识别来自 Nginx 的 Origin)
 app.set('trust proxy', true)
 
-// 1. 极其稳健的 CORS：动态反射来源
+/**
+ * 极其稳健的 CORS 配置：
+ * 1. 允许 credentials (带 Token 请求必须)
+ * 2. 动态反射 Origin (完美支持 www.gellaronline.cc 和 gellaronline.cc)
+ */
 app.use(cors({
   origin: true, 
   credentials: true,
@@ -44,7 +48,7 @@ app.use(cors({
 
 app.use(morgan('dev'))
 
-// 2. 解析中间件
+// 解析中间件
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
@@ -82,7 +86,7 @@ try {
   })
 } catch (e) { console.error('Migration error:', e) }
 
-// 3. API 路由
+// API 路由
 app.use('/api/auth', authRoutes)
 app.use('/api/blogs', likesRoutes)
 app.use('/api/blogs', blogRoutes)
