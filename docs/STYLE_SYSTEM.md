@@ -132,14 +132,28 @@ import '../styles/pages/BlogPage.css'
 }
 ```
 
-## 最佳实践
+## 交互反馈规范
 
-1. **避免硬编码样式**：所有样式都应定义在CSS文件中
-2. **使用CSS变量**：便于主题切换和维护
-3. **支持暗色模式**：所有样式都应考虑暗色模式
-4. **使用过渡效果**：为交互添加平滑的过渡动画
-5. **模块化组织**：每个页面有独立的样式文件
-6. **统一命名**：使用一致的类命名规范
+为了提供一致的用户体验，对于异步操作（如复制、保存）应遵循以下反馈规范：
+
+### 1. 复制操作反馈
+- **状态切换**：点击复制按钮后，按钮应立即切换为成功状态（如显示“Copied!”或绿色对勾图标）。
+- **自动复原**：成功状态应在 2 秒后自动恢复为原始状态。
+- **防止重复**：在成功状态持续期间，应禁用按钮点击，避免重复操作。
+
+示例逻辑：
+```javascript
+const copySuccess = ref(false)
+const handleCopy = async (text) => {
+  await navigator.clipboard.writeText(text)
+  copySuccess.value = true
+  setTimeout(() => copySuccess.value = false, 2000)
+}
+```
+
+### 2. 过渡动画
+- 所有状态切换应使用 `Vue <transition>` 或 Tailwind CSS 的 `transition` 工具类，避免突兀的视觉跳变。
+- 推荐使用 `duration-200` 和 `ease-out` 作为默认动画参数。
 
 ## 注意事项
 

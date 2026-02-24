@@ -154,14 +154,14 @@ export const i18n = createI18n({
 - **变量/函数**: camelCase (如 `currentTab`)
 - **常量**: UPPER_SNAKE_CASE (如 `API_BASE_URL`)
 
-### 组件规范
+### 性能优化规范
 
-- 使用 Vue 3 Composition API
-- 使用 `<script setup>` 语法
-- Props 使用 `defineProps`
-- Emits 使用 `defineEmits`
+- **计算密集型逻辑**：如敏感词过滤、复杂解析等，应考虑引入缓存或预编译机制。
+- **资源复用**：在后端循环中避免重复创建正则表达式或数据库连接。
+- **前端防抖**：对于频繁触发的输入或滚动事件，应使用防抖（Debounce）或节流（Throttle）。
+- **交互反馈**：所有涉及剪贴板、异步提交的操作，必须提供明确的视觉反馈（见样式系统文档）。
 
-## 测试
+## 调试与工具
 
 ### 前端测试
 

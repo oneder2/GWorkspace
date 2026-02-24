@@ -104,11 +104,12 @@ nano .env  # 或使用你喜欢的编辑器
 
 | 变量名 | 说明 | 示例值 | 是否必需 |
 |--------|------|--------|----------|
-| `VITE_API_URL` | API 服务器地址 | `https://api.yourdomain.com/api` | ❌ 否（开发环境有默认值） |
+| `VITE_API_URL` | API 服务器地址 | `/api` | ❌ 否（推荐设为 `/api` 以启用代理） |
 
 **说明**:
-- 如果使用 Vercel 部署，应在 Vercel 项目设置中配置环境变量，而不是使用 `.env` 文件
-- 本地开发环境默认使用 `http://localhost:3001/api`
+- **推荐做法**：在本地开发时，将 `VITE_API_URL` 设置为 `/api`。这样前端请求会经过 Vite 的代理服务器（在 `vite.config.js` 中配置），从而自动解决跨域（CORS）问题并方便调试。
+- 如果不设置，默认会尝试请求 `http://localhost:3001/api`。
+- 如果使用 Vercel 部署，应在 Vercel 项目设置中配置环境变量，而不是使用 `.env` 文件。
 
 ---
 

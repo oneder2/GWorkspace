@@ -34,12 +34,19 @@
           <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('tools.preview') }}</h3>
           <button 
             @click="copyHTML"
-            class="px-3 py-1 text-sm text-white rounded-lg transition-colors"
+            class="px-3 py-1 text-sm text-white rounded-lg transition-colors flex items-center justify-center min-w-[100px]"
             style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker));"
             @mouseenter="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary-light), var(--theme-primary))'"
             @mouseleave="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker))'"
+            :disabled="copySuccess"
           >
-            {{ $t('tools.copyHTML') }}
+            <span v-if="!copySuccess">{{ $t('tools.copyHTML') }}</span>
+            <span v-else class="flex items-center gap-1">
+              <span>Copied!</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </span>
           </button>
         </div>
         <div 
@@ -91,6 +98,8 @@ function hello() {
 
 > This is a blockquote`)
 
+const copySuccess = ref(false)
+
 /**
  * HTML 内容（从 Markdown 转换）
  */
@@ -119,7 +128,10 @@ const clearContent = () => {
 const copyHTML = async () => {
   try {
     await navigator.clipboard.writeText(htmlContent.value)
-    // TODO: 显示成功提示
+    copySuccess.value = true
+    setTimeout(() => {
+      copySuccess.value = false
+    }, 2000)
   } catch (error) {
     console.error('Failed to copy:', error)
   }

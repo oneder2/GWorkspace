@@ -55,7 +55,8 @@ export async function getWeather(lat, lon) {
   try {
     // 使用 wttr.in API，根据经纬度获取天气
     // format=j1 返回 JSON 格式，lang=zh 使用中文
-    const url = `https://wttr.in/?format=j1&lang=zh`
+    // 使用经纬度可以确保与 getLocationByIP 获取的位置一致，且避免服务端/客户端IP不一致问题
+    const url = `https://wttr.in/${lat},${lon}?format=j1&lang=zh`
     const response = await fetch(url, {
       headers: {
         'Accept': 'application/json'

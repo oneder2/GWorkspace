@@ -22,6 +22,49 @@ const WORDS_FILE = path.join(__dirname, 'sensitiveWords.json')
 let sensitiveWords = []
 
 /**
+ * 正则表达式缓存
+ * 存储预编译的正则表达式，避免重复创建
+ * @type {Array<{word: string, regex: RegExp}>}
+ */
+let cachedRegexs = []
+
+/**
+ * 转义正则表达式特殊字符
+ * @param {string} string 
+ * @returns {string}
+ */
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
+ * 为敏感词生成正则表达式
+ * @param {string} word 
+ * @returns {RegExp}
+ */
+function generateRegex(word) {
+  const escapedWord = escapeRegExp(word)
+  if (/^[\u4e00-\u9fa5]+$/.test(word)) {
+    // 中文：直接匹配（不转小写，但在构建正则时使用 'i' 标志以防万一）
+    return new RegExp(escapedWord, 'gi')
+  } else {
+    // 英文：使用单词边界匹配
+    return new RegExp(`\\b${escapedWord}\\b`, 'gi')
+  }
+}
+
+/**
+ * 更新正则缓存
+ */
+function updateRegexCache() {
+  cachedRegexs = sensitiveWords.map(word => ({
+    word,
+    regex: generateRegex(word)
+  }))
+  console.log(`[ContentFilter] Updated regex cache with ${cachedRegexs.length} patterns`)
+}
+
+/**
  * 从文件加载敏感词库
  */
 function loadSensitiveWords() {
@@ -38,10 +81,13 @@ function loadSensitiveWords() {
       // 创建默认文件
       saveSensitiveWords()
     }
+    // 更新缓存
+    updateRegexCache()
   } catch (error) {
     console.error('[ContentFilter] Error loading sensitive words:', error)
     // 使用默认词库
     sensitiveWords = ['spam', 'advertisement', 'promotion']
+    updateRegexCache()
   }
 }
 
@@ -77,20 +123,8 @@ export function containsSensitiveWords(content) {
     return false
   }
   
-  // 检查是否包含敏感词
-  return sensitiveWords.some(word => {
-    // 对于英文单词，使用单词边界匹配，避免误判
-    // 对于中文，直接匹配（不需要转小写）
-    if (/^[\u4e00-\u9fa5]+$/.test(word)) {
-      // 中文：直接包含匹配（不转小写）
-      return content.includes(word)
-    } else {
-      // 英文：使用单词边界匹配（大小写不敏感）
-      const lowerContent = content.toLowerCase()
-      const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
-    return regex.test(lowerContent)
-    }
-  })
+  // 使用缓存的正则进行检查
+  return cachedRegexs.some(({ regex }) => regex.test(content))
 }
 
 /**
@@ -105,19 +139,8 @@ export function filterSensitiveWords(content) {
 
   let filteredContent = content
   
-  sensitiveWords.forEach(word => {
-    // 转义正则表达式特殊字符
-    const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    
-    if (/^[\u4e00-\u9fa5]+$/.test(word)) {
-      // 中文：直接替换
-      const regex = new RegExp(escapedWord, 'gi')
-      filteredContent = filteredContent.replace(regex, '*'.repeat(word.length))
-    } else {
-      // 英文：使用单词边界匹配
-      const regex = new RegExp(`\\b${escapedWord}\\b`, 'gi')
+  cachedRegexs.forEach(({ word, regex }) => {
     filteredContent = filteredContent.replace(regex, '*'.repeat(word.length))
-    }
   })
   
   return filteredContent
@@ -144,6 +167,7 @@ export function addSensitiveWord(wordOrWords) {
   
   if (added) {
     saveSensitiveWords()
+    updateRegexCache() // 更新缓存
   }
   
   return added
@@ -194,6 +218,7 @@ export function removeSensitiveWord(word) {
   if (index > -1) {
     sensitiveWords.splice(index, 1)
     saveSensitiveWords()
+    updateRegexCache()
     return true
   }
   
