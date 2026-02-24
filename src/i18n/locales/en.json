@@ -18,7 +18,8 @@
     "editQuickLinks": "Edit Quick Links",
     "addLink": "Add Link",
     "linkName": "Link Name",
-    "linkUrl": "Link URL"
+    "linkUrl": "Link URL",
+    "updateLog": "Update Log"
   },
   "sites": {
     "title": "Site Navigation",
@@ -183,6 +184,7 @@
     "online": "Online",
     "readArticle": "Read Article",
     "language": "Language",
+    "viewMore": "View More",
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",

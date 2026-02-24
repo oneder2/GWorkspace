@@ -18,7 +18,8 @@
     "editQuickLinks": "编辑快捷链接",
     "addLink": "添加链接",
     "linkName": "链接名称",
-    "linkUrl": "链接地址"
+    "linkUrl": "链接地址",
+    "updateLog": "更新日志"
   },
   "sites": {
     "title": "站点导航",
@@ -183,6 +184,7 @@
     "online": "在线",
     "readArticle": "阅读文章",
     "language": "语言",
+    "viewMore": "查看更多",
     "save": "保存",
     "cancel": "取消",
     "close": "关闭",

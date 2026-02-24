@@ -3,8 +3,9 @@
   支持登录和注册功能
 -->
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm p-4" @click.self="handleClose">
-    <div class="glass-card-panel rounded-3xl p-6 md:p-8 w-full max-w-md overflow-hidden flex flex-col animate-fade-in">
+  <Teleport to="body">
+    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm p-4" @click.self="handleClose">
+      <div class="glass-card-panel rounded-3xl p-6 md:p-8 w-full max-w-md overflow-hidden flex flex-col animate-fade-in">
       <!-- 头部 -->
       <div class="flex items-center justify-between mb-6 shrink-0">
         <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">
@@ -139,6 +140,7 @@
       </div>
     </div>
   </div>
+</Teleport>
 </template>
 
 <script setup>
