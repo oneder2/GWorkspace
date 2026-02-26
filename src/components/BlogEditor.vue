@@ -602,17 +602,38 @@ const handleFileUpload = async (event) => {
   const file = event.target.files[0]
   if (!file) return
 
+  // 1. 创建本地预览 URL，实现“秒开”预览
+  const localPreviewUrl = URL.createObjectURL(file)
+  const placeholderId = `uploading-${Date.now()}`
+  const imageMarkdown = `\n![${file.name}](${localPreviewUrl}#${placeholderId})\n`
+  
+  // 记录光标位置或简单追加
+  formData.value.content += imageMarkdown
+  renderMarkdown(formData.value.content) // 立即触发一次渲染
+
   isUploadingImage.value = true
   try {
     const result = await uploadApi.uploadBlogImage(file)
-    const imageMarkdown = `\n![${file.name}](${result.url})\n`
-    formData.value.content += imageMarkdown
+    
+    // 2. 上传成功后，将本地预览 URL 替换为真实的云端 URL
+    // 使用带 hash 的占位符进行精准替换
+    const cloudUrl = result.url
+    formData.value.content = formData.value.content.replace(
+      `${localPreviewUrl}#${placeholderId}`,
+      cloudUrl
+    )
+    
+    // 释放内存
+    URL.revokeObjectURL(localPreviewUrl)
+    renderMarkdown(formData.value.content)
   } catch (error) {
     console.error('Image upload failed:', error)
-    alert('Image upload failed. Please ensure backend is configured with Cloudinary credentials.')
+    // 如果失败，移除预览图
+    formData.value.content = formData.value.content.replace(imageMarkdown, '')
+    renderMarkdown(formData.value.content)
+    alert('Image upload failed. Please check network or backend configuration.')
   } finally {
     isUploadingImage.value = false
-    // 重置input，允许重复上传同一张图
     if (fileInputRef.value) fileInputRef.value.value = ''
   }
 }
@@ -823,18 +844,35 @@ const handleClickOutside = (event) => {
 }
 
 /**
- * Markdown预览内容
+ * Markdown预览内容 - 改为 ref，使用防抖更新，解决图片频繁加载问题
  */
-const previewContent = computed(() => {
-  if (!formData.value.content.trim()) {
-    return `<p class="text-slate-400 dark:text-slate-500">${t('blog.previewPlaceholder')}</p>`
+const previewContent = ref('')
+let renderTimer = null
+
+/**
+ * 渲染 Markdown 内容
+ */
+const renderMarkdown = (content) => {
+  if (!content.trim()) {
+    previewContent.value = `<p class="text-slate-400 dark:text-slate-500">${t('blog.previewPlaceholder')}</p>`
+    return
   }
   try {
-    return marked.parse(formData.value.content)
+    previewContent.value = marked.parse(content)
   } catch (error) {
     console.error('Markdown parsing error:', error)
-    return `<p class="text-red-500">${t('blog.previewError')}</p>`
+    previewContent.value = `<p class="text-red-500">${t('blog.previewError')}</p>`
   }
+}
+
+/**
+ * 监听内容变化，实施防抖渲染
+ */
+watch(() => formData.value.content, (newContent) => {
+  if (renderTimer) clearTimeout(renderTimer)
+  renderTimer = setTimeout(() => {
+    renderMarkdown(newContent)
+  }, 300) // 300ms 防抖
 })
 
 /**
@@ -866,6 +904,8 @@ const initFormData = () => {
       slug: ''
     }
   }
+  // 初始化时立即同步渲染内容，确保初次打开有内容
+  renderMarkdown(formData.value.content)
 }
 
 /**

@@ -30,6 +30,31 @@ export default defineConfig({
           }
         ]
       },
+      workbox: {
+        // 运行时缓存配置
+        runtimeCaching: [
+          {
+            // 匹配博客图片等云端资源
+            urlPattern: /^https:\/\/(.*)\.(r2\.cloudflarestorage\.com|r2\.dev|gellaronline\.cc)\/blog\/.*/i,
+            handler: 'CacheFirst', // 优先从缓存读取，实现秒开
+            options: {
+              cacheName: 'blog-images-cache',
+              expiration: {
+                maxEntries: 100, // 最多缓存100张图片
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 缓存30天
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // 匹配 API 返回的图片资源路径
+            urlPattern: /\/api\/upload\/blog-image/i,
+            handler: 'NetworkFirst', // 上传接口必须走网络
+          }
+        ]
+      },
       devOptions: {
         enabled: true,
         type: 'module'

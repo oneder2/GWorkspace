@@ -15,34 +15,34 @@
           <!-- Header -->
           <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
             <div class="flex items-center gap-2">
-              <span class="font-bold text-main text-sm sm:text-base">
+              <span class="font-extrabold text-sm sm:text-base" style="color: var(--theme-primary-darker);">
                 {{ comment.author_name }}
               </span>
               <span 
                 v-if="comment.user_id === 1" 
-                class="px-1.5 py-0.5 bg-[var(--theme-primary)] text-white text-[10px] rounded uppercase font-bold"
+                class="px-1.5 py-0.5 bg-[var(--theme-primary)] text-white text-[10px] rounded uppercase font-bold shadow-sm"
               >
                 Admin
               </span>
             </div>
-            <time class="text-xs text-muted whitespace-nowrap">
+            <time class="text-xs text-secondary font-medium whitespace-nowrap">
               {{ formattedDate }}
             </time>
           </div>
 
           <!-- Body -->
-          <div class="text-secondary leading-relaxed whitespace-pre-wrap break-words text-sm">
+          <div class="text-main leading-relaxed whitespace-pre-wrap break-words text-sm">
             {{ comment.content }}
           </div>
 
           <!-- Footer Actions -->
-          <div class="mt-2 flex items-center justify-between">
+          <div class="mt-3 flex items-center justify-between">
             <div class="flex items-center gap-4">
               <button 
                 @click="showReplyForm = !showReplyForm"
-                class="text-xs font-medium text-muted hover:text-[var(--theme-primary)] transition-colors flex items-center gap-1"
+                class="text-xs font-bold text-secondary hover:text-[var(--theme-primary)] transition-colors flex items-center gap-1"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
                 {{ showReplyForm ? $t('common.cancel') : $t('blog.reply') }}
@@ -54,7 +54,7 @@
               v-if="canDelete"
               @click="handleDelete"
               :disabled="deleting"
-              class="text-xs font-medium text-muted hover:text-red-500 dark:hover:text-red-400 transition-colors flex items-center gap-1 opacity-0 group-hover:opacity-100 disabled:opacity-50"
+              class="text-xs font-bold text-secondary hover:text-red-500 dark:hover:text-red-400 transition-colors flex items-center gap-1 opacity-0 group-hover:opacity-100 disabled:opacity-50"
               :title="$t('common.delete')"
             >
               <span v-if="deleting" class="w-3 h-3 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></span>
