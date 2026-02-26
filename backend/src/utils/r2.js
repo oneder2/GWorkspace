@@ -3,47 +3,52 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-/**
- * 初始化 Cloudflare R2 客户端
- * R2 是 S3 兼容的，使用 S3 客户端即可
- */
+const accountId = (process.env.R2_ACCOUNT_ID || '').trim();
+const accessKeyId = (process.env.R2_ACCESS_KEY_ID || '').trim();
+const secretAccessKey = (process.env.R2_SECRET_ACCESS_KEY || '').trim();
+const bucketName = (process.env.R2_BUCKET_NAME || '').trim();
+
 const s3Client = new S3Client({
   region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    accessKeyId: accessKeyId,
+    secretAccessKey: secretAccessKey,
   },
+  forcePathStyle: true,
 });
 
-/**
- * 上传文件到 R2
- * @param {Buffer} fileBuffer - 文件二进制数据
- * @param {string} fileName - 原始文件名
- * @param {string} contentType - 文件 MIME 类型
- * @returns {Promise<string>} 返回可访问的 URL
- */
 export const uploadToR2 = async (fileBuffer, fileName, contentType) => {
-  const key = `blog/${Date.now()}-${fileName}`;
+  // 存储时的 Key 保持原始中文（SDK 会自动处理签名编码）
+  // 这样在 R2 管理界面看到的名称是正常的
+  const timestamp = Date.now();
+  const key = `blog/${timestamp}-${fileName}`;
+  
+  // URL 编码的文件名，用于 Header 和返回 URL
+  const encodedFileName = encodeURIComponent(fileName);
   
   const command = new PutObjectCommand({
-    Bucket: process.env.R2_BUCKET_NAME,
+    Bucket: bucketName,
     Key: key,
     Body: fileBuffer,
     ContentType: contentType,
+    // 设置 Content-Disposition 确保下载名正常（使用 RFC 5987 标准）
+    ContentDisposition: `inline; filename="${encodedFileName}"; filename*=UTF-8''${encodedFileName}`,
   });
 
   try {
     await s3Client.send(command);
     
-    // 如果配置了自定义域名，使用自定义域名；否则使用 R2 默认公共 URL 结构
     const publicDomain = process.env.R2_PUBLIC_DOMAIN;
     if (publicDomain) {
-      return `${publicDomain.startsWith('http') ? '' : 'https://'}${publicDomain}/${key}`;
+      const domain = publicDomain.replace(/\/$/, '').replace(/^https?:\/\//, '');
+      // 构造公开访问 URL 时，必须对路径中的中文部分进行编码
+      return `https://${domain}/blog/${timestamp}-${encodedFileName}`;
     }
     
-    // 注意：R2 默认不直接暴露 bucket.r2.dev 的 URL，通常建议绑定一个 Cloudflare 域名
-    return `https://${process.env.R2_BUCKET_NAME}.${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${key}`;
+    // 如果没有配置公开域名，给出警告并返回 API URL（虽然可能无法直接显示）
+    console.warn('[R2] R2_PUBLIC_DOMAIN is not set. Images may not render in browser.');
+    return `https://${bucketName}.${accountId}.r2.cloudflarestorage.com/${key}`;
   } catch (error) {
     console.error('R2 upload error:', error);
     throw error;

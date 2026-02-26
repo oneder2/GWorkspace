@@ -3,44 +3,35 @@
   提供管理后台的侧边栏导航和主内容区域
 -->
 <template>
-  <div class="animate-fade-in min-h-full flex flex-col">
-    <!-- 管理后台头部 - 响应式布局 -->
-    <header class="glass-card p-3 sm:p-4 mb-4 sm:mb-6 rounded-xl sm:rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shrink-0">
-      <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
-        <h1 class="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.title') }}</h1>
-        <span class="px-2 sm:px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-semibold rounded-full">
+  <div class="animate-fade-in min-h-full flex flex-col p-4 sm:p-6 lg:p-8">
+    <!-- 管理后台头部 - 简洁化 -->
+    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 shrink-0">
+      <div class="flex items-center gap-4">
+        <h1 class="text-2xl font-extrabold text-main tracking-tight">{{ $t('admin.title') }}</h1>
+        <span class="px-2.5 py-0.5 bg-red-500/10 text-red-500 text-[10px] uppercase font-bold rounded-full border border-red-500/20">
           {{ $t('admin.adminOnly') }}
         </span>
       </div>
-      <div class="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+      <div class="flex items-center gap-3 w-full sm:w-auto">
         <button
           @click="$router.push('/blog')"
-          class="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 transition-colors"
-          style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-          @mouseenter="handleButtonHoverEnter"
-          @mouseleave="handleButtonHoverLeave"
+          class="flex-1 sm:flex-none px-4 py-2 text-sm font-bold text-secondary hover:text-main transition-colors"
         >
           {{ $t('admin.backToBlog') }}
         </button>
         <button
           @click="handleLogout"
-          class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-700 transition-colors text-xs sm:text-sm font-semibold"
+          class="flex-1 sm:flex-none px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all font-bold text-sm shadow-lg shadow-red-500/20 active:scale-95"
         >
           {{ $t('auth.logout') }}
         </button>
       </div>
     </header>
 
-    <!-- 主内容区域 - 响应式布局 -->
-    <div class="flex-1 flex flex-col lg:flex-row gap-4 sm:gap-6 min-h-0">
-      <!-- 侧边栏导航 - 移动端可折叠 -->
-      <AdminSidebar :collapsed="sidebarCollapsed" @toggle-collapse="sidebarCollapsed = !sidebarCollapsed" />
-
-      <!-- 内容区域 -->
-      <main class="flex-1 min-w-0">
-        <router-view />
-      </main>
-    </div>
+    <!-- 内容区域 -->
+    <main class="flex-1 min-w-0">
+      <router-view />
+    </main>
   </div>
 </template>
 

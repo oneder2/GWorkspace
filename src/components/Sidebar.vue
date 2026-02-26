@@ -48,27 +48,15 @@
         <div 
           @click="handleNavClick(item)"
           data-nav-item
-          class="px-4 py-3.5 rounded-xl cursor-pointer flex items-center gap-4 transition-all duration-200 group text-main dark:text-muted border"
-          :class="{
-            'nav-active': currentTab === item.id,
-            'nav-active-fallback': currentTab === item.id && isThemeTransparent,
-            'border-transparent': currentTab !== item.id,
-            'border-border-base': currentTab === item.id
-          }"
-          :style="currentTab !== item.id 
-            ? {
-                '--hover-bg': 'rgba(255, 255, 255, 0.6)',
-                '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 15%, transparent)',
-                '--hover-text': 'var(--text-main)',
-                '--hover-text-dark': 'var(--theme-primary-dark)',
-                '--hover-border': 'var(--border-base)',
-                '--hover-border-dark': 'var(--border-base)'
-              }
-            : {}"
-          @mouseenter="handleNavHoverEnter($event, item.id)"
-          @mouseleave="handleNavHoverLeave($event, item.id)"
+          class="px-4 py-3.5 rounded-xl cursor-pointer flex items-center gap-4 transition-all duration-200 group border"
+          :class="[
+            currentTab === item.id ? 'nav-active border-border-base text-main' : 'border-transparent text-secondary',
+            currentTab === item.id && isThemeTransparent ? 'nav-active-fallback' : ''
+          ]"
+          :style="getNavItemStyle(item.id)"
+          @mouseenter="hoveredId = item.id"
+          @mouseleave="hoveredId = null"
         >
-          <!-- 使用SVG图标替代Phosphor Icons -->
           <component :is="item.icon" class="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
           <span v-if="!collapsed" :class="currentTab === item.id ? 'font-bold whitespace-nowrap' : 'font-medium whitespace-nowrap'">{{ item.name }}</span>
         </div>
@@ -85,13 +73,13 @@
         @mouseenter="handleFooterLinkHoverEnter"
         @mouseleave="handleFooterLinkHoverLeave"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-secondary dark:text-muted transition-colors"
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-secondary transition-colors"
              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
              @mouseenter="handleFooterIconHoverEnter"
              @mouseleave="handleFooterIconHoverLeave">
           <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
         </svg>
-        <span class="text-sm font-medium text-secondary dark:text-muted transition-colors"
+        <span class="text-sm font-medium text-secondary transition-colors"
               style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
               @mouseenter="handleFooterIconHoverEnter"
               @mouseleave="handleFooterIconHoverLeave">GitHub</span>
@@ -105,14 +93,14 @@
         @mouseenter="handleFooterLinkHoverEnter"
         @mouseleave="handleFooterLinkHoverLeave"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary dark:text-muted transition-colors"
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary transition-colors"
              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
              @mouseenter="handleFooterIconHoverEnter"
              @mouseleave="handleFooterIconHoverLeave">
           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
           <polyline points="22,6 12,13 2,6"/>
         </svg>
-        <span class="text-sm font-medium text-secondary dark:text-muted transition-colors"
+        <span class="text-sm font-medium text-secondary transition-colors"
               style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
               @mouseenter="handleFooterIconHoverEnter"
               @mouseleave="handleFooterIconHoverLeave">eclospy@duck.com</span>
@@ -120,7 +108,7 @@
       
       <!-- 所有权声明 -->
       <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-3 border border-border-base shadow-sm backdrop-blur-sm">
-        <p class="text-xs text-muted text-center">
+        <p class="text-xs text-secondary text-center">
           © 2025 GWorkspace
         </p>
         <p class="text-xs text-muted text-center mt-1">
@@ -138,7 +126,7 @@
         @mouseleave="handleFooterLinkHoverLeave"
         title="GitHub"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-secondary dark:text-muted">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-secondary">
           <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
         </svg>
       </a>
@@ -173,14 +161,9 @@ const emit = defineEmits(['toggle-collapse', 'nav-click', 'close-mobile-sidebar'
 const { t } = useI18n()
 const router = useRouter()
 
-/**
- * 检查主题色是否为透明
- */
 const isThemeTransparent = ref(false)
+const hoveredId = ref(null)
 
-/**
- * 检查主题色状态
- */
 const checkThemeTransparent = () => {
   if (typeof document !== 'undefined') {
     const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim()
@@ -188,10 +171,8 @@ const checkThemeTransparent = () => {
   }
 }
 
-// 初始化时检查
 onMounted(() => {
   checkThemeTransparent()
-  // 监听主题变化（如果有主题切换）
   const observer = new MutationObserver(() => {
     checkThemeTransparent()
   })
@@ -203,9 +184,6 @@ onMounted(() => {
   }
 })
 
-/**
- * 导航项配置 - 使用国际化文本和路由
- */
 const navItems = computed(() => [
   { id: 'home', name: t('nav.home'), icon: HomeIcon, route: '/' },
   { id: 'sites', name: t('nav.sites'), icon: CompassIcon, route: '/sites' },
@@ -215,77 +193,34 @@ const navItems = computed(() => [
 ])
 
 /**
- * 检查是否为暗色模式
+ * 动态计算导航项样式，取代 JS 直接操作 DOM，解决 sticky hover 问题
  */
-const isDarkMode = () => {
-  if (typeof document === 'undefined') return false
-  return document.documentElement.classList.contains('dark')
-}
-
-/**
- * 处理导航hover进入
- */
-/**
- * 处理导航hover进入
- */
-/**
- * 处理导航hover进入
- */
-const handleNavHoverEnter = (event, itemId) => {
-  if (props.currentTab === itemId) return // 当前激活项不处理hover
+const getNavItemStyle = (id) => {
+  if (props.currentTab === id) return {}
   
-  const el = event?.currentTarget
-  if (!el) return
-  
-  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
-  if (isDark) {
-    el.style.backgroundColor = 'var(--hover-bg-dark)'
-    // 使用明确的颜色，避免主题色为透明时文字变透明
-    if (isThemeTransparent.value) {
-      el.style.color = '#cbd5e1' // slate-300
+  if (hoveredId.value === id) {
+    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+    if (isDark) {
+      return {
+        backgroundColor: 'color-mix(in srgb, var(--theme-primary) 15%, transparent)',
+        color: isThemeTransparent.value ? '#f1f5f9' : 'var(--text-main)',
+        borderColor: 'var(--border-base)'
+      }
     } else {
-      // 获取主题色并确保不是透明的
-      const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-dark').trim()
-      el.style.color = themePrimary && themePrimary !== 'transparent' ? themePrimary : '#cbd5e1'
+      return {
+        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+        color: 'var(--text-main)',
+        borderColor: 'var(--border-base)'
+      }
     }
-    el.style.borderColor = 'var(--hover-border-dark)'
-  } else {
-    el.style.backgroundColor = 'var(--hover-bg)'
-    el.style.color = 'var(--hover-text)'
-    el.style.borderColor = 'var(--hover-border)'
   }
+  
+  return {}
 }
 
-/**
- * 处理导航hover离开
- */
-const handleNavHoverLeave = (event, itemId) => {
-  if (props.currentTab === itemId) return // 当前激活项不处理hover
-  
-  const el = event?.currentTarget
-  if (!el) return
-  
-  el.style.backgroundColor = ''
-  el.style.color = ''
-  el.style.borderColor = ''
-}
-
-/**
- * 处理导航点击
- */
 const handleNavClick = (item) => {
-  // 清除所有导航项的hover状态
-  if (typeof document !== 'undefined') {
-    const navElements = document.querySelectorAll('[data-nav-item]')
-    navElements.forEach((el) => {
-      el.style.backgroundColor = ''
-      el.style.color = ''
-      el.style.borderColor = ''
-    })
-  }
-  
+  hoveredId.value = null // 点击即刻清除所有 hover 状态
   router.push(item.route)
-  // 如果是移动端抽屉模式，关闭侧边栏
   if (props.isMobileDrawer) {
     emit('close-mobile-sidebar')
   } else {
@@ -293,7 +228,6 @@ const handleNavClick = (item) => {
   }
 }
 
-// 底部链接 Hover 处理
 const handleFooterLinkHoverEnter = (e) => {
   const el = e?.currentTarget
   if (!el) return
@@ -308,7 +242,7 @@ const handleFooterIconHoverEnter = (e) => {
   const el = e?.currentTarget
   if (!el) return
   const isDark = document.documentElement.classList.contains('dark')
-  el.style.color = isDark ? 'var(--hover-color-dark)' : 'var(--hover-color)'
+  el.style.color = isDark ? '#f1f5f9' : 'var(--theme-primary-darker)'
 }
 const handleFooterIconHoverLeave = (e) => {
   if (e?.currentTarget) e.currentTarget.style.color = ''

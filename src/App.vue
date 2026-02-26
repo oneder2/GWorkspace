@@ -16,10 +16,17 @@
       <div class="absolute inset-0 bg-gradient-to-br from-slate-900/75 via-slate-800/80 to-slate-900/85 transition-opacity duration-500 opacity-0 dark:opacity-100"></div>
     </div>
 
-    <!-- 管理后台路由：使用完全独立的布局 -->
-    <div v-if="isAdminRoute" class="relative z-10 flex h-full w-full p-4 gap-4 box-border">
+    <!-- 管理后台路由：使用与普通路由类似的布局，但侧边栏和内容组件不同 -->
+    <div v-if="isAdminRoute" class="relative z-10 flex h-full w-full p-2 sm:p-4 gap-2 sm:gap-4 box-border">
+      <!-- 后台侧边栏 -->
+      <AdminSidebar 
+        :collapsed="sidebarCollapsed"
+        @toggle-collapse="sidebarCollapsed = !sidebarCollapsed"
+        class="hidden md:flex"
+      />
+
       <main class="flex-1 glass-main rounded-3xl flex flex-col min-w-0 relative overflow-hidden shadow-2xl">
-        <div class="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth relative custom-scrollbar">
+        <div class="flex-1 overflow-y-auto scroll-smooth relative custom-scrollbar">
           <router-view />
         </div>
       </main>
@@ -115,6 +122,7 @@ import { useSEO } from './composables/useSEO'
 import { getWeatherInfo } from './utils/weather'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
+import AdminSidebar from './components/admin/AdminSidebar.vue'
 import ThemeCustomizer from './components/ThemeCustomizer.vue'
 
 // 路由

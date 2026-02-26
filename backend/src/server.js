@@ -37,10 +37,24 @@ app.set('trust proxy', true)
 /**
  * 极其稳健的 CORS 配置：
  * 1. 允许 credentials (带 Token 请求必须)
- * 2. 动态反射 Origin (完美支持 www.gellaronline.cc 和 gellaronline.cc)
+ * 2. 支持显式域名列表，解决子域名跨域问题
  */
+const allowedOrigins = [
+  'https://www.gellaronline.cc',
+  'https://gellaronline.cc',
+  'https://workspace.gellaronline.cc'
+];
+
 app.use(cors({
-  origin: true, 
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      callback(null, true);
+    } else {
+      console.warn('CORS Blocked for origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -49,8 +63,8 @@ app.use(cors({
 app.use(morgan('dev'))
 
 // 解析中间件
-app.use(express.json({ limit: '10mb' }))
-app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+app.use(express.json({ limit: '20mb' }))
+app.use(express.urlencoded({ extended: true, limit: '20mb' }))
 
 // 初始化数据库
 const db = getDatabase()

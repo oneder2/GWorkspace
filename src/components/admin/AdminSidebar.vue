@@ -1,72 +1,66 @@
 <!--
   管理后台侧边栏组件
   提供独立的管理后台导航系统
+  完全套用 Sidebar.vue 的视觉样式和状态逻辑，确保全站一致
 -->
 <template>
   <aside 
-    class="glass-card shrink-0 rounded-xl sm:rounded-2xl p-3 sm:p-4 transition-all duration-300"
+    class="glass-sidebar rounded-none md:rounded-2xl sm:md:rounded-3xl flex flex-col shrink-0 transition-all duration-300 h-full shadow-lg" 
     :class="collapsed ? 'w-16 lg:w-20' : 'w-full lg:w-64'"
   >
-    <!-- 头部 - 可折叠 -->
-    <div class="mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-border-base">
-      <div v-if="!collapsed" class="flex items-center justify-between">
-        <div>
-          <h2 class="text-base sm:text-lg font-bold text-main">{{ $t('admin.title') }}</h2>
-          <p class="text-xs text-muted mt-1 hidden sm:block">{{ $t('admin.adminOnly') }}</p>
-        </div>
-        <button
-          @click="$emit('toggle-collapse')"
-          class="lg:hidden p-1.5 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
-          :title="$t('common.collapse')"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
-            <polyline points="9 18 15 12 9 6"/>
+    <!-- 头部 Logo - 管理后台标识 -->
+    <div class="py-4 px-4 flex flex-col items-center relative">
+      <div 
+        @click="$emit('toggle-collapse')" 
+        class="flex items-center gap-3 transition-opacity duration-300 cursor-pointer group hover:opacity-80 active:scale-95 transition-all w-full"
+        v-if="!collapsed"
+        :title="$t('common.collapse')"
+      >
+        <div class="p-2 bg-border-base/50 rounded-lg shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-main">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
           </svg>
-        </button>
+        </div>
+        <span class="font-bold text-xl tracking-tight text-main transition-colors group-hover:[color:var(--theme-primary)]">{{ $t('admin.title') }}</span>
       </div>
-      <button
+      <div 
+        @click="$emit('toggle-collapse')" 
         v-else
-        @click="$emit('toggle-collapse')"
-        class="w-full flex items-center justify-center p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
+        class="cursor-pointer group hover:opacity-80 active:scale-95 transition-all"
         :title="$t('common.expand')"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
-          <polyline points="15 18 9 12 15 6"/>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-main">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
         </svg>
-      </button>
+      </div>
     </div>
-    
-    <nav class="space-y-1">
-      <router-link
-        v-for="item in navItems"
-        :key="item.path"
-        :to="item.path"
-        class="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 group border border-transparent"
-        :class="isActive(item.path)
-          ? 'font-semibold' 
-          : 'text-secondary'"
-        :style="isActive(item.path)
-          ? getActiveStyle(item.path)
-          : {
-              '--hover-bg': 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)',
-              '--hover-bg-dark': 'color-mix(in srgb, var(--theme-primary) 10%, transparent)',
-              '--hover-text': 'var(--theme-primary-darker)',
-              '--hover-text-dark': 'var(--theme-primary-dark)'
-            }"
-        @mouseenter="(event) => handleNavHoverEnter(event, item.path)"
-        @mouseleave="(event) => handleNavHoverLeave(event, item.path)"
-        :title="collapsed ? item.name : ''"
-      >
-        <span v-html="item.icon" class="w-4 sm:w-5 h-4 sm:h-5 shrink-0"></span>
-        <span v-if="!collapsed" class="text-sm sm:text-base">{{ item.name }}</span>
-      </router-link>
+
+    <!-- 导航菜单 - 同步 Sidebar.vue 的逻辑，解决 sticky hover -->
+    <nav class="flex-1 overflow-y-auto px-4 space-y-2 py-4 custom-scrollbar">
+      <template v-for="item in navItems" :key="item.path">
+        <div 
+          @click="handleNavClick(item)"
+          data-nav-item
+          class="px-4 py-3.5 rounded-xl cursor-pointer flex items-center gap-4 transition-all duration-200 group border"
+          :class="[
+            isActive(item.path) ? 'nav-active border-border-base text-main' : 'border-transparent text-secondary',
+            isActive(item.path) && isThemeTransparent ? 'nav-active-fallback' : ''
+          ]"
+          :style="getNavItemStyle(item.path)"
+          @mouseenter="hoveredId = item.path"
+          @mouseleave="hoveredId = null"
+        >
+          <span v-html="item.icon" class="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110"></span>
+          <span v-if="!collapsed" :class="isActive(item.path) ? 'font-bold whitespace-nowrap' : 'font-medium whitespace-nowrap'">{{ item.name }}</span>
+        </div>
+      </template>
     </nav>
   </aside>
 </template>
 
 <script setup>
 import { computed, ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
@@ -79,16 +73,12 @@ const props = defineProps({
 defineEmits(['toggle-collapse'])
 
 const route = useRoute()
+const router = useRouter()
 const { t } = useI18n()
 
-/**
- * 检查主题色是否为透明
- */
 const isThemeTransparent = ref(false)
+const hoveredId = ref(null)
 
-/**
- * 检查主题色状态
- */
 const checkThemeTransparent = () => {
   if (typeof document !== 'undefined') {
     const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim()
@@ -96,28 +86,10 @@ const checkThemeTransparent = () => {
   }
 }
 
-/**
- * 检查是否为暗色模式
- */
-const isDarkMode = ref(false)
-
-/**
- * 更新暗色模式状态
- */
-const updateDarkMode = () => {
-  if (typeof document !== 'undefined') {
-    isDarkMode.value = document.documentElement.classList.contains('dark')
-  }
-}
-
-// 初始化时检查
 onMounted(() => {
   checkThemeTransparent()
-  updateDarkMode()
-  // 监听主题变化
   const observer = new MutationObserver(() => {
     checkThemeTransparent()
-    updateDarkMode()
   })
   if (typeof document !== 'undefined') {
     observer.observe(document.documentElement, {
@@ -127,9 +99,6 @@ onMounted(() => {
   }
 })
 
-/**
- * 图标SVG
- */
 const icons = {
   dashboard: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
   blog: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>`,
@@ -138,142 +107,47 @@ const icons = {
   guestbook: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h4"/></svg>`
 }
 
-/**
- * 导航项配置
- */
 const navItems = computed(() => [
-  {
-    path: '/admin',
-    name: t('admin.dashboard'),
-    icon: icons.dashboard
-  },
-  {
-    path: '/admin/blogs',
-    name: t('admin.blogs'),
-    icon: icons.blog
-  },
-  {
-    path: '/admin/analytics',
-    name: t('admin.analytics'),
-    icon: icons.analytics
-  },
-  {
-    path: '/admin/comments',
-    name: t('admin.comments'),
-    icon: icons.comments
-  },
-  {
-    path: '/admin/guestbook',
-    name: t('admin.guestbook'),
-    icon: icons.guestbook
-  }
+  { path: '/admin', name: t('admin.dashboard'), icon: icons.dashboard },
+  { path: '/admin/blogs', name: t('admin.blogs'), icon: icons.blog },
+  { path: '/admin/analytics', name: t('admin.analytics'), icon: icons.analytics },
+  { path: '/admin/comments', name: t('admin.comments'), icon: icons.comments },
+  { path: '/admin/guestbook', name: t('admin.guestbook'), icon: icons.guestbook }
 ])
 
-/**
- * 检查路由是否激活
- */
 const isActive = (path) => {
-  if (path === '/admin') {
-    return route.path === '/admin'
-  }
+  if (path === '/admin') return route.path === '/admin'
   return route.path.startsWith(path)
 }
 
 /**
- * 获取激活状态的样式
+ * 动态计算导航项样式，取代 JS 直接操作 DOM，解决 sticky hover 问题
  */
-const getActiveStyle = (itemPath) => {
-  if (!isActive(itemPath)) return {}
+const getNavItemStyle = (path) => {
+  if (isActive(path)) return {}
   
-  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
-  
-  if (isThemeTransparent.value) {
-    return {
-      backgroundColor: isDark ? 'rgba(148, 163, 184, 0.3)' : 'rgba(100, 116, 139, 0.2)',
-      color: isDark ? '#cbd5e1' : '#475569',
-      borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.15)'
+  if (hoveredId.value === path) {
+    const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+    if (isDark) {
+      return {
+        backgroundColor: 'color-mix(in srgb, var(--theme-primary) 15%, transparent)',
+        color: isThemeTransparent.value ? '#f1f5f9' : 'var(--text-main)',
+        borderColor: 'var(--border-base)'
+      }
+    } else {
+      return {
+        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+        color: 'var(--text-main)',
+        borderColor: 'var(--border-base)'
+      }
     }
   }
   
-  // 获取主题色并确保不是透明的
-  let themeColorDarker = ''
-  let themeColorDark = ''
-  if (typeof document !== 'undefined') {
-    themeColorDarker = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-darker').trim()
-    themeColorDark = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-dark').trim()
-  }
-  
-  const finalColor = isDark 
-    ? (themeColorDark && themeColorDark !== 'transparent' ? themeColorDark : '#cbd5e1')
-    : (themeColorDarker && themeColorDarker !== 'transparent' ? themeColorDarker : '#475569')
-  
-  const bgColor = isDark 
-    ? 'color-mix(in srgb, var(--theme-primary) 20%, transparent)'
-    : 'color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent)'
-  
-  return {
-    backgroundColor: bgColor,
-    color: finalColor,
-    borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.15)'
-  }
+  return {}
 }
 
-/**
- * 处理导航hover进入
- * @param {Event} event - 鼠标事件
- * @param {string} itemPath - 导航项路径
- */
-const handleNavHoverEnter = (event, itemPath) => {
-  if (isActive(itemPath)) return
-  
-  const el = event?.currentTarget
-  if (!el || typeof document === 'undefined') return
-  
-  updateDarkMode() // 更新暗色模式状态
-  
-  // 如果主题是透明的，使用固定颜色避免文字变透明
-  if (isThemeTransparent.value) {
-    if (isDarkMode.value) {
-      el.style.backgroundColor = 'rgba(148, 163, 184, 0.2)'
-      el.style.color = '#cbd5e1' // 固定颜色，确保文字可见
-      el.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-    } else {
-      el.style.backgroundColor = 'rgba(100, 116, 139, 0.15)'
-      el.style.color = '#475569' // 固定颜色，确保文字可见
-      el.style.borderColor = 'rgba(0, 0, 0, 0.15)'
-    }
-  } else {
-    // 使用主题色，但需要检查颜色是否透明
-    if (isDarkMode.value) {
-      const hoverTextDark = getComputedStyle(document.documentElement).getPropertyValue('--hover-text-dark').trim()
-      const finalColor = hoverTextDark && hoverTextDark !== 'transparent' ? hoverTextDark : '#cbd5e1'
-      el.style.backgroundColor = 'var(--hover-bg-dark)'
-      el.style.color = finalColor
-      el.style.borderColor = 'rgba(255, 255, 255, 0.1)'
-    } else {
-      const hoverText = getComputedStyle(document.documentElement).getPropertyValue('--hover-text').trim()
-      const finalColor = hoverText && hoverText !== 'transparent' ? hoverText : '#475569'
-      el.style.backgroundColor = 'var(--hover-bg)'
-      el.style.color = finalColor
-      el.style.borderColor = 'rgba(0, 0, 0, 0.15)'
-    }
-  }
-}
-
-/**
- * 处理导航hover离开
- * @param {Event} event - 鼠标事件
- * @param {string} itemPath - 导航项路径
- */
-const handleNavHoverLeave = (event, itemPath) => {
-  if (isActive(itemPath)) return
-  
-  const el = event?.currentTarget
-  if (el) {
-    el.style.backgroundColor = ''
-    el.style.color = ''
-    el.style.borderColor = ''
-  }
+const handleNavClick = (item) => {
+  hoveredId.value = null // 点击即刻清除所有 hover 状态
+  router.push(item.path)
 }
 </script>
-
