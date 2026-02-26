@@ -203,7 +203,7 @@
       </div>
       
       <!-- 文章列表 - 可滚动区域 -->
-      <div class="flex-1 space-y-6">
+      <div class="flex-1 space-y-6 pb-24">
         <!-- 骨架屏 - 加载初始数据时显示 -->
         <BlogSkeleton v-if="isLoading && blogPosts.length === 0" :count="3" />
 

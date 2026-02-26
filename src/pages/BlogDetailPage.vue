@@ -4,7 +4,7 @@
   支持文章导航和分享功能
 -->
 <template>
-  <div class="animate-fade-in max-w-4xl mx-auto relative">
+  <div class="animate-fade-in max-w-4xl mx-auto relative pb-24">
     <!-- 阅读进度条 -->
     <div 
       v-if="post"

@@ -172,6 +172,7 @@ import { quickLinksConfig } from '../config/home'
 import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
 import { getCachedFaviconUrl, markFaviconSuccess, markFaviconError } from '../utils/faviconCache'
+import { ensureAbsoluteUrl } from '../utils/urlHelper'
 import GoogleIcon from '../components/icons/GoogleIcon.vue'
 import DuckIcon from '../components/icons/DuckIcon.vue'
 import BaiduIcon from '../components/icons/BaiduIcon.vue'
@@ -197,6 +198,7 @@ const customLinks = customLinksStorage.value
 const defaultLinks = computed(() => {
   return quickLinksConfig.map(link => ({
     ...link,
+    url: ensureAbsoluteUrl(link.url),
     icon: getIcon(link.iconName)
   }))
 })
@@ -209,6 +211,7 @@ const displayLinks = computed(() => {
       const icon = link.iconName ? getIcon(link.iconName) : null
       return {
         ...link,
+        url: ensureAbsoluteUrl(link.url), // 强制格式化 URL (三重保险)
         icon: icon ? markRaw(icon) : null
       }
     })
@@ -220,10 +223,11 @@ const displayLinks = computed(() => {
  * 保存自定义链接
  */
 const handleSaveLinks = (links) => {
+  console.log('[HomePage] handleSaveLinks called with:', links)
   const linksToSave = links.map(link => ({
     id: link.id || `link-${Date.now()}-${Math.random()}`,
     name: link.name,
-    url: link.url,
+    url: ensureAbsoluteUrl(link.url), // 保存时也强制格式化
     iconName: link.iconName || 'HomeIcon',
     color: link.color || 'bg-slate-500'
   }))

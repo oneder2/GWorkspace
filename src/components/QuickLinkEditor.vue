@@ -83,7 +83,7 @@
               :id="`link-url-${index}`"
               :name="`link-url-${index}`"
               v-model="link.url"
-              type="url"
+              type="text"
               :placeholder="$t('home.linkUrl')"
               class="w-full bg-transparent border-b border-slate-300 dark:border-slate-600 outline-none text-slate-600 dark:text-slate-400 text-sm transition-colors"
               style="--focus-border: var(--theme-primary);"
@@ -145,7 +145,7 @@
 <script setup>
 import { ref, watch, markRaw } from 'vue'
 import { getIcon } from '../utils/iconMapper'
-import { getFaviconUrl } from '../utils/urlHelper'
+import { getFaviconUrl, ensureAbsoluteUrl } from '../utils/urlHelper'
 
 const props = defineProps({
   links: {
@@ -217,6 +217,7 @@ const saveLinks = () => {
       const { icon, ...rest } = link
       return {
         ...rest,
+        url: ensureAbsoluteUrl(link.url),
         // iconName保留作为回退方案，但主要使用动态favicon
         iconName: link.iconName || 'HomeIcon'
       }

@@ -36,15 +36,33 @@
           </div>
 
           <!-- Footer Actions -->
-          <div class="mt-2 flex items-center gap-4">
+          <div class="mt-2 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <button 
+                @click="showReplyForm = !showReplyForm"
+                class="text-xs font-medium text-slate-500 hover:text-[var(--theme-primary)] dark:text-slate-400 dark:hover:text-[var(--theme-primary)] transition-colors flex items-center gap-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                {{ showReplyForm ? $t('common.cancel') : $t('blog.reply') }}
+              </button>
+            </div>
+
+            <!-- Delete Button (Authors or Admins only) -->
             <button 
-              @click="showReplyForm = !showReplyForm"
-              class="text-xs font-medium text-slate-500 hover:text-[var(--theme-primary)] dark:text-slate-400 dark:hover:text-[var(--theme-primary)] transition-colors flex items-center gap-1"
+              v-if="canDelete"
+              @click="handleDelete"
+              :disabled="deleting"
+              class="text-xs font-medium text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors flex items-center gap-1 opacity-0 group-hover:opacity-100 disabled:opacity-50"
+              :title="$t('common.delete')"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <span v-if="deleting" class="w-3 h-3 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></span>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
               </svg>
-              {{ showReplyForm ? $t('common.cancel') : $t('blog.reply') }}
+              {{ deleting ? $t('common.processing') : $t('common.delete') }}
             </button>
           </div>
         </div>
@@ -76,6 +94,8 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useAuth } from '../../composables/useAuth'
+import { commentsApi } from '../../utils/api'
 import CommentForm from './CommentForm.vue'
 
 // Recursive component definition
@@ -90,10 +110,21 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['reply-added'])
+const emit = defineEmits(['reply-added', 'comment-deleted'])
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
+const { user } = useAuth()
 const showReplyForm = ref(false)
+const deleting = ref(false)
+
+/**
+ * 判断是否具备删除权限
+ * 评论作者本人或管理员
+ */
+const canDelete = computed(() => {
+  if (!user.value) return false
+  return user.value.role === 'admin' || user.value.id === props.comment.user_id
+})
 
 const firstLetter = computed(() => {
   return (props.comment.author_name || '?').charAt(0).toUpperCase()
@@ -134,5 +165,23 @@ const handleReplySuccess = (newReply) => {
   // Ideally, we should emit an event to refresh the list or add the reply locally
   // Here we emit upwards to the parent (CommentList or CommentItem)
   emit('reply-added', newReply)
+}
+
+/**
+ * 处理删除操作
+ */
+const handleDelete = async () => {
+  if (!window.confirm(t('admin.confirmDelete'))) return
+
+  deleting.value = true
+  try {
+    await commentsApi.delete(props.comment.id)
+    emit('comment-deleted', props.comment.id)
+  } catch (error) {
+    console.error('Failed to delete comment:', error)
+    alert(t('admin.deleteFailed'))
+  } finally {
+    deleting.value = false
+  }
 }
 </script>

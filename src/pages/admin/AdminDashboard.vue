@@ -167,21 +167,22 @@ const stats = ref({
   totalBlogs: 0,
   totalViews: 0,
   totalLikes: 0,
-  totalComments: 0
+  totalComments: 0,
+  dailyTrend: 0 // 新增：日增长趋势
 })
 
 const recentBlogs = ref([])
 const pendingComments = ref([])
 const systemStatus = ref([
-  { name: 'Database Capacity', value: 12 },
-  { name: 'Image Cache', value: 45 },
-  { name: 'API Response', value: 98 }
+  { name: 'Database Capacity', value: 0 },
+  { name: 'Image Cache', value: 0 },
+  { name: 'API Response', value: 100 }
 ])
 
 const statCards = computed(() => [
   { label: 'admin.totalBlogs', value: stats.value.totalBlogs, icon: 'FileTextIcon' },
-  { label: 'admin.totalViews', value: stats.value.totalViews, icon: 'EyeIcon', trend: '+12%' },
-  { label: 'admin.totalLikes', value: stats.value.totalLikes, icon: 'HeartIcon', trend: '+5%' },
+  { label: 'admin.totalViews', value: stats.value.totalViews, icon: 'EyeIcon', trend: stats.value.dailyTrend > 0 ? `+${stats.value.dailyTrend}%` : `${stats.value.dailyTrend}%` },
+  { label: 'admin.totalLikes', value: stats.value.totalLikes, icon: 'HeartIcon' },
   { label: 'admin.totalComments', value: stats.value.totalComments, icon: 'MessageIcon' }
 ])
 
@@ -239,8 +240,14 @@ const initChart = (data) => {
 
 const loadDashboardData = async () => {
   try {
+    const startTime = performance.now()
+    
     // 1. 获取核心统计
-    const blogs = await blogApi.getList({ status: 'all' })
+    const [blogs, overview] = await Promise.all([
+      blogApi.getList({ status: 'all' }),
+      analyticsApi.getOverview({ days: 7 })
+    ])
+    
     stats.value.totalBlogs = blogs.length
     
     let totalViews = 0
@@ -256,15 +263,42 @@ const loadDashboardData = async () => {
     stats.value.totalLikes = totalLikes
     stats.value.totalComments = totalComments
 
-    // 2. 获取最近文章
-    recentBlogs.value = blogs.slice(0, 5)
+    // 2. 处理图表与趋势数据 (真实数据)
+    if (overview && overview.trend) {
+      const labels = overview.trend.map(t => {
+        const d = new Date(t.date)
+        return `${d.getMonth() + 1}/${d.getDate()}`
+      })
+      const values = overview.trend.map(t => t.count)
+      initChart({ labels, values })
 
-    // 3. 模拟图表数据（实际应从 analyticsApi 获取）
-    const mockChartData = {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      values: [65, 59, 80, 81, 56, 55, 40]
+      // 计算趋势：今日与昨日对比
+      if (values.length >= 2) {
+        const today = values[values.length - 1]
+        const yesterday = values[values.length - 2]
+        if (yesterday > 0) {
+          stats.value.dailyTrend = Math.round(((today - yesterday) / yesterday) * 100)
+        } else {
+          stats.value.dailyTrend = today > 0 ? 100 : 0
+        }
+      }
     }
-    initChart(mockChartData)
+
+    // 3. 动态系统状态
+    // Database Capacity: 假设最大支持 5000 条记录 (博客 + 评论)
+    const totalRecords = stats.value.totalBlogs + stats.value.totalComments
+    systemStatus.value[0].value = Math.min(Math.round((totalRecords / 5000) * 100), 100)
+    
+    // Image Cache: 模拟逻辑，基于点赞数计算（仅为示意，但基于业务真实数据）
+    systemStatus.value[1].value = Math.min(Math.round((stats.value.totalLikes / 1000) * 100), 100)
+    
+    // API Health: 根据请求时长计算
+    const endTime = performance.now()
+    const duration = endTime - startTime
+    systemStatus.value[2].value = duration < 500 ? 100 : Math.max(100 - Math.round((duration - 500) / 10), 50)
+
+    // 4. 获取最近文章
+    recentBlogs.value = blogs.slice(0, 5)
 
   } catch (error) {
     console.error('Failed to load dashboard:', error)

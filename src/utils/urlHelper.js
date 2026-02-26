@@ -37,3 +37,17 @@ export function getFaviconUrl(url, size = 64) {
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`
 }
 
+/**
+ * 确保URL是绝对路径
+ * @param {string} url 
+ * @returns {string} 格式化后的URL
+ */
+export function ensureAbsoluteUrl(url) {
+  if (!url) return ''
+  const trimmed = url.trim()
+  if (!trimmed) return ''
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  if (trimmed.startsWith('//')) return `https:${trimmed}`
+  return `https://${trimmed}`
+}
+

@@ -193,6 +193,7 @@
     "collapse": "Collapse",
     "expand": "Expand",
     "menu": "Menu",
+    "delete": "Delete",
     "loading": "Loading..."
   },
   "auth": {

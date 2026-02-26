@@ -33,6 +33,7 @@
         :key="comment.id" 
         :comment="comment"
         @reply-added="refreshComments"
+        @comment-deleted="refreshComments"
       />
     </div>
   </div>

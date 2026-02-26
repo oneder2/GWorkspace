@@ -25,7 +25,7 @@
       </div>
 
       <!-- 内容区域 - 可滚动 -->
-      <div :class="isPageMode ? 'space-y-6' : 'flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-2'">
+      <div :class="isPageMode ? 'space-y-6 pb-24' : 'flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-2 pb-24'">
         <!-- 元数据表单 -->
         <div class="glass-card p-6 rounded-2xl space-y-4 relative z-10">
           <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">{{ $t('blog.articleMeta') }}</h3>
@@ -332,8 +332,22 @@
 
       <!-- 底部操作栏 -->
       <div :class="isPageMode ? 'flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700' : 'flex items-center justify-between gap-4 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 shrink-0'">
-        <div class="text-sm text-slate-500 dark:text-slate-400">
-          {{ $t('blog.saveHint') }}
+        <div class="flex items-center gap-4">
+          <button 
+            v-if="isEditMode"
+            @click="handleDelete"
+            class="px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors font-semibold text-sm flex items-center gap-1.5"
+            :title="$t('common.delete')"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            {{ $t('common.delete') }}
+          </button>
+          <div class="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
+            {{ $t('blog.saveHint') }}
+          </div>
         </div>
         <div class="flex gap-3">
           <button 
@@ -1002,6 +1016,36 @@ const validateForm = () => {
   }
 
   return errors.value.length === 0
+}
+
+/**
+ * 处理删除博客
+ */
+const handleDelete = async () => {
+  if (!formData.value.id) return
+  
+  if (!confirm(t('admin.confirmDelete') || 'Are you sure you want to delete this article?')) {
+    return
+  }
+
+  isSubmitting.value = true
+  try {
+    await blogApi.delete(formData.value.id)
+    
+    // 触发成功事件，通知父组件刷新列表
+    emit('success', {
+      action: 'delete',
+      id: formData.value.id
+    })
+    
+    // 关闭编辑器
+    handleClose()
+  } catch (error) {
+    console.error('Failed to delete article:', error)
+    alert(t('admin.deleteFailed') || 'Failed to delete article')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 /**
