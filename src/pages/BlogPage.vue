@@ -12,8 +12,8 @@
         @click="showMobileFilters = !showMobileFilters"
         class="blog-mobile-filter-btn w-full glass-card p-3 rounded-xl flex items-center justify-between transition-colors"
       >
-        <span class="font-semibold text-slate-800 dark:text-slate-200">{{ $t('blog.filters') }}</span>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-400" :class="{ 'rotate-180': showMobileFilters }">
+        <span class="font-semibold text-main">{{ $t('blog.filters') }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary" :class="{ 'rotate-180': showMobileFilters }">
           <polyline points="6 9 12 15 18 9"/>
         </svg>
       </button>
@@ -31,7 +31,7 @@
       <div v-if="showMobileFilters" class="xl:hidden glass-card p-4 rounded-xl mb-4 space-y-4">
         <!-- Genre分类筛选 -->
         <div>
-          <h3 class="text-sm font-bold mb-3 text-slate-800 dark:text-slate-200">{{ $t('blog.genre') }}</h3>
+          <h3 class="text-sm font-bold mb-3 text-main">{{ $t('blog.genre') }}</h3>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="genre in genres" 
@@ -39,8 +39,8 @@
               @click="toggleGenreFilter(genre)"
               class="px-3 py-1 rounded-md text-xs font-bold transition-all duration-200 uppercase tracking-wide"
               :class="selectedGenre === genre 
-                ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 ring-2 ring-[var(--theme-primary)]' 
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'"
+                ? 'bg-slate-200 dark:bg-slate-700 text-main ring-2 ring-[var(--theme-primary)]' 
+                : 'bg-slate-100 dark:bg-slate-800 text-secondary hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'"
             >
               {{ genre }}
             </button>
@@ -49,7 +49,7 @@
         
         <!-- 标签筛选 -->
         <div>
-          <h3 class="text-sm font-bold mb-3 text-slate-800 dark:text-slate-200">{{ $t('blog.tags') }}</h3>
+          <h3 class="text-sm font-bold mb-3 text-main">{{ $t('blog.tags') }}</h3>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="tag in tags" 
@@ -74,30 +74,30 @@
       <div class="sticky top-6 space-y-1.5 p-4">
         <!-- 统计信息卡片 -->
         <div class="mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
-          <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.statistics') }}</h3>
+          <h3 class="text-lg font-bold mb-4 text-main">{{ $t('blog.statistics') }}</h3>
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('blog.totalArticles') }}</span>
-              <span class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ blogStats.totalArticles || 0 }}</span>
+              <span class="text-sm text-secondary">{{ $t('blog.totalArticles') }}</span>
+              <span class="text-lg font-bold text-main">{{ blogStats.totalArticles || 0 }}</span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('blog.totalComments') }}</span>
-              <span class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ blogStats.totalComments || 0 }}</span>
+              <span class="text-sm text-secondary">{{ $t('blog.totalComments') }}</span>
+              <span class="text-lg font-bold text-main">{{ blogStats.totalComments || 0 }}</span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('blog.totalViews') }}</span>
-              <span class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ formatNumber(blogStats.totalViews || 0) }}</span>
+              <span class="text-sm text-secondary">{{ $t('blog.totalViews') }}</span>
+              <span class="text-lg font-bold text-main">{{ formatNumber(blogStats.totalViews || 0) }}</span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm text-slate-600 dark:text-slate-400">{{ $t('blog.totalLikes') }}</span>
-              <span class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ blogStats.totalLikes || 0 }}</span>
+              <span class="text-sm text-secondary">{{ $t('blog.totalLikes') }}</span>
+              <span class="text-lg font-bold text-main">{{ blogStats.totalLikes || 0 }}</span>
             </div>
           </div>
         </div>
         
         <!-- Genre分类筛选 -->
         <div>
-          <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.genre') }}</h3>
+          <h3 class="text-lg font-bold mb-4 text-main">{{ $t('blog.genre') }}</h3>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="genre in genres" 
@@ -106,8 +106,8 @@
               class="px-3 py-1 rounded-md text-xs font-bold transition-all duration-200 uppercase tracking-wide"
               :class="[
                 selectedGenre === genre 
-                  ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105 blog-genre-btn-selected'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'
+                  ? 'bg-slate-200 dark:bg-slate-700 text-main ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105 blog-genre-btn-selected'
+                  : 'bg-slate-100 dark:bg-slate-800 text-secondary hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'
               ]"
               :title="selectedGenre === genre ? '点击取消筛选' : '点击筛选此分类'"
             >
@@ -118,7 +118,7 @@
     
         <!-- 标签筛选 -->
         <div class="mt-6">
-          <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.tags') }}</h3>
+          <h3 class="text-lg font-bold mb-4 text-main">{{ $t('blog.tags') }}</h3>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="tag in tags" 
@@ -140,7 +140,7 @@
         
         <!-- 归档筛选 -->
         <div class="mt-6">
-          <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200">{{ $t('blog.archive') }}</h3>
+          <h3 class="text-lg font-bold mb-4 text-main">{{ $t('blog.archive') }}</h3>
           <ul class="space-y-2 text-sm">
               <li 
                 v-for="archive in archives" 
@@ -150,7 +150,7 @@
               :class="[
                 selectedArchive === archive.month 
                   ? 'font-semibold blog-archive-item-selected' 
-                  : 'text-slate-500 dark:text-slate-400'
+                  : 'text-muted'
               ]"
               :title="selectedArchive === archive.month ? '点击取消筛选' : '点击筛选此月份'"
               >
@@ -172,7 +172,7 @@
           <!-- 搜索框 - 占据剩余空间 -->
           <div class="flex-1 min-w-0">
             <div class="relative">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted">
                 <circle cx="11" cy="11" r="8"/>
                 <path d="m21 21-4.35-4.35"/>
               </svg>
@@ -188,7 +188,7 @@
               <button 
                 v-if="searchQuery"
                 @click="searchQuery = ''"
-                class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-muted hover:text-secondary transition-colors"
                 :title="$t('common.clear')"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
@@ -216,7 +216,7 @@
             class="blog-article-card glass-card p-6 rounded-2xl group cursor-pointer border-l-4 transition-all animate-fade-in"
           >
             <!-- 文章内容保持不变 -->
-            <div class="flex items-center gap-3 mb-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
+            <div class="flex items-center gap-3 mb-2 flex-wrap text-xs text-muted">
               <span class="font-mono">{{ formatDateChinese(post.published_at || post.date) }}</span>
               <span class="text-slate-300 dark:text-slate-600">·</span>
               <span class="flex items-center gap-1">
@@ -251,7 +251,7 @@
                 <span v-for="tag in post.tags" :key="tag" class="px-2 py-0.5 text-xs rounded-full font-semibold" :style="getTagColor(tag).style">#{{ tag }}</span>
               </div>
             </div>
-            <h3 class="blog-article-title text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2" v-html="highlightText(post.title, searchQuery)"></h3>
+            <h3 class="blog-article-title text-2xl font-bold text-main mb-2" v-html="highlightText(post.title, searchQuery)"></h3>
             <div class="flex items-center justify-between gap-4">
               <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed opacity-80 flex-1 min-w-0" v-html="highlightText(post.excerpt, searchQuery)"></p>
               <div class="blog-read-article-btn flex items-center text-sm font-bold gap-1 group-hover:gap-2 transition-all shrink-0">

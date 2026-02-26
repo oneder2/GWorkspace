@@ -3,12 +3,12 @@
   包含页面标题、天气信息、时间、主题切换、语言切换等功能
 -->
 <template>
-  <header class="h-14 sm:h-16 px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-white/30 dark:border-slate-700/30 shrink-0 relative gap-2 sm:gap-4">
+  <header class="h-14 sm:h-16 px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-border-base shrink-0 relative gap-2 sm:gap-4">
     <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
       <!-- 移动端菜单按钮 -->
       <button
         @click="$emit('toggle-mobile-menu')"
-        class="md:hidden p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors flex-shrink-0"
+        class="md:hidden p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors flex-shrink-0"
         :title="$t('common.menu')"
       >
         <svg 
@@ -20,7 +20,7 @@
           stroke-width="2" 
           stroke-linecap="round" 
           stroke-linejoin="round" 
-          class="w-6 h-6 text-slate-600 dark:text-slate-300"
+          class="w-6 h-6 text-secondary"
         >
           <line x1="3" y1="12" x2="21" y2="12"/>
           <line x1="3" y1="6" x2="21" y2="6"/>
@@ -35,14 +35,14 @@
           stroke-width="2" 
           stroke-linecap="round" 
           stroke-linejoin="round" 
-          class="w-6 h-6 text-slate-600 dark:text-slate-300"
+          class="w-6 h-6 text-secondary"
         >
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
       <!-- 页面标题：亮色模式使用深色，暗色模式使用浅色，确保在背景上有足够对比度 -->
-      <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight truncate drop-shadow-sm">{{ currentTabName }}</h2>
+      <h2 class="text-lg sm:text-xl font-bold text-main tracking-tight truncate drop-shadow-sm">{{ currentTabName }}</h2>
       <span 
         v-if="currentTab === 'tools'" 
         class="px-2 py-0.5 rounded-md text-xs font-mono"
@@ -60,15 +60,15 @@
       <div class="relative">
         <button
           @click.stop="showWorldClockDropdown = !showWorldClockDropdown"
-          class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+          class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
           :title="$t('tools.worldClock.local')"
     >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-slate-600 dark:text-slate-300">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-secondary">
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
           </svg>
-          <span class="text-sm font-mono text-slate-700 dark:text-slate-200">{{ localTime }}</span>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 text-slate-500 dark:text-slate-400">
+          <span class="text-sm font-mono text-secondary">{{ localTime }}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 text-muted">
             <polyline points="6 9 12 15 18 9"/>
       </svg>
         </button>
@@ -86,18 +86,18 @@
             v-click-outside="() => showWorldClockDropdown = false"
             class="absolute right-0 top-full mt-2 w-64 glass-card rounded-xl shadow-lg py-2 z-50"
           >
-            <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">
-              <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ $t('tools.worldClock.local') }}</div>
-              <div class="text-lg font-mono font-bold text-slate-800 dark:text-slate-200 mt-1">{{ formatLocalTimeWithSeconds() }}</div>
-              <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ localDate }}</div>
+            <div class="px-4 py-2 border-b border-border-base">
+              <div class="text-xs font-semibold text-muted uppercase tracking-wider">{{ $t('tools.worldClock.local') }}</div>
+              <div class="text-lg font-mono font-bold text-main mt-1">{{ formatLocalTimeWithSeconds() }}</div>
+              <div class="text-xs text-muted font-mono">{{ localDate }}</div>
             </div>
             <div class="px-4 py-2 space-y-3">
               <!-- 管理员时区 -->
               <div>
                 <div class="flex items-center justify-between mb-1">
-                  <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $t('tools.worldClock.admin') }}</div>
+                  <div class="text-xs font-semibold text-muted">{{ $t('tools.worldClock.admin') }}</div>
                   <div class="flex items-center gap-2">
-                    <div v-if="isAdmin && adminTimeDiff !== null" class="text-xs text-slate-500 dark:text-slate-400">
+                    <div v-if="isAdmin && adminTimeDiff !== null" class="text-xs text-muted">
                       {{ formatTimeDifference(adminTimeDiff) }}
                     </div>
                     <button
@@ -116,14 +116,14 @@
                         stroke-width="2" 
                         stroke-linecap="round" 
                         stroke-linejoin="round" 
-                        class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400"
+                        class="w-3.5 h-3.5 text-muted"
                       >
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                         <circle cx="12" cy="10" r="3"/>
                       </svg>
                       <svg 
                         v-else
-                        class="animate-spin w-3.5 h-3.5 text-slate-500 dark:text-slate-400"
+                        class="animate-spin w-3.5 h-3.5 text-muted"
                         xmlns="http://www.w3.org/2000/svg" 
                         fill="none" 
                         viewBox="0 0 24 24"
@@ -134,46 +134,46 @@
                     </button>
                   </div>
                 </div>
-                <div v-if="adminSettings?.timezone" class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTimeByTimezone(adminSettings.timezone) }}</div>
-                <div v-else class="text-base font-mono font-bold text-slate-500 dark:text-slate-400">--:--:--</div>
-                <div v-if="adminSettings?.timezone" class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDateByTimezone(adminSettings.timezone) }}</div>
-                <div v-else class="text-xs text-slate-500 dark:text-slate-400 font-mono">--</div>
+                <div v-if="adminSettings?.timezone" class="text-base font-mono font-bold text-main">{{ formatTimeByTimezone(adminSettings.timezone) }}</div>
+                <div v-else class="text-base font-mono font-bold text-muted">--:--:--</div>
+                <div v-if="adminSettings?.timezone" class="text-xs text-muted font-mono">{{ formatDateByTimezone(adminSettings.timezone) }}</div>
+                <div v-else class="text-xs text-muted font-mono">--</div>
                 <!-- 修复：只显示location，不要回退到timezone -->
-                <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ adminSettings?.location || 'Click to locate' }}</div>
+                <div class="text-xs text-muted mt-0.5">{{ adminSettings?.location || 'Click to locate' }}</div>
               </div>
               
               <!-- 访客位置 -->
               <div v-if="weather && (weather.city || weather.country)">
                 <div class="flex items-center justify-between mb-1">
-                  <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ $t('tools.worldClock.visitor') }}</div>
-                  <div v-if="visitorTimeDiff !== null" class="text-xs text-slate-500 dark:text-slate-400">
+                  <div class="text-xs font-semibold text-muted">{{ $t('tools.worldClock.visitor') }}</div>
+                  <div v-if="visitorTimeDiff !== null" class="text-xs text-muted">
                     {{ formatTimeDifference(visitorTimeDiff) }}
                   </div>
                 </div>
-                <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTimeByTimezone(visitorTimezone) }}</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDateByTimezone(visitorTimezone) }}</div>
+                <div class="text-base font-mono font-bold text-main">{{ formatTimeByTimezone(visitorTimezone) }}</div>
+                <div class="text-xs text-muted font-mono">{{ formatDateByTimezone(visitorTimezone) }}</div>
                 <!-- 修复：从weather获取位置信息，而不是显示时区字符串 -->
-                <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ formatLocation(weather) }}</div>
+                <div class="text-xs text-muted mt-0.5">{{ formatLocation(weather) }}</div>
               </div>
               
               <!-- 分隔线 -->
-              <div v-if="(adminSettings && adminSettings.timezone) || (weather && (weather.city || weather.country))" class="border-t border-slate-200 dark:border-slate-700 my-2"></div>
+              <div v-if="(adminSettings && adminSettings.timezone) || (weather && (weather.city || weather.country))" class="border-t border-border-base my-2"></div>
               
               <!-- 预设时区 -->
               <div>
-                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ $t('tools.worldClock.china') }}</div>
-                <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTime('china') }}</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDate('china') }}</div>
+                <div class="text-xs font-semibold text-muted mb-1">{{ $t('tools.worldClock.china') }}</div>
+                <div class="text-base font-mono font-bold text-main">{{ formatTime('china') }}</div>
+                <div class="text-xs text-muted font-mono">{{ formatDate('china') }}</div>
               </div>
               <div>
-                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ $t('tools.worldClock.usEast') }}</div>
-                <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTime('usEast') }}</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDate('usEast') }}</div>
+                <div class="text-xs font-semibold text-muted mb-1">{{ $t('tools.worldClock.usEast') }}</div>
+                <div class="text-base font-mono font-bold text-main">{{ formatTime('usEast') }}</div>
+                <div class="text-xs text-muted font-mono">{{ formatDate('usEast') }}</div>
               </div>
               <div>
-                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{{ $t('tools.worldClock.usWest') }}</div>
-                <div class="text-base font-mono font-bold text-slate-800 dark:text-slate-200">{{ formatTime('usWest') }}</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ formatDate('usWest') }}</div>
+                <div class="text-xs font-semibold text-muted mb-1">{{ $t('tools.worldClock.usWest') }}</div>
+                <div class="text-base font-mono font-bold text-main">{{ formatTime('usWest') }}</div>
+                <div class="text-xs text-muted font-mono">{{ formatDate('usWest') }}</div>
               </div>
             </div>
       </div>
@@ -183,7 +183,7 @@
       <!-- 位置信息 -->
       <div 
         v-if="weather && (weather.city || weather.country)" 
-        class="hidden md:flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 bg-white/40 dark:bg-slate-800/40 px-3 py-1.5 rounded-full border border-white/50 dark:border-slate-700/50"
+        class="hidden md:flex items-center gap-2 text-sm text-secondary bg-white/40 dark:bg-slate-800/40 px-3 py-1.5 rounded-full border border-border-base"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -195,7 +195,7 @@
       <!-- 天气信息 -->
       <div 
         v-if="weather" 
-        class="hidden md:flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 bg-white/40 dark:bg-slate-800/40 px-3 py-1.5 rounded-full border border-white/50 dark:border-slate-700/50"
+        class="hidden md:flex items-center gap-2 text-sm text-secondary bg-white/40 dark:bg-slate-800/40 px-3 py-1.5 rounded-full border border-border-base"
       >
         <!-- 使用SVG太阳图标 -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-orange-400">
@@ -209,10 +209,10 @@
         <button
           v-if="!user"
           @click="showAuthModal = true"
-          class="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+          class="p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
           :title="$t('auth.login')"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-300">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
             <circle cx="12" cy="7" r="4"/>
           </svg>
@@ -220,7 +220,7 @@
         <div v-else class="relative" ref="userMenuContainer">
           <button
             @click.stop="toggleUserMenu"
-            class="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors flex items-center gap-2"
+            class="p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors flex items-center gap-2"
             :title="user.username"
             ref="userMenuButton"
           >
@@ -243,24 +243,24 @@
               v-click-outside="handleClickOutside"
               class="absolute right-0 top-full mt-2 w-48 glass-card rounded-xl shadow-lg py-2 z-50"
             >
-              <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">
-                <p class="text-sm font-semibold text-slate-800 dark:text-slate-200">{{ user.username }}</p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">{{ user.email }}</p>
+              <div class="px-4 py-2 border-b border-border-base">
+                <p class="text-sm font-semibold text-main">{{ user.username }}</p>
+                <p class="text-xs text-muted">{{ user.email }}</p>
               </div>
               <button
                 v-if="isAdmin"
                 @click.stop="goToAdmin"
-                class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 transition-colors"
+                class="w-full text-left px-4 py-2 text-sm text-secondary transition-colors"
                 style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
                 @mouseenter="handleUserMenuItemHoverEnter"
                 @mouseleave="handleUserMenuItemHoverLeave"
               >
                 {{ $t('auth.adminPanel') }}
               </button>
-              <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
+              <div class="border-t border-border-base my-1"></div>
               <button
                 @click.stop="handleLogout"
-                class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+                class="w-full text-left px-4 py-2 text-sm text-secondary hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
               >
                 {{ $t('auth.logout') }}
               </button>
@@ -278,10 +278,10 @@
       <!-- 语言切换按钮 -->
       <button
         @click="$emit('toggle-lang')"
-        class="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+        class="p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
         :title="$t('common.language')"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-300">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
           <circle cx="12" cy="12" r="10"/>
           <line x1="2" y1="12" x2="22" y2="12"/>
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
@@ -291,10 +291,10 @@
       <!-- 主题自定义按钮 -->
       <button
         @click="$emit('open-theme-customizer')"
-        class="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+        class="p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
         :title="$t('theme.customize')"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-300">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
           <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
         </svg>
       </button>
@@ -302,7 +302,7 @@
       <!-- 主题切换按钮 -->
       <button
         @click="$emit('toggle-theme')"
-        class="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
+        class="p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
         :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
       >
         <!-- 太阳图标（亮色模式时显示） -->
@@ -311,7 +311,7 @@
           xmlns="http://www.w3.org/2000/svg" 
           viewBox="0 0 24 24" 
           fill="currentColor" 
-          class="w-5 h-5 text-slate-600"
+          class="w-5 h-5 text-secondary"
         >
           <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
         </svg>
@@ -321,7 +321,7 @@
           xmlns="http://www.w3.org/2000/svg" 
           viewBox="0 0 24 24" 
           fill="currentColor" 
-          class="w-5 h-5 text-slate-300"
+          class="w-5 h-5 text-secondary"
         >
           <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
         </svg>

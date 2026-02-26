@@ -7,6 +7,10 @@ import App from './App.vue'
 import { i18n } from './i18n'
 import router from './router'
 import './style.css'
+import { registerSW } from 'virtual:pwa-register'
+
+// 注册 Service Worker 以启用 PWA
+registerSW({ immediate: true })
 
 // 创建Vue应用实例
 const app = createApp(App)

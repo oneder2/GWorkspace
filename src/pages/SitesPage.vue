@@ -9,11 +9,11 @@
     <div class="mb-6">
       <div class="flex items-center justify-between glass-card p-4 rounded-xl">
         <div>
-          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('sites.title') }}</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">{{ $t('sites.subtitle') }}</p>
+          <h2 class="text-lg font-bold text-main">{{ $t('sites.title') }}</h2>
+          <p class="text-xs text-muted">{{ $t('sites.subtitle') }}</p>
         </div>
         <div class="relative w-full max-w-xs">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted">
             <circle cx="11" cy="11" r="8"/>
             <path d="m21 21-4.35-4.35"/>
           </svg>

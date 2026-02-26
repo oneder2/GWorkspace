@@ -6,8 +6,8 @@
 <template>
   <div class="animate-fade-in max-w-6xl mx-auto">
     <div class="text-center mb-10">
-      <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-200">{{ $t('portfolio.title') }}</h2>
-      <p class="text-slate-500 dark:text-slate-400 mt-2">{{ $t('portfolio.subtitle') }}</p>
+      <h2 class="text-3xl font-bold text-main">{{ $t('portfolio.title') }}</h2>
+      <p class="text-muted mt-2">{{ $t('portfolio.subtitle') }}</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <a 
@@ -47,14 +47,14 @@
           <!-- 作品标题：使用深色确保在玻璃卡片上有足够对比度 -->
           <!-- 作品标题：hover时使用主题色 -->
           <h3 
-            class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 transition-colors"
+            class="text-xl font-bold text-main mb-2 transition-colors"
             style="--hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-light);"
             @mouseenter="handleTitleHoverEnter"
             @mouseleave="handleTitleHoverLeave"
           >
             {{ work.title }}
           </h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-3 leading-relaxed">
+          <p class="text-sm text-muted mb-4 line-clamp-3 leading-relaxed">
             {{ work.desc }}
           </p>
           
@@ -63,7 +63,7 @@
             <span 
               v-for="tag in work.tags" 
               :key="tag"
-              class="text-xs px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-lg font-medium shadow-sm"
+              class="text-xs px-2.5 py-1 bg-white dark:bg-slate-800 border border-border-base text-secondary rounded-lg font-medium shadow-sm"
             >
               {{ tag }}
             </span>

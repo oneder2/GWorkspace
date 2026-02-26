@@ -6,12 +6,12 @@
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click.self="$emit('close')">
     <div class="glass-card rounded-3xl p-6 md:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('home.editQuickLinks') }}</h2>
+        <h2 class="text-2xl font-bold text-main">{{ $t('home.editQuickLinks') }}</h2>
         <button 
           @click="$emit('close')"
-          class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          class="p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
@@ -39,7 +39,7 @@
 
           <!-- 图标预览 - 动态获取favicon -->
           <div 
-            class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+            class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-white dark:bg-slate-800 border border-border-base"
           >
             <!-- 优先使用动态获取的favicon -->
             <img 
@@ -53,12 +53,12 @@
             <component 
               v-else-if="link.icon" 
               :is="link.icon" 
-              class="w-6 h-6 text-slate-700 dark:text-slate-200" 
+              class="w-6 h-6 text-secondary" 
             />
             <!-- 最后回退到首字母 -->
             <span 
               v-else 
-              class="text-slate-700 dark:text-slate-200 text-lg font-bold"
+              class="text-secondary text-lg font-bold"
             >
               {{ link.name?.[0] || '?' }}
             </span>
@@ -73,7 +73,7 @@
               v-model="link.name"
               type="text"
               :placeholder="$t('home.linkName')"
-              class="w-full bg-transparent border-b border-slate-300 dark:border-slate-600 outline-none text-slate-800 dark:text-slate-200 font-bold mb-2 transition-colors"
+              class="w-full bg-transparent border-b border-border-base outline-none text-main font-bold mb-2 transition-colors"
               style="--focus-border: var(--theme-primary);"
               @focus="$event.currentTarget.style.borderColor = 'var(--focus-border)'"
               @blur="$event.currentTarget.style.borderColor = ''"
@@ -85,7 +85,7 @@
               v-model="link.url"
               type="text"
               :placeholder="$t('home.linkUrl')"
-              class="w-full bg-transparent border-b border-slate-300 dark:border-slate-600 outline-none text-slate-600 dark:text-slate-400 text-sm transition-colors"
+              class="w-full bg-transparent border-b border-border-base outline-none text-secondary text-sm transition-colors"
               style="--focus-border: var(--theme-primary);"
               @focus="$event.currentTarget.style.borderColor = 'var(--focus-border)'"
               @blur="$event.currentTarget.style.borderColor = ''"
@@ -133,7 +133,7 @@
         </button>
         <button 
           @click="$emit('close')"
-          class="flex-1 py-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 font-bold transition-colors"
+          class="flex-1 py-3 bg-border-base/50 dark:bg-slate-700 text-secondary rounded-xl hover:bg-border-base dark:hover:bg-slate-600 font-bold transition-colors"
         >
           {{ $t('common.cancel') }}
         </button>

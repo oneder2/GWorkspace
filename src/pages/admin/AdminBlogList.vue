@@ -40,7 +40,7 @@
           <tr
             v-for="blog in blogs"
             :key="blog.id"
-            class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
+            class="hover:bg-white/20 dark:hover:bg-white/5 transition-colors"
           >
             <td class="px-6 py-4">
               <div class="font-semibold text-slate-800 dark:text-slate-200">{{ blog.title }}</div>

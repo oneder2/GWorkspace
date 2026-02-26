@@ -8,7 +8,7 @@
       <div class="glass-card-panel rounded-3xl p-6 md:p-8 w-full max-w-md overflow-hidden flex flex-col animate-fade-in">
       <!-- 头部 -->
       <div class="flex items-center justify-between mb-6 shrink-0">
-        <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">
+        <h2 class="text-2xl font-bold text-main">
           {{ isLogin ? $t('auth.login') : $t('auth.register') }}
         </h2>
         <button 
@@ -16,7 +16,7 @@
           class="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
           :title="$t('common.close')"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-slate-600 dark:text-slate-300">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-secondary">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
@@ -34,14 +34,14 @@
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <!-- 用户名（注册时显示） -->
           <div v-if="!isLogin">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <label class="block text-sm font-semibold text-secondary mb-2">
               {{ $t('auth.username') }} <span class="text-red-500">*</span>
             </label>
             <input 
               v-model="formData.username"
               type="text"
               required
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main focus:outline-none focus:ring-2 transition-all"
               style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
               @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
               @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
@@ -51,14 +51,14 @@
 
           <!-- 邮箱（注册时显示） -->
           <div v-if="!isLogin">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <label class="block text-sm font-semibold text-secondary mb-2">
               {{ $t('auth.email') }} <span class="text-red-500">*</span>
             </label>
             <input 
               v-model="formData.email"
               type="email"
               required
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main focus:outline-none focus:ring-2 transition-all"
               style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
               @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
               @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
@@ -68,14 +68,14 @@
 
           <!-- 用户名/邮箱（登录时） -->
           <div v-if="isLogin">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <label class="block text-sm font-semibold text-secondary mb-2">
               {{ $t('auth.username') }} <span class="text-red-500">*</span>
             </label>
             <input 
               v-model="formData.username"
               type="text"
               required
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main focus:outline-none focus:ring-2 transition-all"
               style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
               @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
               @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
@@ -85,14 +85,14 @@
 
           <!-- 密码 -->
           <div>
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <label class="block text-sm font-semibold text-secondary mb-2">
               {{ $t('auth.password') }} <span class="text-red-500">*</span>
             </label>
             <input 
               v-model="formData.password"
               type="password"
               required
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main focus:outline-none focus:ring-2 transition-all"
               style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
               @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
               @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"

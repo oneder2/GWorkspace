@@ -9,11 +9,11 @@
     <div class="flex flex-col items-center">
       <div class="mb-12 text-center w-full">
         <!-- 标题 -->
-        <h1 class="text-5xl font-bold text-slate-800 dark:text-slate-100 mb-4 tracking-tight">
+        <h1 class="text-5xl font-bold text-main mb-4 tracking-tight">
           {{ $t('home.title') }}
         </h1>
         <!-- 副标题 -->
-        <p class="text-slate-700 dark:text-slate-300 text-lg">{{ $t('home.subtitle') }}</p>
+        <p class="text-secondary text-lg">{{ $t('home.subtitle') }}</p>
       </div>
 
       <!-- 搜索组件 -->
@@ -22,7 +22,7 @@
           <!-- 搜索引擎选择 -->
           <div class="relative group shrink-0">
             <button 
-              class="px-4 py-3 rounded-xl hover:bg-slate-100/80 dark:hover:bg-slate-700/80 flex items-center gap-2 text-slate-700 dark:text-slate-300 font-bold transition-colors"
+              class="px-4 py-3 rounded-xl hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md flex items-center gap-2 text-secondary font-bold transition-colors"
               @click="showEngineMenu = !showEngineMenu"
             >
               <component :is="getEngineIcon(searchEngine)" class="w-5 h-5" />
@@ -34,33 +34,33 @@
             <!-- 引擎切换下拉菜单 -->
             <div 
               v-if="showEngineMenu"
-              class="absolute top-full left-0 mt-2 w-44 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-xl shadow-xl border border-white/50 dark:border-slate-700/50 overflow-hidden z-30 p-1"
+              class="absolute top-full left-0 mt-2 w-44 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-xl shadow-xl border border-base overflow-hidden z-30 p-1"
               @click.stop
             >
               <div 
                 @click="searchEngine = 'google'; showEngineMenu = false" 
-                class="px-3 py-2 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg cursor-pointer flex items-center gap-3 text-sm transition-colors"
+                class="px-3 py-2 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg cursor-pointer flex items-center gap-3 text-sm transition-colors text-secondary"
               >
                 <component :is="GoogleIcon" class="w-5 h-5 text-green-500" />
                 Google
               </div>
               <div 
                 @click="searchEngine = 'duckduckgo'; showEngineMenu = false" 
-                class="px-3 py-2 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-lg cursor-pointer flex items-center gap-3 text-sm transition-colors"
+                class="px-3 py-2 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-lg cursor-pointer flex items-center gap-3 text-sm transition-colors text-secondary"
               >
                 <component :is="DuckIcon" class="w-5 h-5 text-orange-500" />
                 DuckDuckGo
               </div>
               <div 
                 @click="searchEngine = 'baidu'; showEngineMenu = false" 
-                class="px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg cursor-pointer flex items-center gap-3 text-sm transition-colors"
+                class="px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg cursor-pointer flex items-center gap-3 text-sm transition-colors text-secondary"
               >
                 <component :is="BaiduIcon" class="w-5 h-5 text-blue-600" />
                 百度
               </div>
               <div 
                 @click="searchEngine = 'edge'; showEngineMenu = false" 
-                class="px-3 py-2 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 rounded-lg cursor-pointer flex items-center gap-3 text-sm transition-colors"
+                class="px-3 py-2 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 rounded-lg cursor-pointer flex items-center gap-3 text-sm transition-colors text-secondary"
               >
                 <component :is="EdgeIcon" class="w-5 h-5 text-cyan-600" />
                 Edge
@@ -68,7 +68,7 @@
             </div>
           </div>
           
-          <div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-700 mx-1"></div>
+          <div class="h-8 w-[1px] bg-border-base mx-1"></div>
           
           <!-- 搜索输入框 -->
           <label for="search-input" class="sr-only">{{ $t('home.searchPlaceholder') }}</label>
@@ -78,7 +78,7 @@
             v-model="searchQuery" 
             @keyup.enter="performSearch"
             type="text" 
-            class="flex-1 h-12 bg-transparent outline-none text-xl text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+            class="flex-1 h-12 bg-transparent outline-none text-xl text-main placeholder:text-muted"
             :placeholder="$t('home.searchPlaceholder')" 
             autofocus
           >
@@ -99,10 +99,10 @@
       <!-- 快捷方式 -->
       <div class="mt-16 w-full max-w-3xl">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 tracking-tight">{{ $t('home.quickLinks') }}</h2>
+          <h2 class="text-lg font-bold text-main tracking-tight">{{ $t('home.quickLinks') }}</h2>
           <button 
             @click="showEditor = true"
-            class="px-4 py-2 bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm rounded-lg text-slate-600 dark:text-slate-400 transition-colors text-xs font-bold flex items-center gap-2 border border-slate-200/30 dark:border-slate-700/30 hover:text-[var(--theme-primary)]"
+            class="px-4 py-2 bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm rounded-lg text-secondary transition-colors text-xs font-bold flex items-center gap-2 border border-border-base hover:text-[var(--theme-primary)]"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -120,7 +120,7 @@
             class="glass-card flex flex-col items-center justify-center py-6 rounded-2xl cursor-pointer group hover:-translate-y-1 transition-all border border-white/20 dark:border-slate-700/20"
           >
             <div 
-              class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 shadow-lg transition-transform duration-300 group-hover:scale-110 bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50"
+              class="w-14 h-14 rounded-2xl flex items-center justify-center mb-3 shadow-lg transition-transform duration-300 group-hover:scale-110 bg-white dark:bg-slate-800 border border-border-base"
             >
               <img 
                 v-if="site.url && getCachedFaviconInfo(site.url).url"
@@ -133,16 +133,16 @@
               <component 
                 v-else-if="site.icon" 
                 :is="site.icon" 
-                class="w-8 h-8 text-slate-700 dark:text-slate-200" 
+                class="w-8 h-8 text-secondary" 
               />
               <span 
                 v-else 
-                class="text-slate-700 dark:text-slate-200 text-lg font-bold"
+                class="text-secondary text-lg font-bold"
               >
                 {{ site.name?.[0] || '?' }}
               </span>
             </div>
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-300 group-hover:text-[var(--theme-primary)] transition-colors">
+            <span class="text-sm font-bold text-secondary group-hover:text-[var(--theme-primary)] transition-colors">
               {{ site.name }}
             </span>
           </a>

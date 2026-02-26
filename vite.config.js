@@ -8,7 +8,29 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   plugins: [
-    vue()
+    vue(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'robots.txt', 'images/icons/*.svg', 'backgrounds/*.jpg'],
+      manifest: {
+        name: 'GWorkspace',
+        short_name: 'GWorkspace',
+        description: 'Personal workspace website with Vue.js, featuring blog, tools, and portfolio management.',
+        theme_color: '#475569',
+        icons: [
+          {
+            src: 'images/icons/icon.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml'
+          },
+          {
+            src: 'images/icons/icon.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml'
+          }
+        ]
+      }
+    })
   ],
   build: {
     rollupOptions: {

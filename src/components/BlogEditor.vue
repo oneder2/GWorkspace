@@ -9,7 +9,7 @@
     <div :class="isPageMode ? 'w-full space-y-6' : 'glass-card-panel rounded-3xl p-6 md:p-8 w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in'">
       <!-- 头部（仅弹窗模式显示） -->
       <div v-if="!isPageMode" class="flex items-center justify-between mb-6 shrink-0">
-        <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">
+        <h2 class="text-2xl font-bold text-main">
           {{ isEditMode ? $t('blog.editArticle') : $t('blog.createArticle') }}
         </h2>
         <button 
@@ -17,7 +17,7 @@
           class="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-slate-800/40 transition-colors"
           :title="$t('common.close')"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-slate-600 dark:text-slate-300">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-secondary">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
@@ -28,17 +28,17 @@
       <div :class="isPageMode ? 'space-y-6 pb-24' : 'flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-2 pb-24'">
         <!-- 元数据表单 -->
         <div class="glass-card p-6 rounded-2xl space-y-4 relative z-10">
-          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">{{ $t('blog.articleMeta') }}</h3>
+          <h3 class="text-lg font-bold text-main mb-4">{{ $t('blog.articleMeta') }}</h3>
           
           <!-- 标题 -->
           <div>
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <label class="block text-sm font-semibold text-secondary mb-2">
               {{ $t('blog.title') }} <span class="text-red-500">*</span>
             </label>
             <input 
               v-model="formData.title"
               type="text"
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main focus:outline-none focus:ring-2 transition-all"
               style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
               @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
               @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
@@ -50,7 +50,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- 分类 -->
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              <label class="block text-sm font-semibold text-secondary mb-2">
                 {{ $t('blog.genre') }} <span class="text-red-500">*</span>
               </label>
               <div class="relative" ref="genreContainerRef">
@@ -58,7 +58,7 @@
                   v-model="formData.genre"
                   type="text"
                   @input="handleGenreInput"
-                  class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+                  class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main focus:outline-none focus:ring-2 transition-all"
                   style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
                   @focus="(e) => { showGenreSuggestions = true; e.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)') }"
                   @blur="(e) => { e.currentTarget.style.setProperty('--tw-ring-color', '') }"
@@ -81,7 +81,7 @@
                     v-for="genre in filteredGenreSuggestions"
                     :key="genre"
                     @mousedown.prevent="selectGenre(genre)"
-                    class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                    class="w-full text-left px-4 py-2 text-sm text-secondary hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                   >
                     {{ genre }}
                   </button>
@@ -91,13 +91,13 @@
 
             <!-- 日期 -->
             <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              <label class="block text-sm font-semibold text-secondary mb-2">
                 {{ $t('blog.date') }} <span class="text-red-500">*</span>
               </label>
               <input 
                 v-model="formData.date"
                 type="date"
-                class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+                class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main focus:outline-none focus:ring-2 transition-all"
               style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
               @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
               @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
@@ -107,13 +107,13 @@
 
           <!-- 摘要 -->
           <div>
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <label class="block text-sm font-semibold text-secondary mb-2">
               {{ $t('blog.excerpt') }} <span class="text-red-500">*</span>
             </label>
             <textarea 
               v-model="formData.excerpt"
               rows="3"
-              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all resize-none"
+              class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main focus:outline-none focus:ring-2 transition-all resize-none"
               style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
               @focus="$event.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)')"
               @blur="$event.currentTarget.style.setProperty('--tw-ring-color', '')"
@@ -123,7 +123,7 @@
 
           <!-- 标签 -->
           <div>
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <label class="block text-sm font-semibold text-secondary mb-2">
               {{ $t('blog.tags') }} <span class="text-red-500">*</span>
             </label>
             <div class="flex flex-wrap gap-2 mb-2">
@@ -152,7 +152,7 @@
                   type="text"
                   @keyup.enter="addTag"
                   @input="handleTagInput"
-                  class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 transition-all"
+                  class="w-full px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main focus:outline-none focus:ring-2 transition-all"
                   style="--focus-ring: color-mix(in srgb, var(--theme-primary) 50%, transparent);"
                   @focus="(e) => { showTagSuggestions = true; e.currentTarget.style.setProperty('--tw-ring-color', 'var(--focus-ring)') }"
                   @blur="(e) => { e.currentTarget.style.setProperty('--tw-ring-color', '') }"
@@ -175,7 +175,7 @@
                     v-for="tag in filteredTagSuggestions"
                     :key="tag"
                     @mousedown.prevent="selectTag(tag)"
-                    class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                    class="w-full text-left px-4 py-2 text-sm text-secondary hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                   >
                     #{{ tag }}
                   </button>
@@ -210,7 +210,7 @@
         <!-- Markdown编辑器 -->
         <div class="glass-card p-6 rounded-2xl flex flex-col relative z-0">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('blog.content') }}</h3>
+            <h3 class="text-lg font-bold text-main">{{ $t('blog.content') }}</h3>
             <div class="flex items-center gap-3">
               <!-- 图片上传 -->
               <div class="flex items-center">
@@ -224,7 +224,7 @@
                 <button 
                   @click="$refs.fileInputRef.click()"
                   :disabled="isUploadingImage"
-                  class="flex items-center gap-1.5 px-3 py-1 text-sm font-semibold bg-white/40 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-[var(--theme-primary)] hover:text-white transition-all disabled:opacity-50"
+                  class="flex items-center gap-1.5 px-3 py-1 text-sm font-semibold bg-white/40 dark:bg-slate-800/40 border border-border-base rounded-lg hover:bg-[var(--theme-primary)] hover:text-white transition-all disabled:opacity-50"
                 >
                   <svg v-if="!isUploadingImage" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                   <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -236,8 +236,8 @@
                 <button
                   @click="viewMode = 'split'"
                   :class="viewMode === 'split' 
-                    ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-slate-200'
-                    : 'text-slate-600 dark:text-slate-400'"
+                    ? 'bg-white dark:bg-slate-700 shadow-sm text-main'
+                    : 'text-secondary'"
                   class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
                   :title="$t('blog.viewSplit')"
                 >
@@ -246,8 +246,8 @@
                 <button
                   @click="viewMode = 'editor'"
                   :class="viewMode === 'editor' 
-                    ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-slate-200'
-                    : 'text-slate-600 dark:text-slate-400'"
+                    ? 'bg-white dark:bg-slate-700 shadow-sm text-main'
+                    : 'text-secondary'"
                   class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
                   :title="$t('blog.viewEditor')"
                 >
@@ -256,8 +256,8 @@
                 <button
                   @click="viewMode = 'preview'"
                   :class="viewMode === 'preview' 
-                    ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-slate-200'
-                    : 'text-slate-600 dark:text-slate-400'"
+                    ? 'bg-white dark:bg-slate-700 shadow-sm text-main'
+                    : 'text-secondary'"
                   class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
                   :title="$t('blog.viewPreview')"
                 >
@@ -266,7 +266,7 @@
               </div>
               <button 
                 @click="clearContent"
-                class="px-3 py-1 text-sm text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                class="px-3 py-1 text-sm text-muted hover:text-red-500 dark:hover:text-red-400 transition-colors"
               >
                 {{ $t('tools.clear') }}
               </button>
@@ -277,18 +277,18 @@
           <div v-if="viewMode === 'split'" class="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-[400px]">
             <!-- 编辑区域 -->
             <div class="flex flex-col">
-              <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{{ $t('tools.editor') }}</label>
+              <label class="text-sm font-semibold text-secondary mb-2">{{ $t('tools.editor') }}</label>
               <textarea 
                 v-model="formData.content"
-                class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-mono text-sm resize-none custom-scrollbar"
+                class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main font-mono text-sm resize-none custom-scrollbar"
                 :placeholder="$t('blog.contentPlaceholder')"
               ></textarea>
             </div>
             <!-- 预览区域 -->
             <div class="flex flex-col">
-              <label class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">{{ $t('tools.preview') }}</label>
+              <label class="text-sm font-semibold text-secondary mb-2">{{ $t('tools.preview') }}</label>
               <div 
-                class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2"
+                class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2"
                 v-html="previewContent"
               ></div>
             </div>
@@ -298,7 +298,7 @@
           <div v-else-if="viewMode === 'editor'" class="flex-1" style="min-height: 600px;">
             <textarea 
               v-model="formData.content"
-              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-mono text-sm resize-none custom-scrollbar"
+              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main font-mono text-sm resize-none custom-scrollbar"
               :placeholder="$t('blog.contentPlaceholder')"
             ></textarea>
           </div>
@@ -306,7 +306,7 @@
           <!-- 纯预览视图 -->
           <div v-else-if="viewMode === 'preview'" class="flex-1" style="min-height: 600px;">
             <div 
-              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2"
+              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2"
               v-html="previewContent"
             ></div>
           </div>
@@ -331,7 +331,7 @@
       </div>
 
       <!-- 底部操作栏 -->
-      <div :class="isPageMode ? 'flex items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700' : 'flex items-center justify-between gap-4 mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 shrink-0'">
+      <div :class="isPageMode ? 'flex items-center justify-between gap-4 pt-6 border-t border-border-base' : 'flex items-center justify-between gap-4 mt-6 pt-6 border-t border-border-base shrink-0'">
         <div class="flex items-center gap-4">
           <button 
             v-if="isEditMode"
@@ -345,14 +345,14 @@
             </svg>
             {{ $t('common.delete') }}
           </button>
-          <div class="text-sm text-slate-500 dark:text-slate-400 hidden sm:block">
+          <div class="text-sm text-muted hidden sm:block">
             {{ $t('blog.saveHint') }}
           </div>
         </div>
         <div class="flex gap-3">
           <button 
             @click="handleClose"
-            class="px-6 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+            class="px-6 py-2 bg-slate-200 dark:bg-slate-700 text-secondary rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
           >
             {{ $t('common.cancel') }}
           </button>

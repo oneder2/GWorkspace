@@ -15,12 +15,11 @@
         {{ $t('admin.noGuestbookMessages') }}
       </div>
       <div v-else class="divide-y divide-slate-200 dark:divide-slate-700">
-        <div
-          v-for="message in messages"
-          :key="message.id"
-          class="p-6 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
-        >
-          <div class="flex items-start justify-between">
+                  <div 
+                    v-for="message in messages" 
+                    :key="message.id"
+                    class="p-6 hover:bg-white/20 dark:hover:bg-white/5 transition-colors"
+                  >          <div class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-3 mb-2">
                 <span class="font-semibold text-slate-800 dark:text-slate-200">

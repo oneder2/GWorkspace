@@ -4,11 +4,11 @@
 -->
 <template>
   <div class="h-full flex items-center justify-center">
-    <div class="bg-white dark:bg-slate-800/90 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-md md:max-w-lg border border-slate-200 dark:border-slate-600/50">
+    <div class="bg-surface/90 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-md md:max-w-lg border border-border-base">
       <!-- 显示屏 -->
-      <div class="bg-slate-100 dark:bg-black/60 rounded-2xl p-4 mb-6 text-right border border-slate-300 dark:border-slate-600/30">
-        <div class="text-slate-500 dark:text-slate-400 text-xs font-mono h-4">{{ calcHistory }}</div>
-        <div class="text-slate-900 dark:text-slate-100 font-mono text-4xl h-12 flex items-end justify-end break-all tracking-wider">
+      <div class="bg-border-base/20 rounded-2xl p-4 mb-6 text-right border border-border-base/30">
+        <div class="text-muted text-xs font-mono h-4">{{ calcHistory }}</div>
+        <div class="text-main font-mono text-4xl h-12 flex items-end justify-end break-all tracking-wider">
           {{ calcDisplay }}
         </div>
       </div>
@@ -23,19 +23,19 @@
         </button>
         <button 
           @click="calcAppend('/')" 
-          class="h-14 rounded-xl bg-slate-100 dark:bg-slate-700/80 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600/50"
+          class="h-14 rounded-xl bg-border-base/50 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-border-base transition-colors border border-border-base/50"
         >
           ÷
         </button>
         <button 
           @click="calcAppend('*')" 
-          class="h-14 rounded-xl bg-slate-100 dark:bg-slate-700/80 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600/50"
+          class="h-14 rounded-xl bg-border-base/50 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-border-base transition-colors border border-border-base/50"
         >
           ×
         </button>
         <button 
           @click="calcDelete" 
-          class="h-14 rounded-xl bg-slate-100 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600/50"
+          class="h-14 rounded-xl bg-border-base/50 text-secondary hover:bg-border-base transition-colors border border-border-base/50"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mx-auto">
             <path d="M22 6h-4l-3 4H3a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h12l3 4h4"/>
@@ -46,13 +46,13 @@
           v-for="n in [7,8,9]" 
           :key="n"
           @click="calcAppend(n)" 
-          class="h-14 rounded-xl bg-slate-100 dark:bg-slate-700/80 text-slate-900 dark:text-slate-100 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-xl border border-slate-300 dark:border-slate-600/50"
+          class="h-14 rounded-xl bg-border-base/50 text-main font-bold hover:bg-border-base transition-colors text-xl border border-border-base/50"
         >
           {{ n }}
         </button>
         <button 
           @click="calcAppend('-')" 
-          class="h-14 rounded-xl bg-slate-100 dark:bg-slate-700/80 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600/50"
+          class="h-14 rounded-xl bg-border-base/50 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-border-base transition-colors border border-border-base/50"
         >
           -
         </button>
@@ -61,13 +61,13 @@
           v-for="n in [4,5,6]" 
           :key="n"
           @click="calcAppend(n)" 
-          class="h-14 rounded-xl bg-slate-100 dark:bg-slate-700/80 text-slate-900 dark:text-slate-100 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-xl border border-slate-300 dark:border-slate-600/50"
+          class="h-14 rounded-xl bg-border-base/50 text-main font-bold hover:bg-border-base transition-colors text-xl border border-border-base/50"
         >
           {{ n }}
         </button>
         <button 
           @click="calcAppend('+')" 
-          class="h-14 rounded-xl bg-slate-100 dark:bg-slate-700/80 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600/50"
+          class="h-14 rounded-xl bg-border-base/50 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-border-base transition-colors border border-border-base/50"
         >
           +
         </button>
@@ -92,13 +92,13 @@
         
         <button 
           @click="calcAppend(0)" 
-          class="col-span-2 h-14 rounded-xl bg-slate-100 dark:bg-slate-700/80 text-slate-900 dark:text-slate-100 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-xl border border-slate-300 dark:border-slate-600/50"
+          class="col-span-2 h-14 rounded-xl bg-border-base/50 text-main font-bold hover:bg-border-base transition-colors text-xl border border-border-base/50"
         >
           0
         </button>
         <button 
           @click="calcAppend('.')" 
-          class="h-14 rounded-xl bg-slate-100 dark:bg-slate-700/80 text-slate-900 dark:text-slate-100 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-slate-300 dark:border-slate-600/50"
+          class="h-14 rounded-xl bg-border-base/50 text-main font-bold hover:bg-border-base transition-colors border border-border-base/50"
         >
           .
         </button>

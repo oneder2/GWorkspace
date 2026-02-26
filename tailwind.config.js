@@ -23,13 +23,20 @@ export default {
           'primary-light': 'var(--theme-primary-light)',
           'primary-lighter': 'var(--theme-primary-lighter)',
           'primary-darker': 'var(--theme-primary-darker)',
-          'primary-darkest': 'var(--theme-primary-darkest)',
-          'primary-emerald': 'var(--theme-primary-emerald)',
-          'primary-emerald-dark': 'var(--theme-primary-emerald-dark)',
-          'primary-emerald-light': 'var(--theme-primary-emerald-light)',
-          'primary-emerald-lighter': 'var(--theme-primary-emerald-lighter)',
-        }
+        },
+        // 语义化背景色
+        'base': 'var(--bg-app)',
+        'surface': 'var(--bg-surface)',
+        'card': 'var(--bg-card)',
+        // 语义化文字色
+        'main': 'var(--text-main)',
+        'secondary': 'var(--text-secondary)',
+        'muted': 'var(--text-muted)',
       },
+      borderColor: {
+        'base': 'var(--border-base)',
+        'highlight': 'var(--border-highlight)',
+      }
     },
   },
   plugins: [],

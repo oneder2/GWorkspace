@@ -16,7 +16,7 @@
     <!-- 返回按钮 -->
     <button 
       @click="$router.push('/blog')"
-      class="mb-6 flex items-center gap-2 text-slate-600 dark:text-slate-400 transition-colors"
+      class="mb-6 flex items-center gap-2 text-secondary transition-colors"
       style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
       @mouseenter="handleBackBtnHoverEnter"
       @mouseleave="handleBackBtnHoverLeave"
@@ -34,11 +34,11 @@
         <div class="flex items-center gap-3 mb-4 flex-wrap">
           <!-- Genre分类 - 显示在日期前 -->
           <span 
-            class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs rounded-md font-bold uppercase tracking-wide"
+            class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-secondary text-xs rounded-md font-bold uppercase tracking-wide"
           >
             {{ post.genre || post.category }}
           </span>
-          <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">{{ post.date }}</span>
+          <span class="text-xs text-muted font-mono">{{ post.date }}</span>
           <!-- 标签列表 - 显示在日期后 -->
           <div v-if="post.tags && post.tags.length > 0" class="flex items-center gap-2 flex-wrap">
             <span 
@@ -51,10 +51,10 @@
             </span>
           </div>
         </div>
-        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 dark:text-slate-200 mb-4 sm:mb-6">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-main mb-4 sm:mb-6">
           {{ post.title }}
         </h1>
-        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+        <p class="text-lg text-secondary leading-relaxed">
           {{ post.excerpt }}
         </p>
       </header>
@@ -62,13 +62,13 @@
       <!-- 文章正文 -->
       <div class="prose prose-slate dark:prose-invert max-w-none">
         <div 
-          class="text-slate-700 dark:text-slate-300 leading-relaxed blog-content"
+          class="text-secondary leading-relaxed blog-content"
           v-html="renderedContent"
         ></div>
       </div>
 
       <!-- 文章底部 -->
-      <footer class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
+      <footer class="mt-12 pt-8 border-t border-border-base">
         <div class="flex items-center justify-between flex-wrap gap-4">
           <!-- 标签 -->
           <div class="flex flex-wrap gap-2">
@@ -87,7 +87,7 @@
             <div class="relative">
               <button 
                 @click="shareArticle"
-                class="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-slate-600 dark:text-slate-400 transition-colors"
+                class="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-secondary transition-colors"
                 style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-dark);"
                 @mouseenter="handleShareBtnHoverEnter"
                 @mouseleave="handleShareBtnHoverLeave"
@@ -119,7 +119,7 @@
                 </div>
               </transition>
             </div>
-            <div class="flex items-center gap-3 text-slate-400 dark:text-slate-500 text-sm">
+            <div class="flex items-center gap-3 text-muted text-sm">
               <button 
                 @click="toggleLike"
                 class="flex items-center gap-1 transition-colors hover:text-red-500 dark:hover:text-red-400"
@@ -146,7 +146,7 @@
     <!-- 相关文章推荐 -->
     <div v-if="post && relatedPosts.length > 0" class="mt-8">
       <!-- 相关文章标题：使用深色确保在玻璃卡片上有足够对比度 -->
-      <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">{{ $t('blog.relatedArticles') }}</h3>
+      <h3 class="text-xl font-bold text-main mb-4">{{ $t('blog.relatedArticles') }}</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <article
           v-for="relatedPost in relatedPosts"
@@ -158,19 +158,19 @@
           @mouseleave="handleRelatedPostHoverLeave"
         >
           <div class="flex items-center gap-2 mb-2">
-            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs rounded-md font-bold uppercase">
+            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-secondary text-xs rounded-md font-bold uppercase">
               {{ relatedPost.category }}
             </span>
-            <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">{{ relatedPost.date }}</span>
+            <span class="text-xs text-muted font-mono">{{ relatedPost.date }}</span>
           </div>
-          <h4 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 transition-colors"
+          <h4 class="text-lg font-bold text-main mb-2 transition-colors"
               style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
               @mouseenter="handleRelatedTitleHoverEnter"
               @mouseleave="handleRelatedTitleHoverLeave"
           >
             {{ relatedPost.title }}
           </h4>
-          <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+          <p class="text-sm text-secondary line-clamp-2">
             {{ relatedPost.excerpt }}
           </p>
         </article>
@@ -187,8 +187,8 @@
         @mouseenter="handleNavBtnHoverEnter"
         @mouseleave="handleNavBtnHoverLeave"
       >
-        <div class="text-xs text-slate-400 dark:text-slate-500 mb-2">{{ $t('blog.prevArticle') }}</div>
-        <div class="font-bold text-slate-700 dark:text-slate-300 transition-colors"
+        <div class="text-xs text-muted mb-2">{{ $t('blog.prevArticle') }}</div>
+        <div class="font-bold text-secondary transition-colors"
              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
              @mouseenter="handleNavTitleHoverEnter"
              @mouseleave="handleNavTitleHoverLeave"
@@ -205,8 +205,8 @@
         @mouseenter="handleNavBtnHoverEnter"
         @mouseleave="handleNavBtnHoverLeave"
       >
-        <div class="text-xs text-slate-400 dark:text-slate-500 mb-2">{{ $t('blog.nextArticle') }}</div>
-        <div class="font-bold text-slate-700 dark:text-slate-300 transition-colors"
+        <div class="text-xs text-muted mb-2">{{ $t('blog.nextArticle') }}</div>
+        <div class="font-bold text-secondary transition-colors"
              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
              @mouseenter="handleNavTitleHoverEnter"
              @mouseleave="handleNavTitleHoverLeave"
@@ -223,13 +223,13 @@
     <div v-else-if="isLoading" class="text-center py-20">
       <div class="flex flex-col items-center gap-4">
         <div class="w-12 h-12 border-4 border-slate-200 dark:border-slate-700 border-t-[var(--theme-primary)] rounded-full animate-spin"></div>
-        <p class="text-slate-600 dark:text-slate-400">{{ t('common.loading') }}</p>
+        <p class="text-secondary">{{ t('common.loading') }}</p>
       </div>
     </div>
 
     <!-- 404 状态 -->
     <div v-else class="text-center py-20">
-      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4">{{ $t('blog.notFound') }}</h2>
+      <h2 class="text-2xl font-bold text-main mb-4">{{ $t('blog.notFound') }}</h2>
       <button 
         @click="$router.push('/blog')"
         class="px-6 py-3 text-white rounded-lg transition-colors"

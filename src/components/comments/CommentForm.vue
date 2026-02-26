@@ -1,6 +1,6 @@
 <template>
   <div class="glass-card p-4 sm:p-6 rounded-xl transition-all duration-300">
-    <h3 v-if="!parentId" class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">
+    <h3 v-if="!parentId" class="text-lg font-bold text-main mb-4">
       {{ $t('blog.leaveComment') }}
     </h3>
     
@@ -11,7 +11,7 @@
           style="background: linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker));">
           {{ user.username.charAt(0).toUpperCase() }}
         </div>
-        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ user.username }}</span>
+        <span class="text-sm font-medium text-secondary">{{ user.username }}</span>
       </div>
 
       <!-- Comment Content -->
@@ -20,7 +20,7 @@
           v-model="formData.content"
           required
           rows="3"
-          class="w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] transition-all resize-none text-sm"
+          class="w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 border border-border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] transition-all resize-none text-sm"
           :placeholder="parentId ? $t('blog.commentPlaceholder') : $t('blog.commentPlaceholder')"
         ></textarea>
       </div>
@@ -37,7 +37,7 @@
             v-if="parentId"
             type="button"
             @click="$emit('cancel')"
-            class="px-4 py-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+            class="px-4 py-2 text-sm text-muted hover:text-secondary transition-colors"
           >
             {{ $t('common.cancel') }}
           </button>
@@ -56,12 +56,12 @@
 
     <!-- User Not Logged In: Show Login Prompt -->
     <div v-else class="py-6 text-center space-y-4">
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 mb-2">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-border-base/50 text-muted mb-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         </svg>
       </div>
-      <p class="text-slate-600 dark:text-slate-400 text-sm">
+      <p class="text-secondary text-sm">
         {{ $t('blog.loginRequired') }}
       </p>
       <button 

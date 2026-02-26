@@ -3,15 +3,15 @@
   采用清淡的磨砂玻璃设计，条理清晰
 -->
 <template>
-  <div class="glass-card rounded-3xl p-6 md:p-8 flex flex-col border border-white/30 dark:border-slate-700/30 shadow-xl backdrop-blur-xl bg-white/40 dark:bg-slate-900/40">
-    <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-200/30 dark:border-slate-700/30">
+  <div class="glass-card rounded-3xl p-6 md:p-8 flex flex-col border border-border-base shadow-xl backdrop-blur-xl bg-white/40 dark:bg-slate-900/40">
+    <div class="flex items-center justify-between mb-8 pb-4 border-b border-border-base">
       <div class="flex items-center gap-3">
         <div class="w-1.5 h-6 bg-[var(--theme-primary)] rounded-full"></div>
-        <h3 class="font-bold text-xl tracking-tight text-slate-800 dark:text-slate-100">
+        <h3 class="font-bold text-xl tracking-tight text-main">
           {{ $t('home.updateLog') }}
         </h3>
       </div>
-      <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold opacity-60">Changelog</span>
+      <span class="text-[10px] uppercase tracking-widest text-muted font-bold opacity-60">Changelog</span>
     </div>
 
     <div class="space-y-8 overflow-y-auto custom-scrollbar pr-2 flex-1 max-h-[400px]">
@@ -20,25 +20,25 @@
           <span class="text-sm font-black text-[var(--theme-primary)] opacity-80 group-hover:opacity-100 transition-opacity">
             {{ update.version }}
           </span>
-          <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
+          <span class="text-[11px] font-bold text-muted uppercase tracking-tighter">
             {{ update.date }}
           </span>
         </div>
         
         <ul class="space-y-2.5 ml-1">
-          <li v-for="(item, i) in update.items" :key="i" class="text-sm text-slate-600 dark:text-slate-400 flex items-start gap-3 leading-relaxed">
-            <div class="mt-1.5 w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0 group-hover:bg-[var(--theme-primary)] transition-colors"></div>
+          <li v-for="(item, i) in update.items" :key="i" class="text-sm text-secondary flex items-start gap-3 leading-relaxed">
+            <div class="mt-1.5 w-1 h-1 rounded-full bg-border-base shrink-0 group-hover:bg-[var(--theme-primary)] transition-colors"></div>
             <span>{{ item }}</span>
           </li>
         </ul>
       </div>
     </div>
     
-    <div class="mt-8 pt-6 border-t border-slate-200/30 dark:border-slate-700/30 flex justify-center">
+    <div class="mt-8 pt-6 border-t border-border-base flex justify-center">
       <a 
         href="https://github.com/oneder2/GWorkspace/blob/main/CHANGELOG.md" 
         target="_blank" 
-        class="group flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-[var(--theme-primary)] dark:hover:text-[var(--theme-primary)] transition-all"
+        class="group flex items-center gap-2 text-xs font-bold text-muted hover:text-[var(--theme-primary)] transition-all"
       >
         <span>{{ $t('common.viewMore') }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform">
@@ -53,6 +53,17 @@
 import { ref } from 'vue'
 
 const updates = ref([
+  {
+    version: 'v2.5.0',
+    date: '2026-02-24',
+    items: [
+      '设计系统：全站语义化变量重构，废弃硬编码颜色',
+      '主题自定义：新增背景透明度、毛玻璃强度调节滑块',
+      'PWA 增强：支持将网页作为独立应用安装至桌面',
+      '交互优化：重构全局 hover 效果，提升复杂背景下的文字可读性',
+      '体验修复：修复博客页面及编辑器底部滚动遮挡问题'
+    ]
+  },
   {
     version: 'v2.4.0',
     date: '2026-02-23',

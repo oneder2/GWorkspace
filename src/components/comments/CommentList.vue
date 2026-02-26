@@ -1,12 +1,12 @@
 <template>
   <div class="mt-12 sm:mt-16" id="comments">
     <div class="flex items-center justify-between mb-8">
-      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+      <h2 class="text-2xl font-bold text-main flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
         {{ $t('blog.comments') }}
-        <span class="text-sm font-normal text-slate-500 ml-2">({{ totalComments }})</span>
+        <span class="text-sm font-normal text-muted ml-2">({{ totalComments }})</span>
       </h2>
     </div>
 
@@ -21,9 +21,9 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="comments.length === 0" class="text-center py-12 bg-slate-50/50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+    <div v-else-if="comments.length === 0" class="text-center py-12 bg-border-base/20 rounded-xl border border-dashed border-border-base">
       <div class="text-4xl mb-3 opacity-50">💬</div>
-      <p class="text-slate-500 dark:text-slate-400 font-medium">{{ $t('blog.noComments') }}</p>
+      <p class="text-muted font-medium">{{ $t('blog.noComments') }}</p>
     </div>
 
     <!-- Comments List -->

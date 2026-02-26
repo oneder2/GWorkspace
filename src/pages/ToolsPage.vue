@@ -17,7 +17,7 @@
           :class="[
             currentTool === tool.id 
               ? 'rounded-2xl border shadow-md' 
-              : 'text-slate-600 dark:text-slate-400 border border-transparent rounded-xl hover:shadow-sm',
+              : 'text-secondary border border-transparent rounded-xl hover:shadow-sm',
             currentTool === tool.id && isThemeTransparent
               ? 'tool-select-btn-selected-transparent'
               : currentTool === tool.id
@@ -64,7 +64,7 @@
                   style="color: var(--theme-primary-darker);"
                   :style="{ '--dark-color': 'var(--theme-primary-dark)' }"
                 />
-                <span class="font-semibold text-sm sm:text-base text-slate-800 dark:text-slate-200 truncate">
+                <span class="font-semibold text-sm sm:text-base text-main truncate">
                   {{ currentToolData.name }}
                 </span>
               </div>
@@ -76,7 +76,7 @@
                 stroke-width="2" 
                 stroke-linecap="round" 
                 stroke-linejoin="round" 
-                class="w-5 h-5 text-slate-500 dark:text-slate-400 transition-transform duration-200 flex-shrink-0 ml-2"
+                class="w-5 h-5 text-muted transition-transform duration-200 flex-shrink-0 ml-2"
                 :class="{ 'rotate-180': showToolDropdown }"
               >
                 <polyline points="6 9 12 15 18 9"/>
@@ -94,7 +94,7 @@
             >
               <div
                 v-if="showToolDropdown"
-                class="border-t border-slate-200/50 dark:border-slate-700/50 overflow-hidden"
+                class="border-t border-border-base/50 overflow-hidden"
               >
                 <div class="max-h-64 overflow-y-auto custom-scrollbar">
                   <button
@@ -105,7 +105,7 @@
                     :class="[
                       currentTool === tool.id 
                         ? 'font-semibold' 
-                        : 'text-slate-600 dark:text-slate-400',
+                        : 'text-secondary',
                       currentTool === tool.id && isThemeTransparent
                         ? 'tool-dropdown-item-selected-transparent'
                         : currentTool === tool.id
@@ -118,7 +118,7 @@
                       class="w-5 h-5 shrink-0"
                       :class="currentTool === tool.id 
                         ? '' 
-                        : 'text-slate-500 dark:text-slate-400'"
+                        : 'text-muted'"
                       :style="currentTool === tool.id 
                         ? (isThemeTransparent 
                             ? { color: '#475569', '--dark-color': '#cbd5e1' }

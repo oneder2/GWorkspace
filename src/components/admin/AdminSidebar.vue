@@ -8,18 +8,18 @@
     :class="collapsed ? 'w-16 lg:w-20' : 'w-full lg:w-64'"
   >
     <!-- 头部 - 可折叠 -->
-    <div class="mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-200 dark:border-slate-700">
+    <div class="mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-border-base">
       <div v-if="!collapsed" class="flex items-center justify-between">
         <div>
-          <h2 class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.title') }}</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 hidden sm:block">{{ $t('admin.adminOnly') }}</p>
+          <h2 class="text-base sm:text-lg font-bold text-main">{{ $t('admin.title') }}</h2>
+          <p class="text-xs text-muted mt-1 hidden sm:block">{{ $t('admin.adminOnly') }}</p>
         </div>
         <button
           @click="$emit('toggle-collapse')"
-          class="lg:hidden p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          class="lg:hidden p-1.5 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
           :title="$t('common.collapse')"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
             <polyline points="9 18 15 12 9 6"/>
           </svg>
         </button>
@@ -27,10 +27,10 @@
       <button
         v-else
         @click="$emit('toggle-collapse')"
-        class="w-full flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        class="w-full flex items-center justify-center p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
         :title="$t('common.expand')"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-slate-600 dark:text-slate-400">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
           <polyline points="15 18 9 12 15 6"/>
         </svg>
       </button>
@@ -44,7 +44,7 @@
         class="flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 group border border-transparent"
         :class="isActive(item.path)
           ? 'font-semibold' 
-          : 'text-slate-600 dark:text-slate-400'"
+          : 'text-secondary'"
         :style="isActive(item.path)
           ? getActiveStyle(item.path)
           : {

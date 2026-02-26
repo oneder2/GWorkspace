@@ -15,7 +15,7 @@
           <!-- Header -->
           <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
             <div class="flex items-center gap-2">
-              <span class="font-bold text-slate-800 dark:text-slate-200 text-sm sm:text-base">
+              <span class="font-bold text-main text-sm sm:text-base">
                 {{ comment.author_name }}
               </span>
               <span 
@@ -25,13 +25,13 @@
                 Admin
               </span>
             </div>
-            <time class="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
+            <time class="text-xs text-muted whitespace-nowrap">
               {{ formattedDate }}
             </time>
           </div>
 
           <!-- Body -->
-          <div class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-wrap break-words">
+          <div class="text-secondary leading-relaxed whitespace-pre-wrap break-words text-sm">
             {{ comment.content }}
           </div>
 
@@ -40,7 +40,7 @@
             <div class="flex items-center gap-4">
               <button 
                 @click="showReplyForm = !showReplyForm"
-                class="text-xs font-medium text-slate-500 hover:text-[var(--theme-primary)] dark:text-slate-400 dark:hover:text-[var(--theme-primary)] transition-colors flex items-center gap-1"
+                class="text-xs font-medium text-muted hover:text-[var(--theme-primary)] transition-colors flex items-center gap-1"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -54,7 +54,7 @@
               v-if="canDelete"
               @click="handleDelete"
               :disabled="deleting"
-              class="text-xs font-medium text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors flex items-center gap-1 opacity-0 group-hover:opacity-100 disabled:opacity-50"
+              class="text-xs font-medium text-muted hover:text-red-500 dark:hover:text-red-400 transition-colors flex items-center gap-1 opacity-0 group-hover:opacity-100 disabled:opacity-50"
               :title="$t('common.delete')"
             >
               <span v-if="deleting" class="w-3 h-3 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></span>
@@ -78,7 +78,7 @@
         </div>
 
         <!-- Nested Replies -->
-        <div v-if="comment.replies && comment.replies.length > 0" class="mt-4 pl-4 sm:pl-6 border-l-2 border-slate-100 dark:border-slate-700/50 space-y-4">
+        <div v-if="comment.replies && comment.replies.length > 0" class="mt-4 pl-4 sm:pl-6 border-l-2 border-border-base space-y-4">
           <CommentItem 
             v-for="reply in comment.replies" 
             :key="reply.id" 
