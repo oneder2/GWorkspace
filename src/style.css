@@ -333,6 +333,151 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
+/* --- 代码块增强样式 (Code Block Enhancements) --- */
+.code-block-wrapper {
+  position: relative;
+  margin: 1.5rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f8fafc; /* 默认亮色背景 (slate-50) */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.dark .code-block-wrapper {
+  background: #1e293b; /* 暗色模式背景 (slate-800) */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  user-select: none;
+}
+
+.dark .code-block-header {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.code-block-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.code-block-dots .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dot.red { background: #ff5f56; }
+.dot.yellow { background: #ffbd2e; }
+.dot.green { background: #27c93f; }
+
+.code-block-lang {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b; /* 亮色模式文字色 */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dark .code-block-lang {
+  color: #94a3b8; /* 暗色模式文字色 */
+}
+
+.copy-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: transparent;
+  border: 1px solid rgba(100, 116, 139, 0.2);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.8;
+}
+
+.dark .copy-button {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.code-block-wrapper:hover .copy-button {
+  opacity: 1;
+}
+
+.copy-button:hover {
+  background: rgba(100, 116, 139, 0.1);
+  color: #1e293b;
+}
+
+.dark .copy-button:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #f1f5f9;
+}
+
+.copy-button.copied {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.code-block-wrapper pre {
+  margin: 0 !important;
+  padding: 1.25rem 1rem !important;
+  background: transparent !important;
+  overflow-x: auto;
+}
+
+.code-block-wrapper pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: 0.9rem !important;
+  line-height: 1.6;
+  white-space: pre;
+  color: #334155 !important; /* 亮色模式代码色 */
+}
+
+.dark .code-block-wrapper pre code {
+  color: #e2e8f0 !important; /* 暗色模式代码色 */
+}
+
+/* TOC 目录项活跃样式增强 */
+.toc-item-active {
+  color: var(--theme-primary) !important;
+  font-weight: 700 !important;
+  transform: translateX(4px);
+  position: relative;
+}
+
+.toc-item-active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 16px;
+  background: var(--theme-primary);
+  border-radius: 2px;
+}
+
 .prose blockquote {
   border-left: 4px solid var(--theme-primary);
   padding-left: 1em;
@@ -344,6 +489,16 @@
 .prose a {
   color: var(--theme-primary);
   text-decoration: underline;
+}
+
+.prose img {
+  cursor: zoom-in;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+.prose img:hover {
+  transform: scale(1.01);
 }
 
 .prose strong {
@@ -365,4 +520,26 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+/* Medium Zoom 图片缩放样式适配 */
+.medium-zoom-overlay {
+  z-index: 100 !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: var(--zoom-bg) !important;
+}
+
+.medium-zoom-image--opened {
+  z-index: 101 !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+}
+
+:root {
+  --zoom-bg: rgba(255, 255, 255, 0.8);
+}
+
+.dark {
+  --zoom-bg: rgba(15, 23, 42, 0.8);
 }

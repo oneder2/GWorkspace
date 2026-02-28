@@ -4,7 +4,7 @@
   支持文章导航和分享功能
 -->
 <template>
-  <div class="animate-fade-in max-w-4xl mx-auto relative pb-24">
+  <div class="animate-fade-in max-w-6xl mx-auto relative pb-24 px-4 lg:px-0">
     <!-- 阅读进度条 -->
     <div 
       v-if="post"
@@ -13,241 +13,153 @@
       :style="{ width: readingProgress + '%' }"
     ></div>
     
-    <!-- 返回按钮 -->
-    <button 
-      @click="$router.push('/blog')"
-      class="mb-6 flex items-center gap-2 text-secondary transition-colors"
-      style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-      @mouseenter="handleBackBtnHoverEnter"
-      @mouseleave="handleBackBtnHoverLeave"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-        <polyline points="15 18 9 12 15 6"/>
-      </svg>
-      <span>{{ $t('blog.backToList') }}</span>
-    </button>
+    <div class="flex flex-col lg:flex-row gap-8 items-start justify-center">
+      <!-- 主体内容 -->
+      <div class="w-full max-w-4xl min-w-0">
+        <!-- 返回按钮 -->
+        <button 
+          @click="$router.push('/blog')"
+          class="mb-6 flex items-center gap-2 text-secondary transition-colors"
+          style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
+          @mouseenter="handleBackBtnHoverEnter"
+          @mouseleave="handleBackBtnHoverLeave"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span>{{ $t('blog.backToList') }}</span>
+        </button>
 
-    <!-- 文章内容 - 响应式内边距 -->
-    <article v-if="post" class="glass-card p-4 sm:p-6 md:p-8 lg:p-12 rounded-2xl">
-      <!-- 文章头部 -->
-      <header class="mb-8">
-        <div class="flex items-center gap-3 mb-4 flex-wrap">
-          <!-- Genre分类 - 显示在日期前 -->
-          <span 
-            class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-secondary text-xs rounded-md font-bold uppercase tracking-wide"
-          >
-            {{ post.genre || post.category }}
-          </span>
-          <span class="text-xs text-muted font-mono">{{ post.date }}</span>
-          <!-- 标签列表 - 显示在日期后 -->
-          <div v-if="post.tags && post.tags.length > 0" class="flex items-center gap-2 flex-wrap">
-            <span 
-              v-for="tag in post.tags" 
-              :key="tag"
-              class="px-2 py-0.5 text-xs rounded-full font-semibold"
-              :style="getTagStyle(tag, typeof document !== 'undefined' && document.documentElement.classList.contains('dark')).style"
-            >
-              #{{ tag }}
-            </span>
-          </div>
-        </div>
-        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-main mb-4 sm:mb-6">
-          {{ post.title }}
-        </h1>
-        <p class="text-lg text-secondary leading-relaxed">
-          {{ post.excerpt }}
-        </p>
-      </header>
-
-      <!-- 文章正文 -->
-      <div class="prose prose-slate dark:prose-invert max-w-none">
-        <div 
-          class="text-secondary leading-relaxed blog-content"
-          v-html="renderedContent"
-        ></div>
-      </div>
-
-      <!-- 文章底部 -->
-      <footer class="mt-12 pt-8 border-t border-border-base">
-        <div class="flex items-center justify-between flex-wrap gap-4">
-          <!-- 标签 -->
-          <div class="flex flex-wrap gap-2">
-            <span 
-              v-for="tag in post.tags" 
-              :key="tag"
-              class="px-3 py-1 rounded-full text-xs font-bold"
-              :style="getTagStyle(tag, typeof document !== 'undefined' && document.documentElement.classList.contains('dark')).style"
-            >
-              #{{ tag }}
-            </span>
-          </div>
-
-          <!-- 分享和互动 -->
-          <div class="flex items-center gap-4">
-            <div class="relative">
-              <button 
-                @click="shareArticle"
-                class="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-secondary transition-colors"
-                style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-dark);"
-                @mouseenter="handleShareBtnHoverEnter"
-                @mouseleave="handleShareBtnHoverLeave"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-                  <polyline points="16 6 12 2 8 6"/>
-                  <line x1="12" y1="2" x2="12" y2="15"/>
-                </svg>
-                <span class="text-sm">{{ shareSuccess ? $t('blog.copied') : $t('blog.share') }}</span>
-              </button>
-              <!-- 成功提示 -->
-              <transition
-                enter-active-class="transition-all duration-300"
-                enter-from-class="opacity-0 scale-95"
-                enter-to-class="opacity-100 scale-100"
-                leave-active-class="transition-all duration-200"
-                leave-from-class="opacity-100 scale-100"
-                leave-to-class="opacity-0 scale-95"
-              >
-                <div 
-                  v-if="shareSuccess"
-                  class="absolute -top-12 left-1/2 -translate-x-1/2 text-white px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-lg z-10"
-                  style="background-color: var(--theme-primary);"
-                >
-                  {{ $t('blog.linkCopied') }}
-                  <div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent"
-                       style="border-top-color: var(--theme-primary);"></div>
-                </div>
-              </transition>
-            </div>
-            <div class="flex items-center gap-3 text-muted text-sm">
-              <button 
-                @click="toggleLike"
-                class="flex items-center gap-1 transition-colors hover:text-red-500 dark:hover:text-red-400"
-                :class="isLiked ? 'text-red-500 dark:text-red-400' : ''"
-                :disabled="isTogglingLike"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
-                {{ (post.likes_count !== undefined && post.likes_count !== null) ? post.likes_count : (post.likes || 0) }}
-              </button>
-              <span class="flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                {{ post.comments ?? 0 }}
+        <!-- 文章内容 -->
+        <article v-if="post" class="glass-card p-4 sm:p-6 md:p-8 lg:p-12 rounded-2xl overflow-hidden">
+          <!-- 文章头部 -->
+          <header class="mb-8">
+            <div class="flex items-center gap-3 mb-4 flex-wrap">
+              <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-secondary text-xs rounded-md font-bold uppercase tracking-wide">
+                {{ post.genre || post.category }}
               </span>
+              <span class="text-xs text-muted font-mono">{{ post.date }}</span>
+              <div v-if="post.tags && post.tags.length > 0" class="flex items-center gap-2 flex-wrap">
+                <span 
+                  v-for="tag in post.tags" 
+                  :key="tag"
+                  class="px-2 py-0.5 text-xs rounded-full font-semibold"
+                  :style="getTagStyle(tag, typeof document !== 'undefined' && document.documentElement.classList.contains('dark')).style"
+                >
+                  #{{ tag }}
+                </span>
+              </div>
+            </div>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-main mb-4 sm:mb-6 leading-tight">
+              {{ post.title }}
+            </h1>
+            <p class="text-lg text-secondary leading-relaxed opacity-80">
+              {{ post.excerpt }}
+            </p>
+          </header>
+
+          <div class="prose prose-slate dark:prose-invert max-w-none">
+            <div 
+              class="text-secondary leading-relaxed blog-content"
+              v-html="renderedContent"
+              @click="handleContentClick"
+            ></div>
+          </div>
+
+          <footer class="mt-12 pt-8 border-t border-border-base">
+            <!-- 保持原有的 footer 内容 -->
+            <div class="flex items-center justify-between flex-wrap gap-4">
+              <div class="flex flex-wrap gap-2">
+                <span v-for="tag in post.tags" :key="tag" class="px-3 py-1 rounded-full text-xs font-bold" :style="getTagStyle(tag, typeof document !== 'undefined' && document.documentElement.classList.contains('dark')).style">#{{ tag }}</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <div class="relative">
+                  <button @click="shareArticle" class="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-secondary transition-colors" style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-dark);" @mouseenter="handleShareBtnHoverEnter" @mouseleave="handleShareBtnHoverLeave">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                    <span class="text-sm">{{ shareSuccess ? $t('blog.copied') : $t('blog.share') }}</span>
+                  </button>
+                  <transition enter-active-class="transition-all duration-300" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="transition-all duration-200" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95"><div v-if="shareSuccess" class="absolute -top-12 left-1/2 -translate-x-1/2 text-white px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-lg z-10" style="background-color: var(--theme-primary);">{{ $t('blog.linkCopied') }}<div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style="border-top-color: var(--theme-primary);"></div></div></transition>
+                </div>
+                <div class="flex items-center gap-3 text-muted text-sm">
+                  <button @click="toggleLike" class="flex items-center gap-1 transition-colors hover:text-red-500 dark:hover:text-red-400" :class="isLiked ? 'text-red-500 dark:text-red-400' : ''" :disabled="isTogglingLike"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>{{ (post.likes_count !== undefined && post.likes_count !== null) ? post.likes_count : (post.likes || 0) }}</button>
+                  <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>{{ post.comments ?? 0 }}</span>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </article>
+
+        <!-- 404 状态 -->
+        <div v-else-if="!isLoading" class="text-center py-20">
+          <h2 class="text-2xl font-bold text-main mb-4">{{ $t('blog.notFound') }}</h2>
+          <button @click="$router.push('/blog')" class="px-6 py-3 text-white rounded-lg" style="background-color: var(--theme-primary);">{{ $t('blog.backToList') }}</button>
+        </div>
+
+        <!-- 加载中状态 -->
+        <div v-else class="text-center py-20">
+          <div class="flex flex-col items-center gap-4">
+            <div class="w-12 h-12 border-4 border-slate-200 dark:border-slate-700 border-t-[var(--theme-primary)] rounded-full animate-spin"></div>
+            <p class="text-secondary">{{ t('common.loading') }}</p>
+          </div>
+        </div>
+
+        <!-- 底部导航和推荐 -->
+        <div v-if="post" class="mt-8 space-y-8">
+          <!-- 相关文章推荐 -->
+          <div v-if="relatedPosts.length > 0">
+            <h3 class="text-xl font-bold text-main mb-4">{{ $t('blog.relatedArticles') }}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <article v-for="relatedPost in relatedPosts" :key="relatedPost.id" @click="$router.push(`/blog/${relatedPost.id}`)" class="glass-card p-5 rounded-xl cursor-pointer transition-all group border-l-4 border-l-transparent" style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-border: var(--theme-primary);" @mouseenter="handleRelatedPostHoverEnter" @mouseleave="handleRelatedPostHoverLeave"><div class="flex items-center gap-2 mb-2"><span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-secondary text-xs rounded-md font-bold uppercase">{{ relatedPost.category }}</span><span class="text-xs text-muted font-mono">{{ relatedPost.date }}</span></div><h4 class="text-lg font-bold text-main mb-2 transition-colors" style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);" @mouseenter="handleRelatedTitleHoverEnter" @mouseleave="handleRelatedTitleHoverLeave">{{ relatedPost.title }}</h4><p class="text-sm text-secondary line-clamp-2">{{ relatedPost.excerpt }}</p></article>
             </div>
           </div>
-        </div>
-      </footer>
-    </article>
 
-    <!-- 相关文章推荐 -->
-    <div v-if="post && relatedPosts.length > 0" class="mt-8">
-      <!-- 相关文章标题：使用深色确保在玻璃卡片上有足够对比度 -->
-      <h3 class="text-xl font-bold text-main mb-4">{{ $t('blog.relatedArticles') }}</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <article
-          v-for="relatedPost in relatedPosts"
-          :key="relatedPost.id"
-          @click="$router.push(`/blog/${relatedPost.id}`)"
-          class="glass-card p-5 rounded-xl cursor-pointer transition-all group border-l-4 border-l-transparent"
-          style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-border: var(--theme-primary);"
-          @mouseenter="handleRelatedPostHoverEnter"
-          @mouseleave="handleRelatedPostHoverLeave"
-        >
-          <div class="flex items-center gap-2 mb-2">
-            <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-secondary text-xs rounded-md font-bold uppercase">
-              {{ relatedPost.category }}
-            </span>
-            <span class="text-xs text-muted font-mono">{{ relatedPost.date }}</span>
+          <!-- 文章导航 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button v-if="prevPost" @click="$router.push(`/blog/${prevPost.id}`)" class="glass-card p-4 rounded-xl text-left transition-colors group" style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);" @mouseenter="handleNavBtnHoverEnter" @mouseleave="handleNavBtnHoverLeave"><div class="text-xs text-muted mb-2">{{ $t('blog.prevArticle') }}</div><div class="font-bold text-secondary transition-colors" style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);" @mouseenter="handleNavTitleHoverEnter" @mouseleave="handleNavTitleHoverLeave">{{ prevPost.title }}</div></button>
+            <div v-else></div>
+            <button v-if="nextPost" @click="$router.push(`/blog/${nextPost.id}`)" class="glass-card p-4 rounded-xl text-left transition-colors group md:text-right" style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);" @mouseenter="handleNavBtnHoverEnter" @mouseleave="handleNavBtnHoverLeave"><div class="text-xs text-muted mb-2">{{ $t('blog.nextArticle') }}</div><div class="font-bold text-secondary transition-colors" style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);" @mouseenter="handleNavTitleHoverEnter" @mouseleave="handleNavTitleHoverLeave">{{ nextPost.title }}</div></button>
           </div>
-          <h4 class="text-lg font-bold text-main mb-2 transition-colors"
-              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-              @mouseenter="handleRelatedTitleHoverEnter"
-              @mouseleave="handleRelatedTitleHoverLeave"
-          >
-            {{ relatedPost.title }}
-          </h4>
-          <p class="text-sm text-secondary line-clamp-2">
-            {{ relatedPost.excerpt }}
-          </p>
-        </article>
-      </div>
-    </div>
 
-    <!-- 文章导航 -->
-    <div v-if="post" class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-      <button 
-        v-if="prevPost"
-        @click="$router.push(`/blog/${prevPost.id}`)"
-        class="glass-card p-4 rounded-xl text-left transition-colors group"
-        style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-        @mouseenter="handleNavBtnHoverEnter"
-        @mouseleave="handleNavBtnHoverLeave"
-      >
-        <div class="text-xs text-muted mb-2">{{ $t('blog.prevArticle') }}</div>
-        <div class="font-bold text-secondary transition-colors"
-             style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-             @mouseenter="handleNavTitleHoverEnter"
-             @mouseleave="handleNavTitleHoverLeave"
-        >
-          {{ prevPost.title }}
+          <!-- 评论区 -->
+          <CommentList v-if="postId" :blog-id="postId" />
         </div>
-      </button>
-      <div v-else></div>
-      <button 
-        v-if="nextPost"
-        @click="$router.push(`/blog/${nextPost.id}`)"
-        class="glass-card p-4 rounded-xl text-left transition-colors group md:text-right"
-        style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-        @mouseenter="handleNavBtnHoverEnter"
-        @mouseleave="handleNavBtnHoverLeave"
-      >
-        <div class="text-xs text-muted mb-2">{{ $t('blog.nextArticle') }}</div>
-        <div class="font-bold text-secondary transition-colors"
-             style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-             @mouseenter="handleNavTitleHoverEnter"
-             @mouseleave="handleNavTitleHoverLeave"
-        >
-          {{ nextPost.title }}
-        </div>
-      </button>
-    </div>
-
-    <!-- 评论区 -->
-    <CommentList v-if="post && postId" :blog-id="postId" />
-
-    <!-- 加载中状态 -->
-    <div v-else-if="isLoading" class="text-center py-20">
-      <div class="flex flex-col items-center gap-4">
-        <div class="w-12 h-12 border-4 border-slate-200 dark:border-slate-700 border-t-[var(--theme-primary)] rounded-full animate-spin"></div>
-        <p class="text-secondary">{{ t('common.loading') }}</p>
       </div>
-    </div>
 
-    <!-- 404 状态 -->
-    <div v-else class="text-center py-20">
-      <h2 class="text-2xl font-bold text-main mb-4">{{ $t('blog.notFound') }}</h2>
-      <button 
-        @click="$router.push('/blog')"
-        class="px-6 py-3 text-white rounded-lg transition-colors"
-        style="background-color: var(--theme-primary);"
-        @mouseenter="const el = $event?.currentTarget; if (el) { el.style.backgroundColor = 'var(--theme-primary-darker)'; }"
-        @mouseleave="const el = $event?.currentTarget; if (el) { el.style.backgroundColor = 'var(--theme-primary)'; }"
-      >
-        {{ $t('blog.backToList') }}
-      </button>
+      <!-- 右侧目录 (仅大屏显示) -->
+      <aside v-if="toc.length > 0" class="hidden lg:block w-64 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
+        <div class="glass-card p-6 rounded-2xl">
+          <h3 class="text-sm font-bold text-main mb-4 uppercase tracking-wider flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            {{ $t('blog.toc') || '目录' }}
+          </h3>
+          <ul class="space-y-3">
+            <li 
+              v-for="item in toc" 
+              :key="item.id"
+              :style="{ paddingLeft: (item.level - 2) * 1.25 + 'rem' }"
+              class="transition-all duration-300"
+            >
+              <button 
+                @click="scrollToAnchor(item.id)"
+                class="text-sm text-left transition-all hover:text-[var(--theme-primary)] block w-full truncate py-1"
+                :class="activeId === item.id ? 'toc-item-active' : 'text-muted'"
+              >
+                {{ item.title }}
+              </button>
+            </li>
+          </ul>
+        </div>
+      </aside>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
+import mediumZoom from 'medium-zoom'
 import { useLocalStorage } from '../composables/useStorage'
 import { useSEO, generateBlogStructuredData } from '../composables/useSEO'
 import { blogApi, likesApi, analyticsApi } from '../utils/api'
@@ -257,6 +169,39 @@ import CommentList from '../components/comments/CommentList.vue'
 const route = useRoute()
 const { t } = useI18n()
 const shareSuccess = ref(false)
+
+/**
+ * 获取真正的滚动容器
+ * 使用 function 声明以支持提升 (Hoisting)
+ */
+function getScrollContainer() {
+  return document.getElementById('main-scroll')
+}
+
+// 图片缩放实例
+const zoomInstance = ref(null)
+
+/**
+ * 初始化文章中的图片缩放
+ */
+const initImageZoom = () => {
+  // 确保在内容渲染后的 DOM 中查找图片
+  const images = document.querySelectorAll('.blog-content img')
+  if (images.length === 0) return
+
+  // 如果已有实例，先清理
+  if (zoomInstance.value) {
+    zoomInstance.value.detach()
+  }
+
+  // 初始化新实例
+  zoomInstance.value = mediumZoom(images, {
+    margin: 24,
+    background: 'transparent', // 使用 CSS 变量控制背景
+    scrollOffset: 0,
+    container: document.body
+  })
+}
 
 // 阅读历史管理
 const { value: readingHistory } = useLocalStorage('blog-reading-history', [])
@@ -286,6 +231,127 @@ const parsePostId = () => {
  * 当前文章ID（响应式）
  */
 const postId = ref(parsePostId())
+
+/**
+ * 文章目录
+ */
+const toc = ref([])
+const activeId = ref('')
+
+/**
+ * 统一的 ID 生成器
+ * 确保目录和正文中的 ID 绝对匹配
+ */
+const generateHeadingId = (text) => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\u4e00-\u9fa5-]+/g, '')
+    .slice(0, 50) // 限制长度
+}
+
+/**
+ * 提取文章目录
+ * 直接从渲染后的 DOM 中提取，确保 ID 100% 匹配
+ */
+const generateTOC = () => {
+  nextTick(() => {
+    // 增加一个小延时，确保 v-html 已经完全渲染并插入到浏览器
+    setTimeout(() => {
+      const contentEl = document.querySelector('.blog-content')
+      if (!contentEl) return
+
+      const headingElements = contentEl.querySelectorAll('h2, h3')
+      const headings = []
+
+      headingElements.forEach((el) => {
+        // 如果标题没有 ID，通过内部文本生成一个（保持和 renderer 一致）
+        if (!el.id) {
+          el.id = generateHeadingId(el.innerText)
+        }
+        
+        headings.push({
+          id: el.id,
+          title: el.innerText.replace('#', '').trim(),
+          level: parseInt(el.tagName.substring(1))
+        })
+      })
+
+      toc.value = headings
+      // 生成后立即检测一次高亮
+      updateActiveTOC()
+    }, 300)
+  })
+}
+
+/**
+ * 平滑滚动到指定锚点
+ */
+const scrollToAnchor = (id) => {
+  const el = document.getElementById(id)
+  const container = getScrollContainer()
+  if (!el || !container) return
+  
+  // 记录活跃 ID 产生即时反馈
+  activeId.value = id
+
+  // 核心公式：[元素相对于视口顶部的距离] - [容器相对于视口顶部的距离] + [容器当前的滚动高度]
+  const containerRect = container.getBoundingClientRect()
+  const elRect = el.getBoundingClientRect()
+  const targetY = elRect.top - containerRect.top + container.scrollTop - 24 // 留出一点顶部呼吸感
+
+  container.scrollTo({
+    top: targetY,
+    behavior: 'smooth'
+  })
+}
+
+/**
+ * 监听滚动更新活跃目录项
+ * 使用 getBoundingClientRect.top 替代 offsetTop，解决父容器 position:relative 导致的偏移问题
+ */
+const updateActiveTOC = () => {
+  const container = getScrollContainer()
+  if (!container || toc.value.length === 0) return
+
+  const threshold = 120 // 触发高亮的距离顶部的阈值
+  let currentActiveId = ''
+
+  for (const heading of toc.value) {
+    const el = document.getElementById(heading.id)
+    if (!el) continue
+
+    const containerRect = container.getBoundingClientRect()
+    const elRect = el.getBoundingClientRect()
+    const relativeTop = elRect.top - containerRect.top
+
+    // 寻找已经到达或超过视口顶部的最后一个标题
+    if (relativeTop <= threshold) {
+      currentActiveId = heading.id
+    } else {
+      break
+    }
+  }
+
+  if (currentActiveId) {
+    activeId.value = currentActiveId
+  }
+}
+
+/**
+ * 为正文中的标题添加 ID
+ */
+const addHeadingIds = (content) => {
+  const renderer = new marked.Renderer()
+  renderer.heading = function({ text, depth, raw }) {
+    const id = raw.toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\u4e00-\u9fa5-]+/g, '')
+    return `<h${depth} id="${id}">${text}</h${depth}>`
+  }
+  return renderer
+}
 
 /**
  * 当前文章
@@ -518,34 +584,21 @@ const readingProgress = ref(0)
  * 计算阅读进度
  */
 const calculateReadingProgress = () => {
-  if (!post.value) {
+  const container = getScrollContainer()
+  if (!container || !post.value) {
     readingProgress.value = 0
     return
   }
   
-  const article = document.querySelector('article')
-  if (!article) {
+  const scrollTop = container.scrollTop
+  const scrollHeight = container.scrollHeight - container.clientHeight
+  
+  if (scrollHeight <= 0) {
     readingProgress.value = 0
     return
   }
   
-  const articleTop = article.offsetTop
-  const articleHeight = article.offsetHeight
-  const windowHeight = window.innerHeight
-  const scrollTop = window.scrollY || document.documentElement.scrollTop
-  
-  // 计算文章在视口中的可见部分
-  const articleBottom = articleTop + articleHeight
-  const viewportTop = scrollTop
-  const viewportBottom = scrollTop + windowHeight
-  
-  // 计算已阅读的部分
-  const readTop = Math.max(viewportTop, articleTop)
-  const readBottom = Math.min(viewportBottom, articleBottom)
-  const readHeight = Math.max(0, readBottom - readTop)
-  
-  // 计算进度百分比
-  const progress = articleHeight > 0 ? (readHeight / articleHeight) * 100 : 0
+  const progress = (scrollTop / scrollHeight) * 100
   readingProgress.value = Math.min(100, Math.max(0, progress))
 }
 
@@ -554,6 +607,7 @@ const calculateReadingProgress = () => {
  */
 const handleScroll = () => {
   calculateReadingProgress()
+  updateActiveTOC()
 }
 
 /**
@@ -583,10 +637,49 @@ const renderedContent = computed(() => {
   if (!post.value) return ''
   const content = post.value.content || post.value.excerpt || ''
   
+  // 自定义渲染器
+  const renderer = new marked.Renderer()
+  
+  // 自定义代码块渲染
+  renderer.code = function({ text, lang, escaped }) {
+    const language = lang || 'text'
+    const codeId = `code-${Math.random().toString(36).substr(2, 9)}`
+    // 预先获取翻译文本，避免在模板字符串中逻辑失效
+    const copyLabel = t('common.copy') || 'Copy'
+    
+    return `
+      <div class="code-block-wrapper group">
+        <div class="code-block-header">
+          <div class="code-block-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <span class="code-block-lang">${language}</span>
+          <button class="copy-button" data-code-id="${codeId}">
+            <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span class="copy-text">${copyLabel}</span>
+          </button>
+        </div>
+        <pre><code class="hljs language-${language}" id="${codeId}">${text}</code></pre>
+      </div>
+    `
+  }
+
+  // 自定义标题渲染，添加 ID
+  renderer.heading = function({ text, depth, raw }) {
+    const id = generateHeadingId(raw)
+    return `<h${depth} id="${id}" class="scroll-mt-24 group flex items-center transition-all duration-300">
+      <span class="heading-text">${text}</span>
+      <a href="#${id}" class="opacity-0 group-hover:opacity-40 transition-opacity ml-2 text-base no-underline">#</a>
+    </h${depth}>`
+  }
+  
   // 配置marked选项
   marked.setOptions({
-    breaks: true, // 支持换行
-    gfm: true, // GitHub风格Markdown
+    renderer,
+    breaks: true,
+    gfm: true,
   })
   
   try {
@@ -595,10 +688,46 @@ const renderedContent = computed(() => {
     return marked.parse(processedContent)
   } catch (error) {
     console.error('Markdown parsing error:', error)
-    // 如果解析失败，返回原始内容（转义HTML）
     return content.replace(/</g, '&lt;').replace(/>/g, '&gt;')
   }
 })
+
+/**
+ * 处理全局点击事件（事件委托处理复制代码）
+ */
+const handleContentClick = async (e) => {
+  const copyBtn = e.target.closest('.copy-button')
+  if (!copyBtn) return
+
+  const codeId = copyBtn.getAttribute('data-code-id')
+  const codeEl = document.getElementById(codeId)
+  if (!codeEl) return
+
+  try {
+    await navigator.clipboard.writeText(codeEl.innerText)
+    
+    // 反馈动画
+    const copyText = copyBtn.querySelector('.copy-text')
+    const originalText = copyText.innerText
+    copyText.innerText = t('blog.copied')
+    copyBtn.classList.add('copied')
+    
+    setTimeout(() => {
+      copyText.innerText = originalText
+      copyBtn.classList.remove('copied')
+    }, 2000)
+  } catch (err) {
+    console.error('Failed to copy:', err)
+  }
+}
+
+// 监听内容渲染完成，初始化图片缩放和目录生成
+watch(() => renderedContent.value, () => {
+  nextTick(() => {
+    initImageZoom()
+    generateTOC()
+  })
+}, { immediate: true })
 
 /**
  * 检查文章是否已收藏
@@ -662,16 +791,21 @@ watch(() => post.value, () => {
   }
 }, { immediate: true })
 
-// 监听滚动事件
+// 生命周期：绑定到 main-scroll 容器而非 window
 onMounted(() => {
-  // loadPost() 已在 watch 中通过 immediate: true 调用，不需要重复调用
-  window.addEventListener('scroll', handleScroll, { passive: true })
+  const container = getScrollContainer()
+  if (container) {
+    container.addEventListener('scroll', handleScroll, { passive: true })
+  }
   // 初始计算一次
-  setTimeout(calculateReadingProgress, 100)
+  setTimeout(handleScroll, 500)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+  const container = getScrollContainer()
+  if (container) {
+    container.removeEventListener('scroll', handleScroll)
+  }
 })
 
 /**
