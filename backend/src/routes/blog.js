@@ -6,8 +6,63 @@
 import express from 'express'
 import { Blog } from '../models/Blog.js'
 import { getDatabase } from '../config/database.js'
+import { generateBlogImage } from '../utils/imageGenerator.js'
 
 const router = express.Router()
+
+/**
+ * 获取文章动态预览图/海报
+ * GET /api/blogs/:id/og-image
+ * 参数: type=poster (生成带二维码的海报)
+ */
+router.get('/:id/og-image', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id)
+    const isPoster = req.query.type === 'poster'
+    const blog = Blog.getById(id)
+
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' })
+    }
+
+    // 获取前端 Origin
+    // 优先使用请求头中的 Origin，否则从 Referer 中解析出 Origin 部分
+    let frontendOrigin = req.get('origin')
+    if (!frontendOrigin && req.get('referer')) {
+      try {
+        const refUrl = new URL(req.get('referer'))
+        frontendOrigin = refUrl.origin
+      } catch (e) {
+        // 解析失败则留空
+      }
+    }
+    
+    // 兜底方案：如果是本地开发且拿不到头信息，才使用请求的主机名（仅作万一之计）
+    if (!frontendOrigin) {
+      frontendOrigin = `${req.protocol}://${req.get('host')}`
+    }
+
+    const blogUrl = `${frontendOrigin}/blog/${blog.id}`
+
+    // 生成图片
+    const imageBuffer = await generateBlogImage({
+      title: blog.title,
+      genre: blog.genre || blog.category || 'Tech',
+      date: blog.published_at || blog.date,
+      slug: blog.slug,
+      url: blogUrl,
+      isPoster: isPoster
+    })
+
+    // 设置响应头并发送图片
+    res.set('Content-Type', 'image/png')
+    res.set('Cache-Control', 'public, max-age=86400') // 缓存 24 小时
+    res.send(imageBuffer)
+  } catch (error) {
+    console.error('Error generating blog image:', error)
+    res.status(500).json({ error: 'Failed to generate image' })
+  }
+})
 
 /**
  * 获取博客列表
