@@ -38,7 +38,9 @@
               <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-secondary text-xs rounded-md font-bold uppercase tracking-wide">
                 {{ post.genre || post.category }}
               </span>
-              <span class="text-xs text-muted font-mono">{{ post.date }}</span>
+              <span class="text-xs text-muted font-mono" :title="$t('blog.publishedAt') || '发布于'">
+                {{ formatDateTime(post.published_at || post.date, true) }}
+              </span>
               <div v-if="post.tags && post.tags.length > 0" class="flex items-center gap-2 flex-wrap">
                 <span 
                   v-for="tag in post.tags" 
@@ -66,43 +68,22 @@
             ></div>
           </div>
 
-          <footer class="mt-12 pt-8 border-t border-border-base">
-            <div class="flex items-center justify-between flex-wrap gap-4">
-              <div class="flex flex-wrap gap-2">
-                <span v-for="tag in post.tags" :key="tag" class="px-3 py-1 rounded-full text-xs font-bold" :style="getTagStyle(tag, isDarkGlobal).style">#{{ tag }}</span>
-              </div>
-              <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
-                  <div class="relative">
-                    <button @click="shareArticle" class="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-secondary transition-colors" style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-dark);" @mouseenter="handleShareBtnHoverEnter" @mouseleave="handleShareBtnHoverLeave">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-                      <span class="text-sm">{{ shareSuccess ? $t('blog.copied') : $t('blog.share') }}</span>
-                    </button>
-                    <transition enter-active-class="transition-all duration-300" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="transition-all duration-200" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95"><div v-if="shareSuccess" class="absolute -top-12 left-1/2 -translate-x-1/2 text-white px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-lg z-10" style="background-color: var(--theme-primary);">{{ $t('blog.linkCopied') }}<div class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style="border-top-color: var(--theme-primary);"></div></div></transition>
-                  </div>
-
-                  <!-- 海报分享按钮 -->
-                  <button 
-                    @click="generatePoster"
-                    class="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-800/50 rounded-lg text-secondary transition-colors"
-                    style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-light);"
-                    @mouseenter="handleShareBtnHoverEnter"
-                    @mouseleave="handleShareBtnHoverLeave"
-                    :title="$t('blog.generatePoster')"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <circle cx="8.5" cy="8.5" r="1.5"/>
-                      <polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                  </button>
-                </div>
-
-                <div class="flex items-center gap-3 text-muted text-sm border-l border-border-base pl-4 ml-2">
-                  <button @click="toggleLike" class="flex items-center gap-1 transition-colors hover:text-red-500 dark:hover:text-red-400" :class="isLiked ? 'text-red-500 dark:text-red-400' : ''" :disabled="isTogglingLike"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>{{ (post.likes_count !== undefined && post.likes_count !== null) ? post.likes_count : (post.likes || 0) }}</button>
-                  <span class="flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>{{ post.comments ?? 0 }}</span>
-                </div>
-              </div>
+          <footer class="mt-12 pt-8 border-t border-border-base flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="text-xs text-muted space-y-1">
+              <p>{{ $t('blog.publishedAt') || '发布于' }}: {{ formatDateTime(post.published_at || post.date, true) }}</p>
+              <p v-if="post.updated_at && post.updated_at !== (post.published_at || post.date)">
+                {{ $t('blog.updatedAt') || '最后更新' }}: {{ formatDateTime(post.updated_at, true) }}
+              </p>
+            </div>
+            <div class="lg:hidden flex items-center gap-2">
+              <button @click="toggleLike" class="flex items-center gap-1.5 px-4 py-2 bg-red-500/10 text-red-500 rounded-lg text-sm font-bold">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" :fill="isLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                {{ post.likes_count || 0 }}
+              </button>
+              <button @click="generatePoster" class="flex items-center gap-1.5 px-4 py-2 bg-slate-100 dark:bg-white/5 text-secondary rounded-lg text-sm font-bold">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                {{ $t('blog.share') }}
+              </button>
             </div>
           </footer>
         </article>
@@ -143,23 +124,80 @@
         </div>
       </div>
 
-      <!-- 右侧目录 (仅大屏显示) -->
-      <aside v-if="toc.length > 0" class="hidden lg:block w-64 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
-        <div class="glass-card p-6 rounded-2xl">
-          <h3 class="text-sm font-bold text-main mb-4 uppercase tracking-wider flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+      <!-- 右侧信息栏 (仅大屏显示) -->
+      <aside class="hidden lg:block w-72 sticky top-24 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
+        <!-- 文章概览卡片 -->
+        <div v-if="post" class="glass-card p-6 rounded-2xl animate-fade-in">
+          <h3 class="text-xs font-bold text-muted mb-4 uppercase tracking-widest">{{ $t('blog.articleOverview') || '文章概览' }}</h3>
+          
+          <div class="space-y-4">
+            <!-- 统计数据 -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col">
+                <span class="text-2xl font-bold text-main">{{ post.views || 0 }}</span>
+                <span class="text-xs text-muted">{{ $t('blog.views') || '阅读量' }}</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-2xl font-bold text-main">{{ readingTime }}</span>
+                <span class="text-xs text-muted">{{ $t('blog.readingTime') || '分钟阅读' }}</span>
+              </div>
+            </div>
+
+            <!-- 互动按钮 -->
+            <div class="flex items-center gap-2 pt-2">
+              <button 
+                @click="toggleLike" 
+                class="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl transition-all"
+                :class="isLiked ? 'bg-red-500 text-white' : 'bg-slate-100 dark:bg-white/5 text-secondary hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500'"
+                :disabled="isTogglingLike"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" :fill="isLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span class="text-sm font-bold">{{ post.likes_count || 0 }}</span>
+              </button>
+              
+              <button 
+                @click="generatePoster"
+                class="px-4 py-2 bg-slate-100 dark:bg-white/5 text-secondary rounded-xl hover:bg-[var(--theme-primary)] hover:text-white transition-all"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              </button>
+            </div>
+
+            <!-- 标签 -->
+            <div v-if="post.tags && post.tags.length > 0" class="pt-2">
+              <div class="flex flex-wrap gap-2">
+                <span 
+                  v-for="tag in post.tags" 
+                  :key="tag"
+                  class="px-2 py-1 text-[10px] rounded-md font-bold transition-transform hover:scale-105 cursor-default"
+                  :style="getTagStyle(tag, isDarkGlobal).style"
+                >
+                  #{{ tag }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 目录卡片 -->
+        <div v-if="toc.length > 0" class="glass-card p-6 rounded-2xl">
+          <h3 class="text-xs font-bold text-muted mb-4 uppercase tracking-widest flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
             {{ $t('blog.toc') }}
           </h3>
           <ul class="space-y-3">
             <li 
               v-for="item in toc" 
               :key="item.id"
-              :style="{ paddingLeft: (item.level - 2) * 1.25 + 'rem' }"
+              :style="{ paddingLeft: (item.level - 2) * 1 + 'rem' }"
               class="transition-all duration-300"
             >
               <button 
                 @click="scrollToAnchor(item.id)"
-                class="text-sm text-left transition-all hover:text-[var(--theme-primary)] block w-full truncate py-1"
+                class="text-sm text-left transition-all hover:text-[var(--theme-primary)] block w-full truncate py-0.5"
                 :class="activeId === item.id ? 'toc-item-active' : 'text-muted'"
               >
                 {{ item.title }}
@@ -209,6 +247,21 @@
                 />
               </div>
 
+              <!-- 链接展示区 -->
+              <div class="mt-6 p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 flex items-center justify-between gap-4">
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs text-muted mb-1">{{ $t('blog.articleLink') || '文章链接' }}</p>
+                  <p class="text-sm font-mono truncate text-secondary">{{ articleUrl }}</p>
+                </div>
+                <button 
+                  @click="shareArticle"
+                  class="shrink-0 p-2 hover:bg-[var(--theme-primary)] hover:text-white rounded-lg transition-all text-secondary"
+                  :title="$t('common.copy')"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+              </div>
+
               <!-- 操作栏 -->
               <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <p class="text-sm text-secondary opacity-70">
@@ -249,6 +302,7 @@ const { t } = useI18n()
 const shareSuccess = ref(false)
 const showPosterModal = ref(false)
 const post = ref(null)
+const postId = ref(null)
 const isLoading = ref(false)
 const allPosts = ref([])
 const isLiked = ref(false)
@@ -257,6 +311,36 @@ const toc = ref([])
 const activeId = ref('')
 const readingProgress = ref(0)
 const zoomInstance = ref(null)
+
+/**
+ * 格式化日期时间
+ * 修复时区偏差，并支持分钟精度
+ */
+const formatDateTime = (dateStr, showTime = false) => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  
+  if (showTime) {
+    const hh = String(date.getHours()).padStart(2, '0')
+    const mm = String(date.getMinutes()).padStart(2, '0')
+    return `${y}-${m}-${d} ${hh}:${mm}`
+  }
+  return `${y}-${m}-${d}`
+}
+
+/**
+ * 计算预计阅读时间 (300字/分钟)
+ */
+const readingTime = computed(() => {
+  if (!post.value?.content) return 0
+  const text = post.value.content.replace(/[#*`>!\[\]\(\)-]/g, '')
+  return Math.ceil(text.length / 300) || 1
+})
 
 // --- 2. 核心辅助计算 ---
 // 安全获取暗色模式状态（用于模板）
@@ -384,6 +468,7 @@ const { applySEO } = useSEO()
 const loadPost = async () => {
   const postIdVal = parseInt(route.params.id)
   if (isNaN(postIdVal)) return
+  postId.value = postIdVal
   isLoading.value = true
   try {
     const article = await blogApi.getById(postIdVal)
@@ -458,6 +543,12 @@ const recordReadingHistory = () => {
 
 // --- 7. 海报功能 ---
 const generatePoster = () => { showPosterModal.value = true }
+
+const articleUrl = computed(() => {
+  if (typeof window === 'undefined') return ''
+  return `${window.location.origin}/blog/${post.value?.id}`
+})
+
 const posterUrl = computed(() => {
   if (!post.value) return ''
   const apiBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://workspace.gellaronline.cc/api' : 'http://localhost:3001/api')

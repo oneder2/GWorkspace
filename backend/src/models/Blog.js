@@ -193,10 +193,16 @@ export class Blog {
     if (status !== undefined) {
       updateFields.push('status = ?')
       updateValues.push(status)
+      
+      // 如果状态从草稿变为已发布，且之前没有发布时间，则设置发布时间
+      if (status === 'published' && (!blog.published_at)) {
+        updateFields.push('published_at = ?')
+        updateValues.push(new Date().toISOString())
+      }
     }
-    if (published_at !== undefined) {
+    if (published_at !== undefined && published_at !== null) {
       updateFields.push('published_at = ?')
-      updateValues.push(published_at)
+      updateValues.push(new Date(published_at).toISOString())
     }
 
     // 更新updated_at

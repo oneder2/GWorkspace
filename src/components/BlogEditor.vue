@@ -880,12 +880,25 @@ watch(() => formData.value.content, (newContent) => {
  */
 const initFormData = () => {
   if (props.isEditMode && props.article) {
+    // 修复：处理现有日期的本地化显示，防止时区导致的日期偏差
+    let displayDate = ''
+    if (props.article.published_at || props.article.date) {
+      const dateObj = new Date(props.article.published_at || props.article.date)
+      if (!isNaN(dateObj.getTime())) {
+        const y = dateObj.getFullYear()
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0')
+        const d = String(dateObj.getDate()).padStart(2, '0')
+        displayDate = `${y}-${m}-${d}`
+      }
+    }
+    if (!displayDate) displayDate = new Date().toISOString().split('T')[0]
+
     // 编辑模式：填充现有数据
     formData.value = {
       id: props.article.id,
       title: props.article.title || '',
       genre: props.article.genre || props.article.category || '',
-      date: props.article.date || new Date().toISOString().split('T')[0],
+      date: displayDate,
       excerpt: props.article.excerpt || '',
       tags: [...(props.article.tags || [])],
       content: props.article.content || '',
@@ -1114,7 +1127,18 @@ const handleSubmit = async () => {
         slug = 'untitled-' + Date.now()
       }
     }
-    const publishedAt = formData.value.date ? `${formData.value.date}T00:00:00.000Z` : null
+    // 修复：不要强制使用 Z (UTC)，应包含本地时区信息或保持本地时间字符串
+    // 更好的做法是直接传递 ISO 字符串，由后端处理或保持原始输入
+    let publishedAt = null
+    if (formData.value.date) {
+      const localDate = new Date(formData.value.date)
+      // 如果是新文章，使用当前的小时分钟，保持发布时刻的精确
+      if (!props.isEditMode) {
+        const now = new Date()
+        localDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds())
+      }
+      publishedAt = localDate.toISOString()
+    }
 
     // 再次验证所有必需字段（双重检查）
     if (!formData.value.title?.trim()) {
