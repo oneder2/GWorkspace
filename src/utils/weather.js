@@ -16,27 +16,74 @@ const IP_API = 'https://ipapi.co/json/'
 
 /**
  * 通过IP地址获取位置信息
+ * 采用多重回退机制确保可靠性
  * @returns {Promise<Object>} 包含城市、国家等位置信息
  */
 export async function getLocationByIP() {
-  try {
-    const response = await fetch(IP_API)
-    const data = await response.json()
-    return {
-      city: data.city || 'Unknown',
-      country: data.country_name || 'Unknown',
-      lat: data.latitude,
-      lon: data.longitude
+  const providers = [
+    {
+      url: 'https://ipapi.co/json/',
+      parse: (data) => ({
+        city: data.city,
+        country: data.country_name,
+        lat: data.latitude,
+        lon: data.longitude
+      })
+    },
+    {
+      url: 'https://ipwho.is/',
+      parse: (data) => ({
+        city: data.city,
+        country: data.country,
+        lat: data.latitude,
+        lon: data.longitude
+      })
+    },
+    {
+      url: 'https://freeipapi.com/api/json',
+      parse: (data) => ({
+        city: data.cityName,
+        country: data.countryName,
+        lat: data.latitude,
+        lon: data.longitude
+      })
     }
-  } catch (error) {
-    console.error('Failed to get location by IP:', error)
-    // 返回默认位置（北京）
-    return {
-      city: 'Beijing',
-      country: 'China',
-      lat: 39.9042,
-      lon: 116.4074
+  ]
+
+  for (const provider of providers) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      
+      const response = await fetch(provider.url, { signal: controller.signal })
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) continue
+      
+      const data = await response.json()
+      const result = provider.parse(data)
+      
+      if (result.lat && result.lon) {
+        console.log(`[Weather] Location found using ${provider.url}:`, result.city)
+        return {
+          city: result.city || 'Unknown',
+          country: result.country || 'Unknown',
+          lat: result.lat,
+          lon: result.lon
+        }
+      }
+    } catch (error) {
+      console.warn(`[Weather] Provider ${provider.url} failed:`, error.message)
     }
+  }
+
+  // 最终回退：北京
+  console.error('[Weather] All location providers failed, falling back to Beijing')
+  return {
+    city: 'Beijing',
+    country: 'China',
+    lat: 39.9042,
+    lon: 116.4074
   }
 }
 
@@ -56,6 +103,7 @@ export async function getWeather(lat, lon) {
   const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   try {
+    // 尝试 wttr.in (JSON 格式)
     const url = `https://wttr.in/${lat},${lon}?format=j1&lang=zh`
     const response = await fetch(url, {
       headers: {
@@ -66,35 +114,56 @@ export async function getWeather(lat, lon) {
     
     clearTimeout(timeoutId);
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    
-    const data = await response.json()
-    
-    if (data.current_condition && data.current_condition[0]) {
-      const current = data.current_condition[0]
-      return {
-        temp: parseInt(current.temp_C) || parseInt(current.temp_F),
-        condition: current.weatherDesc?.[0]?.value || 'Unknown',
-        icon: current.weatherCode,
-        humidity: current.humidity,
-        windSpeed: current.windspeedKmph,
-        city: data.nearest_area?.[0]?.areaName?.[0]?.value || 'Unknown'
+    if (response.ok) {
+      const data = await response.json()
+      
+      if (data.current_condition && data.current_condition[0]) {
+        const current = data.current_condition[0]
+        return {
+          temp: parseInt(current.temp_C) || parseInt(current.temp_F) || 0,
+          condition: current.lang_zh?.[0]?.value || current.weatherDesc?.[0]?.value || 'Unknown',
+          icon: current.weatherCode,
+          humidity: current.humidity,
+          windSpeed: current.windspeedKmph,
+          city: data.nearest_area?.[0]?.areaName?.[0]?.value || 'Unknown'
+        }
       }
     }
     
-    throw new Error('Invalid weather data')
+    throw new Error('wttr.in provided invalid or empty data')
   } catch (error) {
     clearTimeout(timeoutId);
-    console.warn('Weather fetch warning (ignoring):', error.message);
-    // 返回模拟数据作为fallback
+    console.warn('[Weather] wttr.in failed or timed out:', error.message);
+    
+    // 尝试 fallback: Open-Meteo (非常稳定，不需要 API Key)
+    try {
+      const fallbackUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+      const fallbackRes = await fetch(fallbackUrl)
+      if (fallbackRes.ok) {
+        const fbData = await fallbackRes.json()
+        if (fbData.current_weather) {
+          console.log('[Weather] Successfully used Open-Meteo as fallback')
+          return {
+            temp: Math.round(fbData.current_weather.temperature),
+            condition: 'Clear', // Open-Meteo current_weather doesn't give text desc easily without code mapping
+            icon: String(fbData.current_weather.weathercode),
+            humidity: '--',
+            windSpeed: fbData.current_weather.windspeed,
+            city: 'Local'
+          }
+        }
+      }
+    } catch (fbError) {
+      console.warn('[Weather] Fallback weather provider also failed:', fbError.message)
+    }
+
+    // 最终回退数据
     return {
-      temp: 23,
-      condition: 'Partly Cloudy',
+      temp: '--',
+      condition: 'Unknown',
       icon: '116',
-      humidity: 65,
-      windSpeed: 10,
+      humidity: '--',
+      windSpeed: '--',
       city: 'Unknown'
     }
   }

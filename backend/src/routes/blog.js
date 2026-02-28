@@ -45,19 +45,27 @@ router.get('/:id/og-image', async (req, res) => {
     const blogUrl = `${frontendOrigin}/blog/${blog.id}`
 
     // 生成图片
-    const imageBuffer = await generateBlogImage({
-      title: blog.title,
-      genre: blog.genre || blog.category || 'Tech',
-      date: blog.published_at || blog.date,
-      slug: blog.slug,
-      url: blogUrl,
-      isPoster: isPoster
-    })
+    try {
+      const { buffer, contentType } = await generateBlogImage({
+        title: blog.title,
+        genre: blog.genre || blog.category || 'Tech',
+        date: blog.published_at || blog.date,
+        slug: blog.slug,
+        url: blogUrl,
+        isPoster: isPoster
+      })
 
-    // 设置响应头并发送图片
-    res.set('Content-Type', 'image/png')
-    res.set('Cache-Control', 'public, max-age=86400') // 缓存 24 小时
-    res.send(imageBuffer)
+      // 设置响应头并发送图片
+      res.set('Content-Type', contentType || 'image/png')
+      res.set('Cache-Control', 'public, max-age=86400')
+      res.send(buffer)
+    } catch (genError) {
+      console.error('[OG-Image] Generation totally failed:', genError.message)
+      if (blog.image) {
+        return res.redirect(blog.image)
+      }
+      res.status(500).json({ error: 'Image generation service unavailable' })
+    }
   } catch (error) {
     console.error('Error generating blog image:', error)
     res.status(500).json({ error: 'Failed to generate image' })

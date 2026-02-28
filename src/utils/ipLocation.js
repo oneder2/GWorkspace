@@ -11,61 +11,89 @@ const IP_API_SECONDARY = 'https://ip-api.com/json'
  * 获取访问者的真实公网IP地址
  */
 export async function getClientIP() {
-  try {
-    const response = await fetch(IP_API_PRIMARY)
-    if (!response.ok) throw new Error('Primary IP API failed')
-    const data = await response.json()
-    return data.ip || null
-  } catch (error) {
+  const providers = [
+    'https://api.ipify.org?format=json',
+    'https://ipapi.co/json/',
+    'https://ipwho.is/'
+  ]
+
+  for (const url of providers) {
     try {
-      const response = await fetch(IP_API_SECONDARY)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      
+      const response = await fetch(url, { signal: controller.signal })
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) continue
+      
       const data = await response.json()
-      return data.query || null
-    } catch (e) {
-      console.error('All IP APIs failed:', e)
-      return null
+      // 不同 API 的 IP 字段名不同
+      const ip = data.ip || data.ipAddress || data.query
+      
+      if (ip) return ip
+    } catch (error) {
+      console.warn(`[IP] Provider ${url} failed:`, error.message)
     }
   }
+
+  return null
 }
 
 /**
  * 获取访问者的位置信息
+ * 采用多重回退机制，确保在不同网络环境下均能获取信息
  */
 export async function getClientLocationInfo() {
-  // 尝试首选 API
-  try {
-    const response = await fetch(IP_API_PRIMARY)
-    if (response.ok) {
-      const data = await response.json()
-      if (!data.error) {
-        return {
-          ip: data.ip,
-          location: `${data.city}, ${data.country_name}`,
-          timezone: data.timezone
-        }
-      }
+  const providers = [
+    {
+      url: 'https://ipapi.co/json/',
+      parse: (data) => ({
+        ip: data.ip,
+        location: `${data.city}, ${data.country_name}`,
+        timezone: data.timezone
+      })
+    },
+    {
+      url: 'https://ipwho.is/',
+      parse: (data) => ({
+        ip: data.ip,
+        location: `${data.city}, ${data.country}`,
+        timezone: data.timezone?.id
+      })
+    },
+    {
+      url: 'https://freeipapi.com/api/json',
+      parse: (data) => ({
+        ip: data.ipAddress,
+        location: `${data.cityName}, ${data.countryName}`,
+        timezone: data.timeZone
+      })
     }
-  } catch (error) {
-    console.warn('Primary IP API failed, trying fallback...')
+  ]
+
+  for (const provider of providers) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      
+      const response = await fetch(provider.url, { signal: controller.signal })
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) continue
+      
+      const data = await response.json()
+      const result = provider.parse(data)
+      
+      if (result.ip && result.location) {
+        return result
+      }
+    } catch (error) {
+      console.warn(`[IP Location] Provider ${provider.url} failed:`, error.message)
+    }
   }
 
-  // 尝试备用 API
-  try {
-    const response = await fetch(IP_API_SECONDARY)
-    if (response.ok) {
-      const data = await response.json()
-      if (data.status === 'success') {
-        return {
-          ip: data.query,
-          location: `${data.city}, ${data.country}`,
-          timezone: data.timezone
-        }
-      }
-    }
-  } catch (error) {
-    console.error('All IP location APIs failed')
-  }
-
+  console.error('[IP Location] All location providers failed')
   return null
 }
 

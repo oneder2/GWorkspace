@@ -147,6 +147,37 @@ async function getLocationFromIpApi(ip = null) {
 }
 
 /**
+ * 从ipwho.is获取位置信息
+ * @param {string} ip - IP地址（可选）
+ * @returns {Promise<Object>} 位置信息
+ */
+async function getLocationFromIpwhois(ip = null) {
+  const apiUrl = ip ? `https://ipwho.is/${ip}` : 'https://ipwho.is/'
+  const response = await fetch(apiUrl)
+  
+  if (!response.ok) {
+    throw new Error(`Ipwhois returned ${response.status}`)
+  }
+  
+  const data = await response.json()
+  
+  if (!data.success) {
+    throw new Error(data.message || 'Failed to get location')
+  }
+  
+  return {
+    city: data.city || null,
+    country: data.country || null,
+    countryCode: data.country_code || null,
+    timezone: data.timezone?.id || null,
+    utcOffset: data.timezone?.utc || null,
+    lat: data.latitude || null,
+    lon: data.longitude || null,
+    location: `${data.city}, ${data.country}`
+  }
+}
+
+/**
  * 根据IP地址获取位置和时区信息
  * 支持重试机制和多个备用API
  * @param {string} ip - IP地址（可选，不提供则使用请求的IP）
@@ -177,6 +208,7 @@ export async function getLocationByIP(ip = null, options = {}) {
   // API列表（按优先级）
   const apis = [
     { name: 'ipapi.co', fn: () => getLocationFromIpapi(ip) },
+    { name: 'ipwho.is', fn: () => getLocationFromIpwhois(ip) },
     { name: 'ip-api.com', fn: () => getLocationFromIpApi(ip) }
   ]
   
