@@ -74,7 +74,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { commentsApi } from '../../utils/api'
+import { adminApi, commentsApi } from '../../utils/api'
 
 const { t } = useI18n()
 
@@ -87,14 +87,7 @@ const isLoading = ref(false)
 const loadComments = async () => {
   isLoading.value = true
   try {
-    const token = localStorage.getItem('token')
-    const response = await fetch(`${API_BASE_URL}/admin/comments`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    if (!response.ok) throw new Error('Failed to fetch comments')
-    comments.value = await response.json()
+    comments.value = await adminApi.getComments()
   } catch (error) {
     console.error('Failed to load comments:', error)
     comments.value = []
@@ -147,4 +140,3 @@ onMounted(() => {
   loadComments()
 })
 </script>
-

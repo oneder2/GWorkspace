@@ -5,6 +5,7 @@
 
 import express from 'express'
 import { Visit } from '../models/Visit.js'
+import { authenticate, requireAdmin } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -45,7 +46,7 @@ router.post('/visits', (req, res) => {
  * - startDate: 开始日期
  * - endDate: 结束日期
  */
-router.get('/visits', (req, res) => {
+router.get('/visits', authenticate, requireAdmin, (req, res) => {
   try {
     const { startDate, endDate } = req.query
     const stats = Visit.getOverallStats({ startDate, endDate })
@@ -60,7 +61,7 @@ router.get('/visits', (req, res) => {
  * 获取单篇博客的统计
  * GET /api/analytics/blogs/:id/stats
  */
-router.get('/blogs/:id/stats', (req, res) => {
+router.get('/blogs/:id/stats', authenticate, requireAdmin, (req, res) => {
   try {
     const blogId = parseInt(req.params.id)
     const { startDate, endDate } = req.query
@@ -77,7 +78,7 @@ router.get('/blogs/:id/stats', (req, res) => {
  * 获取概览统计
  * GET /api/analytics/overview
  */
-router.get('/overview', (req, res) => {
+router.get('/overview', authenticate, requireAdmin, (req, res) => {
   try {
     const { days = 7 } = req.query
     const trend = Visit.getTrend({ days: parseInt(days) })
@@ -94,5 +95,4 @@ router.get('/overview', (req, res) => {
 })
 
 export default router
-
 

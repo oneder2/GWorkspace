@@ -15,6 +15,7 @@ const getApiBaseUrl = () => {
 }
 
 const API_BASE_URL = getApiBaseUrl()
+export { API_BASE_URL }
 
 /**
  * 获取认证token
@@ -173,6 +174,28 @@ export const uploadApi = {
 export const adminSettingsApi = {
   get: () => request('/admin/settings'),
   update: (data) => request('/admin/settings', { method: 'PUT', body: JSON.stringify(data) })
+}
+
+export const adminApi = {
+  getBlogs: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/admin/blogs${queryString ? `?${queryString}` : ''}`)
+  },
+  getBlogById: (id) => request(`/admin/blogs/${id}`),
+  getBlogGenres: () => request('/admin/blogs/genres'),
+  getBlogTags: () => request('/admin/blogs/tags'),
+  getComments: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/admin/comments${queryString ? `?${queryString}` : ''}`)
+  },
+  getGuestbook: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/admin/guestbook${queryString ? `?${queryString}` : ''}`)
+  },
+  getAnalyticsOverview: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/admin/analytics/overview${queryString ? `?${queryString}` : ''}`)
+  }
 }
 
 /**

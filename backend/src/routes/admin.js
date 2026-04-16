@@ -10,6 +10,7 @@ import { Comment } from '../models/Comment.js'
 import { Visit } from '../models/Visit.js'
 import { User } from '../models/User.js'
 import { AdminSettings } from '../models/AdminSettings.js'
+import { Guestbook } from '../models/Guestbook.js'
 import { getDatabase } from '../config/database.js'
 import { getLocationByIP, isLocalOrReservedIP } from '../utils/ipLocation.js'
 
@@ -29,8 +30,7 @@ router.get('/settings', optionalAuthenticate, (req, res) => {
     // 只返回位置和时区信息，不返回其他敏感设置
     res.json({
       location: settings.location,
-      timezone: settings.timezone,
-      ip_address: settings.ip_address
+      timezone: settings.timezone
     })
   } catch (error) {
     console.error('Error fetching admin settings:', error)
@@ -74,6 +74,40 @@ router.get('/blogs', (req, res) => {
   }
 })
 
+router.get('/blogs/genres', (req, res) => {
+  try {
+    res.json(Blog.getAllGenres(null))
+  } catch (error) {
+    console.error('Error fetching admin blog genres:', error)
+    res.status(500).json({ error: 'Failed to fetch blog genres' })
+  }
+})
+
+router.get('/blogs/tags', (req, res) => {
+  try {
+    res.json(Blog.getAllTags(null))
+  } catch (error) {
+    console.error('Error fetching admin blog tags:', error)
+    res.status(500).json({ error: 'Failed to fetch blog tags' })
+  }
+})
+
+router.get('/blogs/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id)
+    const blog = Blog.getById(id)
+
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' })
+    }
+
+    res.json(blog)
+  } catch (error) {
+    console.error('Error fetching admin blog:', error)
+    res.status(500).json({ error: 'Failed to fetch blog' })
+  }
+})
+
 /**
  * 获取所有评论
  * GET /api/admin/comments
@@ -107,6 +141,47 @@ router.get('/comments', (req, res) => {
   } catch (error) {
     console.error('Error fetching comments:', error)
     res.status(500).json({ error: 'Failed to fetch comments' })
+  }
+})
+
+router.get('/guestbook', (req, res) => {
+  try {
+    const {
+      status = null,
+      limit,
+      offset = 0,
+      sortBy = 'created_at',
+      sortOrder = 'desc'
+    } = req.query
+
+    const messages = Guestbook.getAll({
+      status: status === 'all' ? null : status,
+      limit: limit ? parseInt(limit) : null,
+      offset: parseInt(offset),
+      sortBy,
+      sortOrder
+    })
+
+    res.json(messages)
+  } catch (error) {
+    console.error('Error fetching guestbook messages:', error)
+    res.status(500).json({ error: 'Failed to fetch guestbook messages' })
+  }
+})
+
+router.get('/analytics/overview', (req, res) => {
+  try {
+    const { days = 7 } = req.query
+    const trend = Visit.getTrend({ days: parseInt(days) })
+    const overall = Visit.getOverallStats()
+
+    res.json({
+      trend,
+      overall
+    })
+  } catch (error) {
+    console.error('Error fetching admin analytics overview:', error)
+    res.status(500).json({ error: 'Failed to fetch analytics overview' })
   }
 })
 
@@ -313,4 +388,3 @@ router.put('/settings', async (req, res) => {
 })
 
 export default router
-

@@ -72,7 +72,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { guestbookApi } from '../../utils/api'
+import { adminApi, guestbookApi } from '../../utils/api'
 
 const { t } = useI18n()
 
@@ -106,7 +106,7 @@ const formatDate = (dateString) => {
 const loadMessages = async () => {
   isLoading.value = true
   try {
-    messages.value = await guestbookApi.getList({ status: 'all' })
+    messages.value = await adminApi.getGuestbook({ status: 'all' })
   } catch (error) {
     console.error('Failed to load guestbook messages:', error)
     messages.value = []
@@ -136,4 +136,3 @@ onMounted(() => {
   loadMessages()
 })
 </script>
-

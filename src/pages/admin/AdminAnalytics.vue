@@ -53,7 +53,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { analyticsApi } from '../../utils/api'
+import { adminApi } from '../../utils/api'
 
 const { t } = useI18n()
 
@@ -68,7 +68,7 @@ const overview = ref({
  */
 const loadAnalytics = async () => {
   try {
-    const data = await analyticsApi.getOverview({ days: 30 })
+    const data = await adminApi.getAnalyticsOverview({ days: 30 })
     overview.value = data.overall || overview.value
   } catch (error) {
     console.error('Failed to load analytics:', error)
@@ -79,5 +79,4 @@ onMounted(() => {
   loadAnalytics()
 })
 </script>
-
 

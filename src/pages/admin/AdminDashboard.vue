@@ -155,7 +155,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { blogApi, commentsApi, analyticsApi } from '../../utils/api'
+import { adminApi } from '../../utils/api'
 import Chart from 'chart.js/auto'
 
 const { t } = useI18n()
@@ -243,9 +243,10 @@ const loadDashboardData = async () => {
     const startTime = performance.now()
     
     // 1. 获取核心统计
-    const [blogs, overview] = await Promise.all([
-      blogApi.getList({ status: 'all' }),
-      analyticsApi.getOverview({ days: 7 })
+    const [blogs, overview, adminComments] = await Promise.all([
+      adminApi.getBlogs(),
+      adminApi.getAnalyticsOverview({ days: 7 }),
+      adminApi.getComments()
     ])
     
     stats.value.totalBlogs = blogs.length
@@ -299,6 +300,7 @@ const loadDashboardData = async () => {
 
     // 4. 获取最近文章
     recentBlogs.value = blogs.slice(0, 5)
+    pendingComments.value = (adminComments || []).filter(comment => comment.status === 'pending').slice(0, 5)
 
   } catch (error) {
     console.error('Failed to load dashboard:', error)
@@ -313,4 +315,3 @@ onUnmounted(() => {
   if (visitChart) visitChart.destroy()
 })
 </script>
-

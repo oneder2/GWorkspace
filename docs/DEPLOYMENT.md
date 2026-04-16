@@ -184,7 +184,7 @@ cd backend
 npm start
 ```
 
-在浏览器访问 `http://your-server-ip:3001/api/health` 应该返回健康状态。
+在浏览器访问 `http://your-server-ip:3001/health` 应该返回健康状态。
 
 ## 使用进程管理器
 
@@ -555,4 +555,3 @@ sudo systemctl reload nginx
 - API：`https://your-domain.com/api`
 
 如有问题，请查看日志文件或联系技术支持。
-

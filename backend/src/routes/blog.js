@@ -7,6 +7,7 @@ import express from 'express'
 import { Blog } from '../models/Blog.js'
 import { getDatabase } from '../config/database.js'
 import { generateBlogImage } from '../utils/imageGenerator.js'
+import { authenticate, requireAdmin } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -21,7 +22,7 @@ router.get('/:id/og-image', async (req, res) => {
     const isPoster = req.query.type === 'poster'
     const blog = Blog.getById(id)
 
-    if (!blog) {
+    if (!blog || blog.status !== 'published') {
       return res.status(404).json({ error: 'Blog not found' })
     }
 
@@ -87,7 +88,6 @@ router.get('/', (req, res) => {
   try {
     const {
       genre,
-      status = 'published',
       limit,
       offset = 0,
       sortBy = 'published_at',
@@ -96,7 +96,7 @@ router.get('/', (req, res) => {
 
     const options = {
       genre: genre || null,
-      status: status === 'all' ? null : status, // 'all'表示获取所有状态
+      status: 'published',
       limit: limit ? parseInt(limit) : null,
       offset: parseInt(offset),
       sortBy,
@@ -154,10 +154,7 @@ router.get('/stats', (req, res) => {
  */
 router.get('/genres', (req, res) => {
   try {
-    const { status } = req.query
-    // 如果status为'all'，则获取所有状态；否则使用指定状态或null（所有状态）
-    const genreStatus = status === 'all' ? null : (status || null)
-    const genres = Blog.getAllGenres(genreStatus)
+    const genres = Blog.getAllGenres('published')
     res.json(genres)
   } catch (error) {
     console.error('Error fetching genres:', error)
@@ -174,10 +171,7 @@ router.get('/genres', (req, res) => {
  */
 router.get('/tags', (req, res) => {
   try {
-    const { status } = req.query
-    // 如果status为'all'，则获取所有状态；否则使用指定状态或null（所有状态）
-    const tagStatus = status === 'all' ? null : (status || null)
-    const tags = Blog.getAllTags(tagStatus)
+    const tags = Blog.getAllTags('published')
     res.json(tags)
   } catch (error) {
     console.error('Error fetching tags:', error)
@@ -194,7 +188,7 @@ router.get('/:id', (req, res) => {
     const id = parseInt(req.params.id)
     const blog = Blog.getById(id)
 
-    if (!blog) {
+    if (!blog || blog.status !== 'published') {
       return res.status(404).json({ error: 'Blog not found' })
     }
 
@@ -214,7 +208,7 @@ router.get('/slug/:slug', (req, res) => {
     const { slug } = req.params
     const blog = Blog.getBySlug(slug)
 
-    if (!blog) {
+    if (!blog || blog.status !== 'published') {
       return res.status(404).json({ error: 'Blog not found' })
     }
 
@@ -230,7 +224,7 @@ router.get('/slug/:slug', (req, res) => {
  * POST /api/blogs
  * 需要认证（后续实现）
  */
-router.post('/', (req, res) => {
+router.post('/', authenticate, requireAdmin, (req, res) => {
   try {
     // 记录请求信息用于调试
     console.log('POST /api/blogs - Request received')
@@ -332,7 +326,7 @@ router.post('/', (req, res) => {
  * PUT /api/blogs/:id
  * 需要认证（后续实现）
  */
-router.put('/:id', (req, res) => {
+router.put('/:id', authenticate, requireAdmin, (req, res) => {
   try {
     const id = parseInt(req.params.id)
     const blog = Blog.getById(id)
@@ -367,7 +361,7 @@ router.put('/:id', (req, res) => {
  * DELETE /api/blogs/:id
  * 需要认证（后续实现）
  */
-router.delete('/:id', (req, res) => {
+router.delete('/:id', authenticate, requireAdmin, (req, res) => {
   try {
     const id = parseInt(req.params.id)
     const success = Blog.delete(id)
@@ -390,6 +384,11 @@ router.delete('/:id', (req, res) => {
 router.post('/:id/views', (req, res) => {
   try {
     const id = parseInt(req.params.id)
+    const existingBlog = Blog.getById(id)
+    if (!existingBlog || existingBlog.status !== 'published') {
+      return res.status(404).json({ error: 'Blog not found' })
+    }
+
     const blog = Blog.incrementViews(id)
 
     if (!blog) {
@@ -404,4 +403,3 @@ router.post('/:id/views', (req, res) => {
 })
 
 export default router
-

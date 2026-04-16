@@ -97,7 +97,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { blogApi } from '../../utils/api'
+import { adminApi, blogApi } from '../../utils/api'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -112,7 +112,7 @@ const loadBlogs = async () => {
   isLoading.value = true
   try {
     // 获取所有博客（包括草稿）
-    const allBlogs = await blogApi.getList({ status: 'all' })
+    const allBlogs = await adminApi.getBlogs()
     blogs.value = allBlogs || []
   } catch (error) {
     console.error('Failed to load blogs:', error)
@@ -150,5 +150,4 @@ onMounted(() => {
   loadBlogs()
 })
 </script>
-
 

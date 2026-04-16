@@ -401,7 +401,7 @@ import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css' // 亮色主题作为基础
-import { blogApi, generateSlug, uploadApi } from '../utils/api'
+import { adminApi, blogApi, generateSlug, uploadApi } from '../utils/api'
 import { getTagStyle } from '../utils/tagColor'
 import { getCachedGenres, getCachedTags, setCachedGenres, setCachedTags } from '../utils/suggestionCache'
 
@@ -719,8 +719,8 @@ const loadSuggestions = async () => {
     
     // 获取所有状态的分类和标签（包括草稿）
     const [genres, tags] = await Promise.all([
-      blogApi.getAllGenres({ status: 'all' }),
-      blogApi.getAllTags({ status: 'all' })
+      adminApi.getBlogGenres(),
+      adminApi.getBlogTags()
     ])
     
     apiGenres.value = genres || []
@@ -1262,4 +1262,3 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
-

@@ -4,6 +4,7 @@
  * 使用懒加载优化性能，减少初始包大小
  */
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuth } from '../composables/useAuth.js'
 
 /**
  * 路由懒加载函数
@@ -141,13 +142,27 @@ const router = createRouter({
 /**
  * 路由守卫：更新页面标题
  */
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   // 根据路由 meta 更新标题
   if (to.meta.title) {
     document.title = `${to.meta.title} - GWorkspace`
   } else {
     document.title = 'GWorkspace - Personal Workspace'
   }
+
+  const { user, isAdmin, authReady } = useAuth()
+  await authReady
+
+  if (to.meta.requiresAuth && !user.value) {
+    next('/blog')
+    return
+  }
+
+  if (to.meta.requiresAdmin && !isAdmin.value) {
+    next('/blog')
+    return
+  }
+
   next()
 })
 
