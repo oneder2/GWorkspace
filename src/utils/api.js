@@ -48,8 +48,10 @@ async function request(url, options = {}) {
       if (response.status === 401) {
         localStorage.removeItem('token')
       }
-      const error = await response.json().catch(() => ({ error: response.statusText }))
-      throw new Error(error.message || error.error || `HTTP ${response.status}`)
+      const errorPayload = await response.json().catch(() => ({ error: response.statusText }))
+      const requestError = new Error(errorPayload.message || errorPayload.error || `HTTP ${response.status}`)
+      Object.assign(requestError, errorPayload, { status: response.status })
+      throw requestError
     }
 
     return await response.json()

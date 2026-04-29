@@ -4,10 +4,17 @@
 -->
 <template>
   <div class="space-y-6">
-    <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.comments') }}</h2>
+    <div class="admin-panel rounded-[24px] overflow-hidden">
+      <div class="admin-toolbar flex-col sm:flex-row sm:items-end">
+        <div class="space-y-2">
+          <span class="section-kicker">Moderation</span>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.comments') }}</h2>
+          <p class="text-sm text-secondary">Review, approve, or remove discussion without leaving the queue.</p>
+        </div>
+      </div>
+    </div>
 
-    <!-- 评论列表 -->
-    <div class="glass-card rounded-2xl overflow-hidden">
+    <div class="admin-panel rounded-[24px] overflow-hidden">
       <div v-if="isLoading" class="p-8 text-center text-slate-500 dark:text-slate-400">
         {{ $t('common.loading') }}
       </div>
@@ -15,51 +22,43 @@
         {{ $t('admin.noComments') }}
       </div>
       <div v-else class="divide-y divide-slate-200 dark:divide-slate-700">
-                  <div 
-                    v-for="comment in comments" 
-                    :key="comment.id"
-                    class="p-6 hover:bg-white/20 dark:hover:bg-white/5 transition-colors"
-                  >          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <div class="flex items-center gap-3 mb-2">
+        <div
+          v-for="comment in comments"
+          :key="comment.id"
+          class="p-5 sm:p-6 hover:bg-white/20 dark:hover:bg-white/5 transition-colors"
+        >
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div class="flex-1 min-w-0 space-y-3">
+              <div class="flex flex-wrap items-center gap-2.5">
                 <span class="font-semibold text-slate-800 dark:text-slate-200">
                   {{ comment.user_id === null ? $t('auth.deletedUser') : comment.author_name }}
                 </span>
-                <span class="text-xs text-slate-500 dark:text-slate-400">{{ comment.created_at }}</span>
-                <span
-                  class="px-2 py-1 text-xs font-semibold rounded-full"
-                  :class="comment.status === 'approved'
-                    ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                    : comment.status === 'spam'
-                    ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'"
-                >
+                <span class="status-pill" :class="getStatusClass(comment.status)">
                   {{ comment.status }}
                 </span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">{{ comment.created_at }}</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">{{ $t('admin.blogId') }}: {{ comment.blog_id }}</span>
               </div>
-              <p class="text-slate-700 dark:text-slate-300 mb-2">{{ comment.content }}</p>
-              <p class="text-xs text-slate-500 dark:text-slate-400">
-                {{ $t('admin.blogId') }}: {{ comment.blog_id }}
-              </p>
+              <p class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-7">{{ comment.content }}</p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2 lg:pl-4">
               <button
                 v-if="comment.status !== 'approved'"
                 @click="approveComment(comment.id)"
-                class="px-3 py-1 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                class="action-btn px-4 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700"
               >
                 {{ $t('admin.approve') }}
               </button>
               <button
                 v-if="comment.status !== 'spam'"
                 @click="markSpam(comment.id)"
-                class="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                class="action-btn px-4 py-2 text-sm text-white bg-rose-600 hover:bg-rose-700"
               >
                 {{ $t('admin.markSpam') }}
               </button>
               <button
                 @click="deleteComment(comment.id)"
-                class="px-3 py-1 text-sm bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                class="action-btn action-btn-secondary px-4 py-2 text-sm"
               >
                 {{ $t('admin.delete') }}
               </button>
@@ -80,6 +79,12 @@ const { t } = useI18n()
 
 const comments = ref([])
 const isLoading = ref(false)
+
+const getStatusClass = (status) => {
+  if (status === 'approved') return 'status-pill-success'
+  if (status === 'spam') return 'status-pill-danger'
+  return 'status-pill-neutral'
+}
 
 /**
  * 加载所有评论

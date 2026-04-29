@@ -3,32 +3,32 @@
   采用清淡的磨砂玻璃设计，条理清晰
 -->
 <template>
-  <div class="glass-card rounded-3xl p-6 md:p-8 flex flex-col border border-border-base shadow-xl backdrop-blur-xl bg-white/40 dark:bg-slate-900/40">
-    <div class="flex items-center justify-between mb-8 pb-4 border-b border-border-base">
-      <div class="flex items-center gap-3">
+  <div class="surface-panel rounded-3xl p-6 md:p-8 flex flex-col min-w-0">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 border-b border-border-base min-w-0">
+      <div class="flex items-center gap-3 min-w-0">
         <div class="w-1.5 h-6 bg-[var(--theme-primary)] rounded-full"></div>
-        <h3 class="font-bold text-xl tracking-tight text-main">
+        <h3 class="font-bold text-xl tracking-tight text-main min-w-0 break-words">
           {{ $t('home.updateLog') }}
         </h3>
       </div>
-      <span class="text-[10px] uppercase tracking-widest text-muted font-bold opacity-60">Changelog</span>
+      <span class="text-[10px] uppercase tracking-widest text-muted font-bold opacity-60 sm:text-right">Changelog</span>
     </div>
 
     <div class="space-y-8 overflow-y-auto custom-scrollbar pr-2 flex-1 max-h-[400px]">
       <div v-for="(update, index) in updates" :key="index" class="group">
-        <div class="flex items-baseline gap-4 mb-3">
-          <span class="text-sm font-black text-[var(--theme-primary)] opacity-80 group-hover:opacity-100 transition-opacity">
+        <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4 mb-3 min-w-0">
+          <span class="text-sm font-black text-[var(--theme-primary)] opacity-80 group-hover:opacity-100 transition-opacity break-words">
             {{ update.version }}
           </span>
-          <span class="text-[11px] font-bold text-muted uppercase tracking-tighter">
+          <span class="text-[11px] font-bold text-muted uppercase tracking-tighter break-words">
             {{ update.date }}
           </span>
         </div>
         
         <ul class="space-y-2.5 ml-1">
-          <li v-for="(item, i) in update.items" :key="i" class="text-sm text-secondary flex items-start gap-3 leading-relaxed">
+          <li v-for="(item, i) in update.items" :key="i" class="text-sm text-secondary flex items-start gap-3 leading-relaxed min-w-0">
             <div class="mt-1.5 w-1 h-1 rounded-full bg-border-base shrink-0 group-hover:bg-[var(--theme-primary)] transition-colors"></div>
-            <span>{{ item }}</span>
+            <span class="break-words">{{ item }}</span>
           </li>
         </ul>
       </div>

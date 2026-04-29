@@ -28,7 +28,7 @@
       leave-from-class="opacity-100 max-h-screen"
       leave-to-class="opacity-0 max-h-0"
     >
-      <div v-if="showMobileFilters" class="xl:hidden glass-card p-4 rounded-xl mb-4 space-y-4">
+      <div v-if="showMobileFilters" class="xl:hidden surface-card p-4 rounded-[24px] mb-4 space-y-4">
         <!-- Genre分类筛选 -->
         <div>
           <h3 class="text-sm font-bold mb-3 text-main">{{ $t('blog.genre') }}</h3>
@@ -70,10 +70,10 @@
     </transition>
 
     <!-- 左侧标签和归档 - 放在左侧空白区域，桌面端显示 -->
-    <div class="glass-card w-56 hidden xl:block shrink-0 rounded-2xl">
+    <div class="surface-card w-64 hidden xl:block shrink-0 rounded-[28px]">
       <div class="sticky top-6 space-y-1.5 p-4">
         <!-- 统计信息卡片 -->
-        <div class="mb-6 pb-6 border-b border-slate-200 dark:border-slate-700">
+        <div class="mb-6 pb-6 border-b border-border-base">
           <h3 class="text-lg font-bold mb-4 text-main">{{ $t('blog.statistics') }}</h3>
           <div class="space-y-3">
             <div class="flex items-center justify-between">
@@ -168,7 +168,7 @@
     <div class="flex-1 min-w-0 flex flex-col min-h-full">
       <!-- 搜索栏和创建按钮 - 固定在顶部，水平排列 -->
       <div class="mb-6 shrink-0">
-        <div class="glass-card p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+        <div class="surface-panel p-4 rounded-[24px] flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
           <!-- 搜索框 - 占据剩余空间 -->
           <div class="flex-1 min-w-0">
             <div class="relative">
@@ -213,11 +213,11 @@
             v-for="post in filteredPosts" 
             :key="post.id" 
             @click="$router.push(`/blog/${post.id}`)"
-            class="blog-article-card glass-card p-6 rounded-2xl group cursor-pointer border-l-4 transition-all animate-fade-in"
+            class="blog-article-card surface-card p-6 rounded-[28px] group cursor-pointer border-l-4 transition-all animate-fade-in"
           >
             <!-- 文章内容保持不变 -->
             <div class="flex items-center gap-3 mb-2 flex-wrap text-xs text-muted">
-              <span class="font-mono">{{ formatDateChinese(post.published_at || post.date) }}</span>
+              <span class="font-mono">{{ formatBlogDate(getBlogDateValue(post), 'zh') }}</span>
               <span class="text-slate-300 dark:text-slate-600">·</span>
               <span class="flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
@@ -299,6 +299,7 @@ import { useRouter } from 'vue-router'
 import Fuse from 'fuse.js'
 import { useLocalStorage } from '../composables/useStorage'
 import { blogApi } from '../utils/api'
+import { formatBlogArchiveLabel, formatBlogDate, getBlogDateValue } from '../utils/blogDate'
 import Guestbook from '../components/Guestbook.vue'
 import AuthModal from '../components/AuthModal.vue'
 import BlogSkeleton from '../components/BlogSkeleton.vue'
@@ -428,24 +429,6 @@ const loadBlogStats = async () => {
 const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 
 /**
- * 格式化日期为中文格式
- */
-const formatDateChinese = (dateStr) => {
-  if (!dateStr) return ''
-  const date = new Date(dateStr)
-  if (isNaN(date.getTime())) return dateStr
-  const year = date.getFullYear()
-  const month = date.getMonth() + 1
-  const day = date.getDate()
-  const hours = date.getHours()
-  const minutes = date.getMinutes()
-  if (hours !== 0 || minutes !== 0) {
-    return `${year}年${month}月${day}日 ${hours}时${minutes.toString().padStart(2, '0')}分`
-  }
-  return `${year}年${month}月${day}日`
-}
-
-/**
  * 计算文章热度
  */
 const calculateHeat = (post) => {
@@ -472,10 +455,7 @@ const getTagColor = (tagName) => {
  * 解析日期字符串为月份格式
  */
 const parseDateToMonth = (dateStr) => {
-  const date = new Date(dateStr)
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                     'July', 'August', 'September', 'October', 'November', 'December']
-  return `${monthNames[date.getMonth()]} ${date.getFullYear()}`
+  return formatBlogArchiveLabel(dateStr)
 }
 
 /**
@@ -484,8 +464,9 @@ const parseDateToMonth = (dateStr) => {
 const archives = computed(() => {
   const archiveMap = new Map()
   blogPosts.value.forEach(post => {
-    if (post.date) {
-      const month = parseDateToMonth(post.date)
+    const blogDate = getBlogDateValue(post)
+    if (blogDate) {
+      const month = parseDateToMonth(blogDate)
       archiveMap.set(month, (archiveMap.get(month) || 0) + 1)
     }
   })
@@ -533,7 +514,7 @@ const filteredPosts = computed(() => {
   }
   
   if (selectedArchive.value) {
-    result = result.filter(post => parseDateToMonth(post.date) === selectedArchive.value)
+    result = result.filter(post => parseDateToMonth(getBlogDateValue(post)) === selectedArchive.value)
   }
   
   if (searchQuery.value?.trim()) {
@@ -562,4 +543,3 @@ onMounted(() => {
 /* 导入页面样式 */
 @import '../styles/pages/BlogPage.css';
 </style>
-

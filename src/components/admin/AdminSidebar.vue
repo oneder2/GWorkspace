@@ -5,23 +5,26 @@
 -->
 <template>
   <aside 
-    class="glass-sidebar rounded-none md:rounded-2xl sm:md:rounded-3xl flex flex-col shrink-0 transition-all duration-300 h-full shadow-lg" 
+    class="admin-sidebar rounded-none md:rounded-[28px] flex flex-col shrink-0 transition-all duration-300 h-full shadow-lg" 
     :class="collapsed ? 'w-16 lg:w-20' : 'w-full lg:w-64'"
   >
     <!-- 头部 Logo - 管理后台标识 -->
     <div class="py-4 px-4 flex flex-col items-center relative">
       <div 
         @click="$emit('toggle-collapse')" 
-        class="flex items-center gap-3 transition-opacity duration-300 cursor-pointer group hover:opacity-80 active:scale-95 transition-all w-full"
+        class="flex items-center gap-3 transition-opacity duration-300 cursor-pointer group hover:opacity-80 active:scale-95 transition-all w-full px-2 py-2 rounded-2xl"
         v-if="!collapsed"
         :title="$t('common.collapse')"
       >
-        <div class="p-2 bg-border-base/50 rounded-lg shadow-sm">
+        <div class="p-2.5 bg-[color-mix(in_srgb,var(--theme-primary)_8%,transparent)] rounded-2xl shadow-sm border border-border-base">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-main">
             <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
           </svg>
         </div>
-        <span class="font-bold text-xl tracking-tight text-main transition-colors group-hover:[color:var(--theme-primary)]">{{ $t('admin.title') }}</span>
+        <div class="min-w-0">
+          <span class="block font-bold text-xl tracking-tight text-main transition-colors group-hover:[color:var(--theme-primary)]">{{ $t('admin.title') }}</span>
+          <span class="block text-[11px] uppercase tracking-[0.24em] text-muted">Control Center</span>
+        </div>
       </div>
       <div 
         @click="$emit('toggle-collapse')" 
@@ -41,7 +44,7 @@
         <div 
           @click="handleNavClick(item)"
           data-nav-item
-          class="px-4 py-3.5 rounded-xl cursor-pointer flex items-center gap-4 transition-all duration-200 group border"
+          class="px-4 py-3.5 rounded-2xl cursor-pointer flex items-center gap-4 transition-all duration-200 group border"
           :class="[
             isActive(item.path) ? 'nav-active border-border-base text-main' : 'border-transparent text-secondary',
             isActive(item.path) && isThemeTransparent ? 'nav-active-fallback' : ''

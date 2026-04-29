@@ -7,7 +7,7 @@
 <template>
   <div class="animate-fade-in rounded-3xl flex gap-6 xl:gap-8 min-h-full overflow-hidden">
     <!-- 左侧工具筛选栏 - 放在左侧空白区域，桌面端显示，玻璃卡片背景，无标题 -->
-    <div class="glass-card w-56 hidden xl:block shrink-0 rounded-2xl">
+    <div class="surface-card w-60 hidden xl:block shrink-0 rounded-[28px]">
       <div class="sticky top-6 space-y-1.5 p-2.5">
         <button 
           v-for="tool in tools" 
@@ -50,7 +50,7 @@
     <div class="flex-1 min-w-0 flex flex-col min-h-full">
       <!-- 移动端工具选择器 - 下拉栏形式 -->
       <div class="xl:hidden mb-4 sm:mb-6">
-        <div class="glass-card-tools rounded-xl sm:rounded-2xl shadow-lg overflow-hidden" data-tool-dropdown>
+        <div class="surface-panel rounded-[24px] shadow-lg overflow-hidden" data-tool-dropdown>
           <div class="relative">
             <!-- 下拉按钮 -->
             <button
@@ -145,7 +145,7 @@
 
       <!-- 工具内容区域 - 使用flex-1填充剩余空间，优化样式和间距 -->
       <div 
-        class="glass-card-tools rounded-2xl flex-1 shadow-lg transition-all duration-300 flex flex-col"
+        class="surface-panel rounded-[32px] flex-1 shadow-lg transition-all duration-300 flex flex-col"
         :class="{
           'p-6 md:p-8 lg:p-10': !['calc', 'pomodoro', 'stopwatch', 'worldclock'].includes(currentTool),
           'p-4 md:p-6': ['calc', 'pomodoro', 'stopwatch', 'worldclock'].includes(currentTool)

@@ -11,16 +11,16 @@
 
       <!-- Content -->
       <div class="flex-grow min-w-0">
-        <div class="bg-white/40 dark:bg-slate-800/40 rounded-xl p-3 sm:p-4 hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors">
+        <div class="surface-card rounded-[22px] p-4 sm:p-5">
           <!-- Header -->
           <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
               <span class="font-extrabold text-sm sm:text-base" style="color: var(--theme-primary-darker);">
                 {{ comment.author_name }}
               </span>
               <span 
                 v-if="comment.user_id === 1" 
-                class="px-1.5 py-0.5 bg-[var(--theme-primary)] text-white text-[10px] rounded uppercase font-bold shadow-sm"
+                class="status-pill status-pill-neutral text-[10px]"
               >
                 Admin
               </span>
@@ -36,7 +36,7 @@
           </div>
 
           <!-- Footer Actions -->
-          <div class="mt-3 flex items-center justify-between">
+          <div class="mt-4 flex items-center justify-between gap-3">
             <div class="flex items-center gap-4">
               <button 
                 @click="showReplyForm = !showReplyForm"
@@ -54,7 +54,7 @@
               v-if="canDelete"
               @click="handleDelete"
               :disabled="deleting"
-              class="text-xs font-bold text-secondary hover:text-red-500 dark:hover:text-red-400 transition-colors flex items-center gap-1 opacity-0 group-hover:opacity-100 disabled:opacity-50"
+              class="text-xs font-bold text-secondary hover:text-red-500 dark:hover:text-red-400 transition-colors flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 disabled:opacity-50"
               :title="$t('common.delete')"
             >
               <span v-if="deleting" class="w-3 h-3 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></span>
@@ -78,7 +78,7 @@
         </div>
 
         <!-- Nested Replies -->
-        <div v-if="comment.replies && comment.replies.length > 0" class="mt-4 pl-4 sm:pl-6 border-l-2 border-border-base space-y-4">
+        <div v-if="comment.replies && comment.replies.length > 0" class="mt-4 pl-4 sm:pl-6 border-l-2 border-[color:var(--border-strong)] space-y-4">
           <CommentItem 
             v-for="reply in comment.replies" 
             :key="reply.id" 

@@ -4,6 +4,62 @@
  */
 
 import { getDatabase } from '../config/database.js'
+import { getTodayDateString, normalizePublishedAt } from '../utils/blogDate.js'
+
+const UNTITLED_DRAFT_TITLE = '未命名文件'
+
+const normalizeSlugSeed = (value) => (
+  String(value || '')
+    .toLowerCase()
+    .replace(/[^\w\u4e00-\u9fff-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+)
+
+const createUniqueDraftSlug = (seed = 'draft', excludeId = null) => {
+  const db = getDatabase()
+  const base = normalizeSlugSeed(seed) || 'draft'
+  let candidate = ''
+
+  do {
+    candidate = `${base}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+    const existing = db.prepare('SELECT id FROM blogs WHERE slug = ?').get(candidate)
+    if (!existing || existing.id === excludeId) {
+      return candidate
+    }
+  } while (true)
+}
+
+const resolveDraftPersistedFields = (data, existingBlog = null) => {
+  const status = data.status ?? existingBlog?.status ?? 'published'
+
+  if (status !== 'draft') {
+    return data
+  }
+
+  const nextData = { ...data }
+  const shouldFillTitle = (
+    (nextData.title === undefined && !existingBlog) ||
+    (typeof nextData.title === 'string' && nextData.title.trim().length === 0)
+  )
+  const autoFilledTitle = shouldFillTitle
+
+  if (shouldFillTitle) {
+    nextData.title = UNTITLED_DRAFT_TITLE
+  }
+
+  const slugIsBlank = nextData.slug === undefined || (typeof nextData.slug === 'string' && nextData.slug.trim().length === 0)
+  const hasPlaceholderSlug = autoFilledTitle && normalizeSlugSeed(nextData.slug) === normalizeSlugSeed(UNTITLED_DRAFT_TITLE)
+  if (slugIsBlank || hasPlaceholderSlug) {
+    if (existingBlog?.slug && nextData.slug !== undefined) {
+      nextData.slug = existingBlog.slug
+    } else if (!existingBlog || nextData.slug !== undefined) {
+      nextData.slug = createUniqueDraftSlug(nextData.title || existingBlog?.title || UNTITLED_DRAFT_TITLE, existingBlog?.id ?? null)
+    }
+  }
+
+  return nextData
+}
 
 /**
  * 博客模型类
@@ -107,6 +163,7 @@ export class Blog {
    */
   static create(data) {
     const db = getDatabase()
+    const persistedData = resolveDraftPersistedFields(data)
     const {
       title,
       slug,
@@ -116,10 +173,12 @@ export class Blog {
       tags = [],
       status = 'published',
       published_at = null
-    } = data
+    } = persistedData
 
     const now = new Date().toISOString()
-    const publishedAt = published_at || (status === 'published' ? now : null)
+    const normalizedPublishedAt = normalizePublishedAt(published_at)
+    const shouldAutoFillPublishedAt = published_at === undefined || published_at === null || published_at === ''
+    const publishedAt = normalizedPublishedAt ?? (status === 'published' && shouldAutoFillPublishedAt ? getTodayDateString() : null)
 
     const result = db.prepare(`
       INSERT INTO blogs (title, slug, genre, content, excerpt, tags, status, published_at, created_at, updated_at)
@@ -152,6 +211,8 @@ export class Blog {
     
     if (!blog) return null
 
+    const persistedData = resolveDraftPersistedFields(data, blog)
+
     const {
       title,
       slug,
@@ -161,7 +222,7 @@ export class Blog {
       tags,
       status,
       published_at
-    } = data
+    } = persistedData
 
     const updateFields = []
     const updateValues = []
@@ -195,14 +256,14 @@ export class Blog {
       updateValues.push(status)
       
       // 如果状态从草稿变为已发布，且之前没有发布时间，则设置发布时间
-      if (status === 'published' && (!blog.published_at)) {
+      if (status === 'published' && (!blog.published_at) && published_at === undefined) {
         updateFields.push('published_at = ?')
-        updateValues.push(new Date().toISOString())
+        updateValues.push(getTodayDateString())
       }
     }
-    if (published_at !== undefined && published_at !== null) {
+    if (published_at !== undefined) {
       updateFields.push('published_at = ?')
-      updateValues.push(new Date(published_at).toISOString())
+      updateValues.push(normalizePublishedAt(published_at))
     }
 
     // 更新updated_at
@@ -310,4 +371,3 @@ export class Blog {
     return Array.from(tagSet)
   }
 }
-

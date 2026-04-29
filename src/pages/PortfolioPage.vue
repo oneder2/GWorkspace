@@ -4,10 +4,11 @@
   模块化设计，便于添加新作品
 -->
 <template>
-  <div class="animate-fade-in max-w-6xl mx-auto">
-    <div class="text-center mb-10">
-      <h2 class="text-3xl font-bold text-main">{{ $t('portfolio.title') }}</h2>
-      <p class="text-muted mt-2">{{ $t('portfolio.subtitle') }}</p>
+  <div class="animate-fade-in max-w-6xl mx-auto space-y-8">
+    <div class="hero-panel rounded-[32px] p-8 sm:p-10 text-center">
+      <span class="section-kicker">Selected Work</span>
+      <h2 class="section-title mt-3">{{ $t('portfolio.title') }}</h2>
+      <p class="section-copy mt-3 mx-auto">{{ $t('portfolio.subtitle') }}</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <a 
@@ -15,7 +16,7 @@
         :key="work.title" 
         :href="work.url" 
         target="_blank" 
-        class="glass-card p-3 rounded-2xl group flex flex-col h-full hover:shadow-2xl transition-all duration-500"
+        class="surface-card p-3 rounded-[28px] group flex flex-col h-full hover:shadow-2xl transition-all duration-500"
       >
         <!-- 作品预览图 -->
         <div class="h-48 rounded-xl relative overflow-hidden bg-slate-100 dark:bg-slate-800">

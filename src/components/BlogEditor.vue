@@ -357,7 +357,14 @@
             {{ $t('common.cancel') }}
           </button>
           <button 
-            @click="handleSubmit"
+            @click="handleSubmit('draft')"
+            :disabled="isSubmitting"
+            class="px-6 py-2 border border-border-base bg-white/40 dark:bg-slate-800/40 text-secondary rounded-lg hover:bg-white/70 dark:hover:bg-slate-700/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+          >
+            {{ draftActionLabel }}
+          </button>
+          <button 
+            @click="handleSubmit('published')"
             :disabled="isSubmitting"
             class="px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
             :style="isThemeTransparent
@@ -387,7 +394,7 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            {{ isSubmitting ? $t('blog.submitting') : $t('common.save') }}
+            {{ isSubmitting ? $t('blog.submitting') : (isEditMode && formData.status === 'published' ? ($t('blog.updatePublished') || 'Update Published') : ($t('blog.publishArticle') || 'Publish Article')) }}
           </button>
         </div>
       </div>
@@ -402,6 +409,7 @@ import { marked } from 'marked'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css' // 亮色主题作为基础
 import { adminApi, blogApi, generateSlug, uploadApi } from '../utils/api'
+import { formatBlogDate, getBlogDateValue } from '../utils/blogDate'
 import { getTagStyle } from '../utils/tagColor'
 import { getCachedGenres, getCachedTags, setCachedGenres, setCachedTags } from '../utils/suggestionCache'
 
@@ -439,6 +447,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'success'])
 
 const { t } = useI18n()
+const UNTITLED_DRAFT_TITLE = '未命名文件'
 
 /**
  * 检查主题色是否为透明
@@ -571,11 +580,12 @@ const formData = ref({
   id: null,
   title: '',
   genre: '',
-  date: new Date().toISOString().split('T')[0], // 默认今天
+  date: '',
   excerpt: '',
   tags: [],
   content: '',
-  slug: ''
+  slug: '',
+  status: 'draft'
 })
 
 /**
@@ -594,6 +604,12 @@ const viewMode = ref('split')
 const isSubmitting = ref(false)
 const isUploadingImage = ref(false)
 const fileInputRef = ref(null)
+const draftActionLabel = computed(() => {
+  if (props.isEditMode && formData.value.status === 'published') {
+    return t('blog.convertToDraft') || 'Convert to Draft'
+  }
+  return t('blog.saveDraft') || 'Save Draft'
+})
 
 /**
  * 处理图片上传
@@ -880,18 +896,7 @@ watch(() => formData.value.content, (newContent) => {
  */
 const initFormData = () => {
   if (props.isEditMode && props.article) {
-    // 修复：处理现有日期的本地化显示，防止时区导致的日期偏差
-    let displayDate = ''
-    if (props.article.published_at || props.article.date) {
-      const dateObj = new Date(props.article.published_at || props.article.date)
-      if (!isNaN(dateObj.getTime())) {
-        const y = dateObj.getFullYear()
-        const m = String(dateObj.getMonth() + 1).padStart(2, '0')
-        const d = String(dateObj.getDate()).padStart(2, '0')
-        displayDate = `${y}-${m}-${d}`
-      }
-    }
-    if (!displayDate) displayDate = new Date().toISOString().split('T')[0]
+    const displayDate = formatBlogDate(getBlogDateValue(props.article)) || ''
 
     // 编辑模式：填充现有数据
     formData.value = {
@@ -902,7 +907,8 @@ const initFormData = () => {
       excerpt: props.article.excerpt || '',
       tags: [...(props.article.tags || [])],
       content: props.article.content || '',
-      slug: props.article.slug || generateSlug(props.article.title)
+      slug: props.article.slug || generateSlug(props.article.title),
+      status: props.article.status || 'published'
     }
   } else {
     // 新建模式：设置默认值
@@ -910,11 +916,12 @@ const initFormData = () => {
       id: null,
       title: '',
       genre: '',
-      date: new Date().toISOString().split('T')[0],
+      date: '',
       excerpt: '',
       tags: [],
       content: '',
-      slug: ''
+      slug: '',
+      status: 'draft'
     }
   }
   // 初始化时立即同步渲染内容，确保初次打开有内容
@@ -1041,31 +1048,40 @@ const handleTagButtonHoverLeave = (event) => {
 /**
  * 验证表单
  */
-const validateForm = () => {
+const validateForm = (targetStatus = 'published') => {
   errors.value = []
   
-  if (!formData.value.title || formData.value.title.trim().length === 0) {
+  if (targetStatus === 'published' && (!formData.value.title || formData.value.title.trim().length === 0)) {
     errors.value.push(t('blog.titleRequired') || 'Title is required')
   }
 
-  if (!formData.value.genre || formData.value.genre.trim().length === 0) {
-    errors.value.push(t('blog.genreRequired') || 'Genre is required')
+  const hasDate = !!formData.value.date
+  const hasValidDate = !hasDate || /^\d{4}-\d{2}-\d{2}/.test(formData.value.date)
+
+  if (!hasValidDate) {
+    errors.value.push(t('blog.dateRequired') || 'Date must be in YYYY-MM-DD format')
   }
 
-  if (!formData.value.date || !/^\d{4}-\d{2}-\d{2}/.test(formData.value.date)) {
-    errors.value.push(t('blog.dateRequired') || 'Date is required and must be in YYYY-MM-DD format')
-  }
+  if (targetStatus === 'published') {
+    if (!formData.value.genre || formData.value.genre.trim().length === 0) {
+      errors.value.push(t('blog.genreRequired') || 'Genre is required')
+    }
 
-  if (!formData.value.excerpt || formData.value.excerpt.trim().length === 0) {
-    errors.value.push(t('blog.excerptRequired') || 'Excerpt is required')
-  }
+    if (!hasDate) {
+      errors.value.push(t('blog.dateRequired') || 'Date is required and must be in YYYY-MM-DD format')
+    }
 
-  if (!Array.isArray(formData.value.tags) || formData.value.tags.length === 0) {
-    errors.value.push(t('blog.tagsRequired') || 'At least one tag is required')
-  }
+    if (!formData.value.excerpt || formData.value.excerpt.trim().length === 0) {
+      errors.value.push(t('blog.excerptRequired') || 'Excerpt is required')
+    }
 
-  if (!formData.value.content.trim()) {
-    errors.value.push(t('blog.contentRequired') || 'Content is required')
+    if (!Array.isArray(formData.value.tags) || formData.value.tags.length === 0) {
+      errors.value.push(t('blog.tagsRequired') || 'At least one tag is required')
+    }
+
+    if (!formData.value.content.trim()) {
+      errors.value.push(t('blog.contentRequired') || 'Content is required')
+    }
   }
 
   return errors.value.length === 0
@@ -1104,9 +1120,18 @@ const handleDelete = async () => {
 /**
  * 提交表单
  */
-const handleSubmit = async () => {
+const handleSubmit = async (targetStatus = 'published') => {
+  if (
+    targetStatus === 'draft' &&
+    props.isEditMode &&
+    formData.value.status === 'published' &&
+    !confirm(t('blog.confirmConvertToDraft') || 'Move this published article back to draft?')
+  ) {
+    return
+  }
+
   // 验证表单
-  if (!validateForm()) {
+  if (!validateForm(targetStatus)) {
     return
   }
 
@@ -1114,82 +1139,72 @@ const handleSubmit = async () => {
   errors.value = []
 
   try {
+    const rawTitle = (formData.value.title || '').trim()
+    const resolvedTitle = targetStatus === 'draft' && rawTitle.length === 0
+      ? UNTITLED_DRAFT_TITLE
+      : rawTitle
+
     // 准备数据 - 确保所有必需字段都有值并去除空白
     // 如果 slug 为空或只包含空格，自动从标题生成
     // 注意：generateSlug 已经支持中文字符，如果结果为空会返回 'untitled'
     const rawSlug = (formData.value.slug || '').trim()
     let slug = rawSlug
-    if (!slug) {
+    if (targetStatus === 'draft' && rawTitle.length === 0) {
+      slug = rawSlug || `draft-${Date.now().toString(36)}`
+    } else if (!slug) {
       // 如果 slug 为空，从标题生成
-      slug = generateSlug(formData.value.title)
+      slug = generateSlug(resolvedTitle)
       // 如果生成的 slug 仍然为空（理论上不应该发生），使用默认值
       if (!slug) {
-        slug = 'untitled-' + Date.now()
+        slug = targetStatus === 'draft'
+          ? `draft-${Date.now().toString(36)}`
+          : `untitled-${Date.now().toString(36)}`
       }
     }
-    // 修复：不要强制使用 Z (UTC)，应包含本地时区信息或保持本地时间字符串
-    // 更好的做法是直接传递 ISO 字符串，由后端处理或保持原始输入
-    let publishedAt = null
-    if (formData.value.date) {
-      const localDate = new Date(formData.value.date)
-      // 如果是新文章，使用当前的小时分钟，保持发布时刻的精确
-      if (!props.isEditMode) {
-        const now = new Date()
-        localDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds())
-      }
-      publishedAt = localDate.toISOString()
-    }
+    const publishedAt = formData.value.date || null
 
     // 再次验证所有必需字段（双重检查）
-    if (!formData.value.title?.trim()) {
+    if (targetStatus === 'published' && !resolvedTitle) {
       errors.value.push(t('blog.titleRequired') || 'Title is required')
       isSubmitting.value = false
       return
     }
-    if (!formData.value.genre?.trim()) {
+    if (targetStatus === 'published' && !formData.value.genre?.trim()) {
       errors.value.push(t('blog.genreRequired') || 'Genre is required')
       isSubmitting.value = false
       return
     }
-    if (!formData.value.content?.trim()) {
+    if (targetStatus === 'published' && !formData.value.content?.trim()) {
       errors.value.push(t('blog.contentRequired') || 'Content is required')
       isSubmitting.value = false
       return
     }
-    if (!formData.value.excerpt?.trim()) {
+    if (targetStatus === 'published' && !formData.value.excerpt?.trim()) {
       errors.value.push(t('blog.excerptRequired') || 'Excerpt is required')
       isSubmitting.value = false
       return
     }
-    if (!Array.isArray(formData.value.tags) || formData.value.tags.length === 0) {
+    if (targetStatus === 'published' && (!Array.isArray(formData.value.tags) || formData.value.tags.length === 0)) {
       errors.value.push(t('blog.tagsRequired') || 'At least one tag is required')
       isSubmitting.value = false
       return
     }
 
+    if (targetStatus === 'draft' && rawTitle.length === 0) {
+      formData.value.title = resolvedTitle
+    }
+    formData.value.slug = slug
+
     const articleData = {
-      title: formData.value.title.trim(),
+      title: resolvedTitle,
       slug: slug,
       genre: formData.value.genre.trim(),
       content: formData.value.content.trim(),
       excerpt: formData.value.excerpt.trim(),
       tags: formData.value.tags,
-      status: 'published',
+      status: targetStatus,
       published_at: publishedAt
     }
-
-    // 打印提交的数据（便于调试，包括生产环境）
-    console.log('Submitting article data:', {
-      title: articleData.title,
-      slug: articleData.slug,
-      genre: articleData.genre,
-      contentLength: articleData.content.length,
-      excerpt: articleData.excerpt,
-      tagsCount: articleData.tags.length,
-      status: articleData.status,
-      published_at: articleData.published_at
-    })
-    console.log('Full articleData object:', JSON.stringify(articleData, null, 2))
 
     // 调用API创建或更新文章
     let result
@@ -1201,28 +1216,33 @@ const handleSubmit = async () => {
 
     // 触发成功事件
     emit('success', {
-      article: result
+      article: result,
+      status: targetStatus
     })
 
     // 关闭编辑器
     handleClose()
   } catch (error) {
     console.error('Failed to submit article:', error)
-    // 如果有详细的错误信息（如missingFields），显示详细信息
+    const fieldMap = {
+      title: t('blog.title') || 'Title',
+      slug: t('blog.slug') || 'Slug',
+      genre: t('blog.genre') || 'Genre',
+      content: t('blog.content') || 'Content',
+      excerpt: t('blog.excerpt') || 'Excerpt',
+      tags: t('blog.tags') || 'Tags',
+      published_at: t('blog.date') || 'Date',
+      status: t('admin.status') || 'Status'
+    }
+
     if (error.missingFields && Array.isArray(error.missingFields)) {
-      const missingFieldNames = error.missingFields.map(field => {
-        const fieldMap = {
-          title: t('blog.title') || 'Title',
-          slug: t('blog.slug') || 'Slug',
-          genre: t('blog.genre') || 'Genre',
-          content: t('blog.content') || 'Content',
-          excerpt: t('blog.excerpt') || 'Excerpt'
-        }
-        return fieldMap[field] || field
-      })
+      const missingFieldNames = error.missingFields.map(field => fieldMap[field] || field)
       errors.value = [`${t('blog.missingFields') || 'Missing required fields'}: ${missingFieldNames.join(', ')}`]
+    } else if (error.invalidFields && Array.isArray(error.invalidFields)) {
+      const invalidFieldNames = error.invalidFields.map(field => fieldMap[field] || field)
+      errors.value = [`${t('blog.validationErrors') || 'Validation errors'}: ${invalidFieldNames.join(', ')}`]
     } else {
-    errors.value = [error.message || t('blog.submitError') || 'Failed to submit article']
+      errors.value = [error.message || t('blog.submitError') || 'Failed to submit article']
     }
   } finally {
     isSubmitting.value = false

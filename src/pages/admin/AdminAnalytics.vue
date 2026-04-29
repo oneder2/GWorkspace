@@ -4,26 +4,34 @@
 -->
 <template>
   <div class="space-y-6">
-    <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.analytics') }}</h2>
+    <div class="admin-panel rounded-[24px] overflow-hidden">
+      <div class="admin-toolbar flex-col sm:flex-row sm:items-end">
+        <div class="space-y-2">
+          <span class="section-kicker">Metrics</span>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.analytics') }}</h2>
+          <p class="text-sm text-secondary">High-signal traffic numbers and popular post movement, framed for scanning instead of decoration.</p>
+        </div>
+      </div>
+    </div>
 
     <!-- 总体统计 -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="glass-card p-6 rounded-2xl">
+      <div class="admin-stat p-6 rounded-[24px]">
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">{{ $t('admin.totalVisits') }}</p>
         <p class="text-3xl font-bold text-slate-800 dark:text-slate-200">{{ overview.total_visits || 0 }}</p>
       </div>
-      <div class="glass-card p-6 rounded-2xl">
+      <div class="admin-stat p-6 rounded-[24px]">
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">{{ $t('admin.uniqueVisitors') }}</p>
         <p class="text-3xl font-bold text-slate-800 dark:text-slate-200">{{ overview.unique_visitors || 0 }}</p>
       </div>
-      <div class="glass-card p-6 rounded-2xl">
+      <div class="admin-stat p-6 rounded-[24px]">
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">{{ $t('admin.popularBlogs') }}</p>
         <p class="text-3xl font-bold text-slate-800 dark:text-slate-200">{{ overview.popular_blogs?.length || 0 }}</p>
       </div>
     </div>
 
     <!-- 热门文章 -->
-    <div class="glass-card p-6 rounded-2xl">
+    <div class="admin-panel p-6 rounded-[24px]">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4">{{ $t('admin.popularBlogs') }}</h3>
       <div v-if="overview.popular_blogs && overview.popular_blogs.length > 0" class="space-y-3">
         <div
@@ -79,4 +87,3 @@ onMounted(() => {
   loadAnalytics()
 })
 </script>
-

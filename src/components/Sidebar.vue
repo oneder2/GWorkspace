@@ -5,11 +5,11 @@
 -->
 <template>
   <aside 
-    class="glass-sidebar rounded-none md:rounded-2xl sm:md:rounded-3xl flex flex-col shrink-0 transition-all duration-300 h-full shadow-lg" 
-    :class="collapsed ? 'w-16 sm:w-20' : 'w-full md:w-56 sm:md:w-64'"
+    class="surface-panel rounded-none md:rounded-[28px] flex flex-col shrink-0 transition-all duration-300 h-full shadow-lg overflow-hidden" 
+    :class="collapsed ? 'w-16 sm:w-20' : 'w-full md:w-64'"
   >
     <!-- 头部 Logo - 点击可收起/展开（桌面端）或关闭（移动端） -->
-    <div class="py-4 px-4 flex flex-col items-center relative">
+    <div class="py-5 px-4 flex flex-col items-center relative border-b border-[color:var(--border-strong)]">
       <div 
         @click="$emit('toggle-collapse')" 
         class="flex items-center gap-3 transition-opacity duration-300 cursor-pointer group hover:opacity-80 active:scale-95 transition-all w-full"
@@ -18,11 +18,14 @@
       >
         <!-- Logo图标：亮色模式使用黑色，暗色模式使用白色 -->
         <GWorkspaceIcon :size="60" variant="black" class="dark:brightness-0 dark:invert" />
-        <span class="font-bold text-xl tracking-tight text-main transition-colors group-hover:[color:var(--theme-primary)]">GWorkspace</span>
+        <div class="min-w-0">
+          <p class="section-kicker mb-1">Navigation</p>
+          <span class="font-bold text-xl tracking-tight text-main transition-colors group-hover:[color:var(--theme-primary)]">GWorkspace</span>
+        </div>
         <!-- 移动端关闭按钮 -->
         <button
           @click.stop="$emit('nav-click')"
-          class="md:hidden ml-auto p-1.5 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
+          class="md:hidden ml-auto icon-btn p-2"
           :title="$t('common.close')"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
@@ -43,12 +46,12 @@
     </div>
 
     <!-- 导航菜单 -->
-    <nav class="flex-1 overflow-y-auto px-4 space-y-2 py-4 custom-scrollbar">
+    <nav class="flex-1 overflow-y-auto px-3 sm:px-4 space-y-2 py-4 custom-scrollbar">
       <template v-for="item in navItems" :key="item.id">
         <div 
           @click="handleNavClick(item)"
           data-nav-item
-          class="px-4 py-3.5 rounded-xl cursor-pointer flex items-center gap-4 transition-all duration-200 group border"
+          class="px-4 py-3.5 rounded-[20px] cursor-pointer flex items-center gap-4 transition-all duration-200 group border"
           :class="[
             currentTab === item.id ? 'nav-active border-border-base text-main' : 'border-transparent text-secondary',
             currentTab === item.id && isThemeTransparent ? 'nav-active-fallback' : ''
@@ -64,50 +67,43 @@
     </nav>
 
     <!-- 底部页面信息区 -->
-    <div class="p-5 mt-auto space-y-2" v-if="!collapsed">
+    <div class="p-4 mt-auto space-y-3 border-t border-[color:var(--border-strong)]" v-if="!collapsed">
+      <button
+        @click="$emit('open-update-log')"
+        class="surface-card rounded-[20px] p-3 flex items-center gap-3 transition-colors group w-full text-left"
+      >
+        <FileTextIcon class="w-5 h-5 text-secondary transition-colors group-hover:text-main shrink-0" />
+        <div class="min-w-0">
+          <div class="text-sm font-medium text-secondary transition-colors group-hover:text-main">{{ $t('home.updateLog') }}</div>
+          <div class="text-xs text-muted truncate">Changelog</div>
+        </div>
+      </button>
+
       <a 
         href="https://github.com/oneder2/GWorkspace" 
         target="_blank"
-        class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-3 flex items-center gap-3 border border-border-base shadow-sm backdrop-blur-sm transition-colors group"
-        style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-        @mouseenter="handleFooterLinkHoverEnter"
-        @mouseleave="handleFooterLinkHoverLeave"
+        class="surface-card rounded-[20px] p-3 flex items-center gap-3 transition-colors group"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-secondary transition-colors"
-             style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-             @mouseenter="handleFooterIconHoverEnter"
-             @mouseleave="handleFooterIconHoverLeave">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-secondary transition-colors group-hover:text-main">
           <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
         </svg>
-        <span class="text-sm font-medium text-secondary transition-colors"
-              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-              @mouseenter="handleFooterIconHoverEnter"
-              @mouseleave="handleFooterIconHoverLeave">GitHub</span>
+        <span class="text-sm font-medium text-secondary transition-colors group-hover:text-main">GitHub</span>
       </a>
       
       <!-- 电子邮件 -->
       <a 
         href="mailto:eclospy@duck.com" 
-        class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-3 flex items-center gap-3 border border-border-base shadow-sm backdrop-blur-sm transition-colors group"
-        style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-        @mouseenter="handleFooterLinkHoverEnter"
-        @mouseleave="handleFooterLinkHoverLeave"
+        class="surface-card rounded-[20px] p-3 flex items-center gap-3 transition-colors group"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary transition-colors"
-             style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-             @mouseenter="handleFooterIconHoverEnter"
-             @mouseleave="handleFooterIconHoverLeave">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary transition-colors group-hover:text-main">
           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
           <polyline points="22,6 12,13 2,6"/>
         </svg>
-        <span class="text-sm font-medium text-secondary transition-colors"
-              style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
-              @mouseenter="handleFooterIconHoverEnter"
-              @mouseleave="handleFooterIconHoverLeave">eclospy@duck.com</span>
+        <span class="text-sm font-medium text-secondary transition-colors group-hover:text-main">eclospy@duck.com</span>
       </a>
       
       <!-- 所有权声明 -->
-      <div class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-3 border border-border-base shadow-sm backdrop-blur-sm">
+      <div class="surface-card rounded-[20px] p-3">
         <p class="text-xs text-secondary text-center">
           © 2025 GWorkspace
         </p>
@@ -116,14 +112,19 @@
         </p>
       </div>
     </div>
-    <div v-else class="p-4 flex flex-col items-center gap-2 mt-auto">
+    <div v-else class="p-4 flex flex-col items-center gap-2 mt-auto border-t border-[color:var(--border-strong)]">
+      <button
+        @click="$emit('open-update-log')"
+        class="w-11 h-11 rounded-[18px] surface-card flex items-center justify-center transition-colors"
+        :title="$t('home.updateLog')"
+      >
+        <FileTextIcon class="w-5 h-5 text-secondary" />
+      </button>
+
       <a 
-        href="https://github.com" 
+        href="https://github.com/oneder2/GWorkspace" 
         target="_blank"
-        class="w-10 h-10 rounded-xl bg-white/50 dark:bg-slate-800/50 flex items-center justify-center border border-border-base shadow-sm backdrop-blur-sm transition-colors"
-        style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-        @mouseenter="handleFooterLinkHoverEnter"
-        @mouseleave="handleFooterLinkHoverLeave"
+        class="w-11 h-11 rounded-[18px] surface-card flex items-center justify-center transition-colors"
         title="GitHub"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-secondary">
@@ -144,6 +145,7 @@ import WrenchIcon from './icons/WrenchIcon.vue'
 import ArticleIcon from './icons/ArticleIcon.vue'
 import BriefcaseIcon from './icons/BriefcaseIcon.vue'
 import GWorkspaceIcon from './icons/GWorkspaceIcon.vue'
+import FileTextIcon from './icons/FileTextIcon.vue'
 
 const props = defineProps({
   collapsed: {
@@ -156,7 +158,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['toggle-collapse', 'nav-click', 'close-mobile-sidebar'])
+const emit = defineEmits(['toggle-collapse', 'nav-click', 'close-mobile-sidebar', 'open-update-log'])
 
 const { t } = useI18n()
 const router = useRouter()
@@ -228,23 +230,4 @@ const handleNavClick = (item) => {
   }
 }
 
-const handleFooterLinkHoverEnter = (e) => {
-  const el = e?.currentTarget
-  if (!el) return
-  const isDark = document.documentElement.classList.contains('dark')
-  el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'
-}
-const handleFooterLinkHoverLeave = (e) => {
-  if (e?.currentTarget) e.currentTarget.style.backgroundColor = ''
-}
-
-const handleFooterIconHoverEnter = (e) => {
-  const el = e?.currentTarget
-  if (!el) return
-  const isDark = document.documentElement.classList.contains('dark')
-  el.style.color = isDark ? '#f1f5f9' : 'var(--theme-primary-darker)'
-}
-const handleFooterIconHoverLeave = (e) => {
-  if (e?.currentTarget) e.currentTarget.style.color = ''
-}
 </script>
