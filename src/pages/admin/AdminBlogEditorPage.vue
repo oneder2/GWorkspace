@@ -35,7 +35,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import BlogEditor from '../../components/BlogEditor.vue'
-import { blogApi } from '../../utils/api'
+import { adminApi } from '../../utils/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -54,7 +54,7 @@ const loadArticle = async () => {
   isLoading.value = true
   try {
     const id = parseInt(route.params.id)
-    article.value = await blogApi.getById(id)
+    article.value = await adminApi.getBlogById(id)
   } catch (error) {
     console.error('Failed to load article:', error)
     alert(t('blog.notFound'))
@@ -84,5 +84,4 @@ onMounted(() => {
   }
 })
 </script>
-
 

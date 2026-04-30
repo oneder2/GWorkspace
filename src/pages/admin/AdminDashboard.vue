@@ -4,21 +4,25 @@
 -->
 <template>
   <div class="space-y-6 animate-fade-in pb-10">
-    <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+      <div class="space-y-2">
+        <span class="section-kicker">Overview</span>
+        <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-[var(--theme-primary)]">
           <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
         </svg>
         {{ $t('admin.dashboard') }}
-      </h2>
-      <div class="text-xs font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full">
+        </h2>
+        <p class="section-copy text-sm">Publishing pulse, moderation queue, and system health in a single pass.</p>
+      </div>
+      <div class="text-xs font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full w-fit">
         Last updated: {{ lastUpdate }}
       </div>
     </div>
 
     <!-- 统计核心看板 -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div v-for="item in statCards" :key="item.label" class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+      <div v-for="item in statCards" :key="item.label" class="admin-stat p-6 rounded-[24px] relative overflow-hidden group">
         <div class="absolute -right-2 -top-2 opacity-10 group-hover:scale-110 transition-transform duration-500">
           <component :is="item.icon" class="w-20 h-20" />
         </div>
@@ -38,7 +42,7 @@
       
       <!-- 快速入口 (左侧) -->
       <div class="lg:col-span-1 space-y-6">
-        <div class="glass-card p-5 rounded-2xl">
+        <div class="admin-panel p-5 rounded-[24px]">
           <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
             {{ $t('admin.quickActions') }}
           </h3>
@@ -61,7 +65,7 @@
         </div>
 
         <!-- 系统概览图 (示意) -->
-        <div class="glass-card p-5 rounded-2xl bg-gradient-to-br from-[var(--theme-primary)]/10 to-transparent">
+        <div class="admin-panel p-5 rounded-[24px] bg-gradient-to-br from-[var(--theme-primary)]/10 to-transparent">
           <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">System Status</h3>
           <div class="space-y-4">
             <div v-for="sys in systemStatus" :key="sys.name">
@@ -83,13 +87,13 @@
       <!-- 最近动态 (右侧) -->
       <div class="lg:col-span-2 space-y-6">
         <!-- 访问趋势图 -->
-        <div class="glass-card p-6 rounded-2xl h-[300px]">
+        <div class="admin-panel p-6 rounded-[24px] h-[300px]">
           <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Visit Trends (Last 7 Days)</h3>
           <canvas ref="chartCanvas"></canvas>
         </div>
 
         <!-- 待审核评论 -->
-        <div class="glass-card p-6 rounded-2xl">
+        <div class="admin-panel p-6 rounded-[24px]">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
               {{ $t('admin.comments') }}
@@ -99,7 +103,7 @@
           </div>
           
           <div v-if="pendingComments.length" class="space-y-4">
-            <div v-for="comment in pendingComments" :key="comment.id" class="p-4 bg-white/30 dark:bg-slate-800/30 rounded-xl border border-white/20">
+            <div v-for="comment in pendingComments" :key="comment.id" class="p-4 bg-white/50 dark:bg-slate-900/40 rounded-2xl border border-border-base">
               <div class="flex justify-between items-start gap-3 mb-2">
                 <div class="flex items-center gap-2">
                   <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold">
@@ -113,12 +117,12 @@
             </div>
           </div>
           <div v-else class="py-10 text-center text-slate-400 text-sm">
-            🎉 All comments approved!
+            No pending comments.
           </div>
         </div>
 
         <!-- 最近文章 -->
-        <div class="glass-card p-6 rounded-2xl">
+        <div class="admin-panel p-6 rounded-[24px]">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">Recent Posts</h3>
             <button @click="$router.push('/admin/blogs')" class="text-xs text-[var(--theme-primary)] font-bold hover:underline">Manage</button>
@@ -155,7 +159,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { blogApi, commentsApi, analyticsApi } from '../../utils/api'
+import { adminApi } from '../../utils/api'
 import Chart from 'chart.js/auto'
 
 const { t } = useI18n()
@@ -243,9 +247,10 @@ const loadDashboardData = async () => {
     const startTime = performance.now()
     
     // 1. 获取核心统计
-    const [blogs, overview] = await Promise.all([
-      blogApi.getList({ status: 'all' }),
-      analyticsApi.getOverview({ days: 7 })
+    const [blogs, overview, adminComments] = await Promise.all([
+      adminApi.getBlogs(),
+      adminApi.getAnalyticsOverview({ days: 7 }),
+      adminApi.getComments()
     ])
     
     stats.value.totalBlogs = blogs.length
@@ -299,6 +304,7 @@ const loadDashboardData = async () => {
 
     // 4. 获取最近文章
     recentBlogs.value = blogs.slice(0, 5)
+    pendingComments.value = (adminComments || []).filter(comment => comment.status === 'pending').slice(0, 5)
 
   } catch (error) {
     console.error('Failed to load dashboard:', error)
@@ -313,4 +319,3 @@ onUnmounted(() => {
   if (visitChart) visitChart.destroy()
 })
 </script>
-

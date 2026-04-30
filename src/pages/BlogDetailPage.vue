@@ -4,7 +4,7 @@
   支持文章导航和分享功能
 -->
 <template>
-  <div class="animate-fade-in max-w-6xl mx-auto relative pb-24 px-4 lg:px-0">
+  <div class="animate-fade-in max-w-7xl mx-auto relative pb-24 px-0">
     <!-- 阅读进度条 -->
     <div 
       v-if="post"
@@ -14,12 +14,11 @@
     ></div>
     
     <div class="flex flex-col lg:flex-row gap-8 items-start justify-center">
-      <!-- 主体内容 -->
-      <div class="w-full max-w-4xl min-w-0">
+      <div class="w-full max-w-5xl min-w-0 space-y-6">
         <!-- 返回按钮 -->
         <button 
           @click="$router.push('/blog')"
-          class="mb-6 flex items-center gap-2 text-secondary transition-colors"
+          class="flex items-center gap-2 text-secondary transition-colors"
           style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);"
           @mouseenter="handleBackBtnHoverEnter"
           @mouseleave="handleBackBtnHoverLeave"
@@ -30,16 +29,14 @@
           <span>{{ $t('blog.backToList') }}</span>
         </button>
 
-        <!-- 文章内容 -->
-        <article v-if="post" class="glass-card p-4 sm:p-6 md:p-8 lg:p-12 rounded-2xl overflow-hidden">
-          <!-- 文章头部 -->
-          <header class="mb-8">
+        <section v-if="post" class="hero-panel rounded-[32px] p-6 sm:p-8 lg:p-10 overflow-hidden">
+          <header class="max-w-4xl space-y-6">
             <div class="flex items-center gap-3 mb-4 flex-wrap">
-              <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-secondary text-xs rounded-md font-bold uppercase tracking-wide">
+              <span class="eyebrow">
                 {{ post.genre || post.category }}
               </span>
               <span class="text-xs text-muted font-mono" :title="$t('blog.publishedAt') || '发布于'">
-                {{ formatDateTime(post.published_at || post.date, true) }}
+                {{ formatBlogDate(getBlogDateValue(post)) }}
               </span>
               <div v-if="post.tags && post.tags.length > 0" class="flex items-center gap-2 flex-wrap">
                 <span 
@@ -52,15 +49,29 @@
                 </span>
               </div>
             </div>
-            <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-main mb-4 sm:mb-6 leading-tight">
+            <h1 class="section-title text-4xl sm:text-5xl lg:text-6xl leading-[0.95]">
               {{ post.title }}
             </h1>
-            <p class="text-lg text-secondary leading-relaxed opacity-80">
+            <p class="section-copy text-lg sm:text-xl">
               {{ post.excerpt }}
             </p>
+            <div class="flex flex-wrap items-center gap-3 pt-2">
+              <button @click="toggleLike" class="action-btn action-btn-secondary text-sm" :disabled="isTogglingLike">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" :fill="isLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                {{ post.likes_count || 0 }}
+              </button>
+              <button @click="generatePoster" class="action-btn action-btn-primary text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                {{ $t('blog.share') }}
+              </button>
+            </div>
           </header>
+        </section>
 
-          <div class="prose prose-slate dark:prose-invert max-w-none">
+        <article v-if="post" class="surface-panel rounded-[32px] p-6 sm:p-8 md:p-10 lg:p-12 overflow-hidden">
+          <div class="prose prose-slate dark:prose-invert max-w-none editorial-prose">
             <div 
               class="text-secondary leading-relaxed blog-content"
               v-html="renderedContent"
@@ -70,17 +81,17 @@
 
           <footer class="mt-12 pt-8 border-t border-border-base flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="text-xs text-muted space-y-1">
-              <p>{{ $t('blog.publishedAt') || '发布于' }}: {{ formatDateTime(post.published_at || post.date, true) }}</p>
-              <p v-if="post.updated_at && post.updated_at !== (post.published_at || post.date)">
-                {{ $t('blog.updatedAt') || '最后更新' }}: {{ formatDateTime(post.updated_at, true) }}
+              <p>{{ $t('blog.publishedAt') || '发布于' }}: {{ formatBlogDate(getBlogDateValue(post)) }}</p>
+              <p v-if="post.updated_at && post.updated_at !== getBlogDateValue(post)">
+                {{ $t('blog.updatedAt') || '最后更新' }}: {{ formatBlogDateTime(post.updated_at) }}
               </p>
             </div>
             <div class="lg:hidden flex items-center gap-2">
-              <button @click="toggleLike" class="flex items-center gap-1.5 px-4 py-2 bg-red-500/10 text-red-500 rounded-lg text-sm font-bold">
+              <button @click="toggleLike" class="action-btn action-btn-secondary text-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" :fill="isLiked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 {{ post.likes_count || 0 }}
               </button>
-              <button @click="generatePoster" class="flex items-center gap-1.5 px-4 py-2 bg-slate-100 dark:bg-white/5 text-secondary rounded-lg text-sm font-bold">
+              <button @click="generatePoster" class="action-btn action-btn-primary text-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                 {{ $t('blog.share') }}
               </button>
@@ -103,20 +114,20 @@
         </div>
 
         <!-- 底部导航和推荐 -->
-        <div v-if="post" class="mt-8 space-y-8">
+        <div v-if="post" class="space-y-8">
           <!-- 相关文章推荐 -->
           <div v-if="relatedPosts.length > 0">
             <h3 class="text-xl font-bold text-main mb-4">{{ $t('blog.relatedArticles') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <article v-for="relatedPost in relatedPosts" :key="relatedPost.id" @click="$router.push(`/blog/${relatedPost.id}`)" class="glass-card p-5 rounded-xl cursor-pointer transition-all group border-l-4 border-l-transparent" style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-border: var(--theme-primary);" @mouseenter="handleRelatedPostHoverEnter" @mouseleave="handleRelatedPostHoverLeave"><div class="flex items-center gap-2 mb-2"><span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-secondary text-xs rounded-md font-bold uppercase">{{ relatedPost.category }}</span><span class="text-xs text-muted font-mono">{{ relatedPost.date }}</span></div><h4 class="text-lg font-bold text-main mb-2 transition-colors" style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);" @mouseenter="handleRelatedTitleHoverEnter" @mouseleave="handleRelatedTitleHoverLeave">{{ relatedPost.title }}</h4><p class="text-sm text-secondary line-clamp-2">{{ relatedPost.excerpt }}</p></article>
+              <article v-for="relatedPost in relatedPosts" :key="relatedPost.id" @click="$router.push(`/blog/${relatedPost.id}`)" class="surface-card p-5 rounded-[24px] cursor-pointer transition-all group border-l-4 border-l-transparent" style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent); --hover-border: var(--theme-primary);" @mouseenter="handleRelatedPostHoverEnter" @mouseleave="handleRelatedPostHoverLeave"><div class="flex items-center gap-2 mb-2"><span class="eyebrow !text-[10px] !px-2.5 !py-1">{{ relatedPost.genre || relatedPost.category }}</span><span class="text-xs text-muted font-mono">{{ formatBlogDate(getBlogDateValue(relatedPost)) }}</span></div><h4 class="text-lg font-bold text-main mb-2 transition-colors" style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);" @mouseenter="handleRelatedTitleHoverEnter" @mouseleave="handleRelatedTitleHoverLeave">{{ relatedPost.title }}</h4><p class="text-sm text-secondary line-clamp-2">{{ relatedPost.excerpt }}</p></article>
             </div>
           </div>
 
           <!-- 文章导航 -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button v-if="prevPost" @click="$router.push(`/blog/${prevPost.id}`)" class="glass-card p-4 rounded-xl text-left transition-colors group" style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);" @mouseenter="handleNavBtnHoverEnter" @mouseleave="handleNavBtnHoverLeave"><div class="text-xs text-muted mb-2">{{ $t('blog.prevArticle') }}</div><div class="font-bold text-secondary transition-colors" style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);" @mouseenter="handleNavTitleHoverEnter" @mouseleave="handleNavTitleHoverLeave">{{ prevPost.title }}</div></button>
+            <button v-if="prevPost" @click="$router.push(`/blog/${prevPost.id}`)" class="surface-card p-4 rounded-[24px] text-left transition-colors group" style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);" @mouseenter="handleNavBtnHoverEnter" @mouseleave="handleNavBtnHoverLeave"><div class="text-xs text-muted mb-2">{{ $t('blog.prevArticle') }}</div><div class="font-bold text-secondary transition-colors" style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);" @mouseenter="handleNavTitleHoverEnter" @mouseleave="handleNavTitleHoverLeave">{{ prevPost.title }}</div></button>
             <div v-else></div>
-            <button v-if="nextPost" @click="$router.push(`/blog/${nextPost.id}`)" class="glass-card p-4 rounded-xl text-left transition-colors group md:text-right" style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);" @mouseenter="handleNavBtnHoverEnter" @mouseleave="handleNavBtnHoverLeave"><div class="text-xs text-muted mb-2">{{ $t('blog.nextArticle') }}</div><div class="font-bold text-secondary transition-colors" style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);" @mouseenter="handleNavTitleHoverEnter" @mouseleave="handleNavTitleHoverLeave">{{ nextPost.title }}</div></button>
+            <button v-if="nextPost" @click="$router.push(`/blog/${nextPost.id}`)" class="surface-card p-4 rounded-[24px] text-left transition-colors group md:text-right" style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);" @mouseenter="handleNavBtnHoverEnter" @mouseleave="handleNavBtnHoverLeave"><div class="text-xs text-muted mb-2">{{ $t('blog.nextArticle') }}</div><div class="font-bold text-secondary transition-colors" style="--hover-color: var(--theme-primary-darker); --hover-color-dark: var(--theme-primary-dark);" @mouseenter="handleNavTitleHoverEnter" @mouseleave="handleNavTitleHoverLeave">{{ nextPost.title }}</div></button>
           </div>
 
           <!-- 评论区 -->
@@ -125,9 +136,9 @@
       </div>
 
       <!-- 右侧信息栏 (仅大屏显示) -->
-      <aside class="hidden lg:block w-72 sticky top-24 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
+      <aside class="hidden lg:block w-80 sticky top-24 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
         <!-- 文章概览卡片 -->
-        <div v-if="post" class="glass-card p-6 rounded-2xl animate-fade-in">
+        <div v-if="post" class="surface-card p-6 rounded-[28px] animate-fade-in">
           <h3 class="text-xs font-bold text-muted mb-4 uppercase tracking-widest">{{ $t('blog.articleOverview') || '文章概览' }}</h3>
           
           <div class="space-y-4">
@@ -183,7 +194,7 @@
         </div>
 
         <!-- 目录卡片 -->
-        <div v-if="toc.length > 0" class="glass-card p-6 rounded-2xl">
+        <div v-if="toc.length > 0" class="surface-card p-6 rounded-[28px]">
           <h3 class="text-xs font-bold text-muted mb-4 uppercase tracking-widest flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
             {{ $t('blog.toc') }}
@@ -220,7 +231,7 @@
       >
         <div v-if="showPosterModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" @click="showPosterModal = false">
           <div 
-            class="glass-card max-w-3xl w-full rounded-3xl overflow-hidden relative animate-fade-in shadow-2xl border border-white/20"
+            class="surface-float max-w-3xl w-full rounded-3xl overflow-hidden relative animate-fade-in shadow-2xl border border-[color:var(--border-strong)]"
             @click.stop
           >
             <!-- 关闭按钮 -->
@@ -293,6 +304,7 @@ import mediumZoom from 'medium-zoom'
 import { useLocalStorage } from '../composables/useStorage'
 import { useSEO, generateBlogStructuredData } from '../composables/useSEO'
 import { blogApi, likesApi, analyticsApi } from '../utils/api'
+import { formatBlogDate, formatBlogDateTime, getBlogDateValue } from '../utils/blogDate'
 import { getTagStyle } from '../utils/tagColor'
 import CommentList from '../components/comments/CommentList.vue'
 
@@ -311,27 +323,6 @@ const toc = ref([])
 const activeId = ref('')
 const readingProgress = ref(0)
 const zoomInstance = ref(null)
-
-/**
- * 格式化日期时间
- * 修复时区偏差，并支持分钟精度
- */
-const formatDateTime = (dateStr, showTime = false) => {
-  if (!dateStr) return ''
-  const date = new Date(dateStr)
-  if (isNaN(date.getTime())) return dateStr
-  
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  
-  if (showTime) {
-    const hh = String(date.getHours()).padStart(2, '0')
-    const mm = String(date.getMinutes()).padStart(2, '0')
-    return `${y}-${m}-${d} ${hh}:${mm}`
-  }
-  return `${y}-${m}-${d}`
-}
 
 /**
  * 计算预计阅读时间 (300字/分钟)
@@ -552,15 +543,58 @@ const articleUrl = computed(() => {
 const posterUrl = computed(() => {
   if (!post.value) return ''
   const apiBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://workspace.gellaronline.cc/api' : 'http://localhost:3001/api')
-  return `${apiBaseUrl}/blogs/${post.value.id}/og-image?type=poster`
+  const version = encodeURIComponent(post.value.updated_at || getBlogDateValue(post.value) || post.value.id)
+  return `${apiBaseUrl}/blogs/${post.value.id}/og-image?type=poster&v=${version}`
 })
+
+const convertPosterBlobToPng = async (blob) => new Promise((resolve, reject) => {
+  const objectUrl = window.URL.createObjectURL(blob)
+  const image = new Image()
+
+  image.onload = () => {
+    const canvas = document.createElement('canvas')
+    canvas.width = image.naturalWidth || 1200
+    canvas.height = image.naturalHeight || 630
+
+    const context = canvas.getContext('2d')
+    if (!context) {
+      window.URL.revokeObjectURL(objectUrl)
+      reject(new Error('Canvas context unavailable'))
+      return
+    }
+
+    context.fillStyle = '#ffffff'
+    context.fillRect(0, 0, canvas.width, canvas.height)
+    context.drawImage(image, 0, 0, canvas.width, canvas.height)
+    canvas.toBlob((pngBlob) => {
+      window.URL.revokeObjectURL(objectUrl)
+      if (!pngBlob) {
+        reject(new Error('Failed to export poster'))
+        return
+      }
+      resolve(pngBlob)
+    }, 'image/png')
+  }
+
+  image.onerror = () => {
+    window.URL.revokeObjectURL(objectUrl)
+    reject(new Error('Failed to load poster image'))
+  }
+
+  image.src = objectUrl
+})
+
 const downloadPoster = async () => {
   try {
     const res = await fetch(posterUrl.value)
-    const blob = await res.blob()
-    const url = window.URL.createObjectURL(blob)
+    const sourceBlob = await res.blob()
+    const finalBlob = sourceBlob.type.includes('svg')
+      ? await convertPosterBlobToPng(sourceBlob).catch(() => sourceBlob)
+      : sourceBlob
+    const url = window.URL.createObjectURL(finalBlob)
+    const extension = finalBlob.type.includes('png') ? 'png' : 'svg'
     const a = document.createElement('a')
-    a.href = url; a.download = `poster-${post.value?.slug || 'blog'}.png`
+    a.href = url; a.download = `poster-${post.value?.slug || 'blog'}.${extension}`
     a.click(); window.URL.revokeObjectURL(url)
   } catch (e) { console.error(e) }
 }
@@ -612,7 +646,7 @@ onUnmounted(() => {
 // --- 10. 交互逻辑 ---
 const shareArticle = async () => {
   try {
-    await navigator.clipboard.writeText(window.location.href)
+    await navigator.clipboard.writeText(articleUrl.value || window.location.href)
     shareSuccess.value = true
     setTimeout(() => { shareSuccess.value = false }, 3000)
   } catch (e) {}

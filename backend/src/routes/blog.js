@@ -7,8 +7,118 @@ import express from 'express'
 import { Blog } from '../models/Blog.js'
 import { getDatabase } from '../config/database.js'
 import { generateBlogImage } from '../utils/imageGenerator.js'
+import { normalizePublishedAt } from '../utils/blogDate.js'
+import { authenticate, requireAdmin } from '../middleware/auth.js'
 
 const router = express.Router()
+
+const VALID_BLOG_STATUSES = new Set(['published', 'draft'])
+const UNTITLED_DRAFT_TITLE = '未命名文件'
+
+const isBlankString = (value) => (
+  value === undefined ||
+  value === null ||
+  (typeof value === 'string' && value.trim().length === 0)
+)
+
+const normalizeSlugSeed = (value) => (
+  String(value || '')
+    .toLowerCase()
+    .replace(/[^\w\u4e00-\u9fff-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+)
+
+const createUniqueDraftSlug = (seed = 'draft', currentId = null) => {
+  const base = normalizeSlugSeed(seed) || 'draft'
+  let candidate = ''
+
+  do {
+    candidate = `${base}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+  } while ((() => {
+    const existing = Blog.getBySlug(candidate)
+    return existing && existing.id !== currentId
+  })())
+
+  return candidate
+}
+
+const sanitizeBlogPayload = (payload = {}) => ({
+  ...payload,
+  title: typeof payload.title === 'string' ? payload.title.trim() : payload.title,
+  slug: typeof payload.slug === 'string' ? payload.slug.trim() : payload.slug,
+  status: typeof payload.status === 'string' ? payload.status.trim() : payload.status,
+  genre: typeof payload.genre === 'string' ? payload.genre.trim() : payload.genre,
+  content: typeof payload.content === 'string' ? payload.content.trim() : payload.content,
+  excerpt: typeof payload.excerpt === 'string' ? payload.excerpt.trim() : payload.excerpt,
+  tags: Array.isArray(payload.tags)
+    ? payload.tags
+        .filter(tag => typeof tag === 'string' && tag.trim().length > 0)
+        .map(tag => tag.trim())
+    : payload.tags,
+  raw_published_at: payload.published_at,
+  published_at: payload.published_at === undefined
+    ? undefined
+    : normalizePublishedAt(payload.published_at)
+})
+
+const applyDraftFallbacks = (payload, existingBlog = null) => {
+  const status = payload.status || existingBlog?.status || 'published'
+
+  if (status !== 'draft') {
+    return payload
+  }
+
+  const nextPayload = { ...payload }
+  const shouldFillTitle = isBlankString(nextPayload.title) && (nextPayload.title !== undefined || !existingBlog)
+  const autoFilledTitle = shouldFillTitle
+
+  if (shouldFillTitle) {
+    nextPayload.title = UNTITLED_DRAFT_TITLE
+  }
+
+  const hasPlaceholderSlug = autoFilledTitle && normalizeSlugSeed(nextPayload.slug) === normalizeSlugSeed(UNTITLED_DRAFT_TITLE)
+
+  if (isBlankString(nextPayload.slug) || hasPlaceholderSlug) {
+    if (existingBlog?.slug && nextPayload.slug !== undefined) {
+      nextPayload.slug = existingBlog.slug
+    } else if (!existingBlog || nextPayload.slug !== undefined) {
+      const slugSeed = !isBlankString(nextPayload.title)
+        ? nextPayload.title
+        : existingBlog?.title || UNTITLED_DRAFT_TITLE
+      nextPayload.slug = createUniqueDraftSlug(slugSeed, existingBlog?.id ?? null)
+    }
+  }
+
+  return nextPayload
+}
+
+const validateBlogPayload = (payload, existingBlog = null) => {
+  const status = payload.status || existingBlog?.status || 'published'
+  const effective = { ...existingBlog, ...payload, status }
+  const missingFields = []
+  const invalidFields = []
+
+  if (!VALID_BLOG_STATUSES.has(status)) {
+    invalidFields.push('status')
+  }
+
+  if (payload.raw_published_at !== undefined && !isBlankString(payload.raw_published_at) && effective.published_at === null) {
+    invalidFields.push('published_at')
+  }
+
+  if (status === 'published') {
+    if (isBlankString(effective.title)) missingFields.push('title')
+    if (isBlankString(effective.slug)) missingFields.push('slug')
+    if (isBlankString(effective.genre)) missingFields.push('genre')
+    if (isBlankString(effective.content)) missingFields.push('content')
+    if (isBlankString(effective.excerpt)) missingFields.push('excerpt')
+    if (!Array.isArray(effective.tags) || effective.tags.length === 0) missingFields.push('tags')
+    if (isBlankString(effective.published_at)) missingFields.push('published_at')
+  }
+
+  return { status, missingFields, invalidFields }
+}
 
 /**
  * 获取文章动态预览图/海报
@@ -21,7 +131,7 @@ router.get('/:id/og-image', async (req, res) => {
     const isPoster = req.query.type === 'poster'
     const blog = Blog.getById(id)
 
-    if (!blog) {
+    if (!blog || blog.status !== 'published') {
       return res.status(404).json({ error: 'Blog not found' })
     }
 
@@ -49,8 +159,10 @@ router.get('/:id/og-image', async (req, res) => {
       const { buffer, contentType } = await generateBlogImage({
         title: blog.title,
         genre: blog.genre || blog.category || 'Tech',
+        excerpt: blog.excerpt,
         date: blog.published_at || blog.date,
         slug: blog.slug,
+        updatedAt: blog.updated_at,
         url: blogUrl,
         isPoster: isPoster
       })
@@ -87,7 +199,6 @@ router.get('/', (req, res) => {
   try {
     const {
       genre,
-      status = 'published',
       limit,
       offset = 0,
       sortBy = 'published_at',
@@ -96,7 +207,7 @@ router.get('/', (req, res) => {
 
     const options = {
       genre: genre || null,
-      status: status === 'all' ? null : status, // 'all'表示获取所有状态
+      status: 'published',
       limit: limit ? parseInt(limit) : null,
       offset: parseInt(offset),
       sortBy,
@@ -154,10 +265,7 @@ router.get('/stats', (req, res) => {
  */
 router.get('/genres', (req, res) => {
   try {
-    const { status } = req.query
-    // 如果status为'all'，则获取所有状态；否则使用指定状态或null（所有状态）
-    const genreStatus = status === 'all' ? null : (status || null)
-    const genres = Blog.getAllGenres(genreStatus)
+    const genres = Blog.getAllGenres('published')
     res.json(genres)
   } catch (error) {
     console.error('Error fetching genres:', error)
@@ -174,10 +282,7 @@ router.get('/genres', (req, res) => {
  */
 router.get('/tags', (req, res) => {
   try {
-    const { status } = req.query
-    // 如果status为'all'，则获取所有状态；否则使用指定状态或null（所有状态）
-    const tagStatus = status === 'all' ? null : (status || null)
-    const tags = Blog.getAllTags(tagStatus)
+    const tags = Blog.getAllTags('published')
     res.json(tags)
   } catch (error) {
     console.error('Error fetching tags:', error)
@@ -194,7 +299,7 @@ router.get('/:id', (req, res) => {
     const id = parseInt(req.params.id)
     const blog = Blog.getById(id)
 
-    if (!blog) {
+    if (!blog || blog.status !== 'published') {
       return res.status(404).json({ error: 'Blog not found' })
     }
 
@@ -214,7 +319,7 @@ router.get('/slug/:slug', (req, res) => {
     const { slug } = req.params
     const blog = Blog.getBySlug(slug)
 
-    if (!blog) {
+    if (!blog || blog.status !== 'published') {
       return res.status(404).json({ error: 'Blog not found' })
     }
 
@@ -230,95 +335,47 @@ router.get('/slug/:slug', (req, res) => {
  * POST /api/blogs
  * 需要认证（后续实现）
  */
-router.post('/', (req, res) => {
+router.post('/', authenticate, requireAdmin, (req, res) => {
   try {
-    // 记录请求信息用于调试
-    console.log('POST /api/blogs - Request received')
-    console.log('Request headers:', JSON.stringify(req.headers, null, 2))
-    console.log('Request body type:', typeof req.body)
-    console.log('Request body keys:', req.body ? Object.keys(req.body) : 'req.body is null/undefined')
-    console.log('Request body content:', JSON.stringify(req.body, null, 2))
-    
-    // 检查请求体是否存在
     if (!req.body) {
-      console.error('Request body is missing or not parsed')
       return res.status(400).json({ 
         error: 'Request body is missing or not parsed',
         message: 'The request body could not be parsed. Please check Content-Type header and request format.'
       })
     }
 
-    const {
-      title,
-      slug,
-      genre,
-      content,
-      excerpt,
-      tags = [],
-      status = 'published',
-      published_at = null
-    } = req.body
+    let payload = sanitizeBlogPayload({
+      tags: [],
+      status: 'published',
+      published_at: null,
+      ...req.body
+    })
+    payload = applyDraftFallbacks(payload)
+    const { missingFields, invalidFields } = validateBlogPayload(payload)
 
-    // 记录每个字段的值（用于调试）
-    console.log('Extracted fields:')
-    console.log('  title:', typeof title, title ? `"${title.substring(0, 50)}..."` : title)
-    console.log('  slug:', typeof slug, slug)
-    console.log('  genre:', typeof genre, genre)
-    console.log('  content:', typeof content, content ? `[${content.length} chars]` : content)
-    console.log('  excerpt:', typeof excerpt, excerpt ? `"${excerpt.substring(0, 50)}..."` : excerpt)
-    console.log('  tags:', typeof tags, Array.isArray(tags) ? `[${tags.length} items]` : tags)
-
-    // 基础验证 - 检查所有必需字段，提供详细的错误信息
-    const missingFields = []
-    
-    // 更严格的验证：检查字段是否存在且非空
-    if (title === undefined || title === null || (typeof title === 'string' && title.trim().length === 0)) {
-      missingFields.push('title')
-      console.log('  -> title is missing or empty')
+    if (invalidFields.length > 0) {
+      return res.status(400).json({
+        error: 'Invalid fields',
+        invalidFields,
+        message: `Invalid fields: ${invalidFields.join(', ')}`
+      })
     }
-    if (slug === undefined || slug === null || (typeof slug === 'string' && slug.trim().length === 0)) {
-      missingFields.push('slug')
-      console.log('  -> slug is missing or empty')
-    }
-    if (genre === undefined || genre === null || (typeof genre === 'string' && genre.trim().length === 0)) {
-      missingFields.push('genre')
-      console.log('  -> genre is missing or empty')
-    }
-    if (content === undefined || content === null || (typeof content === 'string' && content.trim().length === 0)) {
-      missingFields.push('content')
-      console.log('  -> content is missing or empty')
-    }
-    if (excerpt === undefined || excerpt === null || (typeof excerpt === 'string' && excerpt.trim().length === 0)) {
-      missingFields.push('excerpt')
-      console.log('  -> excerpt is missing or empty')
-    }
-
     if (missingFields.length > 0) {
-      console.error('Validation failed. Missing fields:', missingFields)
       return res.status(400).json({ 
         error: 'Missing required fields',
-        missingFields: missingFields,
+        missingFields,
         message: `Missing required fields: ${missingFields.join(', ')}`,
         receivedFields: req.body ? Object.keys(req.body) : []
       })
     }
 
     // 检查slug是否已存在
-    const existing = Blog.getBySlug(slug)
+    const existing = Blog.getBySlug(payload.slug)
     if (existing) {
       return res.status(409).json({ error: 'Slug already exists' })
     }
 
-    const blog = Blog.create({
-      title,
-      slug,
-      genre,
-      content,
-      excerpt,
-      tags,
-      status,
-      published_at
-    })
+    const blog = Blog.create(payload)
 
     res.status(201).json(blog)
   } catch (error) {
@@ -332,7 +389,7 @@ router.post('/', (req, res) => {
  * PUT /api/blogs/:id
  * 需要认证（后续实现）
  */
-router.put('/:id', (req, res) => {
+router.put('/:id', authenticate, requireAdmin, (req, res) => {
   try {
     const id = parseInt(req.params.id)
     const blog = Blog.getById(id)
@@ -341,15 +398,35 @@ router.put('/:id', (req, res) => {
       return res.status(404).json({ error: 'Blog not found' })
     }
 
+    let payload = sanitizeBlogPayload(req.body || {})
+    payload = applyDraftFallbacks(payload, blog)
+    const { missingFields, invalidFields } = validateBlogPayload(payload, blog)
+
+    if (invalidFields.length > 0) {
+      return res.status(400).json({
+        error: 'Invalid fields',
+        invalidFields,
+        message: `Invalid fields: ${invalidFields.join(', ')}`
+      })
+    }
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        missingFields,
+        message: `Missing required fields: ${missingFields.join(', ')}`
+      })
+    }
+
     // 如果更新slug，检查是否冲突
-    if (req.body.slug && req.body.slug !== blog.slug) {
-      const existing = Blog.getBySlug(req.body.slug)
+    if (payload.slug && payload.slug !== blog.slug) {
+      const existing = Blog.getBySlug(payload.slug)
       if (existing) {
         return res.status(409).json({ error: 'Slug already exists' })
       }
     }
 
-    const updated = Blog.update(id, req.body)
+    const updated = Blog.update(id, payload)
 
     if (!updated) {
       return res.status(500).json({ error: 'Failed to update blog' })
@@ -367,7 +444,7 @@ router.put('/:id', (req, res) => {
  * DELETE /api/blogs/:id
  * 需要认证（后续实现）
  */
-router.delete('/:id', (req, res) => {
+router.delete('/:id', authenticate, requireAdmin, (req, res) => {
   try {
     const id = parseInt(req.params.id)
     const success = Blog.delete(id)
@@ -390,6 +467,11 @@ router.delete('/:id', (req, res) => {
 router.post('/:id/views', (req, res) => {
   try {
     const id = parseInt(req.params.id)
+    const existingBlog = Blog.getById(id)
+    if (!existingBlog || existingBlog.status !== 'published') {
+      return res.status(404).json({ error: 'Blog not found' })
+    }
+
     const blog = Blog.incrementViews(id)
 
     if (!blog) {
@@ -404,4 +486,3 @@ router.post('/:id/views', (req, res) => {
 })
 
 export default router
-

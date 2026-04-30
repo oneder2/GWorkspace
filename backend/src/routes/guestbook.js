@@ -23,7 +23,6 @@ const router = express.Router()
 router.get('/', (req, res) => {
   try {
     const {
-      status = 'approved', // 默认只显示已审核的留言
       limit,
       offset = 0,
       sortBy = 'created_at',
@@ -31,9 +30,7 @@ router.get('/', (req, res) => {
     } = req.query
 
     const options = {
-      // 如果 status 为 'all'，设置为 null 以获取所有状态（包括 deleted，用于管理员查看）
-      // 否则使用指定的状态（默认 'approved'，排除 deleted）
-      status: status === 'all' ? null : status,
+      status: 'approved',
       limit: limit ? parseInt(limit) : null,
       offset: parseInt(offset),
       sortBy,
@@ -105,7 +102,7 @@ router.get('/:id', (req, res) => {
     const id = parseInt(req.params.id)
     const message = Guestbook.getById(id)
 
-    if (!message) {
+    if (!message || message.status !== 'approved') {
       return res.status(404).json({ error: 'Message not found' })
     }
 
@@ -121,13 +118,17 @@ router.get('/:id', (req, res) => {
  * PUT /api/guestbook/:id
  * 需要认证（后续实现）
  */
-router.put('/:id', (req, res) => {
+router.put('/:id', authenticate, (req, res) => {
   try {
     const id = parseInt(req.params.id)
     const message = Guestbook.getById(id)
 
     if (!message) {
       return res.status(404).json({ error: 'Message not found' })
+    }
+
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' })
     }
 
     const updated = Guestbook.update(id, req.body)
@@ -175,8 +176,7 @@ router.delete('/:id', authenticate, (req, res) => {
  */
 router.get('/stats/count', (req, res) => {
   try {
-    const { status } = req.query
-    const count = Guestbook.getCount(status || null)
+    const count = Guestbook.getCount('approved')
     res.json({ count })
   } catch (error) {
     console.error('Error fetching guestbook count:', error)
@@ -185,4 +185,3 @@ router.get('/stats/count', (req, res) => {
 })
 
 export default router
-

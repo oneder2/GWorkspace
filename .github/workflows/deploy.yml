@@ -10,6 +10,10 @@ on:
       - '.github/workflows/deploy.yml'
   workflow_dispatch: # 允许手动触发
 
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: true
+
 jobs:
   # 后端部署到自建服务器
   deploy-backend:
@@ -22,12 +26,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install backend dependencies
         run: |
           cd backend
-          npm ci --production
+          npm ci --omit=dev
+
+      - name: Verify backend modules load
+        run: |
+          cd backend
+          node --input-type=module -e "await Promise.all(['./src/routes/blog.js','./src/routes/comments.js','./src/routes/likes.js','./src/routes/guestbook.js','./src/routes/analytics.js','./src/routes/admin.js'].map(p => import(p))); console.log('backend modules ok')"
 
       - name: Create deployment package
         run: |
@@ -58,8 +69,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # 传递机密变量给远程脚本
-          envs: R2_ACCOUNT_ID,R2_ACCESS_KEY_ID,R2_SECRET_ACCESS_KEY,R2_BUCKET_NAME,R2_PUBLIC_DOMAIN
           script: |
             # 设置变量
             DEPLOY_DIR="$HOME/gworkspace/backend"
@@ -135,9 +144,6 @@ jobs:
             }
 
             echo "Injecting R2 configurations from GitHub Secrets..."
-            update_env "R2_ACCOUNT_ID" "$R2_ACCOUNT_ID"
-            update_env "R2_ACCESS_KEY_ID" "$ACCESS_KEY_ID" # appleboy envs 使用缩写前缀映射或直接引用
-            # 注意：appleboy ssh-action 会将 secrets 映射为环境变量名
             update_env "R2_ACCESS_KEY_ID" "${{ secrets.R2_ACCESS_KEY_ID }}"
             update_env "R2_SECRET_ACCESS_KEY" "${{ secrets.R2_SECRET_ACCESS_KEY }}"
             update_env "R2_ACCOUNT_ID" "${{ secrets.R2_ACCOUNT_ID }}"

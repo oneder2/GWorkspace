@@ -4,30 +4,52 @@
 -->
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.blogs') }}</h2>
-      <router-link
-        to="/admin/blogs/new"
-        class="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all font-semibold flex items-center gap-2"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        {{ $t('admin.createBlog') }}
-      </router-link>
+    <div class="admin-panel rounded-[24px] overflow-hidden">
+      <div class="admin-toolbar flex-col sm:flex-row sm:items-end">
+        <div class="space-y-2">
+          <span class="section-kicker">Publishing</span>
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.blogs') }}</h2>
+          <p class="text-sm text-secondary">Review drafts, monitor status, and jump into editing without leaving the list.</p>
+        </div>
+        <router-link
+          to="/admin/blogs/new"
+          class="action-btn action-btn-primary text-sm"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          {{ $t('admin.createBlog') }}
+        </router-link>
+      </div>
     </div>
 
-    <!-- 博客列表 -->
-    <div class="glass-card rounded-2xl overflow-hidden">
+    <div class="admin-panel rounded-[24px] overflow-hidden">
       <div v-if="isLoading" class="p-8 text-center text-slate-500 dark:text-slate-400">
         {{ $t('common.loading') }}
       </div>
       <div v-else-if="blogs.length === 0" class="p-8 text-center text-slate-500 dark:text-slate-400">
         {{ $t('admin.noBlogs') }}
       </div>
-      <table v-else class="w-full">
-        <thead class="bg-slate-50 dark:bg-slate-800/50">
+      <template v-else>
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex flex-wrap gap-2">
+          <button
+            v-for="filter in statusFilters"
+            :key="filter.value"
+            @click="activeStatus = filter.value"
+            class="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors"
+            :class="activeStatus === filter.value
+              ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+          >
+            {{ filter.label }} · {{ filter.count }}
+          </button>
+        </div>
+        <div v-if="filteredBlogs.length === 0" class="p-8 text-center text-slate-500 dark:text-slate-400">
+          {{ $t('admin.noBlogsInFilter') }}
+        </div>
+        <table v-else class="admin-table">
+        <thead>
           <tr>
             <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.title') }}</th>
             <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.status') }}</th>
@@ -38,7 +60,7 @@
         </thead>
         <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
           <tr
-            v-for="blog in blogs"
+            v-for="blog in filteredBlogs"
             :key="blog.id"
             class="hover:bg-white/20 dark:hover:bg-white/5 transition-colors"
           >
@@ -60,7 +82,7 @@
               {{ blog.views || 0 }}
             </td>
             <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-              {{ blog.published_at ? new Date(blog.published_at).toLocaleDateString() : '-' }}
+              {{ blog.status === 'published' && blog.published_at ? formatBlogDate(blog.published_at) : '—' }}
             </td>
             <td class="px-6 py-4 text-right">
               <div class="flex items-center justify-end gap-2">
@@ -89,21 +111,47 @@
           </tr>
         </tbody>
       </table>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { blogApi } from '../../utils/api'
+import { adminApi, blogApi } from '../../utils/api'
+import { formatBlogDate } from '../../utils/blogDate'
 
 const router = useRouter()
 const { t } = useI18n()
 
 const blogs = ref([])
 const isLoading = ref(false)
+const activeStatus = ref('all')
+const statusFilters = computed(() => ([
+  {
+    value: 'all',
+    label: t('admin.allStatuses'),
+    count: blogs.value.length
+  },
+  {
+    value: 'published',
+    label: t('admin.published'),
+    count: blogs.value.filter(blog => blog.status === 'published').length
+  },
+  {
+    value: 'draft',
+    label: t('admin.draft'),
+    count: blogs.value.filter(blog => blog.status === 'draft').length
+  }
+]))
+const filteredBlogs = computed(() => {
+  if (activeStatus.value === 'all') {
+    return blogs.value
+  }
+  return blogs.value.filter(blog => blog.status === activeStatus.value)
+})
 
 /**
  * 加载博客列表
@@ -112,7 +160,7 @@ const loadBlogs = async () => {
   isLoading.value = true
   try {
     // 获取所有博客（包括草稿）
-    const allBlogs = await blogApi.getList({ status: 'all' })
+    const allBlogs = await adminApi.getBlogs()
     blogs.value = allBlogs || []
   } catch (error) {
     console.error('Failed to load blogs:', error)
@@ -150,5 +198,3 @@ onMounted(() => {
   loadBlogs()
 })
 </script>
-
-

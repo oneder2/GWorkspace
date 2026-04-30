@@ -3,12 +3,15 @@
   包含页面标题、天气信息、时间、主题切换、语言切换等功能
 -->
 <template>
-  <header class="h-14 sm:h-16 px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-border-base shrink-0 relative gap-2 sm:gap-4">
+  <header
+    class="h-16 sm:h-[4.5rem] px-4 sm:px-6 md:px-8 flex items-center justify-between shrink-0 relative gap-3 sm:gap-4 divider-strong-b"
+    style="background: color-mix(in srgb, var(--surface-elevated) 70%, transparent);"
+  >
     <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
       <!-- 移动端菜单按钮 -->
       <button
         @click="$emit('toggle-mobile-menu')"
-        class="md:hidden p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors flex-shrink-0"
+        class="md:hidden icon-btn flex-shrink-0"
         :title="$t('common.menu')"
       >
         <svg 
@@ -42,27 +45,26 @@
         </svg>
       </button>
       <!-- 页面标题：亮色模式使用深色，暗色模式使用浅色，确保在背景上有足够对比度 -->
-      <h2 class="text-lg sm:text-xl font-bold text-main tracking-tight truncate drop-shadow-sm">{{ currentTabName }}</h2>
+      <div class="min-w-0">
+        <p class="section-kicker mb-1 hidden sm:block">Workspace</p>
+        <h2 class="text-lg sm:text-xl font-bold text-main tracking-tight truncate">{{ currentTabName }}</h2>
+      </div>
       <span 
         v-if="currentTab === 'tools'" 
-        class="px-2 py-0.5 rounded-md text-xs font-mono"
-        style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); color: var(--theme-primary-darker);"
-        :style="{ '--dark-bg': 'color-mix(in srgb, var(--theme-primary) 30%, transparent)', '--dark-text': 'var(--theme-primary-light)' }"
-        @mouseenter="handleVersionBadgeHoverEnter"
-        @mouseleave="handleVersionBadgeHoverLeave"
+        class="eyebrow text-[0.66rem] px-2.5 py-1"
       >
-        v2.0
+        v3.0.0
       </span>
     </div>
     
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2 sm:gap-3">
       <!-- 世界时钟 - 显示本地时间，其他地区时间在下拉栏（放在右侧） -->
       <div class="relative">
         <button
           @click.stop="showWorldClockDropdown = !showWorldClockDropdown"
-          class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
+          class="hidden md:flex topbar-chip transition-colors"
           :title="$t('tools.worldClock.local')"
-    >
+        >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-secondary">
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
@@ -84,9 +86,9 @@
           <div
             v-if="showWorldClockDropdown"
             v-click-outside="() => showWorldClockDropdown = false"
-            class="absolute right-0 top-full mt-2 w-64 glass-card rounded-xl shadow-lg py-2 z-50"
+            class="absolute right-0 top-full mt-3 w-72 surface-float rounded-[22px] shadow-xl py-2 z-50"
           >
-            <div class="px-4 py-2 border-b border-border-base">
+            <div class="px-4 py-3 divider-strong-b">
               <div class="text-xs font-semibold text-muted uppercase tracking-wider">{{ $t('tools.worldClock.local') }}</div>
               <div class="text-lg font-mono font-bold text-main mt-1">{{ formatLocalTimeWithSeconds() }}</div>
               <div class="text-xs text-muted font-mono">{{ localDate }}</div>
@@ -104,7 +106,7 @@
                       v-if="isAdmin"
                       @click="relocateAdmin"
                       :disabled="isRelocating"
-                      class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      class="icon-btn p-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                       :title="$t('tools.worldClock.relocate') || 'Relocate'"
                     >
                       <svg 
@@ -157,7 +159,7 @@
               </div>
               
               <!-- 分隔线 -->
-              <div v-if="(adminSettings && adminSettings.timezone) || (weather && (weather.city || weather.country))" class="border-t border-border-base my-2"></div>
+              <div v-if="(adminSettings && adminSettings.timezone) || (weather && (weather.city || weather.country))" class="border-t border-[color:var(--border-strong)] my-2"></div>
               
               <!-- 预设时区 -->
               <div>
@@ -183,7 +185,7 @@
       <!-- 位置信息 -->
       <div 
         v-if="weather && (weather.city || weather.country)" 
-        class="hidden md:flex items-center gap-2 text-sm text-secondary bg-white/40 dark:bg-slate-800/40 px-3 py-1.5 rounded-full border border-border-base"
+        class="hidden xl:flex topbar-chip"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -195,7 +197,7 @@
       <!-- 天气信息 -->
       <div 
         v-if="weather" 
-        class="hidden md:flex items-center gap-2 text-sm text-secondary bg-white/40 dark:bg-slate-800/40 px-3 py-1.5 rounded-full border border-border-base"
+        class="hidden lg:flex topbar-chip"
       >
         <!-- 使用SVG太阳图标 -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-orange-400">
@@ -209,7 +211,7 @@
         <button
           v-if="!user"
           @click="showAuthModal = true"
-          class="p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
+          class="icon-btn"
           :title="$t('auth.login')"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
@@ -220,7 +222,7 @@
         <div v-else class="relative" ref="userMenuContainer">
           <button
             @click.stop="toggleUserMenu"
-            class="p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors flex items-center gap-2"
+            class="icon-btn flex items-center gap-2 rounded-[18px] pr-3"
             :title="user.username"
             ref="userMenuButton"
           >
@@ -241,32 +243,29 @@
             <div
               v-if="showUserMenu"
               v-click-outside="handleClickOutside"
-              class="absolute right-0 top-full mt-2 w-48 glass-card rounded-xl shadow-lg py-2 z-50"
+              class="absolute right-0 top-full mt-3 w-56 surface-float rounded-[22px] shadow-xl py-2 z-50"
             >
-              <div class="px-4 py-2 border-b border-border-base">
+              <div class="px-4 py-3 divider-strong-b">
                 <p class="text-sm font-semibold text-main">{{ user.username }}</p>
                 <p class="text-xs text-muted">{{ user.email }}</p>
               </div>
               <button
                 v-if="isAdmin"
                 @click.stop="goToAdmin"
-                class="w-full text-left px-4 py-2 text-sm text-secondary transition-colors"
-                style="--hover-bg: color-mix(in srgb, var(--theme-primary-lighter) 50%, transparent); --hover-bg-dark: color-mix(in srgb, var(--theme-primary) 20%, transparent);"
-                @mouseenter="handleUserMenuItemHoverEnter"
-                @mouseleave="handleUserMenuItemHoverLeave"
+                class="menu-list-btn"
               >
                 {{ $t('auth.adminPanel') }}
               </button>
-              <div class="border-t border-border-base my-1"></div>
+              <div class="divider-strong-t mt-1 pt-3"></div>
               <button
                 @click.stop="handleLogout"
-                class="w-full text-left px-4 py-2 text-sm text-secondary hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+                class="menu-list-btn"
               >
                 {{ $t('auth.logout') }}
               </button>
               <button
                 @click.stop="handleDeleteAccount"
-                class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                class="menu-list-btn menu-list-btn-danger"
               >
                 {{ $t('auth.deleteAccount') }}
               </button>
@@ -278,7 +277,7 @@
       <!-- 语言切换按钮 -->
       <button
         @click="$emit('toggle-lang')"
-        class="p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
+        class="icon-btn"
         :title="$t('common.language')"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
@@ -291,7 +290,7 @@
       <!-- 主题自定义按钮 -->
       <button
         @click="$emit('open-theme-customizer')"
-        class="p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
+        class="icon-btn"
         :title="$t('theme.customize')"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
@@ -302,7 +301,7 @@
       <!-- 主题切换按钮 -->
       <button
         @click="$emit('toggle-theme')"
-        class="p-2 rounded-lg hover:bg-white/60 dark:hover:bg-white/10 backdrop-blur-md transition-colors"
+        class="icon-btn"
         :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
       >
         <!-- 太阳图标（亮色模式时显示） -->
@@ -755,49 +754,6 @@ const handleDeleteAccount = async () => {
     alert(t('auth.accountDeleted'))
   } else {
     alert(result.error || t('auth.deleteAccountFailed'))
-  }
-}
-
-/**
- * 处理版本标签hover进入
- */
-const handleVersionBadgeHoverEnter = (event) => {
-  const el = event?.currentTarget
-  if (!el) return
-  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
-  if (isDark) {
-    el.style.backgroundColor = 'var(--dark-bg)'
-    el.style.color = 'var(--dark-text)'
-  }
-}
-
-/**
- * 处理版本标签hover离开
- */
-const handleVersionBadgeHoverLeave = (event) => {
-  const el = event?.currentTarget
-  if (!el) return
-  el.style.backgroundColor = ''
-  el.style.color = ''
-}
-
-/**
- * 处理用户菜单项hover进入
- */
-const handleUserMenuItemHoverEnter = (event) => {
-  const el = event?.currentTarget
-  if (!el) return
-  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
-  el.style.backgroundColor = isDark ? 'var(--hover-bg-dark)' : 'var(--hover-bg)'
-}
-
-/**
- * 处理用户菜单项hover离开
- */
-const handleUserMenuItemHoverLeave = (event) => {
-  const el = event?.currentTarget
-  if (el) {
-    el.style.backgroundColor = ''
   }
 }
 

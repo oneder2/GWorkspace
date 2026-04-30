@@ -7,7 +7,7 @@
   <div class="animate-fade-in relative max-w-6xl mx-auto">
     <!-- 搜索栏 - 不固定，随页面滚动 -->
     <div class="mb-6">
-      <div class="flex items-center justify-between glass-card p-4 rounded-xl">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 surface-panel p-5 rounded-[28px]">
         <div>
           <h2 class="text-lg font-bold text-main">{{ $t('sites.title') }}</h2>
           <p class="text-xs text-muted">{{ $t('sites.subtitle') }}</p>
@@ -48,7 +48,7 @@
             <div 
               v-for="link in category.links" 
               :key="link.title" 
-              class="glass-card p-4 rounded-xl flex items-start gap-3 group relative"
+              class="surface-card p-4 rounded-[24px] flex items-start gap-3 group relative"
             >
               <a 
                 :href="link.url" 
@@ -110,7 +110,7 @@
       <!-- 右侧索引和收藏 -->
       <aside v-if="filteredSites.length > 0" class="w-48 hidden xl:block shrink-0 space-y-4">
         <!-- 收藏列表 -->
-        <div v-if="favoriteLinks.length > 0" class="sticky top-28 glass-card p-4 rounded-xl">
+        <div v-if="favoriteLinks.length > 0" class="sticky top-28 surface-card p-4 rounded-[24px]">
           <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-3 tracking-wider flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-yellow-500">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -141,7 +141,7 @@
         </div>
 
         <!-- 分类索引 -->
-        <div class="sticky top-28 glass-card p-4 rounded-xl">
+        <div class="sticky top-28 surface-card p-4 rounded-[24px]">
           <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-3 tracking-wider flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
               <line x1="8" y1="6" x2="21" y2="6"/>

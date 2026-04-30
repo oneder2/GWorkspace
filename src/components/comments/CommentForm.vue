@@ -1,5 +1,5 @@
 <template>
-  <div class="glass-card p-4 sm:p-6 rounded-xl transition-all duration-300">
+  <div :class="parentId ? 'surface-panel rounded-[22px] p-4 sm:p-5' : 'surface-panel rounded-[28px] p-5 sm:p-6'">
     <h3 v-if="!parentId" class="text-lg font-bold text-main mb-4">
       {{ $t('blog.leaveComment') }}
     </h3>
@@ -20,7 +20,7 @@
           v-model="formData.content"
           required
           rows="3"
-          class="w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 border border-border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)] transition-all resize-none text-sm"
+          class="field-input min-h-[112px] resize-none text-sm"
           :placeholder="parentId ? $t('blog.commentPlaceholder') : $t('blog.commentPlaceholder')"
         ></textarea>
       </div>
@@ -45,7 +45,7 @@
           <button 
             type="submit"
             :disabled="loading || !formData.content.trim()"
-            class="px-6 py-2 bg-[var(--theme-primary)] text-white text-sm font-medium rounded-lg hover:brightness-110 active:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+            class="action-btn action-btn-primary px-5 py-2.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
             {{ parentId ? $t('blog.reply') : $t('blog.submit') }}
@@ -66,7 +66,7 @@
       </p>
       <button 
         @click="showAuthModal = true"
-        class="px-8 py-2.5 bg-[var(--theme-primary)] text-white text-sm font-bold rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[var(--theme-primary)]/20"
+        class="action-btn action-btn-primary px-8 py-3 text-sm"
       >
         {{ $t('auth.login') }} / {{ $t('auth.register') }}
       </button>

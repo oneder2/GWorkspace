@@ -1,11 +1,15 @@
-# GitHub Actions 部署配置指南
+# GitHub Actions 与部署配置指南
 
-本文档说明如何配置 GitHub Actions 实现前端自动部署到 Vercel，后端自动部署到自建服务器。
+本文档说明如何配置 GitHub Actions 与 Vercel，实现基础 CI 校验、前端自动部署到 Vercel，以及后端自动部署到自建服务器。
 
 ## 一、部署架构
 
 ```
 GitHub Repository
+    ├─→ GitHub Actions CI
+    │   ├─→ 前端构建校验
+    │   └─→ 后端模块加载校验
+    │
     ├─→ Vercel GitHub 集成 (前端)
     │   └─→ 自动检测 push → 自动构建部署
     │
@@ -16,7 +20,7 @@ GitHub Repository
         └─→ Node.js + PM2 + SQLite
 ```
 
-**注意**：前端通过 Vercel 的 GitHub 集成自动部署，无需在 GitHub Actions 中配置。
+**注意**：前端生产部署通过 Vercel 的 GitHub 集成自动完成；GitHub Actions 负责 CI 校验和后端部署。
 
 ## 二、GitHub Secrets 配置
 
@@ -177,11 +181,18 @@ npm run create-admin
 
 **无需任何额外配置**，Vercel 的 GitHub 集成会自动处理所有步骤。
 
+### CI 流程（GitHub Actions）
+
+1. 所有 PR 和推送到 `main` 时触发
+2. 前端执行 `npm ci` + `npm run build`
+3. 后端执行 `npm ci --omit=dev`
+4. 对关键后端路由模块做加载校验，尽早发现语法或依赖错误
+
 ### 后端部署流程（GitHub Actions）
 
 1. 检测到 `backend/` 目录变更时触发
 2. 检出代码
-3. 安装生产依赖
+3. 安装生产依赖并执行部署前 smoke check
 4. 创建部署包（排除 node_modules、.env、数据库文件）
 5. 通过 SCP 上传到服务器
 6. 在服务器上：
@@ -189,7 +200,7 @@ npm run create-admin
    - 停止服务
    - 解压新版本
    - 安装依赖
-   - 运行数据库迁移
+   - 启动服务（服务启动时会自动执行 SQL 迁移）
    - 启动服务
 
 ## 六、部署触发条件
@@ -316,4 +327,3 @@ pm2 start src/server.js --name gworkspace-backend
 2. 服务器 SSH 访问是否正常
 3. PM2 服务是否正常运行
 4. 数据库迁移是否成功
-

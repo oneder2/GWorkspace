@@ -5,6 +5,7 @@
 
 import express from 'express'
 import { Comment } from '../models/Comment.js'
+import { Blog } from '../models/Blog.js'
 import { authenticate } from '../middleware/auth.js'
 import { containsSensitiveWords } from '../utils/contentFilter.js'
 import rateLimit from 'express-rate-limit'
@@ -38,16 +39,19 @@ const commentRateLimiter = rateLimit({
 router.get('/:id/comments', (req, res) => {
   try {
     const blogId = parseInt(req.params.id)
+    const blog = Blog.getById(blogId)
+    if (!blog || blog.status !== 'published') {
+      return res.status(404).json({ error: 'Blog not found' })
+    }
     const {
       limit,
-      offset = 0,
-      status = 'approved'
+      offset = 0
     } = req.query
 
     const options = {
       limit: limit ? parseInt(limit) : null,
       offset: parseInt(offset),
-      status
+      status: 'approved'
     }
 
     const comments = Comment.getByBlogId(blogId, options)
@@ -66,6 +70,10 @@ router.get('/:id/comments', (req, res) => {
 router.post('/:id/comments', authenticate, commentRateLimiter, (req, res) => {
   try {
     const blogId = parseInt(req.params.id)
+    const blog = Blog.getById(blogId)
+    if (!blog || blog.status !== 'published') {
+      return res.status(404).json({ error: 'Blog not found' })
+    }
     const {
       content,
       parent_id = null
@@ -122,7 +130,14 @@ router.put('/:id', authenticate, (req, res) => {
       return res.status(403).json({ error: 'Access denied' })
     }
 
-    const updated = Comment.update(id, req.body)
+    const payload = { ...req.body }
+    if (req.user.role !== 'admin') {
+      delete payload.status
+      delete payload.author_name
+      delete payload.author_email
+    }
+
+    const updated = Comment.update(id, payload)
 
     if (!updated) {
       return res.status(500).json({ error: 'Failed to update comment' })
@@ -189,6 +204,16 @@ router.post('/:id/reply', authenticate, commentRateLimiter, (req, res) => {
       return res.status(403).json({ error: 'Reply contains sensitive words' })
     }
 
+    const parentComment = Comment.getById(parentId)
+    if (!parentComment) {
+      return res.status(404).json({ error: 'Parent comment not found' })
+    }
+
+    const blog = Blog.getById(parentComment.blog_id)
+    if (!blog || blog.status !== 'published') {
+      return res.status(404).json({ error: 'Blog not found' })
+    }
+
     const comment = Comment.reply(parentId, {
       user_id: req.user.id,
       author_name: req.user.username,
@@ -205,4 +230,3 @@ router.post('/:id/reply', authenticate, commentRateLimiter, (req, res) => {
 })
 
 export default router
-

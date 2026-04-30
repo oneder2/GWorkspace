@@ -5,6 +5,7 @@
 
 import express from 'express'
 import { Like } from '../models/Like.js'
+import { Blog } from '../models/Blog.js'
 import { optionalAuthenticate } from '../middleware/auth.js'
 
 const router = express.Router()
@@ -16,6 +17,10 @@ const router = express.Router()
 router.get('/:id/likes', (req, res) => {
   try {
     const blogId = parseInt(req.params.id)
+    const blog = Blog.getById(blogId)
+    if (!blog || blog.status !== 'published') {
+      return res.status(404).json({ error: 'Blog not found' })
+    }
     const count = Like.getCount(blogId)
     res.json({ count })
   } catch (error) {
@@ -32,6 +37,10 @@ router.get('/:id/likes', (req, res) => {
 router.get('/:id/liked', optionalAuthenticate, (req, res) => {
   try {
     const blogId = parseInt(req.params.id)
+    const blog = Blog.getById(blogId)
+    if (!blog || blog.status !== 'published') {
+      return res.status(404).json({ error: 'Blog not found' })
+    }
     const userId = req.user?.id || null
     let liked = false
 
@@ -59,6 +68,10 @@ router.get('/:id/liked', optionalAuthenticate, (req, res) => {
 router.post('/:id/likes', optionalAuthenticate, (req, res) => {
   try {
     const blogId = parseInt(req.params.id)
+    const blog = Blog.getById(blogId)
+    if (!blog || blog.status !== 'published') {
+      return res.status(404).json({ error: 'Blog not found' })
+    }
     const userId = req.user?.id || null
     const userIp = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress
     const userAgent = req.headers['user-agent'] || null
@@ -78,4 +91,3 @@ router.post('/:id/likes', optionalAuthenticate, (req, res) => {
 })
 
 export default router
-

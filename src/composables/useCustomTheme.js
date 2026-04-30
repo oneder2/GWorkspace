@@ -19,6 +19,72 @@ const availablePresets = {
   crimson: { name: 'Crimson', primary: '#ef4444', primaryDark: '#dc2626' }
 }
 
+const FALLBACK_PRIMARY = availablePresets.none.primary
+
+const normalizeHexColor = (value, fallback = FALLBACK_PRIMARY) => {
+  const input = String(value || '').trim()
+
+  const shortMatch = /^#?([a-f\d])([a-f\d])([a-f\d])$/i.exec(input)
+  if (shortMatch) {
+    return `#${shortMatch[1]}${shortMatch[1]}${shortMatch[2]}${shortMatch[2]}${shortMatch[3]}${shortMatch[3]}`.toLowerCase()
+  }
+
+  const fullMatch = /^#?([a-f\d]{6})$/i.exec(input)
+  return fullMatch ? `#${fullMatch[1]}`.toLowerCase() : fallback
+}
+
+const hexToRgb = (hex) => {
+  const safeHex = normalizeHexColor(hex)
+  return {
+    r: parseInt(safeHex.slice(1, 3), 16),
+    g: parseInt(safeHex.slice(3, 5), 16),
+    b: parseInt(safeHex.slice(5, 7), 16)
+  }
+}
+
+const adjustBrightness = (hex, percent) => {
+  const { r, g, b } = hexToRgb(hex)
+
+  const adjust = (val) => {
+    const amount = Math.floor(val * (percent / 100))
+    return Math.min(255, Math.max(0, val + amount)).toString(16).padStart(2, '0')
+  }
+
+  return `#${adjust(r)}${adjust(g)}${adjust(b)}`
+}
+
+const isDarkColor = (hex) => {
+  const { r, g, b } = hexToRgb(hex)
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000
+  return brightness < 155
+}
+
+const normalizeThemeColors = (colors) => {
+  if (!colors?.primary) {
+    return generateThemeColors(FALLBACK_PRIMARY)
+  }
+
+  return generateThemeColors(colors.primary)
+}
+
+/**
+ * 从主色生成完整的主题色系
+ * @param {string} primary - 主色 (HEX格式)
+ * @returns {object} 完整的主题色对象
+ */
+const generateThemeColors = (primary) => {
+  const safePrimary = normalizeHexColor(primary)
+
+  return {
+    primary: safePrimary,
+    primaryDark: adjustBrightness(safePrimary, -15),
+    primaryLight: adjustBrightness(safePrimary, 15),
+    primaryLighter: adjustBrightness(safePrimary, 30),
+    primaryDarker: adjustBrightness(safePrimary, -30),
+    textOnPrimary: isDarkColor(safePrimary) ? '#ffffff' : '#1e293b'
+  }
+}
+
 /**
  * 使用自定义主题
  * @returns {object} 主题相关的方法和状态
@@ -45,47 +111,6 @@ export function useCustomTheme() {
   })
 
   /**
-   * 从主色生成完整的主题色系
-   * @param {string} primary - 主色 (HEX格式)
-   * @returns {object} 完整的主题色对象
-   */
-  const generateThemeColors = (primary) => {
-    if (!primary || primary === 'transparent') {
-      return availablePresets.none
-    }
-
-    const adjustBrightness = (hex, percent) => {
-      const r = parseInt(hex.slice(1, 3), 16)
-      const g = parseInt(hex.slice(3, 5), 16)
-      const b = parseInt(hex.slice(5, 7), 16)
-
-      const adjust = (val) => {
-        const amount = Math.floor(val * (percent / 100))
-        return Math.min(255, Math.max(0, val + amount)).toString(16).padStart(2, '0')
-      }
-
-      return `#${adjust(r)}${adjust(g)}${adjust(b)}`
-    }
-
-    const isDark = (hex) => {
-      const r = parseInt(hex.slice(1, 3), 16)
-      const g = parseInt(hex.slice(3, 5), 16)
-      const b = parseInt(hex.slice(5, 7), 16)
-      const brightness = (r * 299 + g * 587 + b * 114) / 1000
-      return brightness < 155
-    }
-
-    return {
-      primary: primary,
-      primaryDark: adjustBrightness(primary, -15),
-      primaryLight: adjustBrightness(primary, 15),
-      primaryLighter: adjustBrightness(primary, 30),
-      primaryDarker: adjustBrightness(primary, -30),
-      textOnPrimary: isDark(primary) ? '#ffffff' : '#1e293b'
-    }
-  }
-
-  /**
    * 应用主题颜色到 CSS 变量
    */
   const applyTheme = () => {
@@ -93,7 +118,7 @@ export function useCustomTheme() {
     if (!colors) return
     
     const root = document.documentElement
-    const theme = colors.primaryLight ? colors : generateThemeColors(colors.primary)
+    const theme = colors.primaryLight ? normalizeThemeColors(colors) : generateThemeColors(colors.primary)
     
     // 主题核心色
     root.style.setProperty('--theme-primary', theme.primary)
@@ -120,7 +145,7 @@ export function useCustomTheme() {
    * 设置自定义主题
    */
   const setCustomTheme = (colors) => {
-    customThemeStore.update(colors)
+    customThemeStore.update(normalizeThemeColors(colors))
     currentPresetStore.update('custom')
     applyTheme()
   }

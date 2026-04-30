@@ -17,7 +17,7 @@
     </div>
 
     <!-- 管理后台路由：使用与普通路由类似的布局，但侧边栏和内容组件不同 -->
-    <div v-if="isAdminRoute" class="relative z-10 flex h-full w-full p-2 sm:p-4 gap-2 sm:gap-4 box-border">
+    <div v-if="isAdminRoute" class="relative z-10 flex h-full w-full p-2 sm:p-4 gap-3 box-border">
       <!-- 后台侧边栏 -->
       <AdminSidebar 
         :collapsed="sidebarCollapsed"
@@ -25,7 +25,7 @@
         class="hidden md:flex"
       />
 
-      <main class="flex-1 glass-main rounded-3xl flex flex-col min-w-0 relative overflow-hidden shadow-2xl">
+      <main class="flex-1 admin-shell rounded-[32px] flex flex-col min-w-0 relative overflow-hidden">
         <div class="flex-1 overflow-y-auto scroll-smooth relative custom-scrollbar">
           <router-view />
         </div>
@@ -33,12 +33,13 @@
     </div>
 
     <!-- 普通路由：使用标准布局（侧边栏 + 顶部栏） -->
-    <div v-else class="relative z-10 flex h-full w-full p-2 sm:p-4 gap-2 sm:gap-4 box-border">
+    <div v-else class="relative z-10 flex h-full w-full p-2 sm:p-4 gap-3 box-border">
       <!-- 左侧导航栏 - 移动端隐藏，平板和桌面显示 -->
       <Sidebar 
         :collapsed="sidebarCollapsed"
         @toggle-collapse="sidebarCollapsed = !sidebarCollapsed"
         :current-tab="currentTab"
+        @open-update-log="showUpdateLogModal = true"
         class="hidden md:flex"
       />
 
@@ -76,13 +77,14 @@
             @toggle-collapse="showMobileMenu = false"
             :current-tab="currentTab"
             @nav-click="showMobileMenu = false"
+            @open-update-log="showUpdateLogModal = true; showMobileMenu = false"
             class="h-full"
           />
         </div>
       </transition>
 
       <!-- 中间主内容区 -->
-      <main class="flex-1 glass-main rounded-3xl flex flex-col min-w-0 relative overflow-hidden shadow-2xl">
+      <main class="flex-1 surface-shell rounded-[32px] flex flex-col min-w-0 relative overflow-hidden">
         <!-- 顶部状态栏 -->
         <Header 
           :current-tab="currentTab"
@@ -96,7 +98,7 @@
         />
 
         <!-- 内容滚动视口 - 响应式内边距 -->
-        <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 scroll-smooth relative custom-scrollbar" id="main-scroll">
+        <div class="flex-1 overflow-y-auto p-5 sm:p-7 md:p-10 lg:p-12 scroll-smooth relative custom-scrollbar" id="main-scroll">
           <!-- 使用 router-view 渲染路由组件 -->
           <router-view />
         </div>
@@ -107,6 +109,11 @@
     <ThemeCustomizer 
       v-if="showThemeCustomizer"
       @close="showThemeCustomizer = false"
+    />
+
+    <UpdateLogModal
+      v-if="showUpdateLogModal"
+      @close="showUpdateLogModal = false"
     />
   </div>
 </template>
@@ -124,6 +131,7 @@ import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
 import AdminSidebar from './components/admin/AdminSidebar.vue'
 import ThemeCustomizer from './components/ThemeCustomizer.vue'
+import UpdateLogModal from './components/UpdateLogModal.vue'
 
 // 路由
 const route = useRoute()
@@ -140,6 +148,7 @@ const sidebarCollapsed = ref(false)
 const showMobileMenu = ref(false) // 移动端菜单显示状态
 const weatherInfo = ref(null)
 const showThemeCustomizer = ref(false)
+const showUpdateLogModal = ref(false)
 
 // 初始化自定义主题
 useCustomTheme()

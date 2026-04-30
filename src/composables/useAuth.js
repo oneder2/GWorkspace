@@ -11,6 +11,7 @@ import { getClientLocationInfo } from '../utils/ipLocation'
 const user = ref(null)
 const token = ref(localStorage.getItem('token') || null)
 const isLoading = ref(false)
+const isInitialized = ref(false)
 
 /**
  * 初始化：从localStorage恢复token并验证
@@ -28,10 +29,11 @@ async function initAuth() {
       token.value = null
     }
   }
+  isInitialized.value = true
 }
 
 // 自动初始化
-initAuth()
+const authReady = initAuth()
 
 /**
  * 用户认证组合式函数
@@ -162,6 +164,8 @@ export function useAuth() {
     user,
     token,
     isLoading,
+    isInitialized,
+    authReady,
     register,
     login,
     logout,
@@ -170,5 +174,4 @@ export function useAuth() {
     isAdmin
   }
 }
-
 

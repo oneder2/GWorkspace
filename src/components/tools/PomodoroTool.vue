@@ -11,7 +11,7 @@
           @click="setMode('work')"
           class="flex-1 py-2 rounded-xl font-bold transition-colors border"
           :class="mode === 'work' 
-            ? 'bg-green-500 dark:bg-green-500 text-white border-green-400/30 dark:border-green-400/30' 
+            ? 'text-white border-transparent bg-[var(--theme-primary)]' 
             : 'bg-slate-100 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600/50 hover:bg-slate-200 dark:hover:bg-slate-600'"
         >
           工作 (25分钟)
@@ -20,7 +20,7 @@
           @click="setMode('break')"
           class="flex-1 py-2 rounded-xl font-bold transition-colors border"
           :class="mode === 'break' 
-            ? 'bg-blue-500 dark:bg-blue-500 text-white border-blue-400/30 dark:border-blue-400/30' 
+            ? 'text-white border-transparent bg-[var(--theme-primary)]' 
             : 'bg-slate-100 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600/50 hover:bg-slate-200 dark:hover:bg-slate-600'"
         >
           休息 (5分钟)
@@ -43,8 +43,8 @@
           @click="startPause" 
           class="flex-1 h-14 rounded-xl font-bold text-white transition-colors border"
           :class="isRunning 
-            ? 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 border-yellow-400/30 dark:border-yellow-400/30' 
-            : 'bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-600 border-green-400/30 dark:border-green-400/30'"
+            ? 'bg-[var(--theme-primary-darker)] border-transparent' 
+            : 'bg-[var(--theme-primary)] border-transparent'"
         >
           {{ isRunning ? '暂停' : '开始' }}
         </button>
