@@ -77,7 +77,7 @@
         </div>
 
         <div class="surface-card rounded-[28px] p-5 sm:p-6 space-y-4 min-w-0">
-          <div class="section-heading mb-0">
+          <div class="section-heading mb-1 pb-4 divider-strong-b">
             <div>
               <div class="section-kicker">Quick Start</div>
               <h2 class="text-2xl font-bold text-main tracking-tight">{{ $t('home.workspaceAreas') }}</h2>
@@ -106,7 +106,7 @@
 
     <section>
       <div class="surface-card rounded-[28px] p-6 sm:p-8 min-w-0">
-        <div class="section-heading flex-col items-start sm:flex-row sm:items-center">
+        <div class="section-heading flex-col items-start sm:flex-row sm:items-center mb-5 pb-5 divider-strong-b">
           <div>
             <div class="section-kicker">Launch Pad</div>
             <h2 class="text-2xl font-bold text-main tracking-tight">{{ $t('home.quickAccess') }}</h2>

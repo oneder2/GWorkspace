@@ -223,30 +223,46 @@ body {
   .surface-panel {
     background: var(--surface-panel);
     border: 1px solid var(--border-base);
-    box-shadow: var(--shadow-soft);
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.74);
     backdrop-filter: blur(calc(var(--glass-blur) + 2px));
     -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px));
+  }
+
+  .dark .surface-panel {
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .surface-card {
     background: color-mix(in srgb, var(--surface-elevated) 96%, transparent);
     border: 1px solid var(--border-strong);
-    box-shadow: var(--shadow-soft);
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.72);
     transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+  }
+
+  .dark .surface-card {
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
   .surface-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
+    box-shadow: var(--shadow-medium), inset 0 1px 0 rgba(255, 255, 255, 0.84);
     border-color: color-mix(in srgb, var(--theme-primary) 18%, var(--border-strong));
+  }
+
+  .dark .surface-card:hover {
+    box-shadow: var(--shadow-medium), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .surface-float {
     background: color-mix(in srgb, var(--surface-overlay) 88%, transparent);
     border: 1px solid var(--border-base);
-    box-shadow: var(--shadow-soft);
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.68);
     backdrop-filter: blur(calc(var(--glass-blur) + 8px));
     -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 8px));
+  }
+
+  .dark .surface-float {
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .hero-panel {
@@ -299,6 +315,45 @@ body {
     max-width: 42rem;
     color: var(--text-secondary);
     line-height: 1.7;
+  }
+
+  .divider-strong-b,
+  .divider-strong-t {
+    position: relative;
+  }
+
+  .divider-strong-b::after,
+  .divider-strong-t::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.94);
+    pointer-events: none;
+  }
+
+  .divider-strong-b::after {
+    bottom: 0;
+    box-shadow: 0 1px 0 rgba(148, 163, 184, 0.16);
+  }
+
+  .divider-strong-t::before {
+    top: 0;
+    box-shadow: 0 -1px 0 rgba(148, 163, 184, 0.16);
+  }
+
+  .dark .divider-strong-b::after,
+  .dark .divider-strong-t::before {
+    background: rgba(255, 255, 255, 0.24);
+  }
+
+  .dark .divider-strong-b::after {
+    box-shadow: 0 1px 0 rgba(2, 6, 23, 0.48);
+  }
+
+  .dark .divider-strong-t::before {
+    box-shadow: 0 -1px 0 rgba(2, 6, 23, 0.48);
   }
 
   .action-btn {

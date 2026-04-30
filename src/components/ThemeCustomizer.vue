@@ -5,7 +5,7 @@
 <template>
   <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 dark:bg-black/70 backdrop-blur-sm" @click.self="$emit('close')">
     <div class="glass-card-panel rounded-3xl p-6 md:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar animate-fade-in">
-      <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center justify-between mb-6 pb-5 divider-strong-b">
         <div class="flex items-center gap-3">
           <div class="w-1.5 h-6 bg-[var(--theme-primary)] rounded-full"></div>
           <h2 class="text-2xl font-bold text-main">{{ $t('theme.title') }}</h2>
@@ -76,7 +76,7 @@
             </div>
 
             <!-- 玻璃效果调节 -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-border-base">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 divider-strong-t">
               <div class="space-y-3">
                 <div class="flex justify-between items-center">
                   <label class="text-sm font-bold text-main">背景透明度</label>

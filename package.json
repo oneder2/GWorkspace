@@ -1,6 +1,6 @@
 {
   "name": "gworkspace",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Personal workspace website with Vue.js",
   "type": "module",
   "scripts": {

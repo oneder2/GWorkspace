@@ -13,7 +13,7 @@
         @click.self="$emit('close')"
       >
         <div class="surface-float w-full max-w-5xl rounded-[32px] overflow-hidden shadow-2xl animate-fade-in">
-          <div class="flex items-center justify-between gap-4 px-6 py-5 border-b border-[color:var(--border-strong)]">
+          <div class="flex items-center justify-between gap-4 px-6 py-5 divider-strong-b">
             <div>
               <div class="section-kicker">Updates</div>
               <h2 class="text-2xl font-bold text-main tracking-tight mt-2">{{ $t('home.updateLog') }}</h2>

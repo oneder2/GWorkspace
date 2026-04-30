@@ -4,7 +4,7 @@
 -->
 <template>
   <div class="surface-panel rounded-3xl p-6 md:p-8 flex flex-col min-w-0">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 border-b border-border-base min-w-0">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 min-w-0 divider-strong-b">
       <div class="flex items-center gap-3 min-w-0">
         <div class="w-1.5 h-6 bg-[var(--theme-primary)] rounded-full"></div>
         <h3 class="font-bold text-xl tracking-tight text-main min-w-0 break-words">
@@ -34,7 +34,7 @@
       </div>
     </div>
     
-    <div class="mt-8 pt-6 border-t border-border-base flex justify-center">
+    <div class="mt-8 pt-6 flex justify-center divider-strong-t">
       <a 
         href="https://github.com/oneder2/GWorkspace/blob/main/CHANGELOG.md" 
         target="_blank" 
@@ -53,6 +53,18 @@
 import { ref } from 'vue'
 
 const updates = ref([
+  {
+    version: 'v3.0.0',
+    date: '2026-04-30',
+    items: [
+      '工具箱定版：重构为单屏优先工作台，工具切换、最近使用与主工作区统一在一个视图内完成',
+      '颜色工具重写：移除不可靠的系统取色链路，改为页内实时调色工作区并同步全部颜色参数反馈',
+      '博客工作流修复：彻底解决发布日期时区偏移、条目日期冗余显示与草稿占位标题问题',
+      '分享海报优化：统一明暗质感、重整信息层级并放大二维码，提升导出可读性与完成度',
+      '安全与交付增强：收紧管理端访问校验，补齐 GitHub Actions CI 检查与部署链路保护',
+      '界面收尾：主面板与日志区域新增高对比分隔线和边界高光，整体层次更稳定'
+    ]
+  },
   {
     version: 'v2.7.0',
     date: '2026-02-26',

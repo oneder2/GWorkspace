@@ -4,7 +4,7 @@
 -->
 <template>
   <header
-    class="h-16 sm:h-[4.5rem] px-4 sm:px-6 md:px-8 flex items-center justify-between border-b border-[color:var(--border-strong)] shrink-0 relative gap-3 sm:gap-4"
+    class="h-16 sm:h-[4.5rem] px-4 sm:px-6 md:px-8 flex items-center justify-between shrink-0 relative gap-3 sm:gap-4 divider-strong-b"
     style="background: color-mix(in srgb, var(--surface-elevated) 70%, transparent);"
   >
     <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
@@ -53,7 +53,7 @@
         v-if="currentTab === 'tools'" 
         class="eyebrow text-[0.66rem] px-2.5 py-1"
       >
-        v2.0
+        v3.0.0
       </span>
     </div>
     
@@ -88,7 +88,7 @@
             v-click-outside="() => showWorldClockDropdown = false"
             class="absolute right-0 top-full mt-3 w-72 surface-float rounded-[22px] shadow-xl py-2 z-50"
           >
-            <div class="px-4 py-3 border-b border-[color:var(--border-strong)]">
+            <div class="px-4 py-3 divider-strong-b">
               <div class="text-xs font-semibold text-muted uppercase tracking-wider">{{ $t('tools.worldClock.local') }}</div>
               <div class="text-lg font-mono font-bold text-main mt-1">{{ formatLocalTimeWithSeconds() }}</div>
               <div class="text-xs text-muted font-mono">{{ localDate }}</div>
@@ -245,7 +245,7 @@
               v-click-outside="handleClickOutside"
               class="absolute right-0 top-full mt-3 w-56 surface-float rounded-[22px] shadow-xl py-2 z-50"
             >
-              <div class="px-4 py-3 border-b border-[color:var(--border-strong)]">
+              <div class="px-4 py-3 divider-strong-b">
                 <p class="text-sm font-semibold text-main">{{ user.username }}</p>
                 <p class="text-xs text-muted">{{ user.email }}</p>
               </div>
@@ -256,7 +256,7 @@
               >
                 {{ $t('auth.adminPanel') }}
               </button>
-              <div class="border-t border-[color:var(--border-strong)] my-1"></div>
+              <div class="divider-strong-t mt-1 pt-3"></div>
               <button
                 @click.stop="handleLogout"
                 class="menu-list-btn"
