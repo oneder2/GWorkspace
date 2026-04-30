@@ -50,20 +50,15 @@
         <!-- 自定义主色 -->
         <section>
           <h3 class="text-sm font-bold text-muted uppercase tracking-wider mb-4">{{ $t('theme.custom') }}</h3>
-          <div class="glass-card p-6 rounded-2xl space-y-6">
+          <div class="theme-custom-card p-6 rounded-2xl space-y-6">
             <div class="flex flex-col sm:flex-row items-center gap-6">
-              <div class="relative shrink-0">
+              <div class="theme-color-picker-wrap shrink-0">
                 <input 
                   type="color" 
-                  v-model="customPrimary"
-                  class="w-20 h-20 rounded-2xl cursor-pointer border-4 border-white/20 dark:border-slate-700/20 bg-transparent"
+                  :value="customPrimary"
+                  class="theme-native-color-picker"
                   @input="handleCustomColorChange"
                 >
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-white mix-blend-difference">
-                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
-                  </svg>
-                </div>
               </div>
               <div class="flex-1 space-y-2 text-center sm:text-left">
                 <p class="font-bold text-main">{{ $t('theme.primaryColor') }}</p>
@@ -164,12 +159,21 @@ const { presetThemes, currentPreset, glassBlur, bgOpacity, setPresetTheme, setCu
 
 const customPrimary = ref('#475569')
 
+const normalizeHexColor = (value, fallback = '#475569') => {
+  const input = String(value || '').trim()
+  const shortMatch = /^#?([a-f\d])([a-f\d])([a-f\d])$/i.exec(input)
+  if (shortMatch) {
+    return `#${shortMatch[1]}${shortMatch[1]}${shortMatch[2]}${shortMatch[2]}${shortMatch[3]}${shortMatch[3]}`.toLowerCase()
+  }
+
+  const fullMatch = /^#?([a-f\d]{6})$/i.exec(input)
+  return fullMatch ? `#${fullMatch[1]}`.toLowerCase() : fallback
+}
+
 onMounted(() => {
   // 获取当前生效的主色
   const current = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim()
-  if (current && current.startsWith('#')) {
-    customPrimary.value = current
-  }
+  customPrimary.value = normalizeHexColor(current)
 })
 
 /**
@@ -177,14 +181,16 @@ onMounted(() => {
  */
 const applyPreset = (key) => {
   setPresetTheme(key)
-  customPrimary.value = presetThemes[key].primary
+  customPrimary.value = normalizeHexColor(presetThemes[key]?.primary)
 }
 
 /**
  * 处理自定义颜色选择
  */
-const handleCustomColorChange = () => {
-  setCustomTheme({ primary: customPrimary.value })
+const handleCustomColorChange = (event) => {
+  const nextColor = normalizeHexColor(event?.target?.value, customPrimary.value)
+  customPrimary.value = nextColor
+  setCustomTheme({ primary: nextColor })
 }
 
 /**
@@ -195,3 +201,55 @@ const resetToDefault = () => {
   customPrimary.value = '#475569'
 }
 </script>
+
+<style scoped>
+.theme-custom-card {
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--surface-bg) 86%, transparent);
+  box-shadow: var(--shadow-soft);
+}
+
+.theme-color-picker-wrap {
+  width: 5.5rem;
+  height: 5.5rem;
+  padding: 0.35rem;
+  border: 1px solid var(--border-color);
+  border-radius: 1.35rem;
+  background: color-mix(in srgb, var(--surface-bg) 92%, transparent);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 14px 32px rgb(15 23 42 / 0.12);
+  isolation: isolate;
+  filter: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.theme-native-color-picker {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 1rem;
+  background: transparent;
+  cursor: pointer;
+  color: transparent;
+  filter: none;
+  mix-blend-mode: normal;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.theme-native-color-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.theme-native-color-picker::-webkit-color-swatch {
+  border: 0;
+  border-radius: 1rem;
+}
+
+.theme-native-color-picker::-moz-color-swatch {
+  border: 0;
+  border-radius: 1rem;
+}
+</style>

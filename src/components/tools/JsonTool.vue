@@ -22,7 +22,10 @@
         </button>
         <button 
           @click="compressJson" 
-          class="px-4 py-1.5 bg-slate-600 dark:bg-slate-700 text-white rounded-lg hover:bg-slate-700 dark:hover:bg-slate-600 text-sm font-medium shadow-md shadow-slate-500/20 flex items-center gap-2"
+          class="px-4 py-1.5 text-white rounded-lg text-sm font-medium shadow-md flex items-center gap-2 transition-colors"
+          style="background-color: color-mix(in srgb, var(--theme-primary) 72%, #64748b); box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--theme-primary) 18%, transparent);"
+          @mouseenter="$event.currentTarget.style.backgroundColor = 'var(--theme-primary-darker)'"
+          @mouseleave="$event.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--theme-primary) 72%, #64748b)'"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>

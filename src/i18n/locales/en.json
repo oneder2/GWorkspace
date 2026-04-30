@@ -37,6 +37,7 @@
   "tools": {
     "title": "Toolbox",
     "utilities": "Utilities",
+    "subtitle": "A shared workspace for creation, distribution, and lightweight operations.",
     "calculator": "Calculator",
     "encoder": "Encoder",
     "json": "JSON Formatter",
@@ -62,6 +63,109 @@
     "markdownPlaceholder": "Enter Markdown content...",
     "copyHTML": "Copy HTML",
     "todo": "Todo List",
+    "toolDescriptions": {
+      "blogAssistant": "Prepare title, slug, excerpt, tags, and publish date before opening the real blog editor.",
+      "markdown": "Draft and preview Markdown content quickly for article structure and reusable snippets.",
+      "qrcode": "Generate shareable QR codes for articles, projects, and internal workspace destinations.",
+      "colorpicker": "Turn theme colors into usable palette references for covers, cards, and visual polish.",
+      "todo": "Track publishing and maintenance tasks so operations move from ideas into execution.",
+      "pomodoro": "Tie focus sessions to creator workflows instead of keeping a timer isolated from the work.",
+      "json": "Handle API payloads and config fragments while working on admin and content system tasks.",
+      "worldclock": "Check multiple timezones quickly when scheduling posts, releases, or cross-region work.",
+      "calc": "Keep fast math available as a lightweight utility instead of a primary workspace surface.",
+      "stopwatch": "Retain quick timing for occasional use without giving it primary page weight.",
+      "encode": "Run Base64 and URL transformations fast while debugging or cleaning pasted content."
+    },
+    "workspace": {
+      "heroEyebrow": "Creative Operations Deck",
+      "heroTitle": "Put writing, publishing, and daily site operations into one workflow",
+      "heroDescription": "This is no longer a loose pile of micro-tools. It is a workspace centered on blog production, share assets, and site upkeep. Start with a workflow, then open the specific tool.",
+      "stats": {
+        "tools": "{count} curated tools",
+        "groups": "{count} workflows",
+        "featured": "{count} featured assistant"
+      },
+      "continueLabel": "Continue Last Work",
+      "recommendedLabel": "Recommended Start",
+      "openTool": "Open Tool",
+      "pinTool": "Pin Tool",
+      "unpinTool": "Unpin Tool",
+      "recentTitle": "Recent Tools",
+      "recentDescription": "Jump back to where you last stopped.",
+      "recentEmpty": "No recent tools yet. Starting with the blog publishing assistant is the strongest default.",
+      "pinnedTitle": "Pinned Tools",
+      "pinnedDescription": "Keep your high-frequency workflows on the front page.",
+      "pinnedEmpty": "Pin a few repeat tools here and the toolbox starts behaving like a real workspace.",
+      "workspaceLabel": "Workspace",
+      "workspaceEmptyTitle": "Choose a tool above to start working",
+      "workspaceEmptyDescription": "Prefer the content and operations groups first. Low-frequency generic utilities have been moved into the lightweight section.",
+      "workspaceHintBadge": "Start Here",
+      "workspaceHintTitle": "Pick a workflow first, then go into the tool details",
+      "workspaceHintDescription": "Recent activity is remembered automatically, and pinned tools stay on the front page. That turns the toolbox into something you open every day instead of a demo shelf.",
+      "backToOverview": "Back to Overview",
+      "badges": {
+        "featured": "Featured",
+        "writing": "Writing",
+        "share": "Share",
+        "visual": "Visual",
+        "workflow": "Workflow",
+        "focus": "Focus",
+        "quick": "Light"
+      },
+      "groups": {
+        "content": {
+          "title": "Content Creation",
+          "description": "Writing, structuring, previewing, and share-asset preparation built around blog and portfolio output."
+        },
+        "operations": {
+          "title": "Site Operations",
+          "description": "Tasks, focus rhythm, and system fragments that help content work actually move forward."
+        },
+        "utility": {
+          "title": "Light Utilities",
+          "description": "Generic helpers still exist, but they no longer dominate the primary workspace surface."
+        }
+      }
+    },
+    "blogAssistant": {
+      "title": "Blog Publishing Assistant",
+      "desc": "Normalize title, slug, excerpt, tags, and publish date before you move into the real editor.",
+      "identityTitle": "Article Identity",
+      "identityDesc": "Define how this post should look and be found before the full writing pass begins.",
+      "contentTitle": "Draft Content and Excerpt",
+      "contentDesc": "Paste or sketch body content here to estimate reading time and generate a reusable summary.",
+      "payloadTitle": "Ready-to-Copy Output",
+      "payloadDesc": "This is the closest shape to a publish-ready payload and can be carried into the blog editor directly.",
+      "readinessTitle": "Pre-Publish Checks",
+      "readinessDesc": "Use a minimal checklist to confirm whether the post is ready for editor handoff.",
+      "slugPlaceholder": "Generated from the title",
+      "resetSlug": "Reset Auto",
+      "useSuggestedExcerpt": "Use Suggested Excerpt",
+      "suggestedExcerpt": "Suggested Excerpt",
+      "suggestedExcerptDesc": "A default summary extracted from the current body content.",
+      "noExcerptSuggestion": "Once body content is available, a reusable excerpt suggestion will appear here.",
+      "excerptLength": "Current excerpt length: {count} chars",
+      "copyPayload": "Copy Publish JSON",
+      "tagsPlaceholder": "Enter tags separated by commas, new lines, or Chinese punctuation",
+      "noTags": "No cleaned tags yet",
+      "readingTimeValue": "Approx. {minutes} min read",
+      "ready": "Baseline requirement is satisfied",
+      "readiness": {
+        "title": "Title",
+        "slug": "Slug",
+        "excerpt": "Excerpt",
+        "tags": "Tags",
+        "content": "Body Size"
+      },
+      "readinessHints": {
+        "title": "Lock the title first so the rest of the metadata becomes stable.",
+        "slug": "Review the URL slug once the title is settled.",
+        "excerpt": "Keep at least one explicit value statement so list cards do not feel empty.",
+        "tags": "Aim for at least 1-3 tags for archive and relationship value.",
+        "content": "The body is still short; consider adding more structure or context.",
+        "contentReady": "The body now has {count} chars and is large enough for refinement."
+      }
+    },
     "worldClock": {
       "title": "World Clock",
       "desc": "View time in different timezones",
@@ -213,6 +317,7 @@
     "expand": "Expand",
     "menu": "Menu",
     "delete": "Delete",
+    "copied": "Copied",
     "loading": "Loading..."
   },
   "auth": {

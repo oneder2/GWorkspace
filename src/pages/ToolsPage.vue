@@ -1,285 +1,257 @@
-<!--
-  工具箱页面组件
-  包含多个实用工具：计算器、编码转换、JSON格式化等
-  模块化设计，便于添加新工具
-  布局：工具栏放在左侧空白区域，中间内容区域使用max-w-6xl居中显示
--->
 <template>
-  <div class="animate-fade-in rounded-3xl flex gap-6 xl:gap-8 min-h-full overflow-hidden">
-    <!-- 左侧工具筛选栏 - 放在左侧空白区域，桌面端显示，玻璃卡片背景，无标题 -->
-    <div class="surface-card w-60 hidden xl:block shrink-0 rounded-[28px]">
-      <div class="sticky top-6 space-y-1.5 p-2.5">
-        <button 
-          v-for="tool in tools" 
-          :key="tool.id"
-          @click="currentTool = tool.id"
-          class="tool-select-btn w-full px-5 py-4 text-left text-sm font-semibold flex items-center gap-3 group relative"
-          :class="[
-            currentTool === tool.id 
-              ? 'rounded-2xl border shadow-md' 
-              : 'text-secondary border border-transparent rounded-xl hover:shadow-sm',
-            currentTool === tool.id && isThemeTransparent
-              ? 'tool-select-btn-selected-transparent'
-              : currentTool === tool.id
-              ? 'tool-select-btn-selected'
-              : ''
-          ]"
-        >
-          <component 
-            :is="tool.icon" 
-            class="w-5 h-5 shrink-0 transition-transform duration-200"
-            :class="currentTool === tool.id 
-              ? 'scale-110' 
-              : 'group-hover:scale-110'"
-          />
-          <span class="truncate flex-1">{{ tool.name }}</span>
-          <!-- 选中指示器 -->
-          <div 
-            v-if="currentTool === tool.id"
-            class="absolute right-2 w-1.5 h-1.5 rounded-full tool-indicator"
-            :class="isThemeTransparent ? 'tool-indicator-transparent' : ''"
-          ></div>
-        </button>
-      </div>
-    </div>
+  <div class="toolbox-page animate-fade-in">
+    <div class="toolbox-shell">
+      <section class="toolbox-dashboard surface-panel shadow-lg">
+        <div class="toolbox-commandbar">
+          <div class="toolbox-dashboard-title-block">
+            <span class="toolbox-dashboard-label">{{ groupNameMap[activeToolData.group] }}</span>
+            <h1 class="toolbox-dashboard-title">{{ activeToolData?.name || $t('tools.title') }}</h1>
+            <span v-if="activeToolData.badge" class="toolbox-dashboard-badge">{{ activeToolData.badge }}</span>
+          </div>
 
-    <!-- 分割线 - 更精致的样式 -->
-    <div class="hidden xl:block w-px bg-gradient-to-b from-transparent via-slate-300 dark:via-slate-600 to-transparent shrink-0"></div>
-
-    <!-- 中间工具内容区 - 使用flex-1占据全部剩余空间，填充到底部 -->
-    <div class="flex-1 min-w-0 flex flex-col min-h-full">
-      <!-- 移动端工具选择器 - 下拉栏形式 -->
-      <div class="xl:hidden mb-4 sm:mb-6">
-        <div class="surface-panel rounded-[24px] shadow-lg overflow-hidden" data-tool-dropdown>
-          <div class="relative">
-            <!-- 下拉按钮 -->
+          <div class="toolbox-dashboard-actions">
             <button
-              @click="showToolDropdown = !showToolDropdown"
-              class="tool-dropdown-btn w-full px-4 py-3 sm:py-4 flex items-center justify-between text-left"
+              class="toolbox-secondary-btn toolbox-trigger-btn"
+              :class="{ 'is-active': showToolMenu }"
+              @click="showToolMenu = !showToolMenu"
             >
-              <div class="flex items-center gap-3 flex-1 min-w-0">
-                <component 
-                  :is="currentToolData.icon" 
-                  class="w-5 h-5 shrink-0"
-                  style="color: var(--theme-primary-darker);"
-                  :style="{ '--dark-color': 'var(--theme-primary-dark)' }"
-                />
-                <span class="font-semibold text-sm sm:text-base text-main truncate">
-                  {{ currentToolData.name }}
-                </span>
-              </div>
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                stroke-width="2" 
-                stroke-linecap="round" 
-                stroke-linejoin="round" 
-                class="w-5 h-5 text-muted transition-transform duration-200 flex-shrink-0 ml-2"
-                :class="{ 'rotate-180': showToolDropdown }"
-              >
-                <polyline points="6 9 12 15 18 9"/>
+              <span class="toolbox-trigger-copy">
+                <strong>{{ $t('tools.workspace.openTool') }}</strong>
+              </span>
+              <svg class="toolbox-trigger-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="m5 7 5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-
-            <!-- 下拉选项列表 -->
-            <transition
-              enter-active-class="transition-all duration-200 ease-out"
-              enter-from-class="opacity-0 max-h-0"
-              enter-to-class="opacity-100 max-h-96"
-              leave-active-class="transition-all duration-200 ease-in"
-              leave-from-class="opacity-100 max-h-96"
-              leave-to-class="opacity-0 max-h-0"
-            >
-              <div
-                v-if="showToolDropdown"
-                class="border-t border-border-base/50 overflow-hidden"
-              >
-                <div class="max-h-64 overflow-y-auto custom-scrollbar">
-                  <button
-                    v-for="tool in tools"
-                    :key="tool.id"
-                    @click="selectTool(tool.id)"
-                    class="tool-dropdown-item w-full px-4 py-3 sm:py-3.5 flex items-center gap-3 text-left border border-transparent rounded-lg"
-                    :class="[
-                      currentTool === tool.id 
-                        ? 'font-semibold' 
-                        : 'text-secondary',
-                      currentTool === tool.id && isThemeTransparent
-                        ? 'tool-dropdown-item-selected-transparent'
-                        : currentTool === tool.id
-                        ? 'tool-dropdown-item-selected'
-                        : ''
-                    ]"
-                  >
-                    <component 
-                      :is="tool.icon" 
-                      class="w-5 h-5 shrink-0"
-                      :class="currentTool === tool.id 
-                        ? '' 
-                        : 'text-muted'"
-                      :style="currentTool === tool.id 
-                        ? (isThemeTransparent 
-                            ? { color: '#475569', '--dark-color': '#cbd5e1' }
-                            : { color: 'var(--theme-primary-darker)', '--dark-color': 'var(--theme-primary-dark)' }
-                          )
-                        : {}"
-                    />
-                    <span class="text-sm sm:text-base flex-1 truncate">{{ tool.name }}</span>
-                    <!-- 选中指示器 -->
-                    <div 
-                      v-if="currentTool === tool.id"
-                      class="w-2 h-2 rounded-full flex-shrink-0"
-                      :style="isThemeTransparent 
-                        ? { backgroundColor: '#475569' }
-                        : { backgroundColor: 'var(--theme-primary)' }"
-                    ></div>
-                  </button>
-                </div>
-              </div>
-            </transition>
           </div>
         </div>
-      </div>
 
-      <!-- 工具内容区域 - 使用flex-1填充剩余空间，优化样式和间距 -->
-      <div 
-        class="surface-panel rounded-[32px] flex-1 shadow-lg transition-all duration-300 flex flex-col"
-        :class="{
-          'p-6 md:p-8 lg:p-10': !['calc', 'pomodoro', 'stopwatch', 'worldclock'].includes(currentTool),
-          'p-4 md:p-6': ['calc', 'pomodoro', 'stopwatch', 'worldclock'].includes(currentTool)
-        }"
-      >
-          <!-- 计算器 -->
-          <CalculatorTool v-if="currentTool === 'calc'" />
-          
-          <!-- 编码转换 -->
-          <EncoderTool v-if="currentTool === 'encode'" />
-          
-          <!-- JSON格式化 -->
-          <JsonTool v-if="currentTool === 'json'" />
-          
-          <!-- 秒表 -->
-          <StopwatchTool v-if="currentTool === 'stopwatch'" />
-          
-          <!-- 番茄钟 -->
-          <PomodoroTool v-if="currentTool === 'pomodoro'" />
-          
-          <!-- 颜色选择器 -->
-          <ColorPickerTool v-if="currentTool === 'colorpicker'" />
-          
-          <!-- 二维码生成器 -->
-          <QRCodeTool v-if="currentTool === 'qrcode'" />
-          
-          <!-- Markdown 编辑器 -->
-          <MarkdownTool v-if="currentTool === 'markdown'" />
-          
-          <!-- 待办事项 -->
-          <TodoTool v-if="currentTool === 'todo'" />
-          
-          <!-- 世界时钟 -->
-          <WorldClockTool v-if="currentTool === 'worldclock'" />
+        <button
+          v-if="showToolMenu"
+          class="toolbox-menu-scrim"
+          type="button"
+          aria-label="Close toolbox menu"
+          @click="showToolMenu = false"
+        ></button>
+
+        <div v-if="showToolMenu" class="toolbox-menu-popover">
+          <section class="toolbox-menu-section">
+            <div class="toolbox-menu-section-head">
+              <span class="toolbox-filter-label">{{ $t('tools.workspace.recentTitle') }}</span>
+              <span class="toolbox-menu-count">{{ recentTools.length }}</span>
+            </div>
+            <div v-if="recentTools.length" class="toolbox-menu-list">
+              <button
+                v-for="tool in recentTools"
+                :key="tool.id"
+                class="toolbox-menu-item"
+                :class="{ 'is-active': activeToolId === tool.id }"
+                @click="openToolFromMenu(tool.id)"
+              >
+                <component :is="tool.icon" class="w-4 h-4 shrink-0" />
+                <span class="truncate">{{ tool.name }}</span>
+              </button>
+            </div>
+            <p v-else class="toolbox-menu-empty">{{ $t('tools.workspace.recentEmpty') }}</p>
+          </section>
+
+          <section
+            v-for="group in groups"
+            :key="group.id"
+            class="toolbox-menu-section"
+          >
+            <div class="toolbox-menu-section-head">
+              <span class="toolbox-filter-label">{{ group.title }}</span>
+              <span class="toolbox-menu-count">{{ group.tools.length }}</span>
+            </div>
+            <div class="toolbox-menu-list">
+              <button
+                v-for="tool in group.tools"
+                :key="tool.id"
+                class="toolbox-menu-item"
+                :class="{ 'is-active': activeToolId === tool.id }"
+                @click="openToolFromMenu(tool.id)"
+              >
+                <component :is="tool.icon" class="w-4 h-4 shrink-0" />
+                <span class="truncate">{{ tool.name }}</span>
+                <span v-if="tool.badge" class="toolbox-menu-badge">{{ tool.badge }}</span>
+              </button>
+            </div>
+          </section>
         </div>
+      </section>
+
+      <section ref="workspaceRef" class="toolbox-workspace surface-panel rounded-[32px] shadow-lg overflow-hidden">
+        <div :class="['toolbox-workspace-body', workspacePaddingClass, workspaceScrollClass]">
+          <component :is="activeToolComponent" />
+        </div>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { toolsConfig } from '../config/tools'
-import { getIcon } from '../utils/iconMapper'
+import { useRoute, useRouter } from 'vue-router'
+import BlogAssistantTool from '../components/tools/BlogAssistantTool.vue'
 import CalculatorTool from '../components/tools/CalculatorTool.vue'
+import ColorPickerTool from '../components/tools/ColorPickerTool.vue'
 import EncoderTool from '../components/tools/EncoderTool.vue'
 import JsonTool from '../components/tools/JsonTool.vue'
-import StopwatchTool from '../components/tools/StopwatchTool.vue'
-import PomodoroTool from '../components/tools/PomodoroTool.vue'
-import ColorPickerTool from '../components/tools/ColorPickerTool.vue'
-import QRCodeTool from '../components/tools/QRCodeTool.vue'
 import MarkdownTool from '../components/tools/MarkdownTool.vue'
+import PomodoroTool from '../components/tools/PomodoroTool.vue'
+import QRCodeTool from '../components/tools/QRCodeTool.vue'
+import StopwatchTool from '../components/tools/StopwatchTool.vue'
 import TodoTool from '../components/tools/TodoTool.vue'
 import WorldClockTool from '../components/tools/WorldClockTool.vue'
+import { useLocalStorage } from '../composables/useStorage'
+import { toolGroups, toolsConfig } from '../config/tools'
+import { getIcon } from '../utils/iconMapper'
+
+const toolComponentMap = {
+  'blog-assistant': BlogAssistantTool,
+  calc: CalculatorTool,
+  colorpicker: ColorPickerTool,
+  encode: EncoderTool,
+  json: JsonTool,
+  markdown: MarkdownTool,
+  pomodoro: PomodoroTool,
+  qrcode: QRCodeTool,
+  stopwatch: StopwatchTool,
+  todo: TodoTool,
+  worldclock: WorldClockTool
+}
+
+const scrollableToolIds = new Set(['blog-assistant', 'markdown', 'todo', 'json', 'encode'])
+const validToolIds = new Set(toolsConfig.map(tool => tool.id))
 
 const { t } = useI18n()
-const currentTool = ref('todo') // 默认工具改为 todo
-const showToolDropdown = ref(false) // 移动端下拉栏显示状态
+const route = useRoute()
+const router = useRouter()
+const workspaceRef = ref(null)
+const activeToolId = ref(null)
+const showToolMenu = ref(false)
+const { value: recentToolIds } = useLocalStorage('toolbox-recent-tools', [])
+const { value: lastActiveToolId } = useLocalStorage('toolbox-last-active-tool', '')
 
-/**
- * 检查主题色是否为透明
- */
-const isThemeTransparent = ref(false)
+const tools = computed(() => toolsConfig.map(tool => ({
+  ...tool,
+  name: t(tool.nameKey),
+  description: t(tool.descriptionKey),
+  badge: tool.badgeKey ? t(tool.badgeKey) : '',
+  icon: getIcon(tool.iconName)
+})))
 
-/**
- * 检查主题色状态
- */
-const checkThemeTransparent = () => {
-  if (typeof document !== 'undefined') {
-    const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary').trim()
-    isThemeTransparent.value = themePrimary === 'transparent'
+const toolMap = computed(() => Object.fromEntries(tools.value.map(tool => [tool.id, tool])))
+
+const groups = computed(() => toolGroups.map(group => {
+  const groupTools = tools.value.filter(tool => tool.group === group.id)
+  return {
+    ...group,
+    title: t(group.titleKey),
+    description: t(group.descriptionKey),
+    tools: groupTools
   }
-}
+}))
 
-// 从配置文件加载工具列表，并映射图标组件和国际化名称
-const tools = computed(() => {
-  return toolsConfig.map(tool => ({
-    ...tool,
-    name: t(tool.nameKey),
-    icon: getIcon(tool.iconName)
-  }))
+const groupNameMap = computed(() => Object.fromEntries(
+  groups.value.map(group => [group.id, group.title])
+))
+
+const recentTools = computed(() => sanitizeIds(recentToolIds.value).map(toolId => toolMap.value[toolId]).filter(Boolean))
+const featuredTool = computed(() => toolMap.value['blog-assistant'] || tools.value[0] || null)
+
+const activeToolData = computed(() => {
+  const normalizedId = normalizeToolId(activeToolId.value)
+  return normalizedId ? toolMap.value[normalizedId] : featuredTool.value
 })
 
-/**
- * 当前选中的工具数据
- */
-const currentToolData = computed(() => {
-  return tools.value.find(tool => tool.id === currentTool.value) || tools.value[0]
-})
+const activeToolComponent = computed(() => (
+  activeToolData.value ? toolComponentMap[activeToolData.value.id] || null : null
+))
 
-/**
- * 选择工具
- * 移动端选择后自动关闭下拉栏
- */
-const selectTool = (toolId) => {
-  currentTool.value = toolId
-  showToolDropdown.value = false
-}
+const workspacePaddingClass = computed(() => (
+  activeToolData.value?.workspacePadding === 'compact'
+    ? 'toolbox-workspace-body-compact'
+    : 'toolbox-workspace-body-default'
+))
 
-/**
- * 点击外部关闭下拉栏
- */
-const handleClickOutside = (event) => {
-  // 检查点击是否在下拉栏外部
-  const dropdownElement = event.target.closest('[data-tool-dropdown]')
-  if (!dropdownElement && showToolDropdown.value) {
-    showToolDropdown.value = false
+const workspaceScrollClass = computed(() => (
+  scrollableToolIds.has(activeToolData.value?.id)
+    ? 'toolbox-workspace-body-scroll'
+    : 'toolbox-workspace-body-static'
+))
+
+watch(
+  [() => route.query.tool, () => lastActiveToolId.value, featuredTool],
+  ([toolQuery, lastToolId, featured]) => {
+    const routeToolId = normalizeToolId(toolQuery)
+    if (!routeToolId && toolQuery) {
+      const nextQuery = { ...route.query }
+      delete nextQuery.tool
+      router.replace({ query: nextQuery })
+      return
+    }
+
+    const fallbackToolId = routeToolId || normalizeToolId(lastToolId) || featured?.id || null
+    if (fallbackToolId && fallbackToolId !== activeToolId.value) {
+      activeToolId.value = fallbackToolId
+    }
+  },
+  { immediate: true }
+)
+
+watch(activeToolId, (toolId) => {
+  const normalizedId = normalizeToolId(toolId)
+  const currentRouteTool = normalizeToolId(route.query.tool)
+  if (!normalizedId) return
+
+  lastActiveToolId.value = normalizedId
+  recentToolIds.value = [
+    normalizedId,
+    ...sanitizeIds(recentToolIds.value).filter(id => id !== normalizedId)
+  ].slice(0, 6)
+
+  if (normalizedId === currentRouteTool) {
+    return
   }
-}
 
-onMounted(() => {
-  // 监听点击事件，用于关闭下拉栏
-  document.addEventListener('click', handleClickOutside)
-  // 检查主题色状态
-  checkThemeTransparent()
-  // 监听主题变化
-  const observer = new MutationObserver(() => {
-    checkThemeTransparent()
+  router.replace({
+    query: {
+      ...route.query,
+      tool: normalizedId
+    }
   })
-  if (typeof document !== 'undefined') {
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['style', 'class']
-    })
-  }
 })
 
-onUnmounted(() => {
-  // 清理事件监听
-  document.removeEventListener('click', handleClickOutside)
-})
+function normalizeToolId(toolId) {
+  const nextId = Array.isArray(toolId) ? toolId[0] : toolId
+  return typeof nextId === 'string' && validToolIds.has(nextId) ? nextId : null
+}
+
+function sanitizeIds(value) {
+  if (!Array.isArray(value)) return []
+  return value.filter(toolId => typeof toolId === 'string' && validToolIds.has(toolId))
+}
+
+async function openToolFromMenu(toolId) {
+  showToolMenu.value = false
+  await openTool(toolId)
+}
+
+async function openTool(toolId) {
+  const normalizedId = normalizeToolId(toolId)
+  if (!normalizedId) return
+
+  activeToolId.value = normalizedId
+  await nextTick()
+
+  if (typeof window !== 'undefined' && window.innerWidth < 1280) {
+    workspaceRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
 </script>
 
 <style scoped>
-/* 导入页面样式 */
 @import '../styles/pages/ToolsPage.css';
 </style>

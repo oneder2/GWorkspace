@@ -23,13 +23,13 @@
         </button>
         <button 
           @click="calcAppend('/')" 
-          class="h-14 rounded-xl bg-border-base/50 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-border-base transition-colors border border-border-base/50"
+          class="h-14 rounded-xl bg-border-base/50 text-[var(--theme-primary-darker)] dark:text-[var(--theme-primary-light)] font-bold hover:bg-border-base transition-colors border border-border-base/50"
         >
           ÷
         </button>
         <button 
           @click="calcAppend('*')" 
-          class="h-14 rounded-xl bg-border-base/50 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-border-base transition-colors border border-border-base/50"
+          class="h-14 rounded-xl bg-border-base/50 text-[var(--theme-primary-darker)] dark:text-[var(--theme-primary-light)] font-bold hover:bg-border-base transition-colors border border-border-base/50"
         >
           ×
         </button>
@@ -52,7 +52,7 @@
         </button>
         <button 
           @click="calcAppend('-')" 
-          class="h-14 rounded-xl bg-border-base/50 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-border-base transition-colors border border-border-base/50"
+          class="h-14 rounded-xl bg-border-base/50 text-[var(--theme-primary-darker)] dark:text-[var(--theme-primary-light)] font-bold hover:bg-border-base transition-colors border border-border-base/50"
         >
           -
         </button>
@@ -67,7 +67,7 @@
         </button>
         <button 
           @click="calcAppend('+')" 
-          class="h-14 rounded-xl bg-border-base/50 text-cyan-600 dark:text-cyan-300 font-bold hover:bg-border-base transition-colors border border-border-base/50"
+          class="h-14 rounded-xl bg-border-base/50 text-[var(--theme-primary-darker)] dark:text-[var(--theme-primary-light)] font-bold hover:bg-border-base transition-colors border border-border-base/50"
         >
           +
         </button>

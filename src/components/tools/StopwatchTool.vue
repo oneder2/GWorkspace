@@ -22,7 +22,7 @@
           class="h-14 rounded-xl font-bold text-white transition-colors border"
           :class="isRunning 
             ? 'bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600 border-red-400/30 dark:border-red-400/30' 
-            : 'bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-600 border-green-400/30 dark:border-green-400/30'"
+            : 'bg-[var(--theme-primary)] border-transparent'"
         >
           {{ isRunning ? '停止' : '开始' }}
         </button>

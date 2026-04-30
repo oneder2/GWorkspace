@@ -105,7 +105,7 @@
       <!-- 所有权声明 -->
       <div class="surface-card rounded-[20px] p-3">
         <p class="text-xs text-secondary text-center">
-          © 2025 GWorkspace
+          © 2026 GWorkspace
         </p>
         <p class="text-xs text-muted text-center mt-1">
           All rights reserved

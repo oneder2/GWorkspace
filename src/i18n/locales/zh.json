@@ -37,6 +37,7 @@
   "tools": {
     "title": "工具箱",
     "utilities": "工具",
+    "subtitle": "创作、分享与轻量运营的统一工作台",
     "calculator": "计算器",
     "encoder": "编码转换",
     "json": "JSON格式化",
@@ -62,6 +63,109 @@
     "markdownPlaceholder": "输入Markdown内容...",
     "copyHTML": "复制HTML",
     "todo": "待办事项",
+    "toolDescriptions": {
+      "blogAssistant": "为博客创作预先整理标题、slug、摘要、标签和发布时间，减少发布前的重复劳动。",
+      "markdown": "快速起草与预览 Markdown 内容，适合文章结构和片段草稿。",
+      "qrcode": "快速生成分享二维码，适合文章、作品和站内入口分发。",
+      "colorpicker": "从主题色到封面配色，快速整理可用的视觉参考。",
+      "todo": "追踪站点运营和创作任务，把待办从想法变成实际推进。",
+      "pomodoro": "把专注时间和休息节奏绑定到站长工作流里，而不是独立计时器。",
+      "json": "处理接口返回和配置片段，适合后台和内容系统联调时使用。",
+      "worldclock": "快速查看多地时间，适合跨时区更新、发布和协作判断。",
+      "calc": "低频但必要的快速计算，保留为轻量工具而不是主工作区。",
+      "stopwatch": "处理临时计时需求，作为次级工具保留。",
+      "encode": "做 Base64 和 URL 编解码等快速转换，适合调试和粘贴处理。"
+    },
+    "workspace": {
+      "heroEyebrow": "Creative Operations Deck",
+      "heroTitle": "把创作、发布与日常运营放进同一个工作流",
+      "heroDescription": "这里不再是零散小工具集合，而是围绕博客、分享物料和站点维护整理出来的工作台。先选工作流，再进入具体工具。",
+      "stats": {
+        "tools": "{count} 个整理后的工具",
+        "groups": "{count} 条工作流",
+        "featured": "{count} 个特色助手"
+      },
+      "continueLabel": "继续上次工作",
+      "recommendedLabel": "推荐起点",
+      "openTool": "打开工具",
+      "pinTool": "固定工具",
+      "unpinTool": "取消固定",
+      "recentTitle": "最近使用",
+      "recentDescription": "回到你刚刚停下来的地方。",
+      "recentEmpty": "还没有最近使用记录，先从博客发布助手开始会更合适。",
+      "pinnedTitle": "固定工具",
+      "pinnedDescription": "把高频工作入口钉在首页。",
+      "pinnedEmpty": "把常用工具固定到这里，工具箱才会逐渐变成你的工作台。",
+      "workspaceLabel": "工作区",
+      "workspaceEmptyTitle": "从上方选择一个工具开始工作",
+      "workspaceEmptyDescription": "优先从内容创作和站长运营两个分组进入。低频的通用工具已经被收进轻量区，不再占据主舞台。",
+      "workspaceHintBadge": "Start Here",
+      "workspaceHintTitle": "先选工作流，再进入工具细节",
+      "workspaceHintDescription": "最近使用会自动记录，固定工具会常驻首页。这样工具箱更像一个每天会打开的工作台，而不是一次性演示页。",
+      "backToOverview": "返回总览",
+      "badges": {
+        "featured": "特色",
+        "writing": "写作",
+        "share": "分享",
+        "visual": "视觉",
+        "workflow": "流程",
+        "focus": "专注",
+        "quick": "轻量"
+      },
+      "groups": {
+        "content": {
+          "title": "内容创作",
+          "description": "围绕写作、整理、预览与分享物料，优先服务博客和作品内容生产。"
+        },
+        "operations": {
+          "title": "站长运营",
+          "description": "处理待办、专注节奏和系统片段，让内容运营真正形成推进闭环。"
+        },
+        "utility": {
+          "title": "轻量效率",
+          "description": "保留必要的通用小工具，但不再让它们占据页面主舞台。"
+        }
+      }
+    },
+    "blogAssistant": {
+      "title": "博客发布助手",
+      "desc": "先把标题、slug、摘要、标签和发布时间整理成可发布状态，再进入正式编辑器。",
+      "identityTitle": "文章身份信息",
+      "identityDesc": "先确定这篇文章在前台会以什么方式被看到和检索。",
+      "contentTitle": "正文与摘要草稿",
+      "contentDesc": "输入正文后会自动估算阅读时长，并生成一版可直接复用的摘要建议。",
+      "payloadTitle": "可复制发布结果",
+      "payloadDesc": "这里整理的是最接近正式发布的数据结构，可直接带去博客编辑器。",
+      "readinessTitle": "发布前检查",
+      "readinessDesc": "用最少的字段确认这篇内容是否已经具备发布基础。",
+      "slugPlaceholder": "根据标题自动生成",
+      "resetSlug": "恢复自动",
+      "useSuggestedExcerpt": "采用建议摘要",
+      "suggestedExcerpt": "建议摘要",
+      "suggestedExcerptDesc": "从正文中提取出的默认摘要。",
+      "noExcerptSuggestion": "输入正文后，这里会自动生成一版可直接复用的摘要。",
+      "excerptLength": "当前摘要长度：{count} 字",
+      "copyPayload": "复制发布 JSON",
+      "tagsPlaceholder": "输入标签，使用逗号、顿号或换行分隔",
+      "noTags": "还没有整理标签",
+      "readingTimeValue": "约 {minutes} 分钟阅读",
+      "ready": "已具备基础要求",
+      "readiness": {
+        "title": "标题",
+        "slug": "Slug",
+        "excerpt": "摘要",
+        "tags": "标签",
+        "content": "正文体量"
+      },
+      "readinessHints": {
+        "title": "先定标题，其他字段才会稳定下来。",
+        "slug": "标题确认后建议检查一次链接别名。",
+        "excerpt": "摘要至少保留一段明确价值描述，避免前台卡片信息过空。",
+        "tags": "建议至少整理 1-3 个标签，方便归档和关联。",
+        "content": "正文略短，建议再补充结构或上下文。",
+        "contentReady": "正文已整理出 {count} 字，可继续完善细节。"
+      }
+    },
     "worldClock": {
       "relocate": "重新定位",
       "title": "世界时钟",
@@ -213,6 +317,7 @@
     "expand": "展开",
     "menu": "菜单",
     "delete": "删除",
+    "copied": "已复制",
     "submitting": "提交中...",
     "submitError": "提交失败",
     "anonymous": "匿名",
