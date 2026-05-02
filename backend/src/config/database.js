@@ -20,7 +20,7 @@ const __dirname = dirname(__filename)
  * 获取数据库路径
  * 优先使用环境变量，否则使用默认路径
  */
-const getDatabasePath = () => {
+export const getDatabasePath = () => {
   if (process.env.DATABASE_PATH) {
     // 如果是相对路径，转换为绝对路径
     if (process.env.DATABASE_PATH.startsWith('./') || process.env.DATABASE_PATH.startsWith('../')) {
@@ -83,4 +83,3 @@ export function closeDatabase() {
     console.log('Database connection closed')
   }
 }
-

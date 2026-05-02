@@ -159,9 +159,14 @@ export const uploadApi = {
       method: 'POST',
       headers,
       body: formData
-    }).then(res => {
-      if (!res.ok) throw new Error('Upload failed')
-      return res.json()
+    }).then(async res => {
+      const payload = await res.json().catch(() => ({ error: 'Upload failed' }))
+      if (!res.ok) {
+        const uploadError = new Error(payload.message || payload.error || 'Upload failed')
+        Object.assign(uploadError, payload, { status: res.status })
+        throw uploadError
+      }
+      return payload
     })
   }
 }
@@ -193,7 +198,15 @@ export const adminApi = {
   getAnalyticsOverview: (params = {}) => {
     const queryString = new URLSearchParams(params).toString()
     return request(`/admin/analytics/overview${queryString ? `?${queryString}` : ''}`)
-  }
+  },
+  getStats: () => request('/admin/stats'),
+  getSystemHealth: () => request('/admin/system/health'),
+  createSystemBackup: () => request('/admin/system/backup', { method: 'POST' }),
+  getSystemAssets: () => request('/admin/system/assets'),
+  deleteSystemAsset: (key) => request('/admin/system/assets', {
+    method: 'DELETE',
+    body: JSON.stringify({ key })
+  })
 }
 
 /**

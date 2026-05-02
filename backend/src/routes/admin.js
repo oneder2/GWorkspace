@@ -4,17 +4,72 @@
  */
 
 import express from 'express'
+import { existsSync, statSync } from 'fs'
 import { authenticate, requireAdmin, optionalAuthenticate } from '../middleware/auth.js'
 import { Blog } from '../models/Blog.js'
-import { Comment } from '../models/Comment.js'
 import { Visit } from '../models/Visit.js'
-import { User } from '../models/User.js'
 import { AdminSettings } from '../models/AdminSettings.js'
 import { Guestbook } from '../models/Guestbook.js'
-import { getDatabase } from '../config/database.js'
+import { createDatabaseBackup, getBackupDirectory, listDatabaseBackups } from '../config/databaseBackup.js'
+import { checkDatabaseHealth } from '../config/databaseHealth.js'
+import { getDatabase, getDatabasePath } from '../config/database.js'
+import { scanBlogImageReferences } from '../utils/blogImageAssets.js'
+import { isCloudflarePurgeConfigured, purgeCloudflareUrls } from '../utils/cloudflare.js'
 import { getLocationByIP, isLocalOrReservedIP } from '../utils/ipLocation.js'
+import { deleteR2Object, getMissingR2Fields, getUploadCacheControl, isR2Configured, listR2Objects } from '../utils/r2.js'
 
 const router = express.Router()
+
+const getFileSize = (filePath) => {
+  if (!existsSync(filePath)) {
+    return 0
+  }
+
+  return statSync(filePath).size
+}
+
+const parsePositiveInteger = (value, fallback) => {
+  const parsed = parseInt(value, 10)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
+
+const getSystemHealthPayload = () => {
+  const db = getDatabase()
+  const dbPath = getDatabasePath()
+  const recentBackups = listDatabaseBackups({ limit: 5 })
+  const backupCount = listDatabaseBackups({ limit: Number.MAX_SAFE_INTEGER }).length
+  const database = checkDatabaseHealth({ db, full: false })
+
+  return {
+    api: {
+      status: 'ok',
+      uptime_seconds: Math.round(process.uptime()),
+      node_version: process.version
+    },
+    database: {
+      ...database,
+      status: database.ok ? 'ok' : 'degraded',
+      path: dbPath,
+      size_bytes: getFileSize(dbPath),
+      wal_size_bytes: getFileSize(`${dbPath}-wal`),
+      shm_size_bytes: getFileSize(`${dbPath}-shm`)
+    },
+    backups: {
+      directory: getBackupDirectory(),
+      count: backupCount,
+      recent: recentBackups,
+      latest: recentBackups[0] || null
+    },
+    object_storage: {
+      configured: isR2Configured(),
+      missing_fields: getMissingR2Fields(),
+      public_domain: process.env.R2_PUBLIC_DOMAIN || null,
+      cache_control: getUploadCacheControl(),
+      purge_configured: isCloudflarePurgeConfigured(),
+      deletion_policy: 'unreferenced-only'
+    }
+  }
+}
 
 /**
  * 获取管理员设置（公开访问，仅返回位置和时区信息）
@@ -171,13 +226,24 @@ router.get('/guestbook', (req, res) => {
 
 router.get('/analytics/overview', (req, res) => {
   try {
-    const { days = 7 } = req.query
-    const trend = Visit.getTrend({ days: parseInt(days) })
+    const days = parsePositiveInteger(req.query.days, 7)
+    const endDate = new Date()
+    const startDate = new Date()
+    startDate.setUTCHours(0, 0, 0, 0)
+    startDate.setUTCDate(startDate.getUTCDate() - (days - 1))
+
+    const trend = Visit.getTrend({ days })
     const overall = Visit.getOverallStats()
+    const range = Visit.getOverallStats({
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString()
+    })
 
     res.json({
+      days,
       trend,
-      overall
+      overall,
+      range
     })
   } catch (error) {
     console.error('Error fetching admin analytics overview:', error)
@@ -199,9 +265,9 @@ router.get('/stats', (req, res) => {
         COUNT(*) as total,
         COUNT(CASE WHEN status = 'published' THEN 1 END) as published,
         COUNT(CASE WHEN status = 'draft' THEN 1 END) as draft,
-        SUM(views) as total_views,
-        SUM(likes_count) as total_likes,
-        SUM(comments_count) as total_comments
+        COALESCE(SUM(views), 0) as total_views,
+        COALESCE(SUM(likes_count), 0) as total_likes,
+        COALESCE(SUM(comments_count), 0) as total_comments
       FROM blogs
     `).get()
 
@@ -225,6 +291,147 @@ router.get('/stats', (req, res) => {
   } catch (error) {
     console.error('Error fetching stats:', error)
     res.status(500).json({ error: 'Failed to fetch stats' })
+  }
+})
+
+router.get('/system/health', (req, res) => {
+  try {
+    res.json(getSystemHealthPayload())
+  } catch (error) {
+    console.error('Error fetching system health:', error)
+    res.status(500).json({ error: 'Failed to fetch system health' })
+  }
+})
+
+router.post('/system/backup', (req, res) => {
+  try {
+    const backup = createDatabaseBackup()
+    const health = getSystemHealthPayload()
+
+    res.status(201).json({
+      backup,
+      backups: health.backups
+    })
+  } catch (error) {
+    console.error('Error creating system backup:', error)
+    res.status(500).json({ error: 'Failed to create database backup' })
+  }
+})
+
+router.get('/system/assets', async (req, res) => {
+  try {
+    if (!isR2Configured()) {
+      return res.json({
+        configured: false,
+        missing_fields: getMissingR2Fields(),
+        cache_control: getUploadCacheControl(),
+        purge_configured: isCloudflarePurgeConfigured(),
+        summary: {
+          total: 0,
+          referenced: 0,
+          orphaned: 0
+        },
+        assets: []
+      })
+    }
+
+    const objects = await listR2Objects({ prefix: 'blog/' })
+    const { references } = scanBlogImageReferences()
+    const assets = objects
+      .map(object => {
+        const referencedBy = references.get(object.key) || []
+
+        return {
+          ...object,
+          referenced: referencedBy.length > 0,
+          can_delete: referencedBy.length === 0,
+          reference_count: referencedBy.length,
+          referenced_by: referencedBy
+        }
+      })
+      .sort((left, right) => {
+        if (left.referenced !== right.referenced) {
+          return Number(left.referenced) - Number(right.referenced)
+        }
+        return (right.last_modified || '').localeCompare(left.last_modified || '')
+      })
+
+    const referencedCount = assets.filter(asset => asset.referenced).length
+
+    res.json({
+      configured: true,
+      missing_fields: [],
+      cache_control: getUploadCacheControl(),
+      purge_configured: isCloudflarePurgeConfigured(),
+      summary: {
+        total: assets.length,
+        referenced: referencedCount,
+        orphaned: assets.length - referencedCount
+      },
+      assets
+    })
+  } catch (error) {
+    console.error('Error fetching system assets:', error)
+    res.status(500).json({ error: 'Failed to fetch system assets' })
+  }
+})
+
+router.delete('/system/assets', async (req, res) => {
+  try {
+    const requestedKey = typeof req.body?.key === 'string' ? req.body.key.trim().replace(/^\/+/, '') : ''
+    if (!requestedKey) {
+      return res.status(400).json({ error: 'Asset key is required' })
+    }
+
+    if (!requestedKey.startsWith('blog/')) {
+      return res.status(400).json({ error: 'Only blog assets can be managed here' })
+    }
+
+    if (!isR2Configured()) {
+      return res.status(503).json({
+        error: 'Cloudflare R2 is not fully configured',
+        missingFields: getMissingR2Fields()
+      })
+    }
+
+    const { references } = scanBlogImageReferences()
+    const referencedBy = references.get(requestedKey) || []
+
+    if (referencedBy.length > 0) {
+      return res.status(409).json({
+        error: 'Asset is still referenced by at least one article',
+        referenced_by: referencedBy
+      })
+    }
+
+    const deletedAsset = await deleteR2Object(requestedKey)
+    let purge = {
+      attempted: false,
+      configured: isCloudflarePurgeConfigured(),
+      purged: 0
+    }
+
+    if (deletedAsset.url) {
+      try {
+        purge = await purgeCloudflareUrls([deletedAsset.url])
+      } catch (error) {
+        purge = {
+          attempted: true,
+          configured: true,
+          purged: 0,
+          error: error.message
+        }
+      }
+    }
+
+    res.json({
+      deleted: true,
+      asset: deletedAsset,
+      purge
+    })
+  } catch (error) {
+    console.error('Error deleting system asset:', error)
+    res.status(500).json({ error: 'Failed to delete system asset' })
   }
 })
 

@@ -5,6 +5,22 @@
 
 import { getDatabase } from '../config/database.js'
 
+const buildDateRange = (days) => {
+  const safeDays = Number.isFinite(days) && days > 0 ? Math.floor(days) : 7
+  const endDate = new Date()
+  endDate.setUTCHours(23, 59, 59, 999)
+
+  const startDate = new Date()
+  startDate.setUTCHours(0, 0, 0, 0)
+  startDate.setUTCDate(startDate.getUTCDate() - (safeDays - 1))
+
+  return {
+    days: safeDays,
+    startDate,
+    endDate
+  }
+}
+
 /**
  * 访问统计模型类
  */
@@ -111,23 +127,33 @@ export class Visit {
 
     // 获取最受欢迎的文章
     let popularQuery = `
-      SELECT blog_id, COUNT(*) as visit_count 
-      FROM visits 
-      WHERE blog_id IS NOT NULL
+      SELECT 
+        visits.blog_id,
+        COUNT(*) as visit_count,
+        blogs.title,
+        blogs.slug,
+        blogs.status
+      FROM visits
+      LEFT JOIN blogs ON blogs.id = visits.blog_id
+      WHERE visits.blog_id IS NOT NULL
     `
     const popularParams = []
 
     if (startDate) {
-      popularQuery += ' AND created_at >= ?'
+      popularQuery += ' AND visits.created_at >= ?'
       popularParams.push(startDate)
     }
 
     if (endDate) {
-      popularQuery += ' AND created_at <= ?'
+      popularQuery += ' AND visits.created_at <= ?'
       popularParams.push(endDate)
     }
 
-    popularQuery += ' GROUP BY blog_id ORDER BY visit_count DESC LIMIT 10'
+    popularQuery += `
+      GROUP BY visits.blog_id, blogs.title, blogs.slug, blogs.status
+      ORDER BY visit_count DESC, visits.blog_id DESC
+      LIMIT 10
+    `
     const popularBlogs = db.prepare(popularQuery).all(...popularParams)
 
     return {
@@ -146,24 +172,39 @@ export class Visit {
   static getTrend(options = {}) {
     const db = getDatabase()
     const { days = 7 } = options
-
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - days)
-    const startDateStr = startDate.toISOString().split('T')[0]
+    const { days: safeDays, startDate, endDate } = buildDateRange(days)
 
     const query = `
       SELECT 
-        DATE(created_at) as date,
+        substr(created_at, 1, 10) as date,
         COUNT(*) as visits,
         COUNT(DISTINCT ip_address) as unique_visitors
       FROM visits
-      WHERE created_at >= ?
-      GROUP BY DATE(created_at)
+      WHERE created_at >= ? AND created_at <= ?
+      GROUP BY substr(created_at, 1, 10)
       ORDER BY date ASC
     `
 
-    return db.prepare(query).all(startDateStr)
+    const rows = db.prepare(query).all(
+      startDate.toISOString(),
+      endDate.toISOString()
+    )
+    const rowMap = new Map(rows.map(row => [row.date, row]))
+    const trend = []
+
+    for (let index = 0; index < safeDays; index += 1) {
+      const currentDate = new Date(startDate)
+      currentDate.setDate(startDate.getDate() + index)
+      const dateKey = currentDate.toISOString().split('T')[0]
+      const matchedRow = rowMap.get(dateKey)
+
+      trend.push({
+        date: dateKey,
+        visits: matchedRow?.visits || 0,
+        unique_visitors: matchedRow?.unique_visitors || 0
+      })
+    }
+
+    return trend
   }
 }
-
-
