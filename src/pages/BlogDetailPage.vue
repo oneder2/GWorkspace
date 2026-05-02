@@ -305,6 +305,7 @@ import { useLocalStorage } from '../composables/useStorage'
 import { useSEO, generateBlogStructuredData } from '../composables/useSEO'
 import { blogApi, likesApi, analyticsApi } from '../utils/api'
 import { formatBlogDate, formatBlogDateTime, getBlogDateValue } from '../utils/blogDate'
+import { normalizeBlogImageSources } from '../utils/blogMarkdown'
 import { getTagStyle } from '../utils/tagColor'
 import CommentList from '../components/comments/CommentList.vue'
 
@@ -611,8 +612,15 @@ const renderedContent = computed(() => {
     const id = generateHeadingId(raw)
     return `<h${depth} id="${id}" class="scroll-mt-24 group flex items-center transition-all duration-300">${text}<a href="#${id}" class="opacity-0 group-hover:opacity-40 ml-2 no-underline">#</a></h${depth}>`
   }
-  marked.setOptions({ renderer, breaks: true, gfm: true })
-  return marked.parse(post.value.content.replace(/!\[([^\]]*)\]\(\.\/images\/([^)]+)\)/g, (m, alt, img) => `![${alt}](/src/posts/${post.value?.slug}/images/${img})`))
+  const normalizedContent = normalizeBlogImageSources(post.value.content, {
+    slug: post.value.slug
+  })
+
+  return marked.parse(normalizedContent, {
+    renderer,
+    breaks: true,
+    gfm: true
+  })
 })
 
 const handleContentClick = async (e) => {
