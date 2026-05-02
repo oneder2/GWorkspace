@@ -5,17 +5,17 @@
 <template>
   <div class="space-y-6 w-full max-w-4xl mx-auto">
     <div class="flex items-center justify-between pb-4 border-b border-slate-200/50 dark:border-slate-700/50">
-      <h3 class="font-bold text-xl text-slate-800 dark:text-slate-200">Encoder / Decoder</h3>
+      <h3 class="font-bold text-xl text-slate-800 dark:text-slate-200">{{ $t('tools.encoderTitle') }}</h3>
       <span class="text-xs px-2 py-1 rounded"
         style="background-color: color-mix(in srgb, var(--theme-primary-lighter) 30%, transparent); color: var(--theme-primary-darker);"
-      >UTF-8</span>
+      >{{ $t('tools.encodingUtf8') }}</span>
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- 输入区 -->
       <div class="space-y-2">
         <label class="block text-sm font-bold text-slate-600 dark:text-slate-400">
-          Input <span class="font-normal opacity-50">(Raw)</span>
+          {{ $t('tools.inputRaw') }}
         </label>
         <textarea 
           v-model="encodeInput" 
@@ -23,14 +23,14 @@
           style="--focus-border: var(--theme-primary);"
           @focus="$event.currentTarget.style.borderColor = 'var(--focus-border)'"
           @blur="$event.currentTarget.style.borderColor = ''" 
-          placeholder="Paste your text here..."
+          :placeholder="$t('tools.pasteTextHere')"
         ></textarea>
       </div>
       
       <!-- 输出区 -->
       <div class="space-y-2">
         <label class="block text-sm font-bold text-slate-600 dark:text-slate-400">
-          Output <span class="font-normal opacity-50">(Processed)</span>
+          {{ $t('tools.outputProcessed') }}
         </label>
         <div class="relative">
           <textarea 
@@ -44,7 +44,7 @@
             style="--hover-text: var(--theme-primary-darker); --hover-text-dark: var(--theme-primary-light);"
             @mouseenter="!copySuccess && (function(e){const el = e.currentTarget; const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark'); el.style.color = isDark ? 'var(--hover-text-dark)' : 'var(--hover-text)'})($event)"
             @mouseleave="$event.currentTarget.style.color = '';" 
-            :title="copySuccess ? 'Copied!' : 'Copy'"
+            :title="copySuccess ? $t('common.copied') : $t('tools.copyResult')"
             :disabled="copySuccess"
           >
             <transition
@@ -78,26 +78,26 @@
         @mouseenter="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary-light), var(--theme-primary))'"
         @mouseleave="$event.currentTarget.style.background = 'linear-gradient(to right, var(--theme-primary), var(--theme-primary-darker))'"
       >
-        Base64 Encode
+        {{ $t('tools.base64Encode') }}
       </button>
       <button 
         @click="doBase64Decode" 
         class="px-5 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 text-sm font-bold shadow-sm transition-colors"
       >
-        Base64 Decode
+        {{ $t('tools.base64Decode') }}
       </button>
       <div class="w-[1px] h-10 bg-slate-300 dark:bg-slate-600 mx-2 hidden md:block"></div>
       <button 
         @click="doUrlEncode" 
         class="px-5 py-2.5 bg-slate-800 dark:bg-slate-700 text-white dark:text-slate-100 rounded-lg hover:bg-slate-900 dark:hover:bg-slate-600 text-sm font-bold shadow-lg shadow-slate-500/20 transition-colors"
       >
-        URL Encode
+        {{ $t('tools.urlEncode') }}
       </button>
       <button 
         @click="doUrlDecode" 
         class="px-5 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 text-sm font-bold shadow-sm transition-colors"
       >
-        URL Decode
+        {{ $t('tools.urlDecode') }}
       </button>
     </div>
   </div>
@@ -105,6 +105,9 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const encodeInput = ref('')
 const encodeResult = ref('')
@@ -117,7 +120,7 @@ const doBase64Encode = () => {
   try { 
     encodeResult.value = btoa(encodeInput.value) 
   } catch(e) { 
-    encodeResult.value = 'Error: Invalid Input' 
+    encodeResult.value = t('tools.invalidInput')
   }
 }
 
@@ -128,7 +131,7 @@ const doBase64Decode = () => {
   try { 
     encodeResult.value = atob(encodeInput.value) 
   } catch(e) { 
-    encodeResult.value = 'Error: Invalid Base64' 
+    encodeResult.value = t('tools.invalidBase64')
   }
 }
 
@@ -146,7 +149,7 @@ const doUrlDecode = () => {
   try {
     encodeResult.value = decodeURIComponent(encodeInput.value)
   } catch(e) {
-    encodeResult.value = 'Error: Invalid URL encoding'
+    encodeResult.value = t('tools.invalidUrlEncoding')
   }
 }
 

@@ -5,7 +5,7 @@
 <template>
   <div class="h-full flex flex-col w-full max-w-5xl mx-auto">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="font-bold text-xl text-slate-800 dark:text-slate-200">JSON Prettier</h3>
+      <h3 class="font-bold text-xl text-slate-800 dark:text-slate-200">{{ $t('tools.jsonToolTitle') }}</h3>
       <div class="flex gap-2">
         <button 
           @click="formatJson" 
@@ -18,7 +18,7 @@
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
           </svg>
-          Format
+          {{ $t('tools.format') }}
         </button>
         <button 
           @click="compressJson" 
@@ -30,7 +30,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
           </svg>
-          Minify
+          {{ $t('tools.minify') }}
         </button>
         <button 
           @click="jsonInput = ''" 
@@ -45,7 +45,7 @@
     </div>
     <textarea 
       v-model="jsonInput" 
-      placeholder="Paste JSON here..." 
+      :placeholder="$t('tools.jsonPlaceholder')"
       class="flex-1 p-4 glass-input rounded-xl outline-none text-sm font-mono resize-none shadow-inner leading-relaxed"
       style="--focus-border: var(--theme-primary);"
       @focus="$event.currentTarget.style.borderColor = 'var(--focus-border)'"
@@ -56,6 +56,9 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const jsonInput = ref('')
 
@@ -68,7 +71,7 @@ const formatJson = () => {
     const obj = JSON.parse(jsonInput.value)
     jsonInput.value = JSON.stringify(obj, null, 2)
   } catch (e) {
-    alert('Invalid JSON')
+    alert(t('tools.invalidJson'))
   }
 }
 
@@ -81,7 +84,7 @@ const compressJson = () => {
     const obj = JSON.parse(jsonInput.value)
     jsonInput.value = JSON.stringify(obj)
   } catch (e) {
-    alert('Invalid JSON')
+    alert(t('tools.invalidJson'))
   }
 }
 </script>

@@ -15,7 +15,7 @@
         <div class="surface-float w-full max-w-5xl rounded-[32px] overflow-hidden shadow-2xl animate-fade-in">
           <div class="flex items-center justify-between gap-4 px-6 py-5 divider-strong-b">
             <div>
-              <div class="section-kicker">Updates</div>
+              <div class="section-kicker">{{ $t('common.updates') }}</div>
               <h2 class="text-2xl font-bold text-main tracking-tight mt-2">{{ $t('home.updateLog') }}</h2>
             </div>
             <button
@@ -40,7 +40,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import UpdateLog from './UpdateLog.vue'
 
+useI18n()
 defineEmits(['close'])
 </script>

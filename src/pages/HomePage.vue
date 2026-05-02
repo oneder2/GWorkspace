@@ -8,7 +8,7 @@
     <section class="hero-panel rounded-[32px] p-6 sm:p-8 lg:p-12">
       <div class="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-start">
         <div class="space-y-6 min-w-0">
-          <span class="eyebrow">Personal Workspace</span>
+          <span class="eyebrow">{{ $t('home.eyebrow') }}</span>
           <div class="space-y-4">
             <h1 class="section-title max-w-3xl">{{ $t('home.title') }}</h1>
             <p class="section-copy text-base sm:text-lg text-slate-600 dark:text-slate-300">{{ $t('home.subtitle') }}</p>
@@ -34,19 +34,19 @@
                 >
                   <div @click="searchEngine = 'google'; showEngineMenu = false" class="px-3 py-2.5 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-xl cursor-pointer flex items-center gap-3 text-sm transition-colors text-secondary">
                     <component :is="GoogleIcon" class="w-5 h-5 text-green-500" />
-                    Google
+                    {{ $t('home.searchEngines.google') }}
                   </div>
                   <div @click="searchEngine = 'duckduckgo'; showEngineMenu = false" class="px-3 py-2.5 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-xl cursor-pointer flex items-center gap-3 text-sm transition-colors text-secondary">
                     <component :is="DuckIcon" class="w-5 h-5 text-orange-500" />
-                    DuckDuckGo
+                    {{ $t('home.searchEngines.duckduckgo') }}
                   </div>
                   <div @click="searchEngine = 'baidu'; showEngineMenu = false" class="px-3 py-2.5 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl cursor-pointer flex items-center gap-3 text-sm transition-colors text-secondary">
                     <component :is="BaiduIcon" class="w-5 h-5 text-blue-600" />
-                    百度
+                    {{ $t('home.searchEngines.baidu') }}
                   </div>
                   <div @click="searchEngine = 'edge'; showEngineMenu = false" class="px-3 py-2.5 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 rounded-xl cursor-pointer flex items-center gap-3 text-sm transition-colors text-secondary">
                     <component :is="EdgeIcon" class="w-5 h-5 text-cyan-600" />
-                    Edge
+                    {{ $t('home.searchEngines.edge') }}
                   </div>
                 </div>
               </div>
@@ -79,7 +79,7 @@
         <div class="surface-card rounded-[28px] p-5 sm:p-6 space-y-4 min-w-0">
           <div class="section-heading mb-1 pb-4 divider-strong-b">
             <div>
-              <div class="section-kicker">Quick Start</div>
+              <div class="section-kicker">{{ $t('home.quickStart') }}</div>
               <h2 class="text-2xl font-bold text-main tracking-tight">{{ $t('home.workspaceAreas') }}</h2>
             </div>
           </div>
@@ -108,7 +108,7 @@
       <div class="surface-card rounded-[28px] p-6 sm:p-8 min-w-0">
         <div class="section-heading flex-col items-start sm:flex-row sm:items-center mb-5 pb-5 divider-strong-b">
           <div>
-            <div class="section-kicker">Launch Pad</div>
+            <div class="section-kicker">{{ $t('home.launchPad') }}</div>
             <h2 class="text-2xl font-bold text-main tracking-tight">{{ $t('home.quickAccess') }}</h2>
             <p class="section-copy mt-3 text-sm sm:text-base">{{ $t('home.quickAccessCopy') }}</p>
           </div>
@@ -198,6 +198,7 @@ const customLinks = customLinksStorage.value
 const defaultLinks = computed(() => {
   return quickLinksConfig.map(link => ({
     ...link,
+    name: t(link.nameKey),
     url: ensureAbsoluteUrl(link.url),
     icon: getIcon(link.iconName)
   }))
@@ -284,11 +285,11 @@ const getEngineIcon = (engine) => {
  */
 const getEngineName = (engine) => {
   switch (engine) {
-    case 'google': return 'Google'
-    case 'duckduckgo': return 'DuckDuckGo'
-    case 'baidu': return '百度'
-    case 'edge': return 'Edge'
-    default: return 'Google'
+    case 'google': return t('home.searchEngines.google')
+    case 'duckduckgo': return t('home.searchEngines.duckduckgo')
+    case 'baidu': return t('home.searchEngines.baidu')
+    case 'edge': return t('home.searchEngines.edge')
+    default: return t('home.searchEngines.google')
   }
 }
 

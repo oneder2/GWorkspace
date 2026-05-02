@@ -9,11 +9,12 @@
   "home": {
     "title": "Good Morning",
     "subtitle": "What would you like to explore today?",
+    "eyebrow": "Personal Workspace",
     "visitorWelcome": "🌍 Hello there!",
     "visitorLocation": "Looking for your footprint...",
     "visitorGreeting": "Welcome visitor from {{location}}!",
     "searchPlaceholder": "Type to search...",
-    "quickLinks": "Quick Links",
+    "quickLinksTitle": "Quick Links",
     "edit": "Edit",
     "editQuickLinks": "Edit Quick Links",
     "addLink": "Add Link",
@@ -22,7 +23,21 @@
     "updateLog": "Update Log",
     "workspaceAreas": "Workspace Areas",
     "quickAccess": "Quick Access",
-    "quickAccessCopy": "Keep your most-used external links here as the fast lane into your daily workflow."
+    "quickAccessCopy": "Keep your most-used external links here as the fast lane into your daily workflow.",
+    "quickStart": "Quick Start",
+    "launchPad": "Launch Pad",
+    "searchEngines": {
+      "google": "Google",
+      "duckduckgo": "DuckDuckGo",
+      "baidu": "Baidu",
+      "edge": "Edge"
+    },
+    "quickLinks": {
+      "github": "GitHub",
+      "youtube": "YouTube",
+      "gmail": "Gmail",
+      "gemini": "Gemini"
+    }
   },
   "sites": {
     "title": "Site Navigation",
@@ -32,7 +47,51 @@
     "index": "Index",
     "favorites": "Favorites",
     "addFavorite": "Add to favorites",
-    "removeFavorite": "Remove from favorites"
+    "removeFavorite": "Remove from favorites",
+    "categories": {
+      "dev": "Dev Tools",
+      "tools": "Tools",
+      "ai": "AI Chatbots",
+      "design": "Design",
+      "learn": "Learning",
+      "friends": "Friend Links"
+    },
+    "links": {
+      "github": "Core hub for open source collaboration.",
+      "stackoverflow": "Classic Q&A site for troubleshooting and search.",
+      "mdn": "Baseline documentation for web standards and APIs.",
+      "vue": "The core frontend framework used by this site.",
+      "tailwind": "A utility-first styling system used heavily in practice.",
+      "regex101": "Regex testing and explanation tool.",
+      "vercel": "Fast deployment and low-friction hosting platform.",
+      "runoob": "Chinese beginner-friendly tutorial collection.",
+      "strudel": "Live coding tool for algorithmic music.",
+      "beepbox": "Useful for quick sound effects and simple melodies.",
+      "wolframalpha": "Search engine for math and computation.",
+      "toolwa": "Long-running all-purpose online toolbox.",
+      "gemini": "Google's multimodal assistant.",
+      "qwen": "Qwen with strong Chinese capability.",
+      "chatgpt": "General-purpose assistant for writing and ideation.",
+      "claude": "Reliable for long-form reading and writing.",
+      "perplexity": "Search-driven answer engine.",
+      "grok": "xAI's conversational product.",
+      "canva": "Online design and template editing platform.",
+      "krita": "Open-source painting software.",
+      "inkscape": "Open-source vector editor.",
+      "gimp": "Classic open-source raster editor.",
+      "blender": "All-round 3D creation suite.",
+      "kdenlive": "Open-source video editor.",
+      "audacity": "Lightweight audio editor.",
+      "obs": "Recording and livestreaming tool.",
+      "handbrake": "Video transcoding utility.",
+      "vlc": "General-purpose media player.",
+      "hackernews": "Aggregated tech news and discussion.",
+      "medium": "English platform for technical and opinion writing.",
+      "coursera": "Structured online learning platform.",
+      "devto": "Developer-focused content community.",
+      "yysuni": "One of the linked friend sites.",
+      "elysiumstack": "One of the linked friend sites."
+    }
   },
   "tools": {
     "title": "Toolbox",
@@ -49,6 +108,7 @@
     "preview": "Preview",
     "colorFormats": "Color Formats",
     "colorPalette": "Color Palette",
+    "copiedHtml": "Copied",
     "qrCode": "QR Code Generator",
     "qrCodeDesc": "Generate QR codes for text or URLs",
     "qrContent": "QR Code Content",
@@ -62,6 +122,9 @@
     "clear": "Clear",
     "markdownPlaceholder": "Enter Markdown content...",
     "copyHTML": "Copy HTML",
+    "markdownCopied": "Copied",
+    "markdownPreviewEmpty": "Start typing to see preview...",
+    "markdownPreviewError": "Markdown parsing error",
     "todo": "Todo List",
     "toolDescriptions": {
       "blogAssistant": "Prepare title, slug, excerpt, tags, and publish date before opening the real blog editor.",
@@ -75,6 +138,37 @@
       "calc": "Keep fast math available as a lightweight utility instead of a primary workspace surface.",
       "stopwatch": "Retain quick timing for occasional use without giving it primary page weight.",
       "encode": "Run Base64 and URL transformations fast while debugging or cleaning pasted content."
+    },
+    "jsonToolTitle": "JSON Prettier",
+    "format": "Format",
+    "minify": "Minify",
+    "jsonPlaceholder": "Paste JSON here...",
+    "invalidJson": "Invalid JSON",
+    "encoderTitle": "Encoder / Decoder",
+    "encodingUtf8": "UTF-8",
+    "inputRaw": "Input (Raw)",
+    "outputProcessed": "Output (Processed)",
+    "pasteTextHere": "Paste your text here...",
+    "base64Encode": "Base64 Encode",
+    "base64Decode": "Base64 Decode",
+    "urlEncode": "URL Encode",
+    "urlDecode": "URL Decode",
+    "invalidBase64": "Error: Invalid Base64",
+    "invalidUrlEncoding": "Error: Invalid URL encoding",
+    "invalidInput": "Error: Invalid Input",
+    "copyResult": "Copy",
+    "colorWorkspace": {
+      "current": "Current",
+      "activeTone": "Active Tone",
+      "activeToneDesc": "All fields are driven by the same HSV state.",
+      "quickPalette": "Quick Palette",
+      "paletteCount": "{count} colors",
+      "pickerLabel": "Color picker",
+      "valuesLabel": "Color values",
+      "hue": "Hue",
+      "saturation": "Saturation",
+      "value": "Value",
+      "placeholder": "#000000"
     },
     "workspace": {
       "heroEyebrow": "Creative Operations Deck",
@@ -292,11 +386,38 @@
     "noComments": "No comments yet. Be the first to comment!",
     "replyTo": "Reply to @{name}",
     "loadMore": "Load More",
-    "noMore": "No more articles"
+    "noMore": "No more articles",
+    "filterTag": "Click to filter by this tag",
+    "filterGenre": "Click to filter by this genre",
+    "filterArchive": "Click to filter by this month",
+    "clearFilter": "Click to clear filter",
+    "titleRequired": "Title is required",
+    "genreRequired": "Genre is required",
+    "dateRequired": "Date is required and must use YYYY-MM-DD format",
+    "excerptRequired": "Excerpt is required",
+    "tagsRequired": "At least one tag is required",
+    "imageUploadFailed": "Image upload failed. Please check network or backend configuration.",
+    "savePosterHintDesktop": "Long press the image or use the button on the right to save it",
+    "savePosterHintMobile": "Long press the image to save it"
   },
   "portfolio": {
     "title": "Selected Works",
-    "subtitle": "Design & Development Portfolio"
+    "subtitle": "Design & Development Portfolio",
+    "eyebrow": "Selected Work",
+    "items": {
+      "glassDashboard": {
+        "title": "Glass Dashboard",
+        "desc": "A personal dashboard template centered on heavy glassmorphism and vivid gradients."
+      },
+      "citeAI": {
+        "title": "CiteAI",
+        "desc": "An AI-assisted citation and research tool for academic writing workflows."
+      },
+      "portfolio": {
+        "title": "Portfolio",
+        "desc": "A personal portfolio site for projects and visual work."
+      }
+    }
   },
   "weather": {
     "loading": "Loading...",
@@ -318,7 +439,63 @@
     "menu": "Menu",
     "delete": "Delete",
     "copied": "Copied",
-    "loading": "Loading..."
+    "anonymous": "Anonymous",
+    "noData": "No data",
+    "justNow": "Just now",
+    "minutesAgo": "{minutes} minutes ago",
+    "hoursAgo": "{hours} hours ago",
+    "daysAgo": "{days} days ago",
+    "loading": "Loading...",
+    "allRightsReserved": "All rights reserved",
+    "workspace": "Workspace",
+    "navigation": "Navigation",
+    "updates": "Updates",
+    "changelog": "Changelog",
+    "discussion": "Discussion"
+  },
+  "changelog": {
+    "v3_0_0": {
+      "0": "Rebuilt the toolbox into a single-screen dashboard workspace to reduce scrolling and context loss.",
+      "1": "Replaced the unstable system color-picking chain with an in-page live color workspace.",
+      "2": "Unified the visual hierarchy of the tool header, filters, and main work surface.",
+      "3": "Fixed the timezone-related publish date shift in blog content.",
+      "4": "Completed the draft-saving flow and added an untitled placeholder for empty draft titles.",
+      "5": "Redesigned sharing posters with better glass layers, QR sizing, and light-dark consistency."
+    },
+    "v2_7_0": {
+      "0": "Added click-to-zoom images for better reading flow.",
+      "1": "Reworked code block styling and copy actions for technical articles.",
+      "2": "Added automatic table of contents generation with scroll syncing.",
+      "3": "Expanded the sharing center with poster preview, QR output, and download.",
+      "4": "Improved sitemap and structured data generation.",
+      "5": "Fixed publish-time and update-time consistency issues."
+    },
+    "v2_6_0": {
+      "0": "Improved image upload compatibility and file size limits.",
+      "1": "Added cloud image caching and instant local preview behavior.",
+      "2": "Refactored admin layout and sidebar behavior to fix scroll and hover problems.",
+      "3": "Completed automated deployment env injection.",
+      "4": "Hardened weather request timeout and fallback handling."
+    },
+    "v2_5_0": {
+      "0": "Introduced a semantic CSS variable system instead of hardcoded colors.",
+      "1": "Expanded theme customization and generated color scales automatically.",
+      "2": "Improved hover feedback and glass layering across the site.",
+      "3": "Reintroduced and refined PWA installation and caching support.",
+      "4": "Fixed bottom overflow issues and comment i18n support."
+    },
+    "v2_4_0": {
+      "0": "Fixed core performance and layering issues in filtering and auth modal flows.",
+      "1": "Improved copy feedback in the encoder and Markdown tools.",
+      "2": "Restored the centered homepage layout and added an update log module.",
+      "3": "Fixed weather location handling and dev proxy configuration.",
+      "4": "Added bilingual support to the homepage update log."
+    },
+    "v2_3_0": {
+      "0": "Added a friend-links section and supporting icon set.",
+      "1": "Improved blog card date, heat, and metadata layout.",
+      "2": "Fixed style variable usage in the tools page."
+    }
   },
   "auth": {
     "login": "Login",
@@ -370,16 +547,39 @@
     "applyCustom": "Apply Custom Theme",
     "reset": "Reset",
     "customize": "Customize Theme",
-    "comingSoon": "Theme customization feature coming soon!"
+    "comingSoon": "Theme customization feature coming soon!",
+    "customHint": "Choose a base color and the system will derive a coordinated scale plus a glassy background treatment.",
+    "bgOpacity": "Background Opacity",
+    "glassBlur": "Glass Blur",
+    "previewPrimary": "Primary Theme Color",
+    "previewPrimaryMeta": "Primary theme application",
+    "previewGlass": "Glass Texture",
+    "previewGlassMeta": "Glassmorphism texture",
+    "presetsMap": {
+      "none": "Default",
+      "aurora": "Aurora",
+      "ocean": "Ocean",
+      "sunset": "Sunset",
+      "royal": "Royal",
+      "sakura": "Sakura",
+      "crimson": "Crimson"
+    }
   },
   "admin": {
     "title": "Admin Panel",
     "adminOnly": "Admin Only",
     "backToBlog": "Back to Blog",
+    "eyebrow": "Administration",
+    "controlCenter": "Control Center",
+    "overview": "Overview",
     "dashboard": "Dashboard",
     "blogs": "Blog Management",
     "analytics": "Analytics",
     "comments": "Comment Management",
+    "publishing": "Publishing",
+    "metrics": "Metrics",
+    "moderation": "Moderation",
+    "community": "Community",
     "createBlog": "Create Blog",
     "editBlog": "Edit Blog",
     "manageBlogs": "Manage Blogs",
@@ -418,6 +618,48 @@
     "deleted": "Deleted",
     "approved": "Approved",
     "pending": "Pending",
-    "messageDeleted": "This message has been deleted"
+    "messageDeleted": "This message has been deleted",
+    "workspaceCopy": "A calmer, denser management workspace focused on operations, moderation, and publishing flow.",
+    "dashboardCopy": "Publishing pulse, moderation queue, and system health in a single pass.",
+    "blogsCopy": "Review drafts, monitor status, and jump into editing without leaving the list.",
+    "analyticsCopy": "High-signal traffic numbers and popular post movement, framed for scanning instead of decoration.",
+    "commentsCopy": "Review, approve, or remove discussion without leaving the queue.",
+    "guestbookCopy": "Handle guestbook visibility and keep public notes tidy.",
+    "systemStatus": "System Status",
+    "visitTrends": "Visit Trends (Last 7 Days)",
+    "viewAll": "View All",
+    "recentPosts": "Recent Posts",
+    "manage": "Manage",
+    "noPendingComments": "No pending comments.",
+    "lastUpdated": "Last updated: {time}",
+    "databaseCapacity": "Database Capacity",
+    "imageCache": "Image Cache",
+    "apiResponse": "API Response",
+    "clickToLocate": "Click to locate",
+    "lightMode": "Switch to light mode",
+    "darkMode": "Switch to dark mode",
+    "relocateFailed": "Failed to relocate. Please try again later.",
+    "routeTitles": {
+      "dashboard": "Admin Dashboard",
+      "blogs": "Blog Management",
+      "newBlog": "New Blog",
+      "editBlog": "Edit Blog",
+      "analytics": "Analytics",
+      "comments": "Comments",
+      "guestbook": "Guestbook Management"
+    }
+  },
+  "seo": {
+    "siteTitle": "GWorkspace - Personal Workspace",
+    "siteDescription": "A personal workspace site built with Vue.js, combining blog, toolbox, navigation, and portfolio surfaces.",
+    "siteKeywords": "workspace, blog, toolbox, portfolio, vue.js"
+  },
+  "routes": {
+    "home": "Home",
+    "sites": "Navigation",
+    "tools": "Toolbox",
+    "blog": "Blog",
+    "blogDetail": "Blog Detail",
+    "portfolio": "Portfolio"
   }
 }

@@ -171,6 +171,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { sitesConfig } from '../config/sites'
 import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
@@ -180,12 +181,18 @@ import { authApi } from '../utils/api'
 
 const siteFilter = ref('')
 const { isAuthenticated } = useAuth()
+const { t } = useI18n()
 
 // 从配置文件加载站点数据，并映射图标组件
 const sitesData = computed(() => {
   return sitesConfig.map(category => ({
     ...category,
-    icon: getIcon(category.iconName)
+    name: t(category.nameKey),
+    icon: getIcon(category.iconName),
+    links: category.links.map(link => ({
+      ...link,
+      desc: t(link.descKey)
+    }))
   }))
 })
 

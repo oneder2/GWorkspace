@@ -77,9 +77,9 @@
   --text-muted: #64748b;     /* slate-500 */
   --text-inverse: #020617;
 
-  --border-base: rgba(255, 255, 255, 0.12);
-  --border-highlight: rgba(255, 255, 255, 0.2);
-  --border-strong: rgba(148, 163, 184, 0.22);
+  --border-base: rgba(255, 255, 255, 0.18);
+  --border-highlight: rgba(255, 255, 255, 0.3);
+  --border-strong: rgba(203, 213, 225, 0.34);
   --shadow-soft: 0 14px 40px rgba(2, 6, 23, 0.36);
   --shadow-medium: 0 24px 60px rgba(2, 6, 23, 0.45);
   --shadow-strong: 0 30px 90px rgba(2, 6, 23, 0.55);
@@ -229,7 +229,7 @@ body {
   }
 
   .dark .surface-panel {
-    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   }
 
   .surface-card {
@@ -240,7 +240,7 @@ body {
   }
 
   .dark .surface-card {
-    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   }
 
   .surface-card:hover {
@@ -250,7 +250,7 @@ body {
   }
 
   .dark .surface-card:hover {
-    box-shadow: var(--shadow-medium), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow-medium), inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   }
 
   .surface-float {
@@ -262,7 +262,7 @@ body {
   }
 
   .dark .surface-float {
-    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   }
 
   .hero-panel {
@@ -463,15 +463,27 @@ body {
     -webkit-backdrop-filter: blur(18px);
   }
 
+  .dark .admin-shell {
+    box-shadow: var(--shadow-strong), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
   .admin-sidebar {
     background: linear-gradient(180deg, color-mix(in srgb, var(--surface-admin-panel) 98%, transparent), color-mix(in srgb, var(--surface-admin) 98%, transparent));
     border-right: 1px solid var(--border-strong);
+  }
+
+  .dark .admin-sidebar {
+    box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.05);
   }
 
   .admin-panel {
     background: color-mix(in srgb, var(--surface-admin-panel) 98%, transparent);
     border: 1px solid var(--border-strong);
     box-shadow: var(--shadow-soft);
+  }
+
+  .dark .admin-panel {
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   }
 
   .admin-toolbar {
@@ -487,6 +499,10 @@ body {
     background: linear-gradient(180deg, color-mix(in srgb, var(--surface-admin-panel) 98%, transparent), color-mix(in srgb, var(--surface-admin) 100%, transparent));
     border: 1px solid var(--border-strong);
     box-shadow: var(--shadow-soft);
+  }
+
+  .dark .admin-stat {
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   }
 
   .admin-table {

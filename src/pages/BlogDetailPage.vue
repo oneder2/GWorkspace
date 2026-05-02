@@ -35,7 +35,7 @@
               <span class="eyebrow">
                 {{ post.genre || post.category }}
               </span>
-              <span class="text-xs text-muted font-mono" :title="$t('blog.publishedAt') || '发布于'">
+              <span class="text-xs text-muted font-mono" :title="$t('blog.publishedAt')">
                 {{ formatBlogDate(getBlogDateValue(post)) }}
               </span>
               <div v-if="post.tags && post.tags.length > 0" class="flex items-center gap-2 flex-wrap">
@@ -81,9 +81,9 @@
 
           <footer class="mt-12 pt-8 border-t border-border-base flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="text-xs text-muted space-y-1">
-              <p>{{ $t('blog.publishedAt') || '发布于' }}: {{ formatBlogDate(getBlogDateValue(post)) }}</p>
+              <p>{{ $t('blog.publishedAt') }}: {{ formatBlogDate(getBlogDateValue(post)) }}</p>
               <p v-if="post.updated_at && post.updated_at !== getBlogDateValue(post)">
-                {{ $t('blog.updatedAt') || '最后更新' }}: {{ formatBlogDateTime(post.updated_at) }}
+                {{ $t('blog.updatedAt') }}: {{ formatBlogDateTime(post.updated_at) }}
               </p>
             </div>
             <div class="lg:hidden flex items-center gap-2">
@@ -139,14 +139,14 @@
       <aside class="hidden lg:block w-80 sticky top-24 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
         <!-- 文章概览卡片 -->
         <div v-if="post" class="surface-card p-6 rounded-[28px] animate-fade-in">
-          <h3 class="text-xs font-bold text-muted mb-4 uppercase tracking-widest">{{ $t('blog.articleOverview') || '文章概览' }}</h3>
+          <h3 class="text-xs font-bold text-muted mb-4 uppercase tracking-widest">{{ $t('blog.articleOverview') }}</h3>
           
           <div class="space-y-4">
             <!-- 统计数据 -->
             <div class="grid grid-cols-2 gap-4">
               <div class="flex flex-col">
                 <span class="text-2xl font-bold text-main">{{ post.views || 0 }}</span>
-                <span class="text-xs text-muted">{{ $t('blog.views') || '阅读量' }}</span>
+                <span class="text-xs text-muted">{{ $t('blog.views') }}</span>
               </div>
               <div class="flex flex-col">
                 <span class="text-2xl font-bold text-main">{{ readingTime }}</span>
@@ -254,14 +254,14 @@
                 <img 
                   :src="posterUrl" 
                   class="w-full h-full object-contain"
-                  alt="Sharing Poster"
+                  :alt="$t('blog.sharingCard')"
                 />
               </div>
 
               <!-- 链接展示区 -->
               <div class="mt-6 p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10 flex items-center justify-between gap-4">
                 <div class="flex-1 min-w-0">
-                  <p class="text-xs text-muted mb-1">{{ $t('blog.articleLink') || '文章链接' }}</p>
+                  <p class="text-xs text-muted mb-1">{{ $t('blog.articleLink') }}</p>
                   <p class="text-sm font-mono truncate text-secondary">{{ articleUrl }}</p>
                 </div>
                 <button 
@@ -276,8 +276,8 @@
               <!-- 操作栏 -->
               <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <p class="text-sm text-secondary opacity-70">
-                  <span class="hidden sm:inline">长按图片或点击右侧按钮保存到相册</span>
-                  <span class="sm:hidden">长按图片保存到相册</span>
+                  <span class="hidden sm:inline">{{ $t('blog.savePosterHintDesktop') }}</span>
+                  <span class="sm:hidden">{{ $t('blog.savePosterHintMobile') }}</span>
                 </p>
                 <button 
                   @click="downloadPoster"

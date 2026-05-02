@@ -60,7 +60,7 @@
                 ? 'ring-2 ring-[var(--theme-primary)] scale-105' 
                 : 'hover:scale-105 cursor-pointer'"
               :style="getTagColor(tag).style"
-              :title="selectedTag === tag ? '点击取消筛选' : '点击筛选此标签'"
+              :title="selectedTag === tag ? $t('blog.clearFilter') : $t('blog.filterTag')"
             >
               #{{ tag }}
             </button>
@@ -109,7 +109,7 @@
                   ? 'bg-slate-200 dark:bg-slate-700 text-main ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105 blog-genre-btn-selected'
                   : 'bg-slate-100 dark:bg-slate-800 text-secondary hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'
               ]"
-              :title="selectedGenre === genre ? '点击取消筛选' : '点击筛选此分类'"
+              :title="selectedGenre === genre ? $t('blog.clearFilter') : $t('blog.filterGenre')"
             >
               {{ genre }}
             </button>
@@ -131,7 +131,7 @@
                   : 'hover:scale-105 cursor-pointer'
               ]"
               :style="getTagColor(tag).style"
-              :title="selectedTag === tag ? '点击取消筛选' : '点击筛选此标签'"
+              :title="selectedTag === tag ? $t('blog.clearFilter') : $t('blog.filterTag')"
             >
               #{{ tag }}
             </button>
@@ -152,7 +152,7 @@
                   ? 'font-semibold blog-archive-item-selected' 
                   : 'text-muted'
               ]"
-              :title="selectedArchive === archive.month ? '点击取消筛选' : '点击筛选此月份'"
+              :title="selectedArchive === archive.month ? $t('blog.clearFilter') : $t('blog.filterArchive')"
               >
                 {{ archive.month }} <span>({{ archive.count }})</span>
               </li>
@@ -217,7 +217,7 @@
           >
             <!-- 文章内容保持不变 -->
             <div class="flex items-center gap-3 mb-2 flex-wrap text-xs text-muted">
-              <span class="font-mono">{{ formatBlogDate(getBlogDateValue(post), 'zh') }}</span>
+              <span class="font-mono">{{ formatBlogDate(getBlogDateValue(post), locale.value) }}</span>
               <span class="text-slate-300 dark:text-slate-600">·</span>
               <span class="flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
@@ -269,13 +269,13 @@
               class="px-8 py-3 bg-white/50 dark:bg-slate-800/50 hover:bg-[var(--theme-primary)] hover:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 disabled:opacity-50"
             >
               <span v-if="isLoading" class="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></span>
-              {{ isLoading ? $t('common.loading') : $t('blog.loadMore') || '加载更多' }}
+              {{ isLoading ? $t('common.loading') : $t('blog.loadMore') }}
             </button>
           </div>
 
           <!-- 无更多内容 -->
           <div v-else-if="blogPosts.length > 0 && !searchQuery" class="py-8 text-center text-slate-400 dark:text-slate-500 text-sm">
-            {{ $t('blog.noMore') || '没有更多文章了' }}
+            {{ $t('blog.noMore') }}
           </div>
         </template>
       </div>
@@ -295,6 +295,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Fuse from 'fuse.js'
 import { useLocalStorage } from '../composables/useStorage'
@@ -306,6 +307,7 @@ import BlogSkeleton from '../components/BlogSkeleton.vue'
 import { getTagStyle } from '../utils/tagColor'
 
 const router = useRouter()
+const { locale } = useI18n()
 const searchQuery = ref('')
 const selectedGenre = ref(null)
 const selectedTag = ref(null)

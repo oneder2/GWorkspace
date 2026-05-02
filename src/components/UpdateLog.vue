@@ -11,7 +11,7 @@
           {{ $t('home.updateLog') }}
         </h3>
       </div>
-      <span class="text-[10px] uppercase tracking-widest text-muted font-bold opacity-60 sm:text-right">Changelog</span>
+      <span class="text-[10px] uppercase tracking-widest text-muted font-bold opacity-60 sm:text-right">{{ $t('common.changelog') }}</span>
     </div>
 
     <div class="space-y-8 overflow-y-auto custom-scrollbar pr-2 flex-1 max-h-[400px]">
@@ -50,74 +50,77 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-const updates = ref([
+const { t } = useI18n()
+
+const updates = computed(() => ([
   {
     version: 'v3.0.0',
     date: '2026-04-30',
     items: [
-      '工具箱定版：重构为单屏优先工作台，工具切换、最近使用与主工作区统一在一个视图内完成',
-      '颜色工具重写：移除不可靠的系统取色链路，改为页内实时调色工作区并同步全部颜色参数反馈',
-      '博客工作流修复：彻底解决发布日期时区偏移、条目日期冗余显示与草稿占位标题问题',
-      '分享海报优化：统一明暗质感、重整信息层级并放大二维码，提升导出可读性与完成度',
-      '安全与交付增强：收紧管理端访问校验，补齐 GitHub Actions CI 检查与部署链路保护',
-      '界面收尾：主面板与日志区域新增高对比分隔线和边界高光，整体层次更稳定'
+      t('changelog.v3_0_0.0'),
+      t('changelog.v3_0_0.1'),
+      t('changelog.v3_0_0.2'),
+      t('changelog.v3_0_0.3'),
+      t('changelog.v3_0_0.4'),
+      t('changelog.v3_0_0.5')
     ]
   },
   {
     version: 'v2.7.0',
     date: '2026-02-26',
     items: [
-      '体验质变：集成 medium-zoom 实现极简流畅的图片点击缩放',
-      '交互重塑：新增 Mac 风格代码块外壳，支持一键复制与语言标识',
-      '导航增强：实现自动化文章目录 (TOC)，支持滚动同步高亮与平滑跳转',
-      '分享中心：新增动态海报生成引擎，支持带二维码的社交分享卡片',
-      'SEO 进阶：Sitemap 后端动态化，实现秒级索引更新与结构化数据增强',
-      '细节打磨：重构时间管理系统，修复时区偏差，新增预计阅读时间统计'
+      t('changelog.v2_7_0.0'),
+      t('changelog.v2_7_0.1'),
+      t('changelog.v2_7_0.2'),
+      t('changelog.v2_7_0.3'),
+      t('changelog.v2_7_0.4'),
+      t('changelog.v2_7_0.5')
     ]
   },
   {
     version: 'v2.6.0',
     date: '2026-02-26',
     items: [
-      '性能飞跃：引入 PWA 图片本地持久化缓存，实现云端图片秒开',
-      '上传优化：编辑器支持乐观预览，上传瞬间即可查看图片',
-      '稳定性增强：彻底修复中文文件名上传乱码及 R2 签名错误',
-      '后台重构：管理侧边栏完全对齐主站样式，大幅提升对比度与交互质感',
-      '自动化运维：实现 GitHub Actions 自动注入环境变量至自建服务器'
+      t('changelog.v2_6_0.0'),
+      t('changelog.v2_6_0.1'),
+      t('changelog.v2_6_0.2'),
+      t('changelog.v2_6_0.3'),
+      t('changelog.v2_6_0.4')
     ]
   },
   {
     version: 'v2.5.0',
     date: '2026-02-24',
     items: [
-      '设计系统：全站语义化变量重构，废弃硬编码颜色',
-      '主题自定义：新增背景透明度、毛玻璃强度调节滑块',
-      'PWA 增强：支持将网页作为独立应用安装至桌面',
-      '交互优化：重构全局 hover 效果，提升复杂背景下的文字可读性',
-      '体验修复：修复博客页面及编辑器底部滚动遮挡问题'
+      t('changelog.v2_5_0.0'),
+      t('changelog.v2_5_0.1'),
+      t('changelog.v2_5_0.2'),
+      t('changelog.v2_5_0.3'),
+      t('changelog.v2_5_0.4')
     ]
   },
   {
     version: 'v2.4.0',
     date: '2026-02-23',
     items: [
-      '后端性能优化：引入敏感词过滤正则缓存',
-      '交互增强：编码工具与编辑器添加复制成功反馈',
-      '架构优化：彻底移除 PWA 系统及相关依赖',
-      '布局修复：恢复首页居中布局并美化更新日志',
-      'Bug 修复：修正天气经纬度定位逻辑、修复登录弹窗层级'
+      t('changelog.v2_4_0.0'),
+      t('changelog.v2_4_0.1'),
+      t('changelog.v2_4_0.2'),
+      t('changelog.v2_4_0.3'),
+      t('changelog.v2_4_0.4')
     ]
   },
   {
     version: 'v2.3.0',
     date: '2026-01-29',
     items: [
-      '新增友站链接分区及模块化设计',
-      '博客页面样式深度优化及热度计算',
-      '工具页面 CSS 变量引用修复'
+      t('changelog.v2_3_0.0'),
+      t('changelog.v2_3_0.1'),
+      t('changelog.v2_3_0.2')
     ]
   }
-])
+]))
 </script>

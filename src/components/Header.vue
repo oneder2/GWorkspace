@@ -46,7 +46,7 @@
       </button>
       <!-- 页面标题：亮色模式使用深色，暗色模式使用浅色，确保在背景上有足够对比度 -->
       <div class="min-w-0">
-        <p class="section-kicker mb-1 hidden sm:block">Workspace</p>
+        <p class="section-kicker mb-1 hidden sm:block">{{ $t('common.workspace') }}</p>
         <h2 class="text-lg sm:text-xl font-bold text-main tracking-tight truncate">{{ currentTabName }}</h2>
       </div>
       <span 
@@ -107,7 +107,7 @@
                       @click="relocateAdmin"
                       :disabled="isRelocating"
                       class="icon-btn p-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                      :title="$t('tools.worldClock.relocate') || 'Relocate'"
+                      :title="$t('tools.worldClock.relocate')"
                     >
                       <svg 
                         v-if="!isRelocating"
@@ -141,7 +141,7 @@
                 <div v-if="adminSettings?.timezone" class="text-xs text-muted font-mono">{{ formatDateByTimezone(adminSettings.timezone) }}</div>
                 <div v-else class="text-xs text-muted font-mono">--</div>
                 <!-- 修复：只显示location，不要回退到timezone -->
-                <div class="text-xs text-muted mt-0.5">{{ adminSettings?.location || 'Click to locate' }}</div>
+                <div class="text-xs text-muted mt-0.5">{{ adminSettings?.location || $t('admin.clickToLocate') }}</div>
               </div>
               
               <!-- 访客位置 -->
@@ -302,7 +302,7 @@
       <button
         @click="$emit('toggle-theme')"
         class="icon-btn"
-        :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+        :title="isDark ? $t('admin.lightMode') : $t('admin.darkMode')"
       >
         <!-- 太阳图标（亮色模式时显示） -->
         <svg 
@@ -643,11 +643,11 @@ const relocateAdmin = async () => {
       
       console.log('Admin location updated successfully:', updatedSettings.location)
     } else {
-      throw new Error('Failed to get location information. Please try again later.')
+      throw new Error(t('admin.relocateFailed'))
     }
   } catch (error) {
     console.error('Failed to relocate admin:', error)
-    alert(error.message || 'Failed to relocate. Please try again later.')
+    alert(error.message || t('admin.relocateFailed'))
   } finally {
     isRelocating.value = false
   }

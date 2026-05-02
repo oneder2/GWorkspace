@@ -647,7 +647,7 @@ const handleFileUpload = async (event) => {
     // 如果失败，移除预览图
     formData.value.content = formData.value.content.replace(imageMarkdown, '')
     renderMarkdown(formData.value.content)
-    alert('Image upload failed. Please check network or backend configuration.')
+    alert(t('blog.imageUploadFailed'))
   } finally {
     isUploadingImage.value = false
     if (fileInputRef.value) fileInputRef.value.value = ''
@@ -1052,35 +1052,35 @@ const validateForm = (targetStatus = 'published') => {
   errors.value = []
   
   if (targetStatus === 'published' && (!formData.value.title || formData.value.title.trim().length === 0)) {
-    errors.value.push(t('blog.titleRequired') || 'Title is required')
+    errors.value.push(t('blog.titleRequired'))
   }
 
   const hasDate = !!formData.value.date
   const hasValidDate = !hasDate || /^\d{4}-\d{2}-\d{2}/.test(formData.value.date)
 
   if (!hasValidDate) {
-    errors.value.push(t('blog.dateRequired') || 'Date must be in YYYY-MM-DD format')
+    errors.value.push(t('blog.dateRequired'))
   }
 
   if (targetStatus === 'published') {
     if (!formData.value.genre || formData.value.genre.trim().length === 0) {
-      errors.value.push(t('blog.genreRequired') || 'Genre is required')
+      errors.value.push(t('blog.genreRequired'))
     }
 
     if (!hasDate) {
-      errors.value.push(t('blog.dateRequired') || 'Date is required and must be in YYYY-MM-DD format')
+      errors.value.push(t('blog.dateRequired'))
     }
 
     if (!formData.value.excerpt || formData.value.excerpt.trim().length === 0) {
-      errors.value.push(t('blog.excerptRequired') || 'Excerpt is required')
+      errors.value.push(t('blog.excerptRequired'))
     }
 
     if (!Array.isArray(formData.value.tags) || formData.value.tags.length === 0) {
-      errors.value.push(t('blog.tagsRequired') || 'At least one tag is required')
+      errors.value.push(t('blog.tagsRequired'))
     }
 
     if (!formData.value.content.trim()) {
-      errors.value.push(t('blog.contentRequired') || 'Content is required')
+      errors.value.push(t('blog.contentRequired'))
     }
   }
 
@@ -1093,7 +1093,7 @@ const validateForm = (targetStatus = 'published') => {
 const handleDelete = async () => {
   if (!formData.value.id) return
   
-  if (!confirm(t('admin.confirmDelete') || 'Are you sure you want to delete this article?')) {
+  if (!confirm(t('admin.confirmDelete'))) {
     return
   }
 
@@ -1111,7 +1111,7 @@ const handleDelete = async () => {
     handleClose()
   } catch (error) {
     console.error('Failed to delete article:', error)
-    alert(t('admin.deleteFailed') || 'Failed to delete article')
+    alert(t('admin.deleteFailed'))
   } finally {
     isSubmitting.value = false
   }
@@ -1125,7 +1125,7 @@ const handleSubmit = async (targetStatus = 'published') => {
     targetStatus === 'draft' &&
     props.isEditMode &&
     formData.value.status === 'published' &&
-    !confirm(t('blog.confirmConvertToDraft') || 'Move this published article back to draft?')
+    !confirm(t('blog.confirmConvertToDraft'))
   ) {
     return
   }
@@ -1165,27 +1165,27 @@ const handleSubmit = async (targetStatus = 'published') => {
 
     // 再次验证所有必需字段（双重检查）
     if (targetStatus === 'published' && !resolvedTitle) {
-      errors.value.push(t('blog.titleRequired') || 'Title is required')
+      errors.value.push(t('blog.titleRequired'))
       isSubmitting.value = false
       return
     }
     if (targetStatus === 'published' && !formData.value.genre?.trim()) {
-      errors.value.push(t('blog.genreRequired') || 'Genre is required')
+      errors.value.push(t('blog.genreRequired'))
       isSubmitting.value = false
       return
     }
     if (targetStatus === 'published' && !formData.value.content?.trim()) {
-      errors.value.push(t('blog.contentRequired') || 'Content is required')
+      errors.value.push(t('blog.contentRequired'))
       isSubmitting.value = false
       return
     }
     if (targetStatus === 'published' && !formData.value.excerpt?.trim()) {
-      errors.value.push(t('blog.excerptRequired') || 'Excerpt is required')
+      errors.value.push(t('blog.excerptRequired'))
       isSubmitting.value = false
       return
     }
     if (targetStatus === 'published' && (!Array.isArray(formData.value.tags) || formData.value.tags.length === 0)) {
-      errors.value.push(t('blog.tagsRequired') || 'At least one tag is required')
+      errors.value.push(t('blog.tagsRequired'))
       isSubmitting.value = false
       return
     }

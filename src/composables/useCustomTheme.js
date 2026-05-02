@@ -10,13 +10,13 @@ import { useLocalStorage } from './useStorage'
  * 预设主题配置
  */
 const availablePresets = {
-  none: { name: 'None', primary: '#475569', primaryDark: '#334155' },
-  aurora: { name: 'Aurora', primary: '#10b981', primaryDark: '#059669' },
-  ocean: { name: 'Ocean', primary: '#0ea5e9', primaryDark: '#0284c7' },
-  sunset: { name: 'Sunset', primary: '#f59e0b', primaryDark: '#d97706' },
-  royal: { name: 'Royal', primary: '#8b5cf6', primaryDark: '#7c3aed' },
-  sakura: { name: 'Sakura', primary: '#ec4899', primaryDark: '#db2777' },
-  crimson: { name: 'Crimson', primary: '#ef4444', primaryDark: '#dc2626' }
+  none: { nameKey: 'theme.presetsMap.none', primary: '#475569', primaryDark: '#334155' },
+  aurora: { nameKey: 'theme.presetsMap.aurora', primary: '#10b981', primaryDark: '#059669' },
+  ocean: { nameKey: 'theme.presetsMap.ocean', primary: '#0ea5e9', primaryDark: '#0284c7' },
+  sunset: { nameKey: 'theme.presetsMap.sunset', primary: '#f59e0b', primaryDark: '#d97706' },
+  royal: { nameKey: 'theme.presetsMap.royal', primary: '#8b5cf6', primaryDark: '#7c3aed' },
+  sakura: { nameKey: 'theme.presetsMap.sakura', primary: '#ec4899', primaryDark: '#db2777' },
+  crimson: { nameKey: 'theme.presetsMap.crimson', primary: '#ef4444', primaryDark: '#dc2626' }
 }
 
 const FALLBACK_PRIMARY = availablePresets.none.primary

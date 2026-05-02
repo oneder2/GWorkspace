@@ -120,7 +120,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useTheme } from './composables/useTheme'
 import { useKeyboard } from './composables/useKeyboard'
@@ -138,8 +137,6 @@ const route = useRoute()
 const router = useRouter()
 
 // 国际化
-const { locale } = useI18n()
-
 // 主题管理
 const { isDark, toggleTheme } = useTheme()
 
@@ -154,12 +151,7 @@ const showUpdateLogModal = ref(false)
 useCustomTheme()
 
 // 初始化 SEO（默认配置）
-useSEO({
-  title: 'GWorkspace - Personal Workspace',
-  description: 'Personal workspace website with Vue.js, featuring blog, tools, and portfolio management.',
-  keywords: 'workspace, blog, tools, portfolio, vue.js',
-  type: 'website'
-})
+useSEO({ type: 'website' })
 
 /**
  * 检查是否为管理后台路由
@@ -190,10 +182,10 @@ const currentTab = computed(() => {
  * 在中文和英文之间切换
  */
 const toggleLanguage = () => {
-  locale.value = locale.value === 'zh' ? 'en' : 'zh'
-  localStorage.setItem('locale', locale.value)
-  // 更新 HTML lang 属性，以便浏览器自动填充等功能识别当前语言
-  document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en'
+  const locale = localStorage.getItem('locale') || 'zh'
+  const nextLocale = locale === 'zh' ? 'en' : 'zh'
+  localStorage.setItem('locale', nextLocale)
+  window.location.reload()
 }
 
 /**
@@ -223,13 +215,8 @@ useKeyboard({
 
 onMounted(() => {
   loadWeather()
-  // 初始化 HTML lang 属性，根据当前 locale 设置
-  document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en'
-})
-
-// 监听 locale 变化，动态更新 HTML lang 属性
-watch(locale, (newLocale) => {
-  document.documentElement.lang = newLocale === 'zh' ? 'zh-CN' : 'en'
+  const currentLocale = localStorage.getItem('locale') || 'zh'
+  document.documentElement.lang = currentLocale === 'zh' ? 'zh-CN' : 'en'
 })
 
 onUnmounted(() => {

@@ -23,7 +23,7 @@
         </div>
         <div class="min-w-0">
           <span class="block font-bold text-xl tracking-tight text-main transition-colors group-hover:[color:var(--theme-primary)]">{{ $t('admin.title') }}</span>
-          <span class="block text-[11px] uppercase tracking-[0.24em] text-muted">Control Center</span>
+          <span class="block text-[11px] uppercase tracking-[0.24em] text-muted">{{ $t('admin.controlCenter') }}</span>
         </div>
       </div>
       <div 

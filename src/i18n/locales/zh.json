@@ -9,11 +9,12 @@
   "home": {
     "title": "早上好",
     "subtitle": "今天你想探索什么？",
+    "eyebrow": "个人工作台",
     "visitorWelcome": "🌍 小伙伴你好呀！",
     "visitorLocation": "正在寻找你的足迹...",
     "visitorGreeting": "欢迎来自 {{location}} 的访客！",
     "searchPlaceholder": "输入搜索内容...",
-    "quickLinks": "快捷链接",
+    "quickLinksTitle": "快捷链接",
     "edit": "编辑",
     "editQuickLinks": "编辑快捷链接",
     "addLink": "添加链接",
@@ -22,7 +23,21 @@
     "updateLog": "更新日志",
     "workspaceAreas": "站内入口",
     "quickAccess": "快速访问",
-    "quickAccessCopy": "保留你最常用的外部链接，作为工作流的快捷起点。"
+    "quickAccessCopy": "保留你最常用的外部链接，作为工作流的快捷起点。",
+    "quickStart": "快速开始",
+    "launchPad": "外部入口",
+    "searchEngines": {
+      "google": "Google",
+      "duckduckgo": "DuckDuckGo",
+      "baidu": "百度",
+      "edge": "Edge"
+    },
+    "quickLinks": {
+      "github": "GitHub",
+      "youtube": "YouTube",
+      "gmail": "Gmail",
+      "gemini": "Gemini"
+    }
   },
   "sites": {
     "title": "站点导航",
@@ -32,7 +47,51 @@
     "index": "目录",
     "favorites": "收藏",
     "addFavorite": "添加到收藏",
-    "removeFavorite": "取消收藏"
+    "removeFavorite": "取消收藏",
+    "categories": {
+      "dev": "开发工具",
+      "tools": "效率工具",
+      "ai": "AI 对话",
+      "design": "设计创作",
+      "learn": "学习资源",
+      "friends": "友站链接"
+    },
+    "links": {
+      "github": "开源协作的基础入口。",
+      "stackoverflow": "经典问题检索与排错社区。",
+      "mdn": "前端标准与 API 文档基线。",
+      "vue": "本站使用的核心前端框架。",
+      "tailwind": "高频实用的原子化样式体系。",
+      "regex101": "正则表达式测试与解释工具。",
+      "vercel": "快速部署与轻量运维平台。",
+      "runoob": "入门向中文技术教程集合。",
+      "strudel": "代码驱动的实时音乐编排工具。",
+      "beepbox": "适合快速做音效和简单旋律。",
+      "wolframalpha": "数学与计算问题查询入口。",
+      "toolwa": "老牌综合在线工具箱。",
+      "gemini": "Google 的多模态助手。",
+      "qwen": "中文能力突出的通义千问。",
+      "chatgpt": "通用型对话与内容生产助手。",
+      "claude": "长文本与写作体验稳定的助手。",
+      "perplexity": "以检索驱动为优势的问答工具。",
+      "grok": "xAI 的对话产品。",
+      "canva": "在线平面设计与模板制作工具。",
+      "krita": "偏绘画向的开源创作软件。",
+      "inkscape": "开源矢量图编辑器。",
+      "gimp": "经典开源位图编辑器。",
+      "blender": "3D 建模与动画全能工具。",
+      "kdenlive": "开源视频剪辑软件。",
+      "audacity": "轻量音频编辑器。",
+      "obs": "录屏与直播推流工具。",
+      "handbrake": "视频格式转换工具。",
+      "vlc": "通用媒体播放器。",
+      "hackernews": "技术新闻与讨论聚合。",
+      "medium": "英文技术与观点文章平台。",
+      "coursera": "系统化在线课程平台。",
+      "devto": "开发者内容社区。",
+      "yysuni": "友站之一。",
+      "elysiumstack": "友站之一。"
+    }
   },
   "tools": {
     "title": "工具箱",
@@ -49,6 +108,7 @@
     "preview": "预览",
     "colorFormats": "颜色格式",
     "colorPalette": "调色板",
+    "copiedHtml": "已复制",
     "qrCode": "二维码生成器",
     "qrCodeDesc": "生成文本或URL的二维码",
     "qrContent": "二维码内容",
@@ -62,6 +122,9 @@
     "clear": "清空",
     "markdownPlaceholder": "输入Markdown内容...",
     "copyHTML": "复制HTML",
+    "markdownCopied": "已复制",
+    "markdownPreviewEmpty": "开始输入以查看预览...",
+    "markdownPreviewError": "Markdown 解析错误",
     "todo": "待办事项",
     "toolDescriptions": {
       "blogAssistant": "为博客创作预先整理标题、slug、摘要、标签和发布时间，减少发布前的重复劳动。",
@@ -75,6 +138,37 @@
       "calc": "低频但必要的快速计算，保留为轻量工具而不是主工作区。",
       "stopwatch": "处理临时计时需求，作为次级工具保留。",
       "encode": "做 Base64 和 URL 编解码等快速转换，适合调试和粘贴处理。"
+    },
+    "jsonToolTitle": "JSON 整理",
+    "format": "格式化",
+    "minify": "压缩",
+    "jsonPlaceholder": "在这里粘贴 JSON...",
+    "invalidJson": "无效的 JSON",
+    "encoderTitle": "编码 / 解码",
+    "encodingUtf8": "UTF-8",
+    "inputRaw": "输入（原始）",
+    "outputProcessed": "输出（处理后）",
+    "pasteTextHere": "在这里粘贴文本...",
+    "base64Encode": "Base64 编码",
+    "base64Decode": "Base64 解码",
+    "urlEncode": "URL 编码",
+    "urlDecode": "URL 解码",
+    "invalidBase64": "错误：无效的 Base64",
+    "invalidUrlEncoding": "错误：无效的 URL 编码",
+    "invalidInput": "错误：输入无效",
+    "copyResult": "复制结果",
+    "colorWorkspace": {
+      "current": "当前颜色",
+      "activeTone": "激活色调",
+      "activeToneDesc": "所有字段由同一组 HSV 状态驱动。",
+      "quickPalette": "快速色板",
+      "paletteCount": "{count} 种颜色",
+      "pickerLabel": "颜色选择器",
+      "valuesLabel": "颜色数值",
+      "hue": "色相",
+      "saturation": "饱和度",
+      "value": "明度",
+      "placeholder": "#000000"
     },
     "workspace": {
       "heroEyebrow": "Creative Operations Deck",
@@ -292,11 +386,38 @@
     "noComments": "暂无评论，快来抢沙发吧！",
     "replyTo": "回复 @{name}",
     "loadMore": "加载更多",
-    "noMore": "没有更多文章了"
+    "noMore": "没有更多文章了",
+    "filterTag": "点击筛选此标签",
+    "filterGenre": "点击筛选此分类",
+    "filterArchive": "点击筛选此月份",
+    "clearFilter": "点击取消筛选",
+    "titleRequired": "标题不能为空",
+    "genreRequired": "分类不能为空",
+    "dateRequired": "日期不能为空，且格式必须为 YYYY-MM-DD",
+    "excerptRequired": "摘要不能为空",
+    "tagsRequired": "至少需要一个标签",
+    "imageUploadFailed": "图片上传失败，请检查网络或后端配置",
+    "savePosterHintDesktop": "长按图片或点击右侧按钮保存到相册",
+    "savePosterHintMobile": "长按图片保存到相册"
   },
   "portfolio": {
     "title": "精选作品",
-    "subtitle": "设计与开发作品集"
+    "subtitle": "设计与开发作品集",
+    "eyebrow": "精选作品",
+    "items": {
+      "glassDashboard": {
+        "title": "玻璃仪表盘",
+        "desc": "以毛玻璃和高饱和渐变为核心的个人控制台模板。"
+      },
+      "citeAI": {
+        "title": "CiteAI",
+        "desc": "面向学术写作与资料整理的 AI 引用辅助工具。"
+      },
+      "portfolio": {
+        "title": "作品集站点",
+        "desc": "展示项目经历与视觉作品的个人作品集网站。"
+      }
+    }
   },
   "weather": {
     "loading": "加载中...",
@@ -323,10 +444,60 @@
     "anonymous": "匿名",
     "noData": "暂无数据",
     "justNow": "刚刚",
-    "minutesAgo": "分钟前",
-    "hoursAgo": "小时前",
-    "daysAgo": "天前",
-    "loading": "加载中..."
+    "minutesAgo": "{minutes} 分钟前",
+    "hoursAgo": "{hours} 小时前",
+    "daysAgo": "{days} 天前",
+    "loading": "加载中...",
+    "allRightsReserved": "保留所有权利",
+    "workspace": "工作区",
+    "navigation": "导航",
+    "updates": "更新",
+    "changelog": "更新日志",
+    "discussion": "讨论区"
+  },
+  "changelog": {
+    "v3_0_0": {
+      "0": "工具箱重构为单屏仪表盘式工作台，减少滚动与上下文跳转。",
+      "1": "颜色工具改为页内实时调色链路，移除跨环境不稳定的系统取色方案。",
+      "2": "统一工具页顶栏、筛选入口与主工作区的视觉分层与边界表达。",
+      "3": "修复博客发布日期时区错位问题，保证设置日期与展示日期一致。",
+      "4": "补齐草稿保存链路与无标题草稿占位名，降低编辑阻力。",
+      "5": "重绘分享海报，统一玻璃层次、二维码尺寸和明暗表现。"
+    },
+    "v2_7_0": {
+      "0": "集成图片点击缩放，提升文章阅读体验。",
+      "1": "重构代码块样式与复制交互，增强长文技术内容可读性。",
+      "2": "新增自动目录导航与滚动高亮。",
+      "3": "完善分享中心，支持海报预览、二维码与下载。",
+      "4": "改进 Sitemap 与结构化数据生成逻辑。",
+      "5": "修复发布时间与修改时间的数据一致性问题。"
+    },
+    "v2_6_0": {
+      "0": "提升图片上传兼容性与体积上限。",
+      "1": "引入云端图片缓存与本地预览优化。",
+      "2": "重构后台布局与侧边栏行为，修复滚动与 hover 问题。",
+      "3": "补齐自动化部署环境变量注入。",
+      "4": "增强天气接口超时与兜底处理。"
+    },
+    "v2_5_0": {
+      "0": "建立语义化 CSS 变量体系，替代硬编码颜色。",
+      "1": "扩展主题自定义能力与色阶推导。",
+      "2": "优化悬停反馈与全站玻璃层质感。",
+      "3": "重新引入并完善 PWA 安装与缓存配置。",
+      "4": "修复底部滚动遮挡与评论系统多语言问题。"
+    },
+    "v2_4_0": {
+      "0": "为敏感词过滤与认证弹窗修复核心性能和层级问题。",
+      "1": "优化编码工具与 Markdown 工具的复制反馈。",
+      "2": "恢复首页经典布局并加入更新日志区域。",
+      "3": "修复天气定位逻辑与开发环境代理配置。",
+      "4": "为首页更新日志加入中英双语支持。"
+    },
+    "v2_3_0": {
+      "0": "新增友站链接分区与配套图标支持。",
+      "1": "优化博客条目日期、热度和信息布局。",
+      "2": "修复工具页面的样式变量引用问题。"
+    }
   },
   "auth": {
     "login": "登录",
@@ -378,16 +549,39 @@
     "applyCustom": "应用自定义主题",
     "reset": "重置",
     "customize": "自定义主题",
-    "comingSoon": "主题自定义功能即将推出，敬请期待！"
+    "comingSoon": "主题自定义功能即将推出，敬请期待！",
+    "customHint": "选择您最喜欢的基准色，系统将自动生成配套的协调色阶和磨砂感背景。",
+    "bgOpacity": "背景透明度",
+    "glassBlur": "毛玻璃强度",
+    "previewPrimary": "主色应用",
+    "previewPrimaryMeta": "主题主色效果",
+    "previewGlass": "玻璃质感",
+    "previewGlassMeta": "毛玻璃层次",
+    "presetsMap": {
+      "none": "默认",
+      "aurora": "极光",
+      "ocean": "海洋",
+      "sunset": "日落",
+      "royal": "皇家",
+      "sakura": "樱花",
+      "crimson": "绯红"
+    }
   },
   "admin": {
     "title": "管理后台",
     "adminOnly": "仅管理员",
     "backToBlog": "返回博客",
+    "eyebrow": "后台管理",
+    "controlCenter": "控制中心",
+    "overview": "总览",
     "dashboard": "仪表盘",
     "blogs": "博客管理",
     "analytics": "数据分析",
     "comments": "评论管理",
+    "publishing": "发布管理",
+    "metrics": "指标概览",
+    "moderation": "内容审核",
+    "community": "社区互动",
     "createBlog": "创建博客",
     "editBlog": "编辑博客",
     "manageBlogs": "管理博客",
@@ -426,6 +620,48 @@
     "deleted": "已删除",
     "approved": "已审核",
     "pending": "待审核",
-    "messageDeleted": "该留言已被删除"
+    "messageDeleted": "该留言已被删除",
+    "workspaceCopy": "一个更克制、更高密度的管理工作台，围绕运营、审核与发布流程展开。",
+    "dashboardCopy": "发布节奏、审核队列与系统状态，一次看完。",
+    "blogsCopy": "在同一个列表里查看草稿、确认状态并继续编辑。",
+    "analyticsCopy": "更聚焦的流量数据与文章热度变化，优先服务快速扫描。",
+    "commentsCopy": "在不离开队列的情况下审核、批准或移除评论。",
+    "guestbookCopy": "管理留言板可见性，保持公开留言整洁有序。",
+    "systemStatus": "系统状态",
+    "visitTrends": "访问趋势（最近 7 天）",
+    "viewAll": "查看全部",
+    "recentPosts": "最近文章",
+    "manage": "管理",
+    "noPendingComments": "暂无待处理评论。",
+    "lastUpdated": "最后更新：{time}",
+    "databaseCapacity": "数据库容量",
+    "imageCache": "图片缓存",
+    "apiResponse": "API 响应",
+    "clickToLocate": "点击定位",
+    "lightMode": "切换到亮色模式",
+    "darkMode": "切换到暗色模式",
+    "relocateFailed": "定位失败，请稍后重试。",
+    "routeTitles": {
+      "dashboard": "管理仪表盘",
+      "blogs": "博客管理",
+      "newBlog": "新建博客",
+      "editBlog": "编辑博客",
+      "analytics": "数据分析",
+      "comments": "评论管理",
+      "guestbook": "留言板管理"
+    }
+  },
+  "seo": {
+    "siteTitle": "GWorkspace - 个人工作台",
+    "siteDescription": "一个基于 Vue.js 的个人工作台站点，整合博客、工具箱、导航和作品集。",
+    "siteKeywords": "工作台, 博客, 工具箱, 作品集, Vue.js"
+  },
+  "routes": {
+    "home": "首页",
+    "sites": "导航",
+    "tools": "工具箱",
+    "blog": "博客",
+    "blogDetail": "文章详情",
+    "portfolio": "作品集"
   }
 }

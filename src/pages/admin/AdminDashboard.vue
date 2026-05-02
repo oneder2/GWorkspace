@@ -6,17 +6,17 @@
   <div class="space-y-6 animate-fade-in pb-10">
     <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
       <div class="space-y-2">
-        <span class="section-kicker">Overview</span>
+        <span class="section-kicker">{{ $t('admin.overview') }}</span>
         <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-3">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7 text-[var(--theme-primary)]">
           <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
         </svg>
         {{ $t('admin.dashboard') }}
         </h2>
-        <p class="section-copy text-sm">Publishing pulse, moderation queue, and system health in a single pass.</p>
+        <p class="section-copy text-sm">{{ $t('admin.dashboardCopy') }}</p>
       </div>
       <div class="text-xs font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full w-fit">
-        Last updated: {{ lastUpdate }}
+        {{ $t('admin.lastUpdated', { time: lastUpdate }) }}
       </div>
     </div>
 
@@ -66,11 +66,11 @@
 
         <!-- 系统概览图 (示意) -->
         <div class="admin-panel p-5 rounded-[24px] bg-gradient-to-br from-[var(--theme-primary)]/10 to-transparent">
-          <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">System Status</h3>
+          <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">{{ $t('admin.systemStatus') }}</h3>
           <div class="space-y-4">
             <div v-for="sys in systemStatus" :key="sys.name">
               <div class="flex justify-between text-xs mb-1.5">
-                <span class="text-slate-600 dark:text-slate-300">{{ sys.name }}</span>
+                <span class="text-slate-600 dark:text-slate-300">{{ $t(sys.name) }}</span>
                 <span class="font-mono">{{ sys.value }}%</span>
               </div>
               <div class="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -88,7 +88,7 @@
       <div class="lg:col-span-2 space-y-6">
         <!-- 访问趋势图 -->
         <div class="admin-panel p-6 rounded-[24px] h-[300px]">
-          <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">Visit Trends (Last 7 Days)</h3>
+          <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">{{ $t('admin.visitTrends') }}</h3>
           <canvas ref="chartCanvas"></canvas>
         </div>
 
@@ -97,9 +97,9 @@
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
               {{ $t('admin.comments') }}
-              <span v-if="pendingComments.length" class="px-2 py-0.5 bg-orange-100 text-orange-600 text-[10px] rounded-full uppercase">Pending</span>
+              <span v-if="pendingComments.length" class="px-2 py-0.5 bg-orange-100 text-orange-600 text-[10px] rounded-full uppercase">{{ $t('admin.pending') }}</span>
             </h3>
-            <button @click="$router.push('/admin/comments')" class="text-xs text-[var(--theme-primary)] font-bold hover:underline">View All</button>
+            <button @click="$router.push('/admin/comments')" class="text-xs text-[var(--theme-primary)] font-bold hover:underline">{{ $t('admin.viewAll') }}</button>
           </div>
           
           <div v-if="pendingComments.length" class="space-y-4">
@@ -117,15 +117,15 @@
             </div>
           </div>
           <div v-else class="py-10 text-center text-slate-400 text-sm">
-            No pending comments.
+            {{ $t('admin.noPendingComments') }}
           </div>
         </div>
 
         <!-- 最近文章 -->
         <div class="admin-panel p-6 rounded-[24px]">
           <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">Recent Posts</h3>
-            <button @click="$router.push('/admin/blogs')" class="text-xs text-[var(--theme-primary)] font-bold hover:underline">Manage</button>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.recentPosts') }}</h3>
+            <button @click="$router.push('/admin/blogs')" class="text-xs text-[var(--theme-primary)] font-bold hover:underline">{{ $t('admin.manage') }}</button>
           </div>
           <div class="space-y-3">
             <div 
@@ -143,7 +143,7 @@
                   <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
                     <span class="uppercase font-bold">{{ blog.genre }}</span>
                     <span>•</span>
-                    <span>{{ blog.views }} views</span>
+                    <span>{{ blog.views }} {{ $t('admin.views') }}</span>
                   </div>
                 </div>
               </div>
@@ -178,9 +178,9 @@ const stats = ref({
 const recentBlogs = ref([])
 const pendingComments = ref([])
 const systemStatus = ref([
-  { name: 'Database Capacity', value: 0 },
-  { name: 'Image Cache', value: 0 },
-  { name: 'API Response', value: 100 }
+  { name: 'admin.databaseCapacity', value: 0 },
+  { name: 'admin.imageCache', value: 0 },
+  { name: 'admin.apiResponse', value: 100 }
 ])
 
 const statCards = computed(() => [
@@ -210,7 +210,7 @@ const initChart = (data) => {
     data: {
       labels: data.labels,
       datasets: [{
-        label: 'Visits',
+        label: t('admin.visits'),
         data: data.values,
         borderColor: primaryColor,
         backgroundColor: `${primaryColor}20`,

@@ -42,7 +42,7 @@
           >
             <span v-if="!copySuccess">{{ $t('tools.copyHTML') }}</span>
             <span v-else class="flex items-center gap-1">
-              <span>Copied!</span>
+              <span>{{ $t('tools.markdownCopied') }}</span>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
@@ -59,8 +59,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
+
+const { t } = useI18n()
 
 // 配置 marked 选项
 marked.setOptions({
@@ -70,9 +73,9 @@ marked.setOptions({
   mangle: false
 })
 
-const markdownContent = ref(`# Markdown Editor
+const markdownContent = ref(`# ${t('tools.markdown')}
 
-## Features
+## Example
 
 - **Bold text**
 - *Italic text*
@@ -96,7 +99,7 @@ function hello() {
 }
 \`\`\`
 
-> This is a blockquote`)
+> ${t('tools.markdownDesc')}`)
 
 const copySuccess = ref(false)
 
@@ -105,13 +108,13 @@ const copySuccess = ref(false)
  */
 const htmlContent = computed(() => {
   if (!markdownContent.value.trim()) {
-    return '<p class="text-muted">Start typing to see preview...</p>'
+    return `<p class="text-muted">${t('tools.markdownPreviewEmpty')}</p>`
   }
   try {
     return marked.parse(markdownContent.value)
   } catch (error) {
     console.error('Markdown parsing error:', error)
-    return '<p class="text-red-500">Error parsing Markdown</p>'
+    return `<p class="text-red-500">${t('tools.markdownPreviewError')}</p>`
   }
 })
 

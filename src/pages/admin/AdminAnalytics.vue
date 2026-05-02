@@ -7,9 +7,9 @@
     <div class="admin-panel rounded-[24px] overflow-hidden">
       <div class="admin-toolbar flex-col sm:flex-row sm:items-end">
         <div class="space-y-2">
-          <span class="section-kicker">Metrics</span>
+          <span class="section-kicker">{{ $t('admin.metrics') }}</span>
           <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.analytics') }}</h2>
-          <p class="text-sm text-secondary">High-signal traffic numbers and popular post movement, framed for scanning instead of decoration.</p>
+          <p class="text-sm text-secondary">{{ $t('admin.analyticsCopy') }}</p>
         </div>
       </div>
     </div>
@@ -40,7 +40,7 @@
           class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
         >
           <div>
-            <p class="font-semibold text-slate-800 dark:text-slate-200">Blog ID: {{ item.blog_id }}</p>
+            <p class="font-semibold text-slate-800 dark:text-slate-200">{{ $t('admin.blogId') }}: {{ item.blog_id }}</p>
             <p class="text-sm text-slate-500 dark:text-slate-400">{{ $t('admin.visits') }}: {{ item.visit_count }}</p>
           </div>
           <router-link

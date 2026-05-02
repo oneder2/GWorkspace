@@ -7,9 +7,9 @@
     <div class="admin-panel rounded-[24px] overflow-hidden">
       <div class="admin-toolbar flex-col sm:flex-row sm:items-end">
         <div class="space-y-2">
-          <span class="section-kicker">Community</span>
+          <span class="section-kicker">{{ $t('admin.community') }}</span>
           <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.guestbook') }}</h2>
-          <p class="text-sm text-secondary">Handle guestbook visibility and keep public notes tidy.</p>
+          <p class="text-sm text-secondary">{{ $t('admin.guestbookCopy') }}</p>
         </div>
       </div>
     </div>
