@@ -69,10 +69,32 @@ jobs:
           port: ${{ secrets.SERVER_PORT || 22 }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -euo pipefail
+
             # 设置变量
             DEPLOY_DIR="$HOME/gworkspace/backend"
             BACKUP_DIR="$HOME/gworkspace/backups"
             TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            R2_ACCESS_KEY_ID="${{ secrets.R2_ACCESS_KEY_ID }}"
+            R2_SECRET_ACCESS_KEY="${{ secrets.R2_SECRET_ACCESS_KEY }}"
+            R2_ACCOUNT_ID="${{ secrets.R2_ACCOUNT_ID }}"
+            R2_BUCKET_NAME="${{ secrets.R2_BUCKET_NAME }}"
+            R2_PUBLIC_DOMAIN="${{ secrets.R2_PUBLIC_DOMAIN }}"
+
+            require_secret() {
+              key="$1"
+              value="$2"
+              if [ -z "$value" ]; then
+                echo "Missing required deploy secret: $key" >&2
+                exit 1
+              fi
+            }
+
+            require_secret "R2_ACCESS_KEY_ID" "$R2_ACCESS_KEY_ID"
+            require_secret "R2_SECRET_ACCESS_KEY" "$R2_SECRET_ACCESS_KEY"
+            require_secret "R2_ACCOUNT_ID" "$R2_ACCOUNT_ID"
+            require_secret "R2_BUCKET_NAME" "$R2_BUCKET_NAME"
+            require_secret "R2_PUBLIC_DOMAIN" "$R2_PUBLIC_DOMAIN"
             
             # 创建必要的目录
             mkdir -p $DEPLOY_DIR
@@ -99,15 +121,15 @@ jobs:
             mkdir -p $TEMP_DIR
             tar -xzf /tmp/backend-deploy.tar.gz -C $TEMP_DIR --strip-components=1
             
-            # 复制新文件
+            # 清理旧代码，但保留环境变量和数据库目录
             echo "Deploying new version..."
-            if [ -d "$TEMP_DIR" ]; then
-              find "$TEMP_DIR" -type f ! -path "*/node_modules/*" ! -name ".env" ! -path "*/database/*.db*" -exec sh -c '
-                  src="$1"; dest="$2"; rel_path="${src#$3/}"; target="$dest/$rel_path"
-                  mkdir -p "$(dirname "$target")"
-                  cp "$src" "$target"
-                ' _ {} "$DEPLOY_DIR" "$TEMP_DIR" \;
-            fi
+            find "$DEPLOY_DIR" -mindepth 1 \
+              ! -path "$DEPLOY_DIR/.env" \
+              ! -path "$DEPLOY_DIR/database" \
+              ! -path "$DEPLOY_DIR/database/*" \
+              -exec rm -rf {} +
+
+            cp -a "$TEMP_DIR"/. "$DEPLOY_DIR"/
             
             # 数据库文件直接保留原位。
             # 部署包本身不包含 *.db*，因此这里绝不能再用临时拷贝覆盖主库，
@@ -134,11 +156,11 @@ jobs:
             }
 
             echo "Injecting R2 configurations from GitHub Secrets..."
-            update_env "R2_ACCESS_KEY_ID" "${{ secrets.R2_ACCESS_KEY_ID }}"
-            update_env "R2_SECRET_ACCESS_KEY" "${{ secrets.R2_SECRET_ACCESS_KEY }}"
-            update_env "R2_ACCOUNT_ID" "${{ secrets.R2_ACCOUNT_ID }}"
-            update_env "R2_BUCKET_NAME" "${{ secrets.R2_BUCKET_NAME }}"
-            update_env "R2_PUBLIC_DOMAIN" "${{ secrets.R2_PUBLIC_DOMAIN }}"
+            update_env "R2_ACCESS_KEY_ID" "$R2_ACCESS_KEY_ID"
+            update_env "R2_SECRET_ACCESS_KEY" "$R2_SECRET_ACCESS_KEY"
+            update_env "R2_ACCOUNT_ID" "$R2_ACCOUNT_ID"
+            update_env "R2_BUCKET_NAME" "$R2_BUCKET_NAME"
+            update_env "R2_PUBLIC_DOMAIN" "$R2_PUBLIC_DOMAIN"
             
             # 确保在正确的目录
             cd $DEPLOY_DIR
@@ -146,8 +168,11 @@ jobs:
             # 重新安装生产依赖
             # 不再强制 better-sqlite3 从源码编译；服务器上的旧版 g++ 无法处理 -std=c++20，
             # 应优先使用 npm 提供的预编译二进制。
-            rm -rf node_modules
             npm ci --omit=dev --no-audit
+
+            # 显式执行迁移和数据库健康检查，避免把问题带到启动之后
+            npm run db:prepare
+            npm run db:check
             
             # 启动服务
             pm2 start src/server.js --name gworkspace-backend
@@ -155,7 +180,9 @@ jobs:
 
             # 基础健康检查，避免“部署成功但服务未启动”被静默吞掉
             sleep 3
-            curl -fsS "http://127.0.0.1:3001/health" >/dev/null
+            HEALTH_OUTPUT="$(curl -fsS "http://127.0.0.1:3001/health")"
+            echo "$HEALTH_OUTPUT" | grep '"status":"ok"' >/dev/null
+            echo "$HEALTH_OUTPUT" | grep '"database":"ok"' >/dev/null
             
             # 清理
             rm -rf $TEMP_DIR

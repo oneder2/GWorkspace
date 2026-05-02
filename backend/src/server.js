@@ -8,9 +8,8 @@ import cors from 'cors'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
 import { getDatabase, closeDatabase } from './config/database.js'
-import { readFileSync } from 'fs'
-import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
+import { runMigrations } from './config/migrations.js'
+import { checkDatabaseHealth } from './config/databaseHealth.js'
 
 // 导入路由
 import blogRoutes from './routes/blog.js'
@@ -25,9 +24,6 @@ import seoRoutes from './routes/seo.js'
 
 // 加载环境变量
 dotenv.config()
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -70,36 +66,12 @@ app.use(express.urlencoded({ extended: true, limit: '20mb' }))
 // 初始化数据库
 const db = getDatabase()
 
-// 执行数据库迁移
-const migrationFiles = [
-  '001_initial_schema.sql',
-  '002_user_system.sql',
-  '003_guestbook.sql',
-  '004_guestbook_user_id.sql',
-  '005_admin_settings.sql',
-  '006_user_favorites.sql'
-]
-
 try {
-  migrationFiles.forEach(migrationFile => {
-    try {
-      const migrationSQL = readFileSync(join(__dirname, '../database/migrations', migrationFile), 'utf-8')
-      let cleanSQL = migrationSQL.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
-        .map(line => {
-          const commentIndex = line.indexOf('--')
-          return commentIndex >= 0 ? line.substring(0, commentIndex) : line
-        }).join('\n')
-      const statements = cleanSQL.split(';').map(s => s.trim()).filter(s => s.length > 0)
-      statements.forEach(statement => {
-        if (statement) {
-          try { db.exec(statement + ';') } catch (e) {
-            if (!e.message.includes('already exists') && !e.message.includes('duplicate column name')) console.warn(e.message)
-          }
-        }
-      })
-    } catch (e) { if (e.code !== 'ENOENT') console.warn(e) }
-  })
-} catch (e) { console.error('Migration error:', e) }
+  runMigrations({ db })
+} catch (error) {
+  console.error('Migration error:', error)
+  process.exit(1)
+}
 
 // API 路由
 app.use('/api/auth', authRoutes)
@@ -114,7 +86,37 @@ app.use('/api/upload', uploadRoutes)
 app.use('/api/seo', seoRoutes)
 
 // 健康检查
-app.get('/health', (req, res) => res.json({ status: 'ok' }))
+app.get('/health', (req, res) => {
+  try {
+    const health = checkDatabaseHealth({ db, full: false })
+
+    if (!health.ok) {
+      return res.status(503).json({
+        status: 'degraded',
+        checks: {
+          database: 'error'
+        },
+        details: health
+      })
+    }
+
+    res.json({
+      status: 'ok',
+      checks: {
+        database: 'ok'
+      }
+    })
+  } catch (error) {
+    console.error('Health check failed:', error)
+    res.status(503).json({
+      status: 'error',
+      checks: {
+        database: 'error'
+      },
+      error: error.message
+    })
+  }
+})
 app.get('/', (req, res) => res.json({ message: 'GWorkspace API Server' }))
 
 app.use((req, res) => res.status(404).json({ error: 'Not Found' }))

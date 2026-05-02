@@ -76,6 +76,7 @@ export const blogApi = {
   delete: (id) => request(`/blogs/${id}`, { method: 'DELETE' }),
   incrementViews: (id) => request(`/blogs/${id}/views`, { method: 'POST' }),
   getStats: () => request('/blogs/stats'),
+  getMetadata: () => request('/blogs/metadata'),
   getAllGenres: (params = {}) => {
     const queryString = new URLSearchParams(params).toString()
     return request(`/blogs/genres${queryString ? `?${queryString}` : ''}`)
@@ -140,11 +141,6 @@ export const authApi = {
     return request(url, { method: 'DELETE' })
   },
   verify: () => request('/auth/verify'),
-  getFavorites: () => request('/auth/favorites'),
-  updateFavorites: (favorites) => request('/auth/favorites', {
-    method: 'POST',
-    body: JSON.stringify({ favorites })
-  }),
   refresh: () => request('/auth/refresh', { method: 'POST' })
 }
 

@@ -401,18 +401,11 @@ docker-compose up -d
 ### 备份数据库
 
 ```bash
-# 创建备份脚本
-cat > /var/www/gworkspace/backend/scripts/backup.sh << 'EOF'
-#!/bin/bash
-BACKUP_DIR="/var/backups/gworkspace"
-DATE=$(date +%Y%m%d_%H%M%S)
-mkdir -p $BACKUP_DIR
-cp /var/www/gworkspace/backend/database/gworkspace.db $BACKUP_DIR/gworkspace_$DATE.db
-# 保留最近30天的备份
-find $BACKUP_DIR -name "gworkspace_*.db" -mtime +30 -delete
-EOF
-
-chmod +x /var/www/gworkspace/backend/scripts/backup.sh
+# 使用 SQLite 安全备份，适配 WAL 模式
+cd /var/www/gworkspace/backend
+mkdir -p /var/backups/gworkspace
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+npm run db:backup -- /var/backups/gworkspace/gworkspace_$TIMESTAMP.db
 ```
 
 ### 设置自动备份
@@ -426,7 +419,7 @@ crontab -e
 添加：
 
 ```
-0 2 * * * /var/www/gworkspace/backend/scripts/backup.sh
+0 2 * * * cd /var/www/gworkspace/backend && /usr/bin/npm run db:backup -- /var/backups/gworkspace/gworkspace_$(date +\%Y\%m\%d_\%H\%M\%S).db
 ```
 
 每天凌晨 2 点自动备份。
@@ -440,9 +433,13 @@ pm2 stop gworkspace-backend
 # 恢复备份
 cp /var/backups/gworkspace/gworkspace_YYYYMMDD_HHMMSS.db \
    /var/www/gworkspace/backend/database/gworkspace.db
+rm -f /var/www/gworkspace/backend/database/gworkspace.db-shm
+rm -f /var/www/gworkspace/backend/database/gworkspace.db-wal
 
 # 启动服务
-pm2 start gworkspace-backend
+cd /var/www/gworkspace/backend
+npm run db:check
+pm2 start src/server.js --name gworkspace-backend
 ```
 
 ## 故障排查

@@ -58,10 +58,12 @@ export const formatBlogDateTime = (value) => {
   return `${formatBlogDate(value)} ${pad(parts.hours)}:${pad(parts.minutes)}`
 }
 
-export const formatBlogArchiveLabel = (value) => {
-  const parts = getDatePartsFromInput(value)
-  if (!parts) return ''
+export const formatBlogArchiveLabelFromKey = (value) => {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}$/.test(value.trim())) {
+    return ''
+  }
 
+  const [year, month] = value.trim().split('-').map(Number)
   const monthNames = [
     'January',
     'February',
@@ -77,5 +79,20 @@ export const formatBlogArchiveLabel = (value) => {
     'December'
   ]
 
-  return `${monthNames[parts.month - 1]} ${parts.year}`
+  if (month < 1 || month > 12) {
+    return ''
+  }
+
+  return `${monthNames[month - 1]} ${year}`
+}
+
+export const formatBlogArchiveKey = (value) => {
+  const parts = getDatePartsFromInput(value)
+  if (!parts) return ''
+  return `${parts.year}-${pad(parts.month)}`
+}
+
+export const formatBlogArchiveLabel = (value) => {
+  const archiveKey = formatBlogArchiveKey(value)
+  return formatBlogArchiveLabelFromKey(archiveKey)
 }

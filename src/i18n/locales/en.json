@@ -387,6 +387,7 @@
     "replyTo": "Reply to @{name}",
     "loadMore": "Load More",
     "noMore": "No more articles",
+    "noResults": "No articles match the current filters",
     "filterTag": "Click to filter by this tag",
     "filterGenre": "Click to filter by this genre",
     "filterArchive": "Click to filter by this month",

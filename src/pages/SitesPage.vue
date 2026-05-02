@@ -79,19 +79,6 @@
                   <polyline points="7 7 17 7 17 17"/>
                 </svg>
               </a>
-              <!-- 收藏按钮 -->
-              <button 
-                @click.stop="toggleFavorite(link)"
-                class="absolute top-3 right-3 p-1.5 rounded-lg transition-colors"
-                :class="isFavorite(link) 
-                  ? 'text-yellow-500 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' 
-                  : 'text-slate-400 dark:text-slate-500 hover:text-yellow-500 dark:hover:text-yellow-400 hover:bg-yellow-50/50 dark:hover:bg-yellow-900/10 opacity-0 group-hover:opacity-100'"
-                :title="isFavorite(link) ? $t('sites.removeFavorite') : $t('sites.addFavorite')"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              </button>
             </div>
           </div>
         </div>
@@ -107,39 +94,8 @@
         </div>
       </div>
 
-      <!-- 右侧索引和收藏 -->
+      <!-- 右侧目录 -->
       <aside v-if="filteredSites.length > 0" class="w-48 hidden xl:block shrink-0 space-y-4">
-        <!-- 收藏列表 -->
-        <div v-if="favoriteLinks.length > 0" class="sticky top-28 surface-card p-4 rounded-[24px]">
-          <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-3 tracking-wider flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-yellow-500">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            {{ $t('sites.favorites') }}
-          </h4>
-          <ul class="space-y-1 max-h-64 overflow-y-auto custom-scrollbar">
-            <li v-for="link in favoriteLinks" :key="link.url" class="group">
-              <a 
-                :href="link.url" 
-                target="_blank"
-                class="block px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400 transition-all flex items-center justify-between"
-              >
-                <span class="truncate flex-1">{{ link.title }}</span>
-                <button 
-                  @click.stop="toggleFavorite(link)"
-                  class="ml-2 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20 text-red-500 dark:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                  :title="$t('sites.removeFavorite')"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
-              </a>
-            </li>
-          </ul>
-        </div>
-
         <!-- 分类索引 -->
         <div class="sticky top-28 surface-card p-4 rounded-[24px]">
           <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-3 tracking-wider flex items-center gap-2">
@@ -170,17 +126,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { sitesConfig } from '../config/sites'
-import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
 import { getCachedFaviconUrl, markFaviconSuccess, markFaviconError } from '../utils/faviconCache'
-import { useAuth } from '../composables/useAuth'
-import { authApi } from '../utils/api'
 
 const siteFilter = ref('')
-const { isAuthenticated } = useAuth()
 const { t } = useI18n()
 
 // 从配置文件加载站点数据，并映射图标组件
@@ -210,114 +162,6 @@ const filteredSites = computed(() => {
       link.desc.toLowerCase().includes(query)
     )
   })).filter(cat => cat.links.length > 0)
-})
-
-// 收藏的链接（使用 localStorage 持久化）
-const favorites = useLocalStorage('siteFavorites', [])
-
-/**
- * 获取安全的收藏数组
- */
-const getFavoritesArray = () => {
-  if (!favorites.value || !Array.isArray(favorites.value)) {
-    return []
-  }
-  return favorites.value
-}
-
-// 确保初始值是数组
-if (!Array.isArray(favorites.value)) {
-  favorites.update([])
-}
-
-/**
- * 检查链接是否已收藏
- */
-const isFavorite = (link) => {
-  const favoritesArray = getFavoritesArray()
-  return favoritesArray.some(fav => fav.url === link.url)
-}
-
-/**
- * 切换收藏状态
- */
-const toggleFavorite = async (link) => {
-  const currentFavorites = [...getFavoritesArray()]
-  const index = currentFavorites.findIndex(fav => fav.url === link.url)
-  
-  if (index > -1) {
-    // 取消收藏
-    currentFavorites.splice(index, 1)
-  } else {
-    // 添加收藏
-    currentFavorites.push({
-      title: link.title,
-      url: link.url,
-      desc: link.desc
-    })
-  }
-  
-  favorites.update(currentFavorites)
-
-  // 同步到后端
-  if (isAuthenticated.value) {
-    try {
-      await authApi.updateFavorites(currentFavorites)
-    } catch (error) {
-      console.error('Failed to sync favorites to backend:', error)
-    }
-  }
-}
-
-/**
- * 从后端加载收藏
- */
-const fetchBackendFavorites = async () => {
-  if (!isAuthenticated.value) return
-  try {
-    const backendFavorites = await authApi.getFavorites()
-    if (backendFavorites && Array.isArray(backendFavorites)) {
-      // 合并逻辑：以云端为准，或者合并去重
-      // 这里采用简单的合并去重
-      const local = getFavoritesArray()
-      const merged = [...backendFavorites]
-      
-      local.forEach(l => {
-        if (!merged.some(m => m.url === l.url)) {
-          merged.push(l)
-        }
-      })
-      
-      favorites.update(merged)
-      
-      // 如果本地有新增，同步回云端
-      if (merged.length > backendFavorites.length) {
-        await authApi.updateFavorites(merged)
-      }
-    }
-  } catch (error) {
-    console.error('Failed to fetch backend favorites:', error)
-  }
-}
-
-/**
- * 收藏的链接列表
- */
-const favoriteLinks = computed(() => {
-  return getFavoritesArray()
-})
-
-onMounted(() => {
-  if (isAuthenticated.value) {
-    fetchBackendFavorites()
-  }
-})
-
-// 监听登录状态变化
-watch(isAuthenticated, (val) => {
-  if (val) {
-    fetchBackendFavorites()
-  }
 })
 
 /**

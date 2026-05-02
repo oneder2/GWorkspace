@@ -14,6 +14,7 @@ const router = express.Router()
 
 const VALID_BLOG_STATUSES = new Set(['published', 'draft'])
 const UNTITLED_DRAFT_TITLE = '未命名文件'
+const PUBLIC_PAGE_LIMIT = 24
 
 const isBlankString = (value) => (
   value === undefined ||
@@ -120,6 +121,18 @@ const validateBlogPayload = (payload, existingBlog = null) => {
   return { status, missingFields, invalidFields }
 }
 
+const parsePositiveInteger = (value, fallback = 0) => {
+  const parsed = Number.parseInt(value, 10)
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback
+}
+
+const parseListLimit = (value) => {
+  if (value === undefined) return null
+  const parsed = parsePositiveInteger(value, 0)
+  if (parsed <= 0) return null
+  return Math.min(parsed, PUBLIC_PAGE_LIMIT)
+}
+
 /**
  * 获取文章动态预览图/海报
  * GET /api/blogs/:id/og-image
@@ -189,7 +202,9 @@ router.get('/:id/og-image', async (req, res) => {
  * GET /api/blogs
  * 查询参数：
  * - genre: 分类筛选
- * - status: 状态筛选（published/draft）
+ * - tag: 标签筛选
+ * - archive: 归档筛选（YYYY-MM）
+ * - search: 搜索关键词
  * - limit: 限制数量
  * - offset: 偏移量
  * - sortBy: 排序字段（date/views/likes/title）
@@ -199,6 +214,9 @@ router.get('/', (req, res) => {
   try {
     const {
       genre,
+      tag,
+      archive,
+      search,
       limit,
       offset = 0,
       sortBy = 'published_at',
@@ -207,9 +225,12 @@ router.get('/', (req, res) => {
 
     const options = {
       genre: genre || null,
+      tag: tag || null,
+      archive: archive || null,
+      search: search || null,
       status: 'published',
-      limit: limit ? parseInt(limit) : null,
-      offset: parseInt(offset),
+      limit: parseListLimit(limit),
+      offset: parsePositiveInteger(offset, 0),
       sortBy,
       sortOrder
     }
@@ -219,6 +240,21 @@ router.get('/', (req, res) => {
   } catch (error) {
     console.error('Error fetching blogs:', error)
     res.status(500).json({ error: 'Failed to fetch blogs' })
+  }
+})
+
+/**
+ * 获取博客筛选元数据
+ * GET /api/blogs/metadata
+ * 返回完整已发布文章集上的分类、标签、归档统计
+ */
+router.get('/metadata', (req, res) => {
+  try {
+    const metadata = Blog.getMetadata('published')
+    res.json(metadata)
+  } catch (error) {
+    console.error('Error fetching blog metadata:', error)
+    res.status(500).json({ error: 'Failed to fetch blog metadata' })
   }
 })
 
@@ -259,8 +295,6 @@ router.get('/stats', (req, res) => {
 /**
  * 获取所有分类（Genre）
  * GET /api/blogs/genres
- * 查询参数：
- * - status: 状态筛选（可选，默认获取所有状态）
  * 注意：必须在 /:id 路由之前定义，否则会被当作ID处理
  */
 router.get('/genres', (req, res) => {
@@ -276,8 +310,6 @@ router.get('/genres', (req, res) => {
 /**
  * 获取所有标签（Tags）
  * GET /api/blogs/tags
- * 查询参数：
- * - status: 状态筛选（可选，默认获取所有状态）
  * 注意：必须在 /:id 路由之前定义，否则会被当作ID处理
  */
 router.get('/tags', (req, res) => {

@@ -387,6 +387,7 @@
     "replyTo": "回复 @{name}",
     "loadMore": "加载更多",
     "noMore": "没有更多文章了",
+    "noResults": "当前条件下暂无文章",
     "filterTag": "点击筛选此标签",
     "filterGenre": "点击筛选此分类",
     "filterArchive": "点击筛选此月份",

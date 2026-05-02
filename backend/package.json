@@ -8,6 +8,9 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "migrate": "node scripts/migrate-from-files.js",
+    "db:prepare": "node scripts/run-migrations.js",
+    "db:check": "node scripts/check-database.js",
+    "db:backup": "node scripts/backup-database.js",
     "create-admin": "node scripts/create-admin.js"
   },
   "dependencies": {

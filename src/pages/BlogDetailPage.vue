@@ -478,7 +478,7 @@ const loadPost = async () => {
       await analyticsApi.recordVisit({ blog_id: article.id, path: route.path })
       await blogApi.incrementViews(article.id)
     }
-    allPosts.value = await blogApi.getList({ status: 'published' }) || []
+    allPosts.value = await blogApi.getList() || []
     await checkLikeStatus()
   } catch (error) { 
     console.error('Load post failed:', error) 

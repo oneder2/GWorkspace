@@ -7,6 +7,7 @@ import Database from 'better-sqlite3'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
+import { existsSync, mkdirSync } from 'fs'
 import dotenv from 'dotenv'
 
 // 加载环境变量
@@ -40,11 +41,9 @@ export function createDatabase() {
   
   // 确保数据库目录存在
   const dbDir = path.dirname(dbPath)
-  import('fs').then(fs => {
-    if (!fs.default.existsSync(dbDir)) {
-      fs.default.mkdirSync(dbDir, { recursive: true })
-    }
-  })
+  if (!existsSync(dbDir)) {
+    mkdirSync(dbDir, { recursive: true })
+  }
 
   const db = new Database(dbPath)
   
@@ -53,6 +52,9 @@ export function createDatabase() {
   
   // 设置WAL模式（提高并发性能）
   db.pragma('journal_mode = WAL')
+
+  // 为短时锁竞争提供缓冲，降低并发读写时的失败概率
+  db.pragma('busy_timeout = 5000')
   
   console.log(`Database connected: ${dbPath}`)
   
@@ -81,5 +83,4 @@ export function closeDatabase() {
     console.log('Database connection closed')
   }
 }
-
 

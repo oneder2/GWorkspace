@@ -7,10 +7,10 @@
  */
 
 import { readdir, readFile, stat } from 'fs/promises'
-import { readFileSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { getDatabase } from '../src/config/database.js'
+import { runMigrations } from '../src/config/migrations.js'
 import { Blog } from '../src/models/Blog.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -88,63 +88,7 @@ async function readPostFiles(postDir) {
  */
 function initializeDatabase() {
   const db = getDatabase()
-  
-  try {
-    const migrationSQL = readFileSync(
-      join(__dirname, '../database/migrations/001_initial_schema.sql'),
-      'utf-8'
-    )
-    
-    // 移除注释和多行注释
-    let cleanSQL = migrationSQL
-      .replace(/\/\*[\s\S]*?\*\//g, '') // 移除多行注释
-      .split('\n')
-      .map(line => {
-        // 移除单行注释
-        const commentIndex = line.indexOf('--')
-        if (commentIndex >= 0) {
-          return line.substring(0, commentIndex)
-        }
-        return line
-      })
-      .join('\n')
-    
-    // 执行迁移SQL（按语句分割执行）
-    const statements = cleanSQL
-      .split(';')
-      .map(s => s.trim())
-      .filter(s => s.length > 0)
-    
-    for (const statement of statements) {
-      if (statement) {
-        try {
-          db.exec(statement + ';')
-        } catch (error) {
-          // 忽略已存在的表/索引错误
-          if (!error.message.includes('already exists') && 
-              !error.message.includes('duplicate column name')) {
-            console.warn('Migration warning:', error.message)
-            console.warn('Statement:', statement.substring(0, 100))
-          }
-        }
-      }
-    }
-    
-    // 验证表是否创建成功
-    const tables = db.prepare(`
-      SELECT name FROM sqlite_master 
-      WHERE type='table' AND name NOT LIKE 'sqlite_%'
-    `).all()
-    
-    console.log(`Database tables initialized: ${tables.map(t => t.name).join(', ')}`)
-    
-    if (tables.length === 0) {
-      throw new Error('No tables were created')
-    }
-  } catch (error) {
-    console.error('Database initialization error:', error)
-    throw error
-  }
+  runMigrations({ db })
 }
 
 /**
@@ -237,4 +181,3 @@ migrate().catch(error => {
   console.error('Migration failed:', error)
   process.exit(1)
 })
-

@@ -61,6 +61,79 @@ const resolveDraftPersistedFields = (data, existingBlog = null) => {
   return nextData
 }
 
+const parseTagsSafely = (value) => {
+  if (!value) return []
+
+  try {
+    const tags = JSON.parse(value)
+    return Array.isArray(tags) ? tags : []
+  } catch (error) {
+    return []
+  }
+}
+
+const normalizeBlogRecord = (blog) => ({
+  ...blog,
+  tags: parseTagsSafely(blog.tags)
+})
+
+const escapeLikePattern = (value) => (
+  String(value).replace(/[\\%_]/g, match => `\\${match}`)
+)
+
+const buildQueryFilters = (options = {}) => {
+  const {
+    genre = null,
+    tag = null,
+    archive = null,
+    search = null,
+    status = 'published'
+  } = options
+
+  const clauses = []
+  const params = []
+
+  if (genre) {
+    clauses.push('genre = ?')
+    params.push(genre)
+  }
+
+  if (tag) {
+    clauses.push('tags LIKE ? ESCAPE \'\\\\\'')
+    params.push(`%${escapeLikePattern(JSON.stringify(tag))}%`)
+  }
+
+  if (archive) {
+    clauses.push('substr(COALESCE(published_at, created_at), 1, 7) = ?')
+    params.push(archive)
+  }
+
+  if (search) {
+    const pattern = `%${escapeLikePattern(search.trim())}%`
+    clauses.push(`(
+      title LIKE ? ESCAPE '\\' COLLATE NOCASE OR
+      excerpt LIKE ? ESCAPE '\\' COLLATE NOCASE OR
+      content LIKE ? ESCAPE '\\' COLLATE NOCASE OR
+      genre LIKE ? ESCAPE '\\' COLLATE NOCASE OR
+      tags LIKE ? ESCAPE '\\' COLLATE NOCASE
+    )`)
+    params.push(pattern, pattern, pattern, pattern, pattern)
+  }
+
+  if (status !== null && status !== undefined) {
+    clauses.push('status = ?')
+    params.push(status)
+  }
+
+  return { clauses, params }
+}
+
+const getArchiveKey = (value) => {
+  if (typeof value !== 'string') return ''
+  const trimmed = value.trim()
+  return /^\d{4}-\d{2}/.test(trimmed) ? trimmed.slice(0, 7) : ''
+}
+
 /**
  * 博客模型类
  */
@@ -69,6 +142,9 @@ export class Blog {
    * 获取所有博客文章
    * @param {Object} options - 查询选项
    * @param {string} options.genre - 分类筛选
+   * @param {string} options.tag - 标签筛选
+   * @param {string} options.archive - 归档筛选（YYYY-MM）
+   * @param {string} options.search - 搜索关键词
    * @param {string} options.status - 状态筛选（published/draft）
    * @param {number} options.limit - 限制数量
    * @param {number} options.offset - 偏移量
@@ -80,6 +156,9 @@ export class Blog {
     const db = getDatabase()
     const {
       genre = null,
+      tag = null,
+      archive = null,
+      search = null,
       status = 'published',
       limit = null,
       offset = 0,
@@ -88,17 +167,16 @@ export class Blog {
     } = options
 
     let query = 'SELECT * FROM blogs WHERE 1=1'
-    const params = []
+    const { clauses, params } = buildQueryFilters({
+      genre,
+      tag,
+      archive,
+      search,
+      status
+    })
 
-    if (genre) {
-      query += ' AND genre = ?'
-      params.push(genre)
-    }
-
-    // status为null时不过滤状态（用于获取所有博客）
-    if (status !== null && status !== undefined) {
-      query += ' AND status = ?'
-      params.push(status)
+    if (clauses.length > 0) {
+      query += ` AND ${clauses.join(' AND ')}`
     }
 
     // 排序
@@ -114,12 +192,8 @@ export class Blog {
     }
 
     const blogs = db.prepare(query).all(...params)
-    
-    // 解析tags JSON字符串
-    return blogs.map(blog => ({
-      ...blog,
-      tags: blog.tags ? JSON.parse(blog.tags) : []
-    }))
+
+    return blogs.map(normalizeBlogRecord)
   }
 
   /**
@@ -132,11 +206,8 @@ export class Blog {
     const blog = db.prepare('SELECT * FROM blogs WHERE id = ?').get(id)
     
     if (!blog) return null
-    
-    return {
-      ...blog,
-      tags: blog.tags ? JSON.parse(blog.tags) : []
-    }
+
+    return normalizeBlogRecord(blog)
   }
 
   /**
@@ -149,11 +220,8 @@ export class Blog {
     const blog = db.prepare('SELECT * FROM blogs WHERE slug = ?').get(slug)
     
     if (!blog) return null
-    
-    return {
-      ...blog,
-      tags: blog.tags ? JSON.parse(blog.tags) : []
-    }
+
+    return normalizeBlogRecord(blog)
   }
 
   /**
@@ -369,5 +437,63 @@ export class Blog {
     })
     
     return Array.from(tagSet)
+  }
+
+  /**
+   * 获取公开博客的完整筛选元数据
+   * @param {string|null} status - 状态筛选
+   * @returns {{genres: Array, tags: Array, archives: Array}}
+   */
+  static getMetadata(status = 'published') {
+    const db = getDatabase()
+
+    const genres = db.prepare(`
+      SELECT genre AS value, COUNT(*) AS count
+      FROM blogs
+      WHERE genre IS NOT NULL AND TRIM(genre) != '' ${status ? 'AND status = ?' : ''}
+      GROUP BY genre
+      ORDER BY count DESC, value ASC
+    `).all(...(status ? [status] : []))
+
+    const tagRows = db.prepare(`
+      SELECT tags
+      FROM blogs
+      WHERE tags IS NOT NULL ${status ? 'AND status = ?' : ''}
+    `).all(...(status ? [status] : []))
+
+    const tagCounts = new Map()
+    tagRows.forEach(row => {
+      const uniqueTags = new Set(parseTagsSafely(row.tags))
+      uniqueTags.forEach(tag => {
+        if (!tag) return
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
+      })
+    })
+
+    const archiveRows = db.prepare(`
+      SELECT COALESCE(published_at, created_at) AS date_value
+      FROM blogs
+      WHERE COALESCE(published_at, created_at) IS NOT NULL ${status ? 'AND status = ?' : ''}
+    `).all(...(status ? [status] : []))
+
+    const archiveCounts = new Map()
+    archiveRows.forEach(row => {
+      const archiveKey = getArchiveKey(row.date_value)
+      if (!archiveKey) return
+      archiveCounts.set(archiveKey, (archiveCounts.get(archiveKey) || 0) + 1)
+    })
+
+    return {
+      genres,
+      tags: Array.from(tagCounts.entries())
+        .map(([value, count]) => ({ value, count }))
+        .sort((a, b) => {
+          if (b.count !== a.count) return b.count - a.count
+          return a.value.localeCompare(b.value)
+        }),
+      archives: Array.from(archiveCounts.entries())
+        .map(([value, count]) => ({ value, count }))
+        .sort((a, b) => b.value.localeCompare(a.value))
+    }
   }
 }

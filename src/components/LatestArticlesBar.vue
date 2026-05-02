@@ -72,7 +72,6 @@ const showBar = ref(true)
 const loadLatestArticles = async () => {
   try {
     const articles = await blogApi.getList({
-      status: 'published',
       limit: 5,
       sortBy: 'published_at',
       sortOrder: 'desc'
@@ -98,4 +97,3 @@ onMounted(() => {
   display: none;
 }
 </style>
-
