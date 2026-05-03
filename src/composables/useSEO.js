@@ -155,8 +155,8 @@ export function generateBlogStructuredData(article) {
     headline: article.title,
     description: article.excerpt || article.title,
     image: article.image || '/og-image.jpg',
-    datePublished: article.published_at || article.date,
-    dateModified: article.updated_at || article.published_at || article.date,
+    datePublished: article.published_at || article.created_at,
+    dateModified: article.updated_at || article.published_at || article.created_at,
     author: {
       '@type': 'Person',
       name: 'GWorkspace'

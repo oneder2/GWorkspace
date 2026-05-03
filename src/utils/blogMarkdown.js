@@ -1,43 +1,6 @@
 import { marked } from 'marked'
 
-const LOCAL_MARKDOWN_IMAGE_PATTERN = /!\[([^\]]*)\]\(\.\/images\/([^\s)]+)(?:\s+(['"])(.*?)\3)?\)/g
-const LOCAL_HTML_IMAGE_PATTERN = /<img\b([^>]*?)\bsrc=(['"])\.\/images\/([^'"]+)\2([^>]*)>/gi
 const SIMPLE_STANDALONE_IMAGE_HTML_PATTERN = /^<img\b[\s\S]*?>$/i
-
-const resolveLegacyImageUrl = (imageName, slug) => {
-  if (!slug) {
-    return `./images/${imageName}`
-  }
-
-  return `/src/posts/${slug}/images/${imageName}`
-}
-
-export const normalizeBlogImageSources = (content, { slug = '' } = {}) => {
-  if (!content || typeof content !== 'string') {
-    return ''
-  }
-
-  const normalizedSlug = typeof slug === 'string' ? slug.trim() : ''
-
-  let normalizedContent = content.replace(
-    LOCAL_MARKDOWN_IMAGE_PATTERN,
-    (match, altText, imageName, quote, title) => {
-      const resolvedUrl = resolveLegacyImageUrl(imageName, normalizedSlug)
-      const titleSuffix = title ? ` ${quote}${title}${quote}` : ''
-      return `![${altText}](${resolvedUrl}${titleSuffix})`
-    }
-  )
-
-  normalizedContent = normalizedContent.replace(
-    LOCAL_HTML_IMAGE_PATTERN,
-    (match, beforeSrc, quote, imageName, afterSrc) => {
-      const resolvedUrl = resolveLegacyImageUrl(imageName, normalizedSlug)
-      return `<img${beforeSrc}src=${quote}${resolvedUrl}${quote}${afterSrc}>`
-    }
-  )
-
-  return normalizedContent
-}
 
 export const isMarkdownImageParagraphToken = (token) => (
   token?.type === 'paragraph' &&
@@ -53,11 +16,10 @@ export const isSimpleStandaloneImageHtml = (value) => (
 
 export const buildMarkdownPreviewBlocks = ({
   content,
-  slug = '',
   renderer,
   markedOptions = {}
 } = {}) => {
-  const normalizedContent = normalizeBlogImageSources(content, { slug })
+  const normalizedContent = typeof content === 'string' ? content : ''
   if (!normalizedContent.trim()) {
     return []
   }

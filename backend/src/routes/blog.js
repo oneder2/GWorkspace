@@ -173,7 +173,7 @@ router.get('/:id/og-image', async (req, res) => {
         title: blog.title,
         genre: blog.genre || blog.category || 'Tech',
         excerpt: blog.excerpt,
-        date: blog.published_at || blog.date,
+        date: blog.published_at || blog.created_at,
         slug: blog.slug,
         updatedAt: blog.updated_at,
         url: blogUrl,

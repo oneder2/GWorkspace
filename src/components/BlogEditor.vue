@@ -885,7 +885,7 @@ const createPreviewBlockKey = () => {
 /**
  * 渲染 Markdown 预览块
  */
-const renderPreviewBlocks = (content, slug = formData.value.slug) => {
+const renderPreviewBlocks = (content) => {
   if (!content.trim()) {
     previewBlocks.value = [{
       key: createPreviewBlockKey(),
@@ -899,7 +899,6 @@ const renderPreviewBlocks = (content, slug = formData.value.slug) => {
   try {
     const nextBlocks = buildMarkdownPreviewBlocks({
       content,
-      slug,
       renderer: previewRenderer,
       markedOptions: MARKDOWN_OPTIONS
     })
@@ -923,36 +922,36 @@ const renderPreviewBlocks = (content, slug = formData.value.slug) => {
 /**
  * 调度预览渲染
  */
-const schedulePreviewRender = (content, slug = formData.value.slug, { immediate = false } = {}) => {
+const schedulePreviewRender = (content, { immediate = false } = {}) => {
   if (renderTimer) clearTimeout(renderTimer)
 
   if (immediate) {
-    renderPreviewBlocks(content, slug)
+    renderPreviewBlocks(content)
     return
   }
 
   renderTimer = setTimeout(() => {
-    renderPreviewBlocks(content, slug)
+    renderPreviewBlocks(content)
   }, 300)
 }
 
-const renderPreviewImmediately = (content, slug = formData.value.slug) => {
+const renderPreviewImmediately = (content) => {
   skipNextScheduledPreview = true
-  schedulePreviewRender(content, slug, { immediate: true })
+  schedulePreviewRender(content, { immediate: true })
 }
 
 /**
  * 监听内容变化，实施块级防抖渲染
  */
 watch(
-  [() => formData.value.content, () => formData.value.slug],
-  ([newContent, newSlug]) => {
+  () => formData.value.content,
+  (newContent) => {
     if (skipNextScheduledPreview) {
       skipNextScheduledPreview = false
       return
     }
 
-    schedulePreviewRender(newContent, newSlug)
+    schedulePreviewRender(newContent)
   }
 )
 
@@ -990,7 +989,7 @@ const initFormData = () => {
     }
   }
   // 初始化时立即同步渲染内容，确保初次打开有内容
-  renderPreviewBlocks(formData.value.content, formData.value.slug)
+  renderPreviewBlocks(formData.value.content)
 }
 
 /**

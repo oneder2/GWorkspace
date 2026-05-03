@@ -103,6 +103,8 @@
           <router-view />
         </div>
       </main>
+
+      <TerminalAgent />
     </div>
 
     <!-- 主题自定义弹窗 -->
@@ -129,6 +131,7 @@ import { getWeatherInfo } from './utils/weather'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
 import AdminSidebar from './components/admin/AdminSidebar.vue'
+import TerminalAgent from './components/terminal-agent/TerminalAgent.vue'
 import ThemeCustomizer from './components/ThemeCustomizer.vue'
 import UpdateLogModal from './components/UpdateLogModal.vue'
 

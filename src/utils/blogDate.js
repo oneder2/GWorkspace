@@ -11,7 +11,7 @@ export const getTodayDateString = () => {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
 }
 
-export const getBlogDateValue = (blog) => blog?.published_at || blog?.date || ''
+export const getBlogDateValue = (blog) => blog?.published_at || blog?.created_at || ''
 
 const getDatePartsFromInput = (value) => {
   if (!value) return null

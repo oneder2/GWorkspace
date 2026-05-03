@@ -18,6 +18,8 @@
   --accent-danger: #dc2626;
   --accent-success: #059669;
   --accent-info: #0284c7;
+  --agent-signal: #7c9cff;
+  --agent-signal-deep: #4562c8;
   
   /* 语义化背景与表面色 */
   --bg-app: rgba(255, 255, 255, var(--bg-opacity, 0.4));
@@ -76,6 +78,8 @@
   --text-secondary: #cbd5e1;  /* slate-300 */
   --text-muted: #64748b;     /* slate-500 */
   --text-inverse: #020617;
+  --agent-signal: #9bb4ff;
+  --agent-signal-deep: #dbe6ff;
 
   --border-base: rgba(255, 255, 255, 0.18);
   --border-highlight: rgba(255, 255, 255, 0.3);
