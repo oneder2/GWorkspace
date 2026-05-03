@@ -18,9 +18,12 @@ import commentsRoutes from './routes/comments.js'
 import analyticsRoutes from './routes/analytics.js'
 import authRoutes from './routes/auth.js'
 import adminRoutes from './routes/admin.js'
+import adminAiRoutes from './routes/adminAi.js'
+import aiRoutes from './routes/ai.js'
 import guestbookRoutes from './routes/guestbook.js'
 import uploadRoutes from './routes/upload.js'
 import seoRoutes from './routes/seo.js'
+import { startAiDailyCapsuleScheduler } from './services/aiScheduler.js'
 
 // 加载环境变量
 dotenv.config()
@@ -75,11 +78,13 @@ try {
 
 // API 路由
 app.use('/api/auth', authRoutes)
+app.use('/api/ai', aiRoutes)
 app.use('/api/blogs', likesRoutes)
 app.use('/api/blogs', blogRoutes)
 app.use('/api/blogs', commentsRoutes)
 app.use('/api/comments', commentsRoutes)
 app.use('/api/analytics', analyticsRoutes)
+app.use('/api/admin/ai', adminAiRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/guestbook', guestbookRoutes)
 app.use('/api/upload', uploadRoutes)
@@ -125,7 +130,10 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' })
 })
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+  startAiDailyCapsuleScheduler({ logger: console })
+})
 
 process.on('SIGINT', () => { closeDatabase(); process.exit(0); })
 process.on('SIGTERM', () => { closeDatabase(); process.exit(0); })

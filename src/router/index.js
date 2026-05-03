@@ -24,6 +24,7 @@ const AdminDashboard = () => import('../pages/admin/AdminDashboard.vue')
 const AdminBlogList = () => import('../pages/admin/AdminBlogList.vue')
 const AdminBlogEditorPage = () => import('../pages/admin/AdminBlogEditorPage.vue')
 const AdminAnalytics = () => import('../pages/admin/AdminAnalytics.vue')
+const AdminAiStudio = () => import('../pages/admin/AdminAiStudio.vue')
 const AdminComments = () => import('../pages/admin/AdminComments.vue')
 const AdminGuestbook = () => import('../pages/admin/AdminGuestbook.vue')
 const AdminSystem = () => import('../pages/admin/AdminSystem.vue')
@@ -106,6 +107,12 @@ const routes = [
         name: 'admin-analytics',
         component: AdminAnalytics,
         meta: { titleKey: 'admin.routeTitles.analytics' }
+      },
+      {
+        path: 'ai',
+        name: 'admin-ai',
+        component: AdminAiStudio,
+        meta: { titleKey: 'admin.routeTitles.ai' }
       },
       {
         path: 'comments',

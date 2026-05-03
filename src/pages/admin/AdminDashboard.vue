@@ -58,8 +58,15 @@
               <span class="text-xs font-bold">{{ $t('admin.comments') }}</span>
             </button>
             <button
+              @click="$router.push('/admin/ai')"
+              class="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800/50 hover:bg-[var(--theme-primary)] hover:text-white rounded-xl transition-all group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 mb-2 group-hover:scale-110 transition-transform"><path d="M12 3v3"/><path d="M18.36 6.64l-2.12 2.12"/><path d="M21 12h-3"/><path d="M18.36 17.36l-2.12-2.12"/><path d="M12 21v-3"/><path d="M5.64 17.36l2.12-2.12"/><path d="M3 12h3"/><path d="M5.64 6.64l2.12 2.12"/><circle cx="12" cy="12" r="3"/></svg>
+              <span class="text-xs font-bold">{{ $t('admin.ai') }}</span>
+            </button>
+            <button
               @click="$router.push('/admin/system')"
-              class="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800/50 hover:bg-[var(--theme-primary)] hover:text-white rounded-xl transition-all group col-span-2"
+              class="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800/50 hover:bg-[var(--theme-primary)] hover:text-white rounded-xl transition-all group"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 mb-2 group-hover:scale-110 transition-transform"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20h10"/><path d="M9 16v4"/><path d="M15 16v4"/></svg>
               <span class="text-xs font-bold">{{ $t('admin.system') }}</span>

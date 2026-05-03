@@ -165,6 +165,78 @@
         <section class="assistant-card">
           <div class="assistant-card-head">
             <div>
+              <h3 class="assistant-section-title">{{ $t('tools.blogAssistant.aiTitle') }}</h3>
+              <p class="assistant-section-desc">{{ $t('tools.blogAssistant.aiDesc') }}</p>
+            </div>
+            <button
+              type="button"
+              class="assistant-action-btn assistant-action-btn-primary"
+              :disabled="!canGenerateBlogIdea || isGeneratingBlogIdea"
+              @click="generateBlogIdea"
+            >
+              {{ isGeneratingBlogIdea ? $t('common.loading') : $t('tools.blogAssistant.generateIdea') }}
+            </button>
+          </div>
+
+          <div v-if="blogIdeaError" class="text-sm text-rose-500 dark:text-rose-400">
+            {{ blogIdeaError }}
+          </div>
+
+          <div v-if="blogIdea" class="space-y-4">
+            <div class="assistant-output-card">
+              <div class="assistant-output-head">
+                <span>{{ $t('tools.blogAssistant.aiSections.thesis') }}</span>
+                <button type="button" class="assistant-mini-btn" @click="copyField('idea-thesis', blogIdea.thesis)" :disabled="!blogIdea.thesis">
+                  {{ copiedKey === 'idea-thesis' ? copiedLabel : $t('common.copy') }}
+                </button>
+              </div>
+              <div class="assistant-output-value assistant-output-multiline">{{ blogIdea.thesis }}</div>
+            </div>
+
+            <div class="assistant-output-card">
+              <div class="assistant-output-head">
+                <span>{{ $t('tools.blogAssistant.aiSections.angles') }}</span>
+                <button type="button" class="assistant-mini-btn" @click="copyField('idea-angles', ideaAnglesText)" :disabled="!ideaAnglesText">
+                  {{ copiedKey === 'idea-angles' ? copiedLabel : $t('common.copy') }}
+                </button>
+              </div>
+              <div class="assistant-output-value assistant-output-multiline">{{ ideaAnglesText || '—' }}</div>
+            </div>
+
+            <div class="assistant-output-card">
+              <div class="assistant-output-head">
+                <span>{{ $t('tools.blogAssistant.aiSections.title') }}</span>
+                <button type="button" class="assistant-mini-btn" @click="copyField('idea-title', blogIdea.title_suggestion)" :disabled="!blogIdea.title_suggestion">
+                  {{ copiedKey === 'idea-title' ? copiedLabel : $t('common.copy') }}
+                </button>
+              </div>
+              <div class="assistant-output-value assistant-output-multiline">{{ blogIdea.title_suggestion || '—' }}</div>
+            </div>
+
+            <div class="assistant-output-card">
+              <div class="assistant-output-head">
+                <span>{{ $t('tools.blogAssistant.aiSections.outline') }}</span>
+                <button type="button" class="assistant-mini-btn" @click="copyField('idea-outline', blogIdea.outline_or_closing)" :disabled="!blogIdea.outline_or_closing">
+                  {{ copiedKey === 'idea-outline' ? copiedLabel : $t('common.copy') }}
+                </button>
+              </div>
+              <div class="assistant-output-value assistant-output-multiline">{{ blogIdea.outline_or_closing || '—' }}</div>
+            </div>
+          </div>
+
+          <div v-else class="assistant-output-card">
+            <div class="assistant-output-head">
+              <span>{{ $t('tools.blogAssistant.aiIdleTitle') }}</span>
+            </div>
+            <div class="assistant-output-value assistant-output-multiline">
+              {{ $t('tools.blogAssistant.aiIdleCopy') }}
+            </div>
+          </div>
+        </section>
+
+        <section class="assistant-card">
+          <div class="assistant-card-head">
+            <div>
               <h3 class="assistant-section-title">{{ $t('tools.blogAssistant.payloadTitle') }}</h3>
               <p class="assistant-section-desc">{{ $t('tools.blogAssistant.payloadDesc') }}</p>
             </div>
@@ -271,7 +343,7 @@
 <script setup>
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { generateSlug } from '../../utils/api'
+import { aiApi, generateSlug } from '../../utils/api'
 import { formatBlogDate, getTodayDateString, isDateOnlyString } from '../../utils/blogDate'
 
 const { t, locale } = useI18n()
@@ -284,6 +356,9 @@ const tagSource = ref('')
 const content = ref('')
 const excerpt = ref('')
 const copiedKey = ref('')
+const blogIdea = ref(null)
+const blogIdeaError = ref('')
+const isGeneratingBlogIdea = ref(false)
 let copiedTimer = null
 
 onUnmounted(() => {
@@ -342,6 +417,14 @@ const payload = computed(() => ({
 }))
 
 const payloadJson = computed(() => JSON.stringify(payload.value, null, 2))
+const canGenerateBlogIdea = computed(() => (
+  Boolean(title.value.trim() || excerpt.value.trim() || normalizedTags.value.length > 0 || plainContent.value.length > 0)
+))
+const ideaAnglesText = computed(() => (
+  Array.isArray(blogIdea.value?.angles)
+    ? blogIdea.value.angles.map((angle, index) => `${index + 1}. ${angle}`).join('\n')
+    : ''
+))
 
 const localizedDate = computed(() => {
   const nextLocale = locale.value === 'zh' ? 'zh' : 'iso'
@@ -415,6 +498,28 @@ async function copyField(key, value) {
     }, 1800)
   } catch (error) {
     console.error('Failed to copy assistant field:', error)
+  }
+}
+
+async function generateBlogIdea() {
+  if (!canGenerateBlogIdea.value || isGeneratingBlogIdea.value) {
+    return
+  }
+
+  isGeneratingBlogIdea.value = true
+  blogIdeaError.value = ''
+
+  try {
+    blogIdea.value = await aiApi.getBlogSeed({
+      title: title.value.trim(),
+      excerpt: excerpt.value.trim(),
+      tags: normalizedTags.value,
+      content: plainContent.value.slice(0, 3200)
+    })
+  } catch (error) {
+    blogIdeaError.value = error.message || t('tools.blogAssistant.aiError')
+  } finally {
+    isGeneratingBlogIdea.value = false
   }
 }
 

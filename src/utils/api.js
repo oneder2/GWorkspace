@@ -87,6 +87,15 @@ export const blogApi = {
   }
 }
 
+export const aiApi = {
+  getDailyCapsule: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/ai/daily-capsule${queryString ? `?${queryString}` : ''}`)
+  },
+  analyze: (data) => request('/ai/analyze', { method: 'POST', body: JSON.stringify(data) }),
+  getBlogSeed: (data) => request('/ai/blog-seed', { method: 'POST', body: JSON.stringify(data) })
+}
+
 /**
  * 点赞API
  */
@@ -206,7 +215,19 @@ export const adminApi = {
   deleteSystemAsset: (key) => request('/admin/system/assets', {
     method: 'DELETE',
     body: JSON.stringify({ key })
-  })
+  }),
+  getAiSeeds: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/admin/ai/seeds${queryString ? `?${queryString}` : ''}`)
+  },
+  createAiSeed: (data) => request('/admin/ai/seeds', { method: 'POST', body: JSON.stringify(data) }),
+  updateAiSeed: (id, data) => request(`/admin/ai/seeds/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  importAiSeeds: (data) => request('/admin/ai/seeds/import', { method: 'POST', body: JSON.stringify(data) }),
+  getAiDailyCapsule: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/admin/ai/daily-capsule${queryString ? `?${queryString}` : ''}`)
+  },
+  refreshAiDailyCapsule: (data = {}) => request('/admin/ai/daily-capsule/refresh', { method: 'POST', body: JSON.stringify(data) })
 }
 
 /**

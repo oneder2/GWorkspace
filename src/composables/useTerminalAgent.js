@@ -2,6 +2,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { portfolioConfig } from '../config/portfolio'
 import { toolsConfig } from '../config/tools'
+import { useDailyCapsule } from '../composables/useDailyCapsule'
 import { getTerminalAgentCopy, getTerminalAgentLocale, terminalAgentMeta } from '../config/terminalAgent'
 import { i18n } from '../i18n'
 import { blogApi } from '../utils/api'
@@ -43,6 +44,7 @@ export function useTerminalAgent() {
   const locale = computed(() => getTerminalAgentLocale(i18n.global.locale.value))
   const copy = computed(() => getTerminalAgentCopy(locale.value))
   const prompt = computed(() => copy.value.meta.prompt)
+  const { capsule: dailyCapsule, loadDailyCapsule } = useDailyCapsule()
 
   const isOpen = ref(false)
   const history = ref([])
@@ -178,6 +180,15 @@ export function useTerminalAgent() {
     return blogSnapshotPromise
   }
 
+  async function ensureDailyCapsuleLoaded({ force = false } = {}) {
+    try {
+      return await loadDailyCapsule({ force })
+    } catch (error) {
+      console.error('Failed to load terminal daily capsule:', error)
+      return null
+    }
+  }
+
   function buildSignalEntry() {
     const featuredPost = blogSnapshot.value.recentPosts[0]
     const totalArticles = blogSnapshot.value.stats?.totalArticles
@@ -268,6 +279,90 @@ export function useTerminalAgent() {
     }
   }
 
+  function buildCapsuleEntry() {
+    if (!dailyCapsule.value) {
+      return {
+        blocks: [
+          {
+            type: 'text',
+            content: copy.value.commands.capsule.empty
+          }
+        ]
+      }
+    }
+
+    return {
+      blocks: [
+        {
+          type: 'text',
+          content: copy.value.commands.capsule.intro
+        },
+        {
+          type: 'text',
+          content: dailyCapsule.value.greeting,
+          tone: 'muted'
+        },
+        {
+          type: 'text',
+          content: dailyCapsule.value.thesis
+        },
+        {
+          type: 'text',
+          content: `“${dailyCapsule.value.source_text}”`,
+          tone: 'muted'
+        },
+        {
+          type: 'text',
+          content: dailyCapsule.value.takeaway
+        },
+        {
+          type: 'links',
+          items: [
+            {
+              label: copy.value.commands.capsule.openAnalyzerLabel,
+              meta: copy.value.commands.capsule.openAnalyzerMeta,
+              to: '/tools?tool=thesis-parser'
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  function buildAskEntry() {
+    return {
+      blocks: [
+        {
+          type: 'text',
+          content: copy.value.commands.ask.intro
+        },
+        ...(dailyCapsule.value
+          ? [
+              {
+                type: 'text',
+                content: dailyCapsule.value.thesis
+              }
+            ]
+          : []),
+        {
+          type: 'links',
+          items: [
+            {
+              label: copy.value.commands.ask.analyzerLabel,
+              meta: copy.value.commands.ask.analyzerMeta,
+              to: '/tools?tool=thesis-parser'
+            },
+            {
+              label: copy.value.commands.ask.blogAssistantLabel,
+              meta: copy.value.commands.ask.blogAssistantMeta,
+              to: '/tools?tool=blog-assistant'
+            }
+          ]
+        }
+      ]
+    }
+  }
+
   function buildDriftTarget() {
     const articleTargets = blogSnapshot.value.recentPosts.map((post) => ({
       label: post.title,
@@ -308,6 +403,7 @@ export function useTerminalAgent() {
       }),
       signal: buildSignalEntry,
       recent: buildRecentEntry,
+      capsule: buildCapsuleEntry,
       drift: () => {
         const target = buildDriftTarget()
 
@@ -342,9 +438,7 @@ export function useTerminalAgent() {
         }
       },
       status: buildStatusEntry,
-      ask: () => ({
-        blocks: copy.value.commands.ask.blocks
-      })
+      ask: buildAskEntry
     }
   }
 
@@ -465,6 +559,10 @@ export function useTerminalAgent() {
 
     if (['signal', 'recent', 'drift'].includes(commandName)) {
       await ensureBlogSnapshotLoaded()
+    }
+
+    if (['capsule', 'ask'].includes(commandName)) {
+      await ensureDailyCapsuleLoaded()
     }
 
     const result = await handler()

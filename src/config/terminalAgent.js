@@ -94,6 +94,13 @@ const TERMINAL_AGENT_LOCALES = {
         description: '查看最近内容',
         intro: '最近几条内容入口已经整理出来了。'
       },
+      capsule: {
+        description: '查看今日拆句',
+        intro: '今日拆句已经挂上来了。',
+        empty: '今日拆句暂时还没生成出来。',
+        openAnalyzerLabel: '一句话命题解析器',
+        openAnalyzerMeta: '进入工具箱继续拆'
+      },
       drift: {
         description: '随机跳转到一个站内目标',
         response: '已转向 {target}。'
@@ -103,32 +110,18 @@ const TERMINAL_AGENT_LOCALES = {
         intro: '运行状态如下。'
       },
       ask: {
-        description: '试探 AI 接口',
-        blocks: [
-          {
-            type: 'text',
-            content: 'AI 接口的位置已经留好，但后端能力还没接进来。'
-          },
-          {
-            type: 'text',
-            content: '现在你得到的是一个明确的入口，不是一段空洞的聊天壳。'
-          },
-          {
-            type: 'status',
-            items: [
-              { label: 'adapter', value: 'reserved' },
-              { label: 'runtime', value: 'not attached' },
-              { label: 'mode', value: 'placeholder' },
-              { label: 'cost target', value: 'low' }
-            ]
-          }
-        ]
+        description: '查看 AI 入口',
+        intro: 'AI 没被塞进一个聊天壳里，而是被拆成了几个更具体的入口。',
+        analyzerLabel: '一句话命题解析器',
+        analyzerMeta: '公开展示思路拆解',
+        blogAssistantLabel: 'Blog Assistant 2.0',
+        blogAssistantMeta: '用于起稿和提炼写作命题'
       },
       clear: {
         description: '清空当前输出'
       }
     },
-    commandOrder: ['help', 'whoami', 'signal', 'recent', 'drift', 'status', 'ask', 'clear']
+    commandOrder: ['help', 'whoami', 'signal', 'recent', 'capsule', 'drift', 'status', 'ask', 'clear']
   },
   en: {
     meta: {
@@ -216,6 +209,13 @@ const TERMINAL_AGENT_LOCALES = {
         description: 'Show recent content',
         intro: 'Recent entries are staged below.'
       },
+      capsule: {
+        description: 'Inspect today\'s capsule',
+        intro: 'Today\'s capsule is already staged.',
+        empty: 'Today\'s capsule has not been generated yet.',
+        openAnalyzerLabel: 'Thesis Parser',
+        openAnalyzerMeta: 'Continue the breakdown in the toolbox'
+      },
       drift: {
         description: 'Jump to a random site target',
         response: 'Rerouted to {target}.'
@@ -225,19 +225,18 @@ const TERMINAL_AGENT_LOCALES = {
         intro: 'Runtime state follows.'
       },
       ask: {
-        description: 'Probe the future AI slot',
-        blocks: [
-          {
-            type: 'text',
-            content: 'The AI entry is reserved, but the runtime is not attached yet.'
-          }
-        ]
+        description: 'Inspect AI entry points',
+        intro: 'The AI layer is not a chat shell here. It has been split into narrower entry points.',
+        analyzerLabel: 'Thesis Parser',
+        analyzerMeta: 'Public-facing proposition breakdown',
+        blogAssistantLabel: 'Blog Assistant 2.0',
+        blogAssistantMeta: 'Draft angles and writing hooks'
       },
       clear: {
         description: 'Clear current output'
       }
     },
-    commandOrder: ['help', 'whoami', 'signal', 'recent', 'drift', 'status', 'ask', 'clear']
+    commandOrder: ['help', 'whoami', 'signal', 'recent', 'capsule', 'drift', 'status', 'ask', 'clear']
   }
 }
 
