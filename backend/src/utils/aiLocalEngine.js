@@ -1,4 +1,5 @@
 import { getMasterPrompt } from './masterPrompt.js'
+import { normalizeDailyCapsuleSeed } from './aiSeedText.js'
 
 const ABSOLUTE_MARKERS = ['一定', '永远', '必须', '注定', '总会', '总是', '所有', '唯一', '完全']
 const DEFAULT_ANALYSIS_TITLE = '先把命题说清楚，再谈结论'
@@ -276,7 +277,8 @@ export function createLocalBlogSeed(payload = {}) {
 }
 
 export function createLocalDailyCapsule(seed = {}) {
-  const sourceText = normalizeInput(seed.source_text || '')
+  const normalizedSeed = normalizeDailyCapsuleSeed(seed)
+  const sourceText = normalizeInput(normalizedSeed.source_text || '')
   const analysis = createLocalAnalysis(sourceText)
   const topicProfile = detectTopicProfile(sourceText)
   const thesis = convertAnalysisToHeroTitle(
@@ -292,8 +294,8 @@ export function createLocalDailyCapsule(seed = {}) {
 
   return {
     source_text: sourceText,
-    source_label: seed.source_label || 'manual',
-    source_url: seed.source_url || null,
+    source_label: normalizedSeed.source_label || 'manual',
+    source_url: normalizedSeed.source_url || null,
     greeting,
     thesis,
     boundary,

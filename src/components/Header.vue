@@ -56,6 +56,8 @@
         v3.0.0
       </span>
     </div>
+
+    <HeaderGiftPanel />
     
     <div class="flex items-center gap-2 sm:gap-3">
       <!-- 世界时钟 - 显示本地时间，其他地区时间在下拉栏（放在右侧） -->
@@ -344,6 +346,7 @@ import { useAuth } from '../composables/useAuth'
 import { adminSettingsApi } from '../utils/api'
 import { getClientLocationInfo } from '../utils/ipLocation'
 import AuthModal from './AuthModal.vue'
+import HeaderGiftPanel from './HeaderGiftPanel.vue'
 
 const props = defineProps({
   currentTab: {

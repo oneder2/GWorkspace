@@ -6,14 +6,13 @@
 <template>
   <div class="max-w-6xl mx-auto mt-4 sm:mt-8 px-1 sm:px-2 animate-fade-in pb-24 space-y-8">
     <section class="hero-panel rounded-[32px] p-6 sm:p-8 lg:p-12">
-      <div class="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-start">
-        <div class="space-y-6 min-w-0">
-          <span class="eyebrow">{{ $t('home.eyebrow') }}</span>
-          <div class="space-y-4">
-            <div v-if="heroPrompt" class="section-kicker">{{ heroPrompt }}</div>
-            <h1 class="section-title max-w-3xl">{{ $t('home.title') }}</h1>
-            <p class="section-copy text-base sm:text-lg text-slate-600 dark:text-slate-300">{{ heroSubtitle }}</p>
-          </div>
+        <div class="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-start">
+          <div class="space-y-6 min-w-0">
+            <span class="eyebrow">{{ $t('home.eyebrow') }}</span>
+            <div class="space-y-4">
+              <h1 class="section-title max-w-3xl">{{ $t('home.title') }}</h1>
+              <p class="section-copy text-base sm:text-lg text-slate-600 dark:text-slate-300">{{ $t('home.subtitle') }}</p>
+            </div>
 
           <div class="surface-panel rounded-[28px] p-3 sm:p-4 relative z-20">
             <div class="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -106,60 +105,6 @@
     </section>
 
     <section>
-      <div class="surface-card rounded-[28px] p-6 sm:p-8 min-w-0 space-y-5">
-        <div class="section-heading flex-col items-start sm:flex-row sm:items-center mb-1 pb-4 divider-strong-b">
-          <div>
-            <div class="section-kicker">{{ $t('home.dailyCapsule.kicker') }}</div>
-            <h2 class="text-2xl font-bold text-main tracking-tight">{{ $t('home.dailyCapsule.title') }}</h2>
-            <p class="section-copy mt-3 text-sm sm:text-base">{{ $t('home.dailyCapsule.desc') }}</p>
-          </div>
-        </div>
-
-        <template v-if="dailyCapsule">
-          <div class="space-y-4">
-            <div class="p-5 rounded-[24px] bg-white/60 dark:bg-slate-900/40 border border-border-base">
-              <div class="text-xs uppercase tracking-[0.22em] text-slate-400 mb-3">{{ $t('home.dailyCapsule.source') }}</div>
-              <p class="text-lg sm:text-xl font-semibold text-main leading-8">“{{ dailyCapsule.source_text }}”</p>
-            </div>
-
-            <div class="grid gap-4 md:grid-cols-2">
-              <div class="surface-card rounded-[24px] p-4">
-                <div class="text-xs uppercase tracking-[0.18em] text-slate-400 mb-2">{{ $t('home.dailyCapsule.thesis') }}</div>
-                <p class="text-sm text-main leading-7">{{ dailyCapsule.thesis }}</p>
-              </div>
-              <div class="surface-card rounded-[24px] p-4">
-                <div class="text-xs uppercase tracking-[0.18em] text-slate-400 mb-2">{{ $t('home.dailyCapsule.boundary') }}</div>
-                <p class="text-sm text-main leading-7">{{ dailyCapsule.boundary }}</p>
-              </div>
-            </div>
-
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-1">
-              <div class="text-sm text-secondary leading-6">
-                {{ dailyCapsule.takeaway }}
-              </div>
-              <div class="flex flex-wrap gap-2 shrink-0">
-                <router-link to="/tools?tool=thesis-parser" class="action-btn action-btn-secondary text-sm">
-                  {{ $t('home.dailyCapsule.openAnalyzer') }}
-                </router-link>
-                <router-link to="/tools?tool=blog-assistant" class="action-btn action-btn-primary text-sm">
-                  {{ $t('home.dailyCapsule.openBlogAssistant') }}
-                </router-link>
-              </div>
-            </div>
-
-            <div v-if="dailyCapsule?.source_label" class="text-xs text-slate-500 dark:text-slate-400 break-all">
-              {{ dailyCapsule.source_label }}
-            </div>
-          </div>
-        </template>
-
-        <div v-else class="p-5 rounded-[24px] bg-white/50 dark:bg-slate-900/30 border border-border-base text-sm text-secondary">
-          {{ $t('home.dailyCapsule.empty') }}
-        </div>
-      </div>
-    </section>
-
-    <section>
       <div class="surface-card rounded-[28px] p-6 sm:p-8 min-w-0">
         <div class="section-heading flex-col items-start sm:flex-row sm:items-center mb-5 pb-5 divider-strong-b">
           <div>
@@ -218,10 +163,9 @@
 </template>
 
 <script setup>
-import { ref, computed, markRaw, onMounted } from 'vue'
+import { ref, computed, markRaw } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { quickLinksConfig } from '../config/home'
-import { useDailyCapsule } from '../composables/useDailyCapsule'
 import { useLocalStorage } from '../composables/useStorage'
 import { getIcon } from '../utils/iconMapper'
 import { getCachedFaviconUrl, markFaviconSuccess, markFaviconError } from '../utils/faviconCache'
@@ -237,7 +181,6 @@ import BriefcaseIcon from '../components/icons/BriefcaseIcon.vue'
 import QuickLinkEditor from '../components/QuickLinkEditor.vue'
 
 const { t } = useI18n()
-const { capsule: dailyCapsule, loadDailyCapsule } = useDailyCapsule()
 
 // 搜索相关
 const searchEngine = ref('google')
@@ -307,21 +250,6 @@ const workspaceLinks = computed(() => ([
     icon: markRaw(BriefcaseIcon)
   }
 ]))
-
-const trimDisplayText = (value, maxLength) => {
-  const normalized = String(value || '').replace(/\s+/g, ' ').trim()
-  if (!normalized) return ''
-  if (normalized.length <= maxLength) return normalized
-  return `${normalized.slice(0, Math.max(1, maxLength - 1)).trim()}…`
-}
-
-const heroPrompt = computed(() => (
-  dailyCapsule.value?.greeting ? trimDisplayText(dailyCapsule.value.greeting, 12) : ''
-))
-
-const heroSubtitle = computed(() => (
-  dailyCapsule.value?.thesis ? trimDisplayText(dailyCapsule.value.thesis, 72) : t('home.subtitle')
-))
 
 /**
  * 保存自定义链接
@@ -404,9 +332,4 @@ const handleIconError = (event, site) => {
   if (event.target) event.target.style.display = 'none'
 }
 
-onMounted(() => {
-  loadDailyCapsule().catch((error) => {
-    console.error('Failed to load daily capsule:', error)
-  })
-})
 </script>

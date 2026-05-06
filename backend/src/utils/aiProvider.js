@@ -1,5 +1,6 @@
 import { createLocalAnalysis, createLocalBlogSeed, createLocalDailyCapsule } from './aiLocalEngine.js'
 import { buildMasterPromptSummary } from './masterPrompt.js'
+import { normalizeDailyCapsuleSeed } from './aiSeedText.js'
 
 const DEFAULT_PROVIDER = 'openai-compatible'
 const DEFAULT_API_URL = 'https://api.openai.com/v1/chat/completions'
@@ -171,7 +172,10 @@ async function runWithFallback({ task, payload, schema, fallbackFactory }) {
 
 function normalizeDailyCapsulePayload(data = {}, seed = {}) {
   const fallback = createLocalDailyCapsule(seed)
-  const sourceText = normalizeText(data.source_text || fallback.source_text)
+  const normalizedSeed = normalizeDailyCapsuleSeed({
+    source_text: data.source_text || fallback.source_text
+  })
+  const sourceText = normalizeText(normalizedSeed.source_text || fallback.source_text)
   const sourceLabel = normalizeText(data.source_label || fallback.source_label)
   const sourceUrl = typeof data.source_url === 'string' && data.source_url.trim().length > 0
     ? data.source_url.trim()
@@ -255,9 +259,11 @@ export function generateBlogSeed(payload = {}) {
 }
 
 export function generateDailyCapsule(seed = {}) {
+  const normalizedSeed = normalizeDailyCapsuleSeed(seed)
+
   return runWithFallback({
     task: '今日拆句',
-    payload: seed,
+    payload: normalizedSeed,
     schema: {
       source_text: 'string',
       source_label: 'string',
@@ -267,9 +273,9 @@ export function generateDailyCapsule(seed = {}) {
       boundary: 'string',
       takeaway: 'string'
     },
-    fallbackFactory: () => createLocalDailyCapsule(seed)
+    fallbackFactory: () => createLocalDailyCapsule(normalizedSeed)
   }).then((result) => ({
     ...result,
-    data: normalizeDailyCapsulePayload(result.data, seed)
+    data: normalizeDailyCapsulePayload(result.data, normalizedSeed)
   }))
 }

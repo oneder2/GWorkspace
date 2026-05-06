@@ -2,9 +2,12 @@ import { AiSeed } from '../models/AiSeed.js'
 import { DailyCapsule } from '../models/DailyCapsule.js'
 import { getTodayDateString, isDateOnlyString } from '../utils/blogDate.js'
 import { generateAnalysis, generateBlogSeed, generateDailyCapsule, getAiRuntimeSummary } from '../utils/aiProvider.js'
+import { isDailyCapsuleSeedEligible, isLocalFallbackFriendlySeed } from '../utils/aiSeedText.js'
 
 const MAX_ANALYZE_LENGTH = 280
 const MAX_BLOG_INPUT_LENGTH = 6000
+const DAILY_CAPSULE_CANDIDATE_BATCH = 48
+const DAILY_CAPSULE_MAX_SOURCE_LENGTH = 160
 const DEFAULT_WHITELIST = [
   'zhihu.com',
   'weibo.com',
@@ -118,8 +121,22 @@ function chooseSeed(seedId = null) {
   }
 
   ensureBootstrapSeeds()
-  const candidates = AiSeed.getCandidatePool(12)
-  return candidates[0] || null
+  const runtime = getAiRuntimeSummary()
+  const candidates = AiSeed.getCandidatePool(DAILY_CAPSULE_CANDIDATE_BATCH)
+  const eligibleCandidates = candidates.filter((candidate) => (
+    isDailyCapsuleSeedEligible(candidate, {
+      maxSourceLength: DAILY_CAPSULE_MAX_SOURCE_LENGTH
+    })
+  ))
+
+  if (runtime.provider_mode === 'local-fallback') {
+    const localizedCandidates = eligibleCandidates.filter(isLocalFallbackFriendlySeed)
+    if (localizedCandidates.length > 0) {
+      return localizedCandidates[0]
+    }
+  }
+
+  return eligibleCandidates[0] || candidates[0] || null
 }
 
 export async function ensureDailyCapsule(options = {}) {

@@ -48,6 +48,10 @@ const normalizeWhitespace = (value) => (
     .trim()
 )
 
+const stripMarkdownLinks = (value) => (
+  String(value || '').replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/gi, '$1')
+)
+
 const normalizeCatalogKey = (value) => normalizeWhitespace(value).toLowerCase()
 
 const stripHtml = (value) => (
@@ -171,7 +175,6 @@ function parseChineseProverbs(repoPath) {
       const nativeText = normalizeWhitespace(item?.[config.nativeField] || '')
       const transliteration = normalizeWhitespace(item?.[config.transliterationField] || '')
       const englishMeaning = normalizeWhitespace(item?.en || '')
-      const sourceText = [nativeText, englishMeaning].filter(Boolean).join(' // ')
       const proverbId = item?.id || `${config.idPrefix}-${String(index + 1).padStart(3, '0')}`
       const tags = Array.isArray(item?.cats)
         ? [...new Set(item.cats.map(tag => normalizeWhitespace(tag)).filter(Boolean))]
@@ -179,7 +182,7 @@ function parseChineseProverbs(repoPath) {
 
       return {
         id: `chinese-proverbs:${proverbId}`,
-        source_text: normalizeWhitespace(sourceText),
+        source_text: normalizeWhitespace(nativeText),
         author: config.culture,
         language: config.language,
         notes: config.notes,
@@ -267,7 +270,7 @@ function parseLinsaQuotes(repoPath) {
     quoteIndex += 1
     const body = line.slice(2).trim()
     const match = body.match(/^(.*?)(?:\s+-\s+([^-][\s\S]*))?$/)
-    const quote = normalizeWhitespace(match?.[1] || body)
+    const quote = normalizeWhitespace(stripMarkdownLinks(match?.[1] || body))
     const author = normalizeWhitespace(match?.[2] || '')
 
     results.push({
@@ -287,7 +290,7 @@ function parseLinsaQuotes(repoPath) {
 
 function toCatalogEntry(sourceKey, record) {
   const meta = REPO_META[sourceKey]
-  const sourceText = normalizeWhitespace(record.source_text)
+  const sourceText = normalizeWhitespace(stripMarkdownLinks(record.source_text))
 
   return {
     id: record.id,

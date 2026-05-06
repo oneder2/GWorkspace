@@ -500,7 +500,13 @@
     "navigation": "Navigation",
     "updates": "Updates",
     "changelog": "Changelog",
-    "discussion": "Discussion"
+    "discussion": "Discussion",
+    "stationGift": "Keeper's Note",
+    "stationGiftIdle": "One sentence is waiting for whoever is willing to pause.",
+    "stationGiftBoundary": "Reading",
+    "stationGiftTakeaway": "Afterglow",
+    "stationGiftRead": "Read Further",
+    "stationGiftWrite": "Write From It"
   },
   "changelog": {
     "v3_0_0": {

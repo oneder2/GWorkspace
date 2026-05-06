@@ -503,6 +503,13 @@
     "updates": "更新",
     "changelog": "更新日志",
     "discussion": "讨论区"
+    ,
+    "stationGift": "站长赠语",
+    "stationGiftIdle": "今日有一句话，留给愿意停一秒的人。",
+    "stationGiftBoundary": "落点",
+    "stationGiftTakeaway": "余意",
+    "stationGiftRead": "展开此意",
+    "stationGiftWrite": "借题起笔"
   },
   "changelog": {
     "v3_0_0": {
