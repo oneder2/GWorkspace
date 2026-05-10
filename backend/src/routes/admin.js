@@ -82,10 +82,11 @@ router.get('/settings', optionalAuthenticate, (req, res) => {
     if (!settings) {
       return res.status(404).json({ error: 'Settings not found' })
     }
-    // 只返回位置和时区信息，不返回其他敏感设置
+    // 只返回公开可用的站点信息
     res.json({
       location: settings.location,
-      timezone: settings.timezone
+      timezone: settings.timezone,
+      homepage_content: settings.homepage_content
     })
   } catch (error) {
     console.error('Error fetching admin settings:', error)
@@ -450,6 +451,7 @@ router.delete('/system/assets', async (req, res) => {
 router.put('/settings', async (req, res) => {
   try {
     const { location, timezone, ip_address, forceRelocate } = req.body
+    const homepageContent = req.body.homepage_content ?? req.body.homepageContent
     const userId = req.user.id
 
     // DEBUG: 输出请求参数
@@ -457,13 +459,22 @@ router.put('/settings', async (req, res) => {
       ip_address: ip_address || null,
       location: location || null,
       timezone: timezone || null,
+      homepage_content: homepageContent ? '[provided]' : null,
       forceRelocate: forceRelocate || false
     })
+
+    const updatePayload = {}
+
+    if (homepageContent !== undefined) {
+      updatePayload.homepage_content = homepageContent
+    }
+
+    const hasLocationPayload = ip_address !== undefined || location !== undefined || timezone !== undefined || forceRelocate === true
 
     let locationInfo = { location, timezone, ip_address }
 
     // 情况1：前端提供了完整的位置信息（推荐方式）
-    if (ip_address && location && timezone) {
+    if (hasLocationPayload && ip_address && location && timezone) {
       // 验证IP地址不是本地/保留IP
       if (isLocalOrReservedIP(ip_address)) {
         return res.status(400).json({ 
@@ -483,7 +494,7 @@ router.put('/settings', async (req, res) => {
       locationInfo = { ip_address, location, timezone }
     }
     // 情况2：前端只提供了IP地址，后端根据IP获取位置信息
-    else if (ip_address && (!location || !timezone)) {
+    else if (hasLocationPayload && ip_address && (!location || !timezone)) {
       // 验证IP地址
       if (isLocalOrReservedIP(ip_address)) {
         return res.status(400).json({ 
@@ -524,7 +535,7 @@ router.put('/settings', async (req, res) => {
       }
     }
     // 情况3：只提供了location和timezone，没有IP（兼容旧代码）
-    else if (location && timezone && !ip_address) {
+    else if (hasLocationPayload && location && timezone && !ip_address) {
       // 尝试从请求中获取IP作为备用
       const userIp = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress
       if (userIp && !isLocalOrReservedIP(userIp)) {
@@ -538,7 +549,7 @@ router.put('/settings', async (req, res) => {
       })
     }
     // 情况4：forceRelocate为true（已废弃，保留兼容性）
-    else if (forceRelocate === true) {
+    else if (hasLocationPayload && forceRelocate === true) {
       // 尝试从请求中获取IP
       const userIp = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress
       
@@ -569,8 +580,8 @@ router.put('/settings', async (req, res) => {
         })
       }
     }
-    // 情况5：参数不足
-    else {
+    // 情况5：参数不足，但允许仅更新首页内容
+    else if (!homepageContent && !hasLocationPayload) {
       return res.status(400).json({ 
         error: 'Missing required parameters',
         message: 'Please provide ip_address (from frontend), or location and timezone manually.'
@@ -584,8 +595,21 @@ router.put('/settings', async (req, res) => {
       ip_address: locationInfo.ip_address || null
     })
 
+    if (hasLocationPayload) {
+      updatePayload.location = locationInfo.location || null
+      updatePayload.timezone = locationInfo.timezone || null
+      updatePayload.ip_address = locationInfo.ip_address || null
+    }
+
+    if (Object.keys(updatePayload).length === 0) {
+      return res.status(400).json({
+        error: 'Missing required parameters',
+        message: 'Please provide homepage_content or location fields to update.'
+      })
+    }
+
     // 更新管理员设置
-    const updatedSettings = AdminSettings.update(locationInfo, userId)
+    const updatedSettings = AdminSettings.update(updatePayload, userId)
 
     res.json(updatedSettings)
   } catch (error) {

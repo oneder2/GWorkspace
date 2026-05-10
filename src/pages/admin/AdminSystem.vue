@@ -46,6 +46,60 @@
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <section class="admin-panel p-6 rounded-[24px] space-y-5 xl:col-span-2">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.homepageContent') }}</h3>
+            <p class="text-sm text-secondary">{{ $t('admin.homepageContentCopy') }}</p>
+          </div>
+          <button
+            @click="saveHomepageContent"
+            class="action-btn action-btn-primary text-sm"
+            :disabled="isSavingHomepageContent || isLoadingHomepageContent"
+          >
+            {{ isSavingHomepageContent ? $t('common.loading') : $t('common.save') }}
+          </button>
+        </div>
+
+        <div v-if="homepageStatusMessage" class="rounded-2xl px-4 py-3 text-sm" :class="homepageStatusToneClass">
+          {{ homepageStatusMessage }}
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <section class="space-y-4">
+            <div class="text-xs uppercase tracking-[0.22em] text-slate-400">中文</div>
+            <label class="space-y-2 block">
+              <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ $t('admin.homeStatus') }}</span>
+              <textarea v-model="homepageForm.status.zh" rows="4" class="admin-textarea" :placeholder="$t('admin.homeStatusPlaceholderZh')"></textarea>
+            </label>
+            <label class="space-y-2 block">
+              <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ $t('admin.homeSlogan') }}</span>
+              <textarea v-model="homepageForm.slogan.zh" rows="3" class="admin-textarea" :placeholder="$t('admin.homeSloganPlaceholderZh')"></textarea>
+            </label>
+            <label class="space-y-2 block">
+              <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ $t('admin.homeTasks') }}</span>
+              <textarea v-model="homepageTasksZh" rows="5" class="admin-textarea" :placeholder="$t('admin.homeTasksPlaceholderZh')"></textarea>
+            </label>
+          </section>
+
+          <section class="space-y-4">
+            <div class="text-xs uppercase tracking-[0.22em] text-slate-400">English</div>
+            <label class="space-y-2 block">
+              <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ $t('admin.homeStatus') }}</span>
+              <textarea v-model="homepageForm.status.en" rows="4" class="admin-textarea" :placeholder="$t('admin.homeStatusPlaceholderEn')"></textarea>
+            </label>
+            <label class="space-y-2 block">
+              <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ $t('admin.homeSlogan') }}</span>
+              <textarea v-model="homepageForm.slogan.en" rows="3" class="admin-textarea" :placeholder="$t('admin.homeSloganPlaceholderEn')"></textarea>
+            </label>
+            <label class="space-y-2 block">
+              <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ $t('admin.homeTasks') }}</span>
+              <textarea v-model="homepageTasksEn" rows="5" class="admin-textarea" :placeholder="$t('admin.homeTasksPlaceholderEn')"></textarea>
+            </label>
+          </section>
+        </div>
+      </section>
+
       <div class="admin-panel p-6 rounded-[24px] space-y-5">
         <div class="flex items-center justify-between gap-4">
           <div>
@@ -243,9 +297,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { adminApi } from '../../utils/api'
+import { adminApi, adminSettingsApi } from '../../utils/api'
 
 const { t } = useI18n()
 
@@ -254,6 +308,29 @@ const isLoadingAssets = ref(false)
 const isCreatingBackup = ref(false)
 const deletingKey = ref('')
 const showOrphansOnly = ref(true)
+const isLoadingHomepageContent = ref(false)
+const isSavingHomepageContent = ref(false)
+const homepageStatusMessage = ref('')
+const homepageStatusTone = ref('neutral')
+
+const createHomepageForm = () => ({
+  status: {
+    zh: '',
+    en: ''
+  },
+  slogan: {
+    zh: '',
+    en: ''
+  },
+  tasks: {
+    zh: [],
+    en: []
+  }
+})
+
+const homepageForm = reactive(createHomepageForm())
+const homepageTasksZh = ref('')
+const homepageTasksEn = ref('')
 
 const health = ref({
   database: {},
@@ -273,6 +350,18 @@ const assets = ref({
     orphaned: 0
   },
   assets: []
+})
+
+const homepageStatusToneClass = computed(() => {
+  if (homepageStatusTone.value === 'success') {
+    return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/12 dark:text-emerald-300'
+  }
+
+  if (homepageStatusTone.value === 'danger') {
+    return 'bg-rose-50 text-rose-700 dark:bg-rose-500/12 dark:text-rose-300'
+  }
+
+  return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
 })
 
 const formatBytes = (value) => {
@@ -338,6 +427,82 @@ const filteredAssets = computed(() => {
   return allAssets.filter(asset => !asset.referenced)
 })
 
+const resetHomepageStatus = () => {
+  homepageStatusMessage.value = ''
+  homepageStatusTone.value = 'neutral'
+}
+
+const toTaskLines = (value) => {
+  if (!Array.isArray(value)) return ''
+  return value.filter(item => typeof item === 'string' && item.trim()).join('\n')
+}
+
+const parseTaskLines = (value) => value
+  .split(/\r?\n/)
+  .map(line => line.trim())
+  .filter(Boolean)
+
+const applyHomepageContent = (content = {}) => {
+  homepageForm.status.zh = content?.status?.zh || ''
+  homepageForm.status.en = content?.status?.en || ''
+  homepageForm.slogan.zh = content?.slogan?.zh || ''
+  homepageForm.slogan.en = content?.slogan?.en || ''
+  homepageForm.tasks.zh = Array.isArray(content?.tasks?.zh) ? [...content.tasks.zh] : []
+  homepageForm.tasks.en = Array.isArray(content?.tasks?.en) ? [...content.tasks.en] : []
+  homepageTasksZh.value = toTaskLines(homepageForm.tasks.zh)
+  homepageTasksEn.value = toTaskLines(homepageForm.tasks.en)
+}
+
+const loadHomepageContent = async () => {
+  isLoadingHomepageContent.value = true
+
+  try {
+    const settings = await adminSettingsApi.get()
+    applyHomepageContent(settings?.homepage_content)
+  } catch (error) {
+    console.error('Failed to load homepage content:', error)
+    homepageStatusTone.value = 'danger'
+    homepageStatusMessage.value = error.message || t('admin.homepageContentLoadFailed')
+  } finally {
+    isLoadingHomepageContent.value = false
+  }
+}
+
+const saveHomepageContent = async () => {
+  isSavingHomepageContent.value = true
+  resetHomepageStatus()
+
+  try {
+    const payload = {
+      homepage_content: {
+        status: {
+          zh: homepageForm.status.zh.trim(),
+          en: homepageForm.status.en.trim()
+        },
+        slogan: {
+          zh: homepageForm.slogan.zh.trim(),
+          en: homepageForm.slogan.en.trim()
+        },
+        tasks: {
+          zh: parseTaskLines(homepageTasksZh.value),
+          en: parseTaskLines(homepageTasksEn.value)
+        }
+      }
+    }
+
+    const updated = await adminSettingsApi.update(payload)
+    applyHomepageContent(updated?.homepage_content)
+    homepageStatusTone.value = 'success'
+    homepageStatusMessage.value = t('admin.homepageContentSaveSuccess')
+  } catch (error) {
+    console.error('Failed to save homepage content:', error)
+    homepageStatusTone.value = 'danger'
+    homepageStatusMessage.value = error.message || t('admin.homepageContentSaveFailed')
+  } finally {
+    isSavingHomepageContent.value = false
+  }
+}
+
 const loadHealth = async () => {
   isLoadingHealth.value = true
   try {
@@ -363,7 +528,8 @@ const loadAssets = async () => {
 }
 
 const loadAll = async () => {
-  await Promise.all([loadHealth(), loadAssets()])
+  resetHomepageStatus()
+  await Promise.all([loadHealth(), loadAssets(), loadHomepageContent()])
 }
 
 const createBackup = async () => {
@@ -425,3 +591,40 @@ onMounted(() => {
   loadAll()
 })
 </script>
+
+<style scoped>
+.admin-input,
+.admin-textarea {
+  border-radius: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.admin-input,
+.admin-textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  color: var(--color-text-main, #0f172a);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-input:focus,
+.admin-textarea:focus {
+  border-color: color-mix(in srgb, var(--theme-primary) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-primary) 14%, transparent);
+}
+
+.admin-textarea {
+  min-height: 7.5rem;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.dark .admin-input,
+.dark .admin-textarea {
+  background: rgba(15, 23, 42, 0.42);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(248, 250, 252, 0.92);
+}
+</style>

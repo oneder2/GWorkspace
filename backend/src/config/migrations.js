@@ -13,7 +13,8 @@ export const MIGRATION_FILES = [
   '004_guestbook_user_id.sql',
   '005_admin_settings.sql',
   '006_user_favorites.sql',
-  '007_ai_workflow.sql'
+  '007_ai_workflow.sql',
+  '008_homepage_content.sql'
 ]
 
 const isIgnorableMigrationError = (message = '') => (
