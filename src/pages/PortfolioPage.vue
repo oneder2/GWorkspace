@@ -16,6 +16,7 @@
         :key="work.title" 
         :href="work.url" 
         target="_blank" 
+        rel="noopener noreferrer"
         class="surface-card p-3 rounded-[28px] group flex flex-col h-full hover:shadow-2xl transition-all duration-500"
       >
         <!-- 作品预览图 -->

@@ -28,6 +28,7 @@ export const sitesConfig = [
       { title: 'Beepbox', url:"https://beepbox.co/", descKey: 'sites.links.beepbox' },
       { title: 'WolframAlpha', url:"https://www.wolframalpha.com/", descKey: 'sites.links.wolframalpha' },
       { title: '工具蛙', url:"https://toolwa.com", descKey: 'sites.links.toolwa' },
+      { title: 'iLoveSVG', url:"https://www.ilovesvg.com/", descKey: 'sites.links.ilovesvg' }
     ]
   },
   {

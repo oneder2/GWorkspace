@@ -3,8 +3,8 @@
   采用清淡的磨砂玻璃设计，条理清晰
 -->
 <template>
-  <div class="surface-panel rounded-3xl p-6 md:p-8 flex flex-col min-w-0">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 min-w-0 divider-strong-b">
+  <div :class="['surface-panel rounded-3xl flex flex-col min-w-0', compact ? 'p-4 md:p-5' : 'p-6 md:p-8']">
+    <div :class="['flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between min-w-0 divider-strong-b', compact ? 'mb-5 pb-3' : 'mb-8 pb-4']">
       <div class="flex items-center gap-3 min-w-0">
         <div class="w-1.5 h-6 bg-[var(--theme-primary)] rounded-full"></div>
         <h3 class="font-bold text-xl tracking-tight text-main min-w-0 break-words">
@@ -14,8 +14,8 @@
       <span class="text-[10px] uppercase tracking-widest text-muted font-bold opacity-60 sm:text-right">{{ $t('common.changelog') }}</span>
     </div>
 
-    <div class="space-y-8 overflow-y-auto custom-scrollbar pr-2 flex-1 max-h-[400px]">
-      <div v-for="(update, index) in updates" :key="index" class="group">
+    <div :class="['overflow-y-auto custom-scrollbar pr-2 flex-1', compact ? 'space-y-5 max-h-[320px]' : 'space-y-8 max-h-[400px]']">
+      <div v-for="(update, index) in visibleUpdates" :key="index" class="group">
         <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4 mb-3 min-w-0">
           <span class="text-sm font-black text-[var(--theme-primary)] opacity-80 group-hover:opacity-100 transition-opacity break-words">
             {{ update.version }}
@@ -34,10 +34,11 @@
       </div>
     </div>
     
-    <div class="mt-8 pt-6 flex justify-center divider-strong-t">
+    <div :class="['flex justify-center divider-strong-t', compact ? 'mt-5 pt-4' : 'mt-8 pt-6']">
       <a 
         href="https://github.com/oneder2/GWorkspace/blob/main/CHANGELOG.md" 
-        target="_blank" 
+        target="_blank"
+        rel="noopener noreferrer"
         class="group flex items-center gap-2 text-xs font-bold text-muted hover:text-[var(--theme-primary)] transition-all"
       >
         <span>{{ $t('common.viewMore') }}</span>
@@ -52,6 +53,13 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+const props = defineProps({
+  compact: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const { t } = useI18n()
 
@@ -123,4 +131,8 @@ const updates = computed(() => ([
     ]
   }
 ]))
+
+const visibleUpdates = computed(() => {
+  return props.compact ? updates.value.slice(0, 3) : updates.value
+})
 </script>

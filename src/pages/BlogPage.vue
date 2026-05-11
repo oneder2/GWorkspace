@@ -5,7 +5,7 @@
   布局：标签和归档放在左侧空白区域，中间内容区域填充剩余空间
 -->
 <template>
-  <div class="animate-fade-in rounded-2xl sm:rounded-3xl flex flex-col xl:flex-row gap-4 sm:gap-6 xl:gap-8 min-h-full overflow-hidden">
+  <div class="blog-layout animate-fade-in rounded-2xl sm:rounded-3xl flex flex-col xl:flex-row gap-4 sm:gap-6 xl:gap-8 min-h-full overflow-hidden 2xl:h-full">
     <!-- 移动端筛选按钮 - 显示在顶部 -->
     <div class="xl:hidden mb-4">
       <button
@@ -89,8 +89,8 @@
     </transition>
 
     <!-- 左侧标签和归档 - 放在左侧空白区域，桌面端显示 -->
-    <div class="surface-card w-64 hidden xl:block shrink-0 rounded-[28px]">
-      <div class="sticky top-6 space-y-1.5 p-4">
+    <div class="surface-card w-64 hidden xl:block shrink-0 rounded-[28px] 2xl:h-full">
+      <div class="blog-sidebar-scroll blog-sidebar-scroll-delayed custom-scrollbar 2xl:h-full space-y-1.5 p-4 pr-3">
         <!-- 统计信息卡片 -->
         <div class="mb-6 pb-6 border-b border-border-base">
           <h3 class="text-lg font-bold mb-4 text-main">{{ $t('blog.statistics') }}</h3>
@@ -184,7 +184,7 @@
     <div class="hidden xl:block w-px bg-gradient-to-b from-transparent via-slate-300 dark:via-slate-600 to-transparent shrink-0"></div>
 
     <!-- 中间内容区 - 使用flex-1占据全部剩余空间，填充到底部 -->
-    <div class="flex-1 min-w-0 flex flex-col min-h-full">
+    <div class="blog-content-column flex-1 min-w-0 flex flex-col min-h-full 2xl:min-h-0">
       <!-- 搜索栏和创建按钮 - 固定在顶部，水平排列 -->
       <div class="mb-6 shrink-0">
         <div class="surface-panel p-4 rounded-[24px] flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
@@ -222,7 +222,7 @@
       </div>
       
       <!-- 文章列表 - 可滚动区域 -->
-      <div class="flex-1 space-y-6 pb-24">
+      <div class="blog-posts-scroll flex-1 space-y-6 pb-24 2xl:min-h-0 2xl:overflow-y-auto 2xl:pr-2 custom-scrollbar">
         <!-- 骨架屏 - 加载初始数据时显示 -->
         <BlogSkeleton v-if="isLoading && blogPosts.length === 0" :count="3" />
 
@@ -316,8 +316,8 @@
       </div>
       
     <!-- 右侧留言板 -->
-    <div class="hidden 2xl:block w-80 shrink-0">
-      <div class="sticky top-6">
+    <div class="hidden 2xl:block w-[22rem] shrink-0 2xl:h-full">
+      <div class="blog-guestbook-rail h-full">
         <Guestbook @show-login="showAuthModal = true" />
       </div>
     </div>
@@ -432,7 +432,9 @@ const loadPosts = async ({ append = false } = {}) => {
     blogPosts.value = []
     hasMore.value = true
 
-    const scrollContainer = typeof document !== 'undefined' ? document.getElementById('main-scroll') : null
+    const scrollContainer = typeof document !== 'undefined'
+      ? document.querySelector('.blog-posts-scroll') || document.getElementById('main-scroll')
+      : null
     scrollContainer?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -586,7 +588,9 @@ const observeLoadMore = () => {
       }
     },
     {
-      root: typeof document !== 'undefined' ? document.getElementById('main-scroll') : null,
+      root: typeof document !== 'undefined'
+        ? document.querySelector('.blog-posts-scroll') || document.getElementById('main-scroll')
+        : null,
       rootMargin: '220px 0px'
     }
   )

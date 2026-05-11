@@ -18,6 +18,70 @@
   background-color: var(--hover-bg-dark);
 }
 
+/* ==================== 留言板侧轨 ==================== */
+.blog-layout {
+  min-height: 100%;
+}
+
+.blog-sidebar-scroll {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.blog-sidebar-scroll.blog-sidebar-scroll-delayed {
+  transition: scrollbar-color 0.2s ease;
+}
+
+.blog-sidebar-scroll.blog-sidebar-scroll-delayed::-webkit-scrollbar-thumb {
+  background: transparent;
+  transition: background-color 0.2s ease 0.16s;
+}
+
+.blog-sidebar-scroll.blog-sidebar-scroll-delayed:hover,
+.blog-sidebar-scroll.blog-sidebar-scroll-delayed:focus-within {
+  scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
+}
+
+.dark .blog-sidebar-scroll.blog-sidebar-scroll-delayed:hover,
+.dark .blog-sidebar-scroll.blog-sidebar-scroll-delayed:focus-within {
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.blog-sidebar-scroll.blog-sidebar-scroll-delayed:hover::-webkit-scrollbar-thumb,
+.blog-sidebar-scroll.blog-sidebar-scroll-delayed:focus-within::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.dark .blog-sidebar-scroll.blog-sidebar-scroll-delayed:hover::-webkit-scrollbar-thumb,
+.dark .blog-sidebar-scroll.blog-sidebar-scroll-delayed:focus-within::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.blog-content-column {
+  min-height: 0;
+}
+
+.blog-posts-scroll {
+  min-height: 0;
+}
+
+.blog-guestbook-rail {
+  height: 100%;
+}
+
+@media (min-width: 1536px) {
+  .blog-layout {
+    height: 100%;
+  }
+
+  .blog-sidebar-scroll {
+    height: 100%;
+    overflow-y: auto;
+  }
+}
+
 /* ==================== 文章卡片 ==================== */
 .blog-article-card {
   --hover-border: var(--theme-primary);
@@ -105,4 +169,3 @@
 .blog-tag-btn-selected {
   --tw-ring-color: var(--theme-primary);
 }
-

@@ -76,7 +76,21 @@
             </div>
 
             <!-- 玻璃效果调节 -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 divider-strong-t">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 divider-strong-t">
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <label class="text-sm font-bold text-main">{{ $t('theme.panelOpacity') }}</label>
+                  <span class="text-xs font-mono text-secondary">{{ (panelOpacity * 100).toFixed(0) }}%</span>
+                </div>
+                <input
+                  type="range"
+                  v-model.number="panelOpacity"
+                  min="0.2"
+                  max="0.9"
+                  step="0.02"
+                  class="w-full accent-[var(--theme-primary)] cursor-pointer"
+                >
+              </div>
               <div class="space-y-3">
                 <div class="flex justify-between items-center">
                   <label class="text-sm font-bold text-main">{{ $t('theme.bgOpacity') }}</label>
@@ -155,7 +169,16 @@ import { useCustomTheme } from '../composables/useCustomTheme'
 
 const emit = defineEmits(['close'])
 const { t } = useI18n()
-const { presetThemes, currentPreset, glassBlur, bgOpacity, setPresetTheme, setCustomTheme, resetTheme } = useCustomTheme()
+const {
+  presetThemes,
+  currentPreset,
+  glassBlur,
+  bgOpacity,
+  panelOpacity,
+  setPresetTheme,
+  setCustomTheme,
+  resetTheme
+} = useCustomTheme()
 
 const customPrimary = ref('#475569')
 
@@ -204,8 +227,8 @@ const resetToDefault = () => {
 
 <style scoped>
 .theme-custom-card {
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--surface-bg) 86%, transparent);
+  border: 1px solid var(--border-base);
+  background: color-mix(in srgb, var(--surface-panel) 86%, transparent);
   box-shadow: var(--shadow-soft);
 }
 
@@ -213,9 +236,9 @@ const resetToDefault = () => {
   width: 5.5rem;
   height: 5.5rem;
   padding: 0.35rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-base);
   border-radius: 1.35rem;
-  background: color-mix(in srgb, var(--surface-bg) 92%, transparent);
+  background: color-mix(in srgb, var(--surface-panel) 92%, transparent);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 14px 32px rgb(15 23 42 / 0.12);
   isolation: isolate;
   filter: none;

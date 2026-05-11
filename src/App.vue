@@ -5,15 +5,11 @@
 <template>
   <div class="overflow-hidden h-screen w-screen text-slate-800 dark:text-slate-200">
     <!-- 全局背景图 -->
-    <div 
-      class="fixed inset-0 z-0 bg-cover bg-center transition-all duration-1000 transform scale-105" 
-      :style="{ backgroundImage: `url('/backgrounds/default.jpg')` }"
-    >
-      <!-- 背景遮罩层 - 优化文本可读性和对比度 -->
-      <!-- 亮色模式：使用浅色渐变提供基础对比度，确保深色文字清晰可读 -->
-      <div class="absolute inset-0 bg-gradient-to-br from-white/45 via-white/35 to-white/55 transition-opacity duration-500 dark:opacity-0"></div>
-      <!-- 暗色模式：使用深色渐变提供基础对比度，确保浅色文字清晰可读 -->
-      <div class="absolute inset-0 bg-gradient-to-br from-slate-900/75 via-slate-800/80 to-slate-900/85 transition-opacity duration-500 opacity-0 dark:opacity-100"></div>
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+      <div
+        class="absolute inset-0 bg-cover bg-center transition-all duration-1000 transform scale-105"
+        :style="backgroundImageStyle"
+      ></div>
     </div>
 
     <!-- 管理后台路由：使用与普通路由类似的布局，但侧边栏和内容组件不同 -->
@@ -98,7 +94,10 @@
         />
 
         <!-- 内容滚动视口 - 响应式内边距 -->
-        <div class="flex-1 overflow-y-auto p-5 sm:p-7 md:p-10 lg:p-12 scroll-smooth relative custom-scrollbar" id="main-scroll">
+        <div
+          :class="mainScrollClass"
+          id="main-scroll"
+        >
           <!-- 使用 router-view 渲染路由组件 -->
           <router-view />
         </div>
@@ -121,13 +120,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useTheme } from './composables/useTheme'
 import { useKeyboard } from './composables/useKeyboard'
 import { useCustomTheme } from './composables/useCustomTheme'
 import { useSEO } from './composables/useSEO'
 import { getWeatherInfo } from './utils/weather'
+import {
+  defaultBackgroundSceneId,
+  resolveBackgroundPhase
+} from './config/backgroundScenes'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
 import AdminSidebar from './components/admin/AdminSidebar.vue'
@@ -137,7 +140,6 @@ import UpdateLogModal from './components/UpdateLogModal.vue'
 
 // 路由
 const route = useRoute()
-const router = useRouter()
 
 // 国际化
 // 主题管理
@@ -149,6 +151,8 @@ const showMobileMenu = ref(false) // 移动端菜单显示状态
 const weatherInfo = ref(null)
 const showThemeCustomizer = ref(false)
 const showUpdateLogModal = ref(false)
+const backgroundHour = ref(new Date().getHours())
+let backgroundPhaseTimer = null
 
 // 初始化自定义主题
 useCustomTheme()
@@ -156,12 +160,24 @@ useCustomTheme()
 // 初始化 SEO（默认配置）
 useSEO({ type: 'website' })
 
+const activeBackground = computed(() =>
+  resolveBackgroundPhase(defaultBackgroundSceneId, backgroundHour.value)
+)
+
+const backgroundImageStyle = computed(() => ({
+  backgroundImage: `url('${activeBackground.value.src}')`,
+  filter: `brightness(${activeBackground.value.brightness})`
+}))
+
 /**
  * 检查是否为管理后台路由
  */
 const isAdminRoute = computed(() => {
   return route.path.startsWith('/admin')
 })
+
+const isBlogIndexRoute = computed(() => route.name === 'blog')
+const isHomeRoute = computed(() => route.name === 'home')
 
 /**
  * 根据当前路由获取当前标签页
@@ -178,6 +194,13 @@ const currentTab = computed(() => {
   }
   return routeToTab[route.name] || 'home'
 })
+
+const mainScrollClass = computed(() => [
+  'flex-1 scroll-smooth relative custom-scrollbar flex flex-col min-h-0',
+  isHomeRoute.value ? 'overflow-hidden' : 'overflow-y-auto',
+  isBlogIndexRoute.value ? '2xl:overflow-hidden' : '',
+  isHomeRoute.value ? 'p-3 sm:p-4 md:p-5 lg:p-6' : 'p-5 sm:p-7 md:p-10 lg:p-12'
+])
 
 
 /**
@@ -204,6 +227,13 @@ const loadWeather = async () => {
 }
 
 /**
+ * 同步本地小时数，用于驱动同场景的时段化切换
+ */
+const syncBackgroundHour = () => {
+  backgroundHour.value = new Date().getHours()
+}
+
+/**
  * 注册全局快捷键
  */
 useKeyboard({
@@ -217,13 +247,17 @@ useKeyboard({
 })
 
 onMounted(() => {
+  syncBackgroundHour()
+  backgroundPhaseTimer = window.setInterval(syncBackgroundHour, 60_000)
   loadWeather()
   const currentLocale = localStorage.getItem('locale') || 'zh'
   document.documentElement.lang = currentLocale === 'zh' ? 'zh-CN' : 'en'
 })
 
 onUnmounted(() => {
-  // 清理工作
+  if (backgroundPhaseTimer !== null) {
+    window.clearInterval(backgroundPhaseTimer)
+  }
 })
 </script>
 

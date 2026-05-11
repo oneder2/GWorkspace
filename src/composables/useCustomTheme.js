@@ -95,12 +95,14 @@ export function useCustomTheme() {
   const currentPresetStore = useLocalStorage('themePreset', 'none')
   const glassBlurStore = useLocalStorage('themeGlassBlur', 12)
   const bgOpacityStore = useLocalStorage('themeBgOpacity', 0.4)
+  const panelOpacityStore = useLocalStorage('themePanelOpacity', 0.68)
 
   // 提取真正的 Ref
   const customTheme = customThemeStore.value
   const currentPreset = currentPresetStore.value
   const glassBlur = glassBlurStore.value
   const bgOpacity = bgOpacityStore.value
+  const panelOpacity = panelOpacityStore.value
 
   /**
    * 当前主题颜色数据
@@ -130,6 +132,7 @@ export function useCustomTheme() {
     // 应用玻璃效果参数
     root.style.setProperty('--glass-blur', `${glassBlur.value}px`)
     root.style.setProperty('--bg-opacity', bgOpacity.value)
+    root.style.setProperty('--panel-opacity', panelOpacity.value)
   }
 
   /**
@@ -158,11 +161,12 @@ export function useCustomTheme() {
     currentPresetStore.update('none')
     glassBlurStore.update(12)
     bgOpacityStore.update(0.4)
+    panelOpacityStore.update(0.68)
     applyTheme()
   }
 
   // 监听玻璃效果变化即时应用
-  watch([glassBlur, bgOpacity], () => {
+  watch([glassBlur, bgOpacity, panelOpacity], () => {
     applyTheme()
   })
 
@@ -177,6 +181,7 @@ export function useCustomTheme() {
     currentPreset,
     glassBlur,
     bgOpacity,
+    panelOpacity,
     setPresetTheme,
     setCustomTheme,
     resetTheme,

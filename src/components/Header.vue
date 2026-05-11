@@ -4,14 +4,14 @@
 -->
 <template>
   <header
-    class="h-16 sm:h-[4.5rem] px-4 sm:px-6 md:px-8 flex items-center justify-between shrink-0 relative gap-3 sm:gap-4 divider-strong-b"
-    style="background: color-mix(in srgb, var(--surface-elevated) 70%, transparent);"
+    class="h-16 sm:h-[4.5rem] px-4 sm:px-6 md:px-8 flex items-center justify-between shrink-0 relative gap-3 sm:gap-4"
+    style="background: transparent;"
   >
     <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
       <!-- 移动端菜单按钮 -->
       <button
         @click="$emit('toggle-mobile-menu')"
-        class="md:hidden icon-btn flex-shrink-0"
+        class="md:hidden icon-btn flex-shrink-0 !bg-transparent !border-0"
         :title="$t('common.menu')"
       >
         <svg 
@@ -46,7 +46,6 @@
       </button>
       <!-- 页面标题：亮色模式使用深色，暗色模式使用浅色，确保在背景上有足够对比度 -->
       <div class="min-w-0">
-        <p class="section-kicker mb-1 hidden sm:block">{{ $t('common.workspace') }}</p>
         <h2 class="text-lg sm:text-xl font-bold text-main tracking-tight truncate">{{ currentTabName }}</h2>
       </div>
       <span 
@@ -187,25 +186,24 @@
       <!-- 位置信息 -->
       <div 
         v-if="weather && (weather.city || weather.country)" 
-        class="hidden xl:flex topbar-chip"
+        class="hidden xl:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/30 dark:bg-white/5 text-secondary border border-white/20"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
           <circle cx="12" cy="10" r="3"/>
         </svg>
-        <span>{{ formatLocation(weather) }}</span>
+        <span class="text-sm font-medium">{{ formatLocation(weather) }}</span>
       </div>
       
       <!-- 天气信息 -->
       <div 
         v-if="weather" 
-        class="hidden lg:flex topbar-chip"
+        class="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/30 dark:bg-white/5 text-secondary border border-white/20"
       >
-        <!-- 使用SVG太阳图标 -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-orange-400">
           <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
         </svg>
-        <span>{{ weather.temp }}°C</span>
+        <span class="text-sm font-bold">{{ weather.temp }}°C</span>
       </div>
       
       <!-- 用户菜单 -->

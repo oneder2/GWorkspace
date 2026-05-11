@@ -7,9 +7,9 @@
     :title="open ? copy.ui.dismissLabel : copy.ui.openLabel"
     @click="$emit('toggle')"
   >
-    <span class="terminal-launcher-core" aria-hidden="true">
-      <span class="terminal-launcher-pulse"></span>
-      <span class="terminal-launcher-orb"></span>
+    <span class="terminal-launcher-icon-shell" aria-hidden="true">
+      <span class="terminal-launcher-icon-glow"></span>
+      <span class="terminal-launcher-icon"></span>
     </span>
 
     <span class="terminal-launcher-copy">
@@ -44,66 +44,90 @@ defineEmits(['toggle'])
 <style scoped>
 .terminal-launcher {
   position: fixed;
-  right: 1rem;
-  bottom: 1rem;
+  right: 1.4rem;
+  bottom: calc(1.45rem + env(safe-area-inset-bottom, 0px));
   z-index: 90;
   display: inline-flex;
   align-items: center;
-  gap: 0.9rem;
-  min-width: 13.5rem;
-  padding: 0.85rem 1rem;
-  border-radius: 24px;
+  gap: 0.85rem;
+  min-width: 13rem;
+  padding: 0.82rem 0.95rem;
+  border-radius: 26px;
   border: 1px solid color-mix(in srgb, var(--agent-signal) 18%, var(--border-base));
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--surface-elevated) 92%, transparent), color-mix(in srgb, var(--surface-overlay) 90%, transparent)),
-    radial-gradient(circle at top left, color-mix(in srgb, var(--agent-signal) 18%, transparent), transparent 45%);
-  box-shadow: var(--shadow-medium), 0 0 0 1px color-mix(in srgb, var(--agent-signal) 10%, transparent);
+    linear-gradient(135deg, color-mix(in srgb, var(--surface-elevated) 94%, transparent), color-mix(in srgb, var(--surface-overlay) 90%, transparent)),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--agent-signal) 16%, transparent), transparent 46%);
+  box-shadow:
+    0 18px 42px rgba(15, 23, 42, 0.16),
+    0 0 0 1px color-mix(in srgb, var(--agent-signal) 8%, transparent);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
-  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease, opacity 0.22s ease;
+  transition: transform 0.26s ease, box-shadow 0.26s ease, border-color 0.26s ease, opacity 0.22s ease;
+}
+
+.terminal-launcher::before {
+  content: "";
+  position: absolute;
+  inset: auto 0.85rem -0.7rem 0.85rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--agent-signal) 24%, transparent), transparent 72%);
+  filter: blur(12px);
+  opacity: 0.65;
+  pointer-events: none;
 }
 
 .terminal-launcher:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-strong), 0 0 0 1px color-mix(in srgb, var(--agent-signal) 22%, transparent);
-  border-color: color-mix(in srgb, var(--agent-signal) 32%, var(--border-base));
+  transform: translateY(-3px) scale(1.01);
+  border-color: color-mix(in srgb, var(--agent-signal) 30%, var(--border-base));
+  box-shadow:
+    0 24px 54px rgba(15, 23, 42, 0.2),
+    0 0 0 1px color-mix(in srgb, var(--agent-signal) 18%, transparent);
 }
 
 .terminal-launcher-open {
-  border-color: color-mix(in srgb, var(--agent-signal) 42%, var(--border-base));
   opacity: 0;
   pointer-events: none;
   transform: translateY(8px) scale(0.98);
 }
 
-.terminal-launcher-core {
+.terminal-launcher-icon-shell {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.8rem;
-  height: 2.8rem;
-  border-radius: 18px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-elevated) 96%, transparent), color-mix(in srgb, var(--surface-panel) 92%, transparent));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--agent-signal) 18%, var(--border-base));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-elevated) 98%, transparent), color-mix(in srgb, var(--surface-panel) 90%, transparent));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.66), 0 10px 24px color-mix(in srgb, var(--agent-signal) 10%, transparent);
   overflow: hidden;
 }
 
-.terminal-launcher-pulse {
+.terminal-launcher-icon-glow {
   position: absolute;
-  inset: 0.5rem;
-  border-radius: 999px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--agent-signal) 55%, white 10%), transparent 68%);
-  animation: terminalLauncherPulse 2.8s ease-in-out infinite;
+  inset: -20%;
+  background: radial-gradient(circle at 28% 24%, color-mix(in srgb, var(--agent-signal) 25%, transparent), transparent 58%);
+  opacity: 0.95;
 }
 
-.terminal-launcher-orb {
+.terminal-launcher-icon {
   position: relative;
-  width: 0.95rem;
-  height: 0.95rem;
-  border-radius: 999px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--agent-signal) 86%, white 18%), color-mix(in srgb, var(--agent-signal-deep) 88%, transparent));
-  box-shadow: 0 0 16px color-mix(in srgb, var(--agent-signal) 42%, transparent);
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: var(--theme-primary-darker);
+  -webkit-mask: url('/images/icons/terminal.svg') center / contain no-repeat;
+  mask: url('/images/icons/terminal.svg') center / contain no-repeat;
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--agent-signal) 24%, transparent));
+  transition: transform 0.26s ease, background-color 0.26s ease, filter 0.26s ease;
+}
+
+.terminal-launcher:hover .terminal-launcher-icon {
+  transform: translateY(-1px) scale(1.03);
+  background-color: var(--agent-signal-deep);
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--agent-signal) 36%, transparent));
 }
 
 .terminal-launcher-copy {
@@ -117,7 +141,7 @@ defineEmits(['toggle'])
 .terminal-launcher-label {
   max-width: 100%;
   color: var(--text-main);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   white-space: nowrap;
@@ -130,7 +154,7 @@ defineEmits(['toggle'])
   align-items: center;
   gap: 0.4rem;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -144,31 +168,23 @@ defineEmits(['toggle'])
   box-shadow: 0 0 10px color-mix(in srgb, var(--agent-signal) 44%, transparent);
 }
 
-@keyframes terminalLauncherPulse {
-  0%,
-  100% {
-    transform: scale(0.92);
-    opacity: 0.55;
-  }
-
-  50% {
-    transform: scale(1.08);
-    opacity: 0.95;
-  }
-}
-
 @media (max-width: 767px) {
   .terminal-launcher {
-    right: 0.85rem;
-    bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
+    right: 1rem;
+    bottom: calc(1.15rem + env(safe-area-inset-bottom, 0px));
     min-width: 0;
     width: auto;
-    max-width: calc(100vw - 1.7rem);
-    padding: 0.8rem 0.9rem;
+    max-width: calc(100vw - 2rem);
+    padding: 0.78rem 0.88rem;
+  }
+
+  .terminal-launcher-icon-shell {
+    width: 2.7rem;
+    height: 2.7rem;
   }
 
   .terminal-launcher-label {
-    font-size: 0.86rem;
+    font-size: 0.84rem;
   }
 }
 </style>

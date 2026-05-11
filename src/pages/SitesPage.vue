@@ -53,6 +53,7 @@
               <a 
                 :href="link.url" 
                 target="_blank" 
+                rel="noopener noreferrer"
                 class="flex items-start gap-3 flex-1 min-w-0"
               >
                 <div class="sites-link-icon w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-slate-400 shrink-0 shadow-sm border border-slate-100 dark:border-slate-700"
