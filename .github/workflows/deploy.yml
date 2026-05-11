@@ -121,12 +121,13 @@ jobs:
             mkdir -p $TEMP_DIR
             tar -xzf /tmp/backend-deploy.tar.gz -C $TEMP_DIR --strip-components=1
             
-            # 清理旧代码，但保留环境变量和数据库目录
+            # 清理旧代码，但保留环境变量和数据库目录。
+            # 这里只删除部署目录的第一层条目，避免 find 在递归遍历 node_modules 时
+            # 因为目标被 rm -rf 提前删掉而返回 “No such file or directory”。
             echo "Deploying new version..."
-            find "$DEPLOY_DIR" -mindepth 1 \
-              ! -path "$DEPLOY_DIR/.env" \
-              ! -path "$DEPLOY_DIR/database" \
-              ! -path "$DEPLOY_DIR/database/*" \
+            find "$DEPLOY_DIR" -mindepth 1 -maxdepth 1 \
+              ! -name '.env' \
+              ! -name 'database' \
               -exec rm -rf {} +
 
             cp -a "$TEMP_DIR"/. "$DEPLOY_DIR"/
