@@ -65,6 +65,19 @@ const { t } = useI18n()
 
 const updates = computed(() => ([
   {
+    version: 'v3.1.0',
+    date: '2026-05-11',
+    items: [
+      t('changelog.v3_1_0.0'),
+      t('changelog.v3_1_0.1'),
+      t('changelog.v3_1_0.2'),
+      t('changelog.v3_1_0.3'),
+      t('changelog.v3_1_0.4'),
+      t('changelog.v3_1_0.5'),
+      t('changelog.v3_1_0.6')
+    ]
+  },
+  {
     version: 'v3.0.0',
     date: '2026-04-30',
     items: [

@@ -529,6 +529,15 @@
     "stationGiftWrite": "Write From It"
   },
   "changelog": {
+    "v3_1_0": {
+      "0": "Refocused the homepage into a personal welcome surface built around status, slogan, on-desk tasks, and music.",
+      "1": "Made the homepage status and task blocks editable from admin for low-frequency maintenance.",
+      "2": "Added Spotify authorization, callback, and now-playing routes to establish a live playback flow.",
+      "3": "Added a Spotify status panel in admin system ops to inspect env gaps, callback URLs, and token cache state.",
+      "4": "Refined homepage card edges, copy tone, search hierarchy, and light-dark contrast for a clearer single-screen layout.",
+      "5": "Completed system ops, asset management, and analytics fixes to reduce site maintenance cost.",
+      "6": "Polished the lightweight AI surfaces, station note flow, and editor preview details for smoother publishing work."
+    },
     "v3_0_0": {
       "0": "Rebuilt the toolbox into a single-screen dashboard workspace to reduce scrolling and context loss.",
       "1": "Replaced the unstable system color-picking chain with an in-page live color workspace.",

@@ -52,7 +52,7 @@
         v-if="currentTab === 'tools'" 
         class="eyebrow text-[0.66rem] px-2.5 py-1"
       >
-        v3.0.0
+        v3.1.0
       </span>
     </div>
 
