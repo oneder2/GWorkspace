@@ -19,7 +19,6 @@
         <!-- Logo图标：亮色模式使用黑色，暗色模式使用白色 -->
         <GWorkspaceIcon :size="60" variant="black" class="dark:brightness-0 dark:invert" />
         <div class="min-w-0">
-          <p class="section-kicker mb-1">Navigation</p>
           <span class="font-bold text-xl tracking-tight text-main transition-colors group-hover:[color:var(--theme-primary)]">GWorkspace</span>
         </div>
         <!-- 移动端关闭按钮 -->
@@ -75,7 +74,7 @@
         <FileTextIcon class="w-5 h-5 text-secondary transition-colors group-hover:text-main shrink-0" />
         <div class="min-w-0">
           <div class="text-sm font-medium text-secondary transition-colors group-hover:text-main">{{ $t('home.updateLog') }}</div>
-          <div class="text-xs text-muted truncate">Changelog</div>
+          <div class="text-xs text-muted truncate">{{ $t('common.changelog') }}</div>
         </div>
       </button>
 
@@ -108,7 +107,7 @@
           © 2026 GWorkspace
         </p>
         <p class="text-xs text-muted text-center mt-1">
-          All rights reserved
+          {{ $t('common.allRightsReserved') }}
         </p>
       </div>
     </div>

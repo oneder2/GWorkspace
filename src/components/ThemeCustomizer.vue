@@ -35,7 +35,7 @@
             >
               <div class="flex flex-col items-center gap-2">
                 <div class="w-8 h-8 rounded-full shadow-inner" :style="{ backgroundColor: theme.primary }"></div>
-                <span class="text-xs font-bold text-main">{{ theme.name }}</span>
+                <span class="text-xs font-bold text-main">{{ $t(theme.nameKey) }}</span>
               </div>
               <!-- 激活标记 -->
               <div v-if="currentPreset === key" class="absolute top-1 right-1">
@@ -62,7 +62,7 @@
               </div>
               <div class="flex-1 space-y-2 text-center sm:text-left">
                 <p class="font-bold text-main">{{ $t('theme.primaryColor') }}</p>
-                <p class="text-xs text-muted leading-relaxed">选择您最喜欢的基准色，系统将自动生成配套的协调色阶和磨砂感背景。</p>
+                <p class="text-xs text-muted leading-relaxed">{{ $t('theme.customHint') }}</p>
                 <div class="flex items-center gap-2 justify-center sm:justify-start pt-2">
                   <span class="px-2 py-1 bg-border-base/50 rounded font-mono text-xs text-secondary uppercase">{{ customPrimary }}</span>
                   <button 
@@ -76,10 +76,24 @@
             </div>
 
             <!-- 玻璃效果调节 -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 divider-strong-t">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 divider-strong-t">
               <div class="space-y-3">
                 <div class="flex justify-between items-center">
-                  <label class="text-sm font-bold text-main">背景透明度</label>
+                  <label class="text-sm font-bold text-main">{{ $t('theme.panelOpacity') }}</label>
+                  <span class="text-xs font-mono text-secondary">{{ (panelOpacity * 100).toFixed(0) }}%</span>
+                </div>
+                <input
+                  type="range"
+                  v-model.number="panelOpacity"
+                  min="0.2"
+                  max="0.9"
+                  step="0.02"
+                  class="w-full accent-[var(--theme-primary)] cursor-pointer"
+                >
+              </div>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <label class="text-sm font-bold text-main">{{ $t('theme.bgOpacity') }}</label>
                   <span class="text-xs font-mono text-secondary">{{ (bgOpacity * 100).toFixed(0) }}%</span>
                 </div>
                 <input 
@@ -93,7 +107,7 @@
               </div>
               <div class="space-y-3">
                 <div class="flex justify-between items-center">
-                  <label class="text-sm font-bold text-main">毛玻璃强度</label>
+                  <label class="text-sm font-bold text-main">{{ $t('theme.glassBlur') }}</label>
                   <span class="text-xs font-mono text-secondary">{{ glassBlur }}px</span>
                 </div>
                 <input 
@@ -118,8 +132,8 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               </div>
               <div>
-                <div class="text-sm font-bold text-main">主色应用</div>
-                <div class="text-xs text-muted">Primary Theme Color</div>
+                <div class="text-sm font-bold text-main">{{ $t('theme.previewPrimary') }}</div>
+                <div class="text-xs text-muted">{{ $t('theme.previewPrimaryMeta') }}</div>
               </div>
             </div>
             <div class="glass-card p-4 rounded-xl flex items-center gap-3 opacity-80">
@@ -127,8 +141,8 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
               </div>
               <div>
-                <div class="text-sm font-bold text-main">玻璃质感</div>
-                <div class="text-xs text-muted">Glassmorphism Texture</div>
+                <div class="text-sm font-bold text-main">{{ $t('theme.previewGlass') }}</div>
+                <div class="text-xs text-muted">{{ $t('theme.previewGlassMeta') }}</div>
               </div>
             </div>
           </div>
@@ -155,7 +169,16 @@ import { useCustomTheme } from '../composables/useCustomTheme'
 
 const emit = defineEmits(['close'])
 const { t } = useI18n()
-const { presetThemes, currentPreset, glassBlur, bgOpacity, setPresetTheme, setCustomTheme, resetTheme } = useCustomTheme()
+const {
+  presetThemes,
+  currentPreset,
+  glassBlur,
+  bgOpacity,
+  panelOpacity,
+  setPresetTheme,
+  setCustomTheme,
+  resetTheme
+} = useCustomTheme()
 
 const customPrimary = ref('#475569')
 
@@ -204,8 +227,8 @@ const resetToDefault = () => {
 
 <style scoped>
 .theme-custom-card {
-  border: 1px solid var(--border-color);
-  background: color-mix(in srgb, var(--surface-bg) 86%, transparent);
+  border: 1px solid var(--border-base);
+  background: color-mix(in srgb, var(--surface-panel) 86%, transparent);
   box-shadow: var(--shadow-soft);
 }
 
@@ -213,9 +236,9 @@ const resetToDefault = () => {
   width: 5.5rem;
   height: 5.5rem;
   padding: 0.35rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-base);
   border-radius: 1.35rem;
-  background: color-mix(in srgb, var(--surface-bg) 92%, transparent);
+  background: color-mix(in srgb, var(--surface-panel) 92%, transparent);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 14px 32px rgb(15 23 42 / 0.12);
   isolation: isolate;
   filter: none;

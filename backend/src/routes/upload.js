@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { uploadToR2 } from '../utils/r2.js';
+import { getMissingR2Fields, uploadToR2 } from '../utils/r2.js';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -31,11 +31,7 @@ router.post('/blog-image', authenticate, requireAdmin, upload.single('image'), a
     console.log(`[Upload] Attempting to upload ${originalName} (${req.file.size} bytes)`);
 
     // 检查核心环境变量是否配置
-    const missingKeys = [];
-    if (!process.env.R2_ACCOUNT_ID) missingKeys.push('R2_ACCOUNT_ID');
-    if (!process.env.R2_ACCESS_KEY_ID) missingKeys.push('R2_ACCESS_KEY_ID');
-    if (!process.env.R2_SECRET_ACCESS_KEY) missingKeys.push('R2_SECRET_ACCESS_KEY');
-    if (!process.env.R2_BUCKET_NAME) missingKeys.push('R2_BUCKET_NAME');
+    const missingKeys = getMissingR2Fields()
 
     if (missingKeys.length > 0) {
       console.error('[Upload] R2 Configuration Missing:', missingKeys.join(', '));
@@ -45,12 +41,14 @@ router.post('/blog-image', authenticate, requireAdmin, upload.single('image'), a
       });
     }
 
-    const url = await uploadToR2(req.file.buffer, originalName, req.file.mimetype);
+    const result = await uploadToR2(req.file.buffer, originalName, req.file.mimetype);
     
-    console.log(`[Upload] Success: ${url}`);
+    console.log(`[Upload] Success: ${result.url}`);
     res.json({
-      url: url,
-      name: originalName
+      url: result.url,
+      key: result.key,
+      name: originalName,
+      cacheControl: result.cache_control
     });
   } catch (error) {
     console.error('[Upload] Server error during image processing:', error);

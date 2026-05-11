@@ -5,11 +5,11 @@
 <template>
   <div class="color-tool-shell w-full">
     <div class="color-tool-card color-workbench">
-      <section class="color-picker-panel" aria-label="Color picker">
+      <section class="color-picker-panel" :aria-label="$t('tools.colorWorkspace.pickerLabel')">
         <div class="color-topbar">
           <div class="color-preview-chip" :style="{ backgroundColor: color }"></div>
           <div class="color-current-block">
-            <span>Current</span>
+            <span>{{ $t('tools.colorWorkspace.current') }}</span>
             <input
               :value="colorDraft"
               @input="updateColorDraft"
@@ -17,7 +17,7 @@
               @keydown.enter="commitColorDraft"
               type="text"
               class="color-hex-input"
-              placeholder="#000000"
+              :placeholder="$t('tools.colorWorkspace.placeholder')"
             >
           </div>
         </div>
@@ -43,7 +43,7 @@
             max="359"
             step="1"
             class="color-hue-slider"
-            aria-label="Hue"
+            :aria-label="$t('tools.colorWorkspace.hue')"
           >
 
           <div class="color-channel-grid">
@@ -63,15 +63,15 @@
         </div>
       </section>
 
-      <section class="color-data-panel" aria-label="Color values">
+      <section class="color-data-panel" :aria-label="$t('tools.colorWorkspace.valuesLabel')">
         <div class="color-hero-card">
           <div class="color-hero-preview" :style="{ backgroundColor: color }">
             <span>{{ color }}</span>
           </div>
           <div class="color-hero-meta">
-            <span class="color-hero-label">Active Tone</span>
+            <span class="color-hero-label">{{ $t('tools.colorWorkspace.activeTone') }}</span>
             <strong>{{ rgbColor }}</strong>
-            <p>所有字段由同一组 HSV 状态驱动。</p>
+            <p>{{ $t('tools.colorWorkspace.activeToneDesc') }}</p>
           </div>
         </div>
 
@@ -112,8 +112,8 @@
 
         <div class="color-palette-card">
           <div class="color-palette-head">
-            <span>Quick Palette</span>
-            <span>{{ palette.length }} colors</span>
+            <span>{{ $t('tools.colorWorkspace.quickPalette') }}</span>
+            <span>{{ $t('tools.colorWorkspace.paletteCount', { count: palette.length }) }}</span>
           </div>
           <div class="color-palette-strip">
             <button
@@ -133,6 +133,9 @@
 
 <script setup>
 import { computed, onBeforeUnmount, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+useI18n()
 
 const svPad = ref(null)
 

@@ -2,7 +2,7 @@
   <div class="mt-12 sm:mt-16" id="comments">
     <div class="section-heading mb-8">
       <div>
-        <span class="section-kicker">Discussion</span>
+        <span class="section-kicker">{{ $t('common.discussion') }}</span>
         <h2 class="text-2xl font-bold text-main flex items-center gap-2 mt-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -44,10 +44,13 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { commentsApi } from '../../utils/api'
 import CommentForm from './CommentForm.vue'
 import CommentItem from './CommentItem.vue'
 import CommentSkeleton from './CommentSkeleton.vue'
+
+useI18n()
 
 const props = defineProps({
   blogId: {

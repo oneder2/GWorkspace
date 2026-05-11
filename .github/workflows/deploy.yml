@@ -47,8 +47,7 @@ jobs:
             --exclude='backend/node_modules' \
             --exclude='backend/.git' \
             --exclude='backend/.env' \
-            --exclude='backend/database/*.db' \
-            --exclude='backend/database/*.db-journal' \
+            --exclude='backend/database/*.db*' \
             backend/
 
       - name: Deploy to server via SCP
@@ -70,20 +69,36 @@ jobs:
           port: ${{ secrets.SERVER_PORT || 22 }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -euo pipefail
+
             # 设置变量
             DEPLOY_DIR="$HOME/gworkspace/backend"
             BACKUP_DIR="$HOME/gworkspace/backups"
             TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            R2_ACCESS_KEY_ID="${{ secrets.R2_ACCESS_KEY_ID }}"
+            R2_SECRET_ACCESS_KEY="${{ secrets.R2_SECRET_ACCESS_KEY }}"
+            R2_ACCOUNT_ID="${{ secrets.R2_ACCOUNT_ID }}"
+            R2_BUCKET_NAME="${{ secrets.R2_BUCKET_NAME }}"
+            R2_PUBLIC_DOMAIN="${{ secrets.R2_PUBLIC_DOMAIN }}"
+
+            require_secret() {
+              key="$1"
+              value="$2"
+              if [ -z "$value" ]; then
+                echo "Missing required deploy secret: $key" >&2
+                exit 1
+              fi
+            }
+
+            require_secret "R2_ACCESS_KEY_ID" "$R2_ACCESS_KEY_ID"
+            require_secret "R2_SECRET_ACCESS_KEY" "$R2_SECRET_ACCESS_KEY"
+            require_secret "R2_ACCOUNT_ID" "$R2_ACCOUNT_ID"
+            require_secret "R2_BUCKET_NAME" "$R2_BUCKET_NAME"
+            require_secret "R2_PUBLIC_DOMAIN" "$R2_PUBLIC_DOMAIN"
             
             # 创建必要的目录
             mkdir -p $DEPLOY_DIR
             mkdir -p $BACKUP_DIR
-            
-            # 备份当前版本
-            if [ -d "$DEPLOY_DIR" ] && [ "$(ls -A $DEPLOY_DIR 2>/dev/null)" ]; then
-              echo "Backing up current version..."
-              tar -czf "$BACKUP_DIR/backend-backup-$TIMESTAMP.tar.gz" -C $DEPLOY_DIR . 2>/dev/null || true
-            fi
             
             # 保存现有的.env文件到临时位置
             ENV_TEMP="/tmp/.env.backup-$$"
@@ -91,37 +106,34 @@ jobs:
               cp "$DEPLOY_DIR/.env" "$ENV_TEMP"
             fi
             
-            # 保存现有数据库文件
-            DB_TEMP="/tmp/gworkspace.db.backup-$$"
-            if [ -f "$DEPLOY_DIR/database/gworkspace.db" ]; then
-              cp "$DEPLOY_DIR/database/gworkspace.db" "$DB_TEMP"
-            fi
+            # 先停止服务，确保 SQLite WAL 数据被安全 checkpoint 到主库
+            pm2 stop gworkspace-backend 2>/dev/null || true
+            pm2 delete gworkspace-backend 2>/dev/null || true
             
+            # 在服务停止后再备份，避免 WAL 模式下只备份到过旧的主库快照
+            if [ -d "$DEPLOY_DIR" ] && [ "$(ls -A $DEPLOY_DIR 2>/dev/null)" ]; then
+              echo "Backing up current version..."
+              tar -czf "$BACKUP_DIR/backend-backup-$TIMESTAMP.tar.gz" -C $DEPLOY_DIR . 2>/dev/null || true
+            fi
+
             # 解压新版本到临时目录
             TEMP_DIR="/tmp/gworkspace-deploy-$TIMESTAMP"
             mkdir -p $TEMP_DIR
             tar -xzf /tmp/backend-deploy.tar.gz -C $TEMP_DIR --strip-components=1
             
-            # 停止服务
-            pm2 stop gworkspace-backend 2>/dev/null || true
-            pm2 delete gworkspace-backend 2>/dev/null || true
-            
-            # 复制新文件
+            # 清理旧代码，但保留环境变量和数据库目录
             echo "Deploying new version..."
-            if [ -d "$TEMP_DIR" ]; then
-              find "$TEMP_DIR" -type f ! -path "*/node_modules/*" ! -name ".env" ! -path "*/database/*.db*" -exec sh -c '
-                  src="$1"; dest="$2"; rel_path="${src#$3/}"; target="$dest/$rel_path"
-                  mkdir -p "$(dirname "$target")"
-                  cp "$src" "$target"
-                ' _ {} "$DEPLOY_DIR" "$TEMP_DIR" \;
-            fi
+            find "$DEPLOY_DIR" -mindepth 1 \
+              ! -path "$DEPLOY_DIR/.env" \
+              ! -path "$DEPLOY_DIR/database" \
+              ! -path "$DEPLOY_DIR/database/*" \
+              -exec rm -rf {} +
+
+            cp -a "$TEMP_DIR"/. "$DEPLOY_DIR"/
             
-            # 恢复数据库
-            if [ -f "$DB_TEMP" ]; then
-              mkdir -p "$DEPLOY_DIR/database"
-              cp "$DB_TEMP" "$DEPLOY_DIR/database/gworkspace.db"
-              rm -f "$DB_TEMP"
-            fi
+            # 数据库文件直接保留原位。
+            # 部署包本身不包含 *.db*，因此这里绝不能再用临时拷贝覆盖主库，
+            # 否则在 SQLite WAL 模式下会把数据库回退到旧 checkpoint。
             
             # 处理 .env 注入逻辑
             if [ -f "$ENV_TEMP" ]; then
@@ -144,23 +156,33 @@ jobs:
             }
 
             echo "Injecting R2 configurations from GitHub Secrets..."
-            update_env "R2_ACCESS_KEY_ID" "${{ secrets.R2_ACCESS_KEY_ID }}"
-            update_env "R2_SECRET_ACCESS_KEY" "${{ secrets.R2_SECRET_ACCESS_KEY }}"
-            update_env "R2_ACCOUNT_ID" "${{ secrets.R2_ACCOUNT_ID }}"
-            update_env "R2_BUCKET_NAME" "${{ secrets.R2_BUCKET_NAME }}"
-            update_env "R2_PUBLIC_DOMAIN" "${{ secrets.R2_PUBLIC_DOMAIN }}"
+            update_env "R2_ACCESS_KEY_ID" "$R2_ACCESS_KEY_ID"
+            update_env "R2_SECRET_ACCESS_KEY" "$R2_SECRET_ACCESS_KEY"
+            update_env "R2_ACCOUNT_ID" "$R2_ACCOUNT_ID"
+            update_env "R2_BUCKET_NAME" "$R2_BUCKET_NAME"
+            update_env "R2_PUBLIC_DOMAIN" "$R2_PUBLIC_DOMAIN"
             
             # 确保在正确的目录
             cd $DEPLOY_DIR
             
-            # 安装构建工具并编译原生模块
-            export npm_config_build_from_source=true
-            npm install --omit=dev --no-audit --build-from-source
-            npm rebuild better-sqlite3 --build-from-source
+            # 重新安装生产依赖
+            # 不再强制 better-sqlite3 从源码编译；服务器上的旧版 g++ 无法处理 -std=c++20，
+            # 应优先使用 npm 提供的预编译二进制。
+            npm ci --omit=dev --no-audit
+
+            # 显式执行迁移和数据库健康检查，避免把问题带到启动之后
+            npm run db:prepare
+            npm run db:check
             
             # 启动服务
             pm2 start src/server.js --name gworkspace-backend
             pm2 save || true
+
+            # 基础健康检查，避免“部署成功但服务未启动”被静默吞掉
+            sleep 3
+            HEALTH_OUTPUT="$(curl -fsS "http://127.0.0.1:3001/health")"
+            echo "$HEALTH_OUTPUT" | grep '"status":"ok"' >/dev/null
+            echo "$HEALTH_OUTPUT" | grep '"database":"ok"' >/dev/null
             
             # 清理
             rm -rf $TEMP_DIR

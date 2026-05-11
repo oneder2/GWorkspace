@@ -14,8 +14,8 @@
 
 export const portfolioConfig = [
   { 
-    title: 'Glass Dashboard', 
-    desc: 'A personal dashboard template featuring heavy use of backdrop-filter and vibrant gradients.', 
+    titleKey: 'portfolio.items.glassDashboard.title',
+    descKey: 'portfolio.items.glassDashboard.desc',
     url: '/', 
     tags: ['Vue 3', 'Tailwind'], 
     iconName: 'LayoutIcon', 
@@ -23,8 +23,8 @@ export const portfolioConfig = [
     image: '/images/portfolio/glass-dashboard.jpg', // 预览图路径（可选）
   },
   { 
-    title: 'CiteAI', 
-    desc: 'AI-powered citation and research tool for academic writing and document management.', 
+    titleKey: 'portfolio.items.citeAI.title',
+    descKey: 'portfolio.items.citeAI.desc',
     url: 'https://citeai.co', 
     tags: ['AI', 'Research'], 
     iconName: 'ShoppingIcon', 
@@ -32,8 +32,8 @@ export const portfolioConfig = [
     image: '/images/portfolio/citeai.jpg', // 预览图路径（可选）
   },
   { 
-    title: 'Portfolio', 
-    desc: 'Personal portfolio website showcasing projects and professional experience.', 
+    titleKey: 'portfolio.items.portfolio.title',
+    descKey: 'portfolio.items.portfolio.desc',
     url: 'https://portfolio.gellaronline.cc', 
     tags: ['Web', 'Portfolio'], 
     iconName: 'ClockIcon', 

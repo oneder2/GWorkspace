@@ -10,14 +10,14 @@ import { useI18n } from 'vue-i18n'
 /**
  * 默认 SEO 配置
  */
-const defaultSEO = {
-  title: 'GWorkspace - Personal Workspace',
-  description: 'Personal workspace website with Vue.js, featuring blog, tools, and portfolio management.',
-  keywords: 'workspace, blog, tools, portfolio, vue.js',
-  image: '/og-image.jpg', // 需要添加默认 OG 图片
+const getDefaultSEO = (t) => ({
+  title: t('seo.siteTitle'),
+  description: t('seo.siteDescription'),
+  keywords: t('seo.siteKeywords'),
+  image: '/og-image.jpg',
   url: typeof window !== 'undefined' ? window.location.origin : '',
   type: 'website'
-}
+})
 
 /**
  * 更新或创建 meta 标签
@@ -82,16 +82,16 @@ function updateStructuredData(data) {
  */
 export function useSEO(seoConfig = {}) {
   const route = useRoute()
-  const { locale } = useI18n()
+  const { locale, t } = useI18n()
   
   /**
    * 应用 SEO 配置
    */
   const applySEO = (config = {}) => {
     const configWithDefaults = {
-      ...defaultSEO,
+      ...getDefaultSEO(t),
       ...config,
-      url: config.url || (typeof window !== 'undefined' ? window.location.href : defaultSEO.url)
+      url: config.url || (typeof window !== 'undefined' ? window.location.href : getDefaultSEO(t).url)
     }
     
     // 更新标题
@@ -154,9 +154,9 @@ export function generateBlogStructuredData(article) {
     '@type': 'BlogPosting',
     headline: article.title,
     description: article.excerpt || article.title,
-    image: article.image || defaultSEO.image,
-    datePublished: article.published_at || article.date,
-    dateModified: article.updated_at || article.published_at || article.date,
+    image: article.image || '/og-image.jpg',
+    datePublished: article.published_at || article.created_at,
+    dateModified: article.updated_at || article.published_at || article.created_at,
     author: {
       '@type': 'Person',
       name: 'GWorkspace'
@@ -175,4 +175,3 @@ export function generateBlogStructuredData(article) {
     }
   }
 }
-

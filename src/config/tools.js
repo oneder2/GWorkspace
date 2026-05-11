@@ -23,6 +23,18 @@ export const toolGroups = [
 
 export const toolsConfig = [
   {
+    id: 'thesis-parser',
+    nameKey: 'tools.thesisParser.title',
+    descriptionKey: 'tools.toolDescriptions.thesisParser',
+    iconName: 'BrainIcon',
+    group: 'content',
+    priority: 'primary',
+    badgeKey: 'tools.workspace.badges.featured',
+    defaultPinned: true,
+    workspacePadding: 'default',
+    keywords: ['thesis', 'analysis', 'thinking', 'proposition']
+  },
+  {
     id: 'blog-assistant',
     nameKey: 'tools.blogAssistant.title',
     descriptionKey: 'tools.toolDescriptions.blogAssistant',

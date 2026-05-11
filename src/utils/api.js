@@ -76,6 +76,7 @@ export const blogApi = {
   delete: (id) => request(`/blogs/${id}`, { method: 'DELETE' }),
   incrementViews: (id) => request(`/blogs/${id}/views`, { method: 'POST' }),
   getStats: () => request('/blogs/stats'),
+  getMetadata: () => request('/blogs/metadata'),
   getAllGenres: (params = {}) => {
     const queryString = new URLSearchParams(params).toString()
     return request(`/blogs/genres${queryString ? `?${queryString}` : ''}`)
@@ -84,6 +85,15 @@ export const blogApi = {
     const queryString = new URLSearchParams(params).toString()
     return request(`/blogs/tags${queryString ? `?${queryString}` : ''}`)
   }
+}
+
+export const aiApi = {
+  getDailyCapsule: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/ai/daily-capsule${queryString ? `?${queryString}` : ''}`)
+  },
+  analyze: (data) => request('/ai/analyze', { method: 'POST', body: JSON.stringify(data) }),
+  getBlogSeed: (data) => request('/ai/blog-seed', { method: 'POST', body: JSON.stringify(data) })
 }
 
 /**
@@ -140,11 +150,6 @@ export const authApi = {
     return request(url, { method: 'DELETE' })
   },
   verify: () => request('/auth/verify'),
-  getFavorites: () => request('/auth/favorites'),
-  updateFavorites: (favorites) => request('/auth/favorites', {
-    method: 'POST',
-    body: JSON.stringify({ favorites })
-  }),
   refresh: () => request('/auth/refresh', { method: 'POST' })
 }
 
@@ -163,9 +168,14 @@ export const uploadApi = {
       method: 'POST',
       headers,
       body: formData
-    }).then(res => {
-      if (!res.ok) throw new Error('Upload failed')
-      return res.json()
+    }).then(async res => {
+      const payload = await res.json().catch(() => ({ error: 'Upload failed' }))
+      if (!res.ok) {
+        const uploadError = new Error(payload.message || payload.error || 'Upload failed')
+        Object.assign(uploadError, payload, { status: res.status })
+        throw uploadError
+      }
+      return payload
     })
   }
 }
@@ -197,7 +207,27 @@ export const adminApi = {
   getAnalyticsOverview: (params = {}) => {
     const queryString = new URLSearchParams(params).toString()
     return request(`/admin/analytics/overview${queryString ? `?${queryString}` : ''}`)
-  }
+  },
+  getStats: () => request('/admin/stats'),
+  getSystemHealth: () => request('/admin/system/health'),
+  createSystemBackup: () => request('/admin/system/backup', { method: 'POST' }),
+  getSystemAssets: () => request('/admin/system/assets'),
+  deleteSystemAsset: (key) => request('/admin/system/assets', {
+    method: 'DELETE',
+    body: JSON.stringify({ key })
+  }),
+  getAiSeeds: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/admin/ai/seeds${queryString ? `?${queryString}` : ''}`)
+  },
+  createAiSeed: (data) => request('/admin/ai/seeds', { method: 'POST', body: JSON.stringify(data) }),
+  updateAiSeed: (id, data) => request(`/admin/ai/seeds/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  importAiSeeds: (data) => request('/admin/ai/seeds/import', { method: 'POST', body: JSON.stringify(data) }),
+  getAiDailyCapsule: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString()
+    return request(`/admin/ai/daily-capsule${queryString ? `?${queryString}` : ''}`)
+  },
+  refreshAiDailyCapsule: (data = {}) => request('/admin/ai/daily-capsule/refresh', { method: 'POST', body: JSON.stringify(data) })
 }
 
 /**

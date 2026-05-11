@@ -1,14 +1,19 @@
 {
   "name": "gworkspace-backend",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "GWorkspace backend API server",
   "type": "module",
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "migrate": "node scripts/migrate-from-files.js",
-    "create-admin": "node scripts/create-admin.js"
+    "migrate": "node scripts/run-migrations.js",
+    "db:prepare": "node scripts/run-migrations.js",
+    "db:check": "node scripts/check-database.js",
+    "db:backup": "node scripts/backup-database.js",
+    "create-admin": "node scripts/create-admin.js",
+    "ai:build-catalog": "node scripts/build-ai-seed-catalog.js",
+    "ai:import-catalog": "node scripts/import-ai-seed-catalog.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.400.0",

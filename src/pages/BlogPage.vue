@@ -5,7 +5,7 @@
   布局：标签和归档放在左侧空白区域，中间内容区域填充剩余空间
 -->
 <template>
-  <div class="animate-fade-in rounded-2xl sm:rounded-3xl flex flex-col xl:flex-row gap-4 sm:gap-6 xl:gap-8 min-h-full overflow-hidden">
+  <div class="blog-layout animate-fade-in rounded-2xl sm:rounded-3xl flex flex-col xl:flex-row gap-4 sm:gap-6 xl:gap-8 min-h-full overflow-hidden 2xl:h-full">
     <!-- 移动端筛选按钮 - 显示在顶部 -->
     <div class="xl:hidden mb-4">
       <button
@@ -35,14 +35,14 @@
           <div class="flex flex-wrap gap-2">
             <button
               v-for="genre in genres" 
-              :key="genre"
-              @click="toggleGenreFilter(genre)"
+              :key="genre.value"
+              @click="toggleGenreFilter(genre.value)"
               class="px-3 py-1 rounded-md text-xs font-bold transition-all duration-200 uppercase tracking-wide"
-              :class="selectedGenre === genre 
-                ? 'bg-slate-200 dark:bg-slate-700 text-main ring-2 ring-[var(--theme-primary)]' 
+              :class="selectedGenre === genre.value
+                ? 'bg-slate-200 dark:bg-slate-700 text-main ring-2 ring-[var(--theme-primary)]'
                 : 'bg-slate-100 dark:bg-slate-800 text-secondary hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'"
             >
-              {{ genre }}
+              {{ genre.value }}
             </button>
           </div>
         </div>
@@ -53,16 +53,35 @@
           <div class="flex flex-wrap gap-2">
             <button
               v-for="tag in tags" 
-              :key="tag"
-              @click="toggleTagFilter(tag)"
+              :key="tag.value"
+              @click="toggleTagFilter(tag.value)"
               class="px-3 py-1 rounded-full text-xs font-bold transition-all duration-200"
-              :class="selectedTag === tag 
-                ? 'ring-2 ring-[var(--theme-primary)] scale-105' 
+              :class="selectedTag === tag.value
+                ? 'ring-2 ring-[var(--theme-primary)] scale-105'
                 : 'hover:scale-105 cursor-pointer'"
-              :style="getTagColor(tag).style"
-              :title="selectedTag === tag ? '点击取消筛选' : '点击筛选此标签'"
+              :style="getTagColor(tag.value).style"
+              :title="selectedTag === tag.value ? $t('blog.clearFilter') : $t('blog.filterTag')"
             >
-              #{{ tag }}
+              #{{ tag.value }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 归档筛选 -->
+        <div>
+          <h3 class="text-sm font-bold mb-3 text-main">{{ $t('blog.archive') }}</h3>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="archive in archives"
+              :key="archive.value"
+              @click="toggleArchiveFilter(archive.value)"
+              class="px-3 py-1 rounded-md text-xs font-bold transition-all duration-200"
+              :class="selectedArchive === archive.value
+                ? 'bg-slate-200 dark:bg-slate-700 text-main ring-2 ring-[var(--theme-primary)]'
+                : 'bg-slate-100 dark:bg-slate-800 text-secondary hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'"
+              :title="selectedArchive === archive.value ? $t('blog.clearFilter') : $t('blog.filterArchive')"
+            >
+              {{ archive.label }} ({{ archive.count }})
             </button>
           </div>
         </div>
@@ -70,8 +89,8 @@
     </transition>
 
     <!-- 左侧标签和归档 - 放在左侧空白区域，桌面端显示 -->
-    <div class="surface-card w-64 hidden xl:block shrink-0 rounded-[28px]">
-      <div class="sticky top-6 space-y-1.5 p-4">
+    <div class="surface-card w-64 hidden xl:block shrink-0 rounded-[28px] 2xl:h-full">
+      <div class="blog-sidebar-scroll blog-sidebar-scroll-delayed custom-scrollbar 2xl:h-full space-y-1.5 p-4 pr-3">
         <!-- 统计信息卡片 -->
         <div class="mb-6 pb-6 border-b border-border-base">
           <h3 class="text-lg font-bold mb-4 text-main">{{ $t('blog.statistics') }}</h3>
@@ -101,17 +120,17 @@
           <div class="flex flex-wrap gap-2">
             <button
               v-for="genre in genres" 
-              :key="genre"
-              @click="toggleGenreFilter(genre)"
+              :key="genre.value"
+              @click="toggleGenreFilter(genre.value)"
               class="px-3 py-1 rounded-md text-xs font-bold transition-all duration-200 uppercase tracking-wide"
               :class="[
-                selectedGenre === genre 
+                selectedGenre === genre.value
                   ? 'bg-slate-200 dark:bg-slate-700 text-main ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105 blog-genre-btn-selected'
                   : 'bg-slate-100 dark:bg-slate-800 text-secondary hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer'
               ]"
-              :title="selectedGenre === genre ? '点击取消筛选' : '点击筛选此分类'"
+              :title="selectedGenre === genre.value ? $t('blog.clearFilter') : $t('blog.filterGenre')"
             >
-              {{ genre }}
+              {{ genre.value }}
             </button>
       </div>
     </div>
@@ -122,18 +141,18 @@
           <div class="flex flex-wrap gap-2">
             <button
               v-for="tag in tags" 
-              :key="tag"
-              @click="toggleTagFilter(tag)"
+              :key="tag.value"
+              @click="toggleTagFilter(tag.value)"
               class="px-3 py-1 rounded-full text-xs font-bold transition-all duration-200"
               :class="[
-                selectedTag === tag 
-                  ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105 blog-tag-btn-selected' 
+                selectedTag === tag.value
+                  ? 'ring-2 ring-offset-2 ring-offset-white dark:ring-offset-slate-800 scale-105 blog-tag-btn-selected'
                   : 'hover:scale-105 cursor-pointer'
               ]"
-              :style="getTagColor(tag).style"
-              :title="selectedTag === tag ? '点击取消筛选' : '点击筛选此标签'"
+              :style="getTagColor(tag.value).style"
+              :title="selectedTag === tag.value ? $t('blog.clearFilter') : $t('blog.filterTag')"
             >
-              #{{ tag }}
+              #{{ tag.value }}
             </button>
           </div>
         </div>
@@ -144,17 +163,17 @@
           <ul class="space-y-2 text-sm">
               <li 
                 v-for="archive in archives" 
-                :key="archive.month"
-              @click="toggleArchiveFilter(archive.month)"
+                :key="archive.value"
+              @click="toggleArchiveFilter(archive.value)"
               class="blog-archive-item cursor-pointer flex justify-between px-2 py-1.5 rounded-lg"
               :class="[
-                selectedArchive === archive.month 
-                  ? 'font-semibold blog-archive-item-selected' 
+                selectedArchive === archive.value
+                  ? 'font-semibold blog-archive-item-selected'
                   : 'text-muted'
               ]"
-              :title="selectedArchive === archive.month ? '点击取消筛选' : '点击筛选此月份'"
+              :title="selectedArchive === archive.value ? $t('blog.clearFilter') : $t('blog.filterArchive')"
               >
-                {{ archive.month }} <span>({{ archive.count }})</span>
+                {{ archive.label }} <span>({{ archive.count }})</span>
               </li>
             </ul>
           </div>
@@ -165,7 +184,7 @@
     <div class="hidden xl:block w-px bg-gradient-to-b from-transparent via-slate-300 dark:via-slate-600 to-transparent shrink-0"></div>
 
     <!-- 中间内容区 - 使用flex-1占据全部剩余空间，填充到底部 -->
-    <div class="flex-1 min-w-0 flex flex-col min-h-full">
+    <div class="blog-content-column flex-1 min-w-0 flex flex-col min-h-full 2xl:min-h-0">
       <!-- 搜索栏和创建按钮 - 固定在顶部，水平排列 -->
       <div class="mb-6 shrink-0">
         <div class="surface-panel p-4 rounded-[24px] flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
@@ -180,14 +199,14 @@
               <input 
                 id="blog-search-input"
                 name="blog-search-input"
-                v-model="searchQuery"
+                v-model="searchInput"
                 type="text"
                 :placeholder="$t('blog.searchPlaceholder')"
                 class="blog-search-input glass-input w-full pl-10 pr-10 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all"
               >
               <button 
-                v-if="searchQuery"
-                @click="searchQuery = ''"
+                v-if="searchInput"
+                @click="clearSearch"
                 class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-muted hover:text-secondary transition-colors"
                 :title="$t('common.clear')"
               >
@@ -203,21 +222,25 @@
       </div>
       
       <!-- 文章列表 - 可滚动区域 -->
-      <div class="flex-1 space-y-6 pb-24">
+      <div class="blog-posts-scroll flex-1 space-y-6 pb-24 2xl:min-h-0 2xl:overflow-y-auto 2xl:pr-2 custom-scrollbar">
         <!-- 骨架屏 - 加载初始数据时显示 -->
         <BlogSkeleton v-if="isLoading && blogPosts.length === 0" :count="3" />
 
         <!-- 文章列表 -->
         <template v-else>
-          <article 
-            v-for="post in filteredPosts" 
+          <div v-if="blogPosts.length === 0" class="surface-card p-8 rounded-[28px] text-center text-slate-500 dark:text-slate-400">
+            {{ $t('blog.noResults') }}
+          </div>
+
+          <article
+            v-for="post in blogPosts"
             :key="post.id" 
             @click="$router.push(`/blog/${post.id}`)"
             class="blog-article-card surface-card p-6 rounded-[28px] group cursor-pointer border-l-4 transition-all animate-fade-in"
           >
             <!-- 文章内容保持不变 -->
             <div class="flex items-center gap-3 mb-2 flex-wrap text-xs text-muted">
-              <span class="font-mono">{{ formatBlogDate(getBlogDateValue(post), 'zh') }}</span>
+              <span class="font-mono">{{ formatBlogDate(getBlogDateValue(post), locale.value) }}</span>
               <span class="text-slate-300 dark:text-slate-600">·</span>
               <span class="flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
@@ -251,9 +274,9 @@
                 <span v-for="tag in post.tags" :key="tag" class="px-2 py-0.5 text-xs rounded-full font-semibold" :style="getTagColor(tag).style">#{{ tag }}</span>
               </div>
             </div>
-            <h3 class="blog-article-title text-2xl font-bold text-main mb-2" v-html="highlightText(post.title, searchQuery)"></h3>
+            <h3 class="blog-article-title text-2xl font-bold text-main mb-2" v-html="highlightText(post.title, activeSearchQuery)"></h3>
             <div class="flex items-center justify-between gap-4">
-              <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed opacity-80 flex-1 min-w-0" v-html="highlightText(post.excerpt, searchQuery)"></p>
+              <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed opacity-80 flex-1 min-w-0" v-html="highlightText(post.excerpt, activeSearchQuery)"></p>
               <div class="blog-read-article-btn flex items-center text-sm font-bold gap-1 group-hover:gap-2 transition-all shrink-0">
                 {{ $t('common.readArticle') }}
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -261,29 +284,40 @@
             </div>
           </article>
 
-          <!-- 加载更多 -->
-          <div v-if="hasMore" class="pt-4 pb-8 flex justify-center">
+          <!-- 无限滚动降级按钮 -->
+          <div v-if="hasMore && !supportsInfiniteScroll" class="pt-4 pb-8 flex justify-center">
             <button 
               @click="loadMore" 
-              :disabled="isLoading"
+              :disabled="isLoadingMore"
               class="px-8 py-3 bg-white/50 dark:bg-slate-800/50 hover:bg-[var(--theme-primary)] hover:text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 disabled:opacity-50"
             >
-              <span v-if="isLoading" class="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></span>
-              {{ isLoading ? $t('common.loading') : $t('blog.loadMore') || '加载更多' }}
+              <span v-if="isLoadingMore" class="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></span>
+              {{ isLoadingMore ? $t('common.loading') : $t('blog.loadMore') }}
             </button>
           </div>
 
+          <div
+            v-if="supportsInfiniteScroll && (hasMore || isLoadingMore)"
+            ref="loadMoreSentinel"
+            class="pt-4 pb-8 flex justify-center items-center min-h-16 text-sm text-slate-500 dark:text-slate-400"
+          >
+            <span v-if="isLoadingMore" class="flex items-center gap-2">
+              <span class="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></span>
+              {{ $t('common.loading') }}
+            </span>
+          </div>
+
           <!-- 无更多内容 -->
-          <div v-else-if="blogPosts.length > 0 && !searchQuery" class="py-8 text-center text-slate-400 dark:text-slate-500 text-sm">
-            {{ $t('blog.noMore') || '没有更多文章了' }}
+          <div v-else-if="blogPosts.length > 0" class="py-8 text-center text-slate-400 dark:text-slate-500 text-sm">
+            {{ $t('blog.noMore') }}
           </div>
         </template>
       </div>
       </div>
       
     <!-- 右侧留言板 -->
-    <div class="hidden 2xl:block w-80 shrink-0">
-      <div class="sticky top-6">
+    <div class="hidden 2xl:block w-[22rem] shrink-0 2xl:h-full">
+      <div class="blog-guestbook-rail h-full">
         <Guestbook @show-login="showAuthModal = true" />
       </div>
     </div>
@@ -294,37 +328,41 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import Fuse from 'fuse.js'
-import { useLocalStorage } from '../composables/useStorage'
+import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { blogApi } from '../utils/api'
-import { formatBlogArchiveLabel, formatBlogDate, getBlogDateValue } from '../utils/blogDate'
+import { formatBlogArchiveLabelFromKey, formatBlogDate, getBlogDateValue } from '../utils/blogDate'
 import Guestbook from '../components/Guestbook.vue'
 import AuthModal from '../components/AuthModal.vue'
 import BlogSkeleton from '../components/BlogSkeleton.vue'
 import { getTagStyle } from '../utils/tagColor'
 
+const route = useRoute()
 const router = useRouter()
-const searchQuery = ref('')
-const selectedGenre = ref(null)
-const selectedTag = ref(null)
-const selectedArchive = ref(null)
-const showFavorites = ref(false)
+const { locale } = useI18n()
 const showMobileFilters = ref(false)
-const sortBy = ref('date-desc')
 const showAuthModal = ref(false)
+const searchInput = ref('')
 
 // 分页与加载状态
 const blogPosts = ref([])
 const isLoading = ref(false)
-const page = ref(0)
-const pageSize = ref(6)
+const isLoadingMore = ref(false)
+const pageSize = 6
 const hasMore = ref(true)
+const loadMoreSentinel = ref(null)
+const supportsInfiniteScroll = typeof IntersectionObserver !== 'undefined'
+let loadMoreObserver = null
+let searchTimer = null
+let activeRequestId = 0
 
-// 独立存储所有分类和标签，确保侧边栏完整性
-const allGenres = ref([])
-const allTags = ref([])
+// 完整元数据由服务端统一提供
+const metadata = ref({
+  genres: [],
+  tags: [],
+  archives: []
+})
 
 // 博客统计信息
 const blogStats = ref({
@@ -334,45 +372,106 @@ const blogStats = ref({
   totalLikes: 0
 })
 
+const normalizeQueryValue = (value) => {
+  if (Array.isArray(value)) {
+    return normalizeQueryValue(value[0])
+  }
+
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+const selectedGenre = computed(() => normalizeQueryValue(route.query.genre) || null)
+const selectedTag = computed(() => normalizeQueryValue(route.query.tag) || null)
+const selectedArchive = computed(() => normalizeQueryValue(route.query.archive) || null)
+const activeSearchQuery = computed(() => normalizeQueryValue(route.query.search))
+
+const genres = computed(() => metadata.value.genres || [])
+const tags = computed(() => metadata.value.tags || [])
+const archives = computed(() => (
+  (metadata.value.archives || []).map(archive => ({
+    ...archive,
+    label: formatBlogArchiveLabelFromKey(archive.value)
+  }))
+))
+
+const buildRouteQuery = (updates = {}) => {
+  const nextQuery = {
+    ...route.query,
+    ...updates
+  }
+
+  Object.keys(nextQuery).forEach(key => {
+    const normalizedValue = normalizeQueryValue(nextQuery[key])
+    if (!normalizedValue) {
+      delete nextQuery[key]
+    } else {
+      nextQuery[key] = normalizedValue
+    }
+  })
+
+  return nextQuery
+}
+
+const replaceBlogQuery = (updates = {}) => {
+  router.replace({ query: buildRouteQuery(updates) })
+}
+
 /**
  * 加载文章列表（支持分页）
  */
-const loadPosts = async (isLoadMore = false) => {
-  if (isLoading.value) return
-  isLoading.value = true
-  
-  if (!isLoadMore) {
-    page.value = 0
+const loadPosts = async ({ append = false } = {}) => {
+  if (append && (isLoadingMore.value || !hasMore.value)) return
+
+  const requestId = ++activeRequestId
+
+  if (append) {
+    isLoadingMore.value = true
+  } else {
+    isLoading.value = true
+    isLoadingMore.value = false
     blogPosts.value = []
+    hasMore.value = true
+
+    const scrollContainer = typeof document !== 'undefined'
+      ? document.querySelector('.blog-posts-scroll') || document.getElementById('main-scroll')
+      : null
+    scrollContainer?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   try {
     const params = {
-      status: 'published',
       sortBy: 'published_at',
       sortOrder: 'desc',
-      limit: pageSize.value,
-      offset: page.value * pageSize.value
+      limit: pageSize + 1,
+      offset: append ? blogPosts.value.length : 0
     }
 
-    // 如果有筛选条件，分页可能受影响，但后端目前 getAll 支持基础筛选
     if (selectedGenre.value) params.genre = selectedGenre.value
+    if (selectedTag.value) params.tag = selectedTag.value
+    if (selectedArchive.value) params.archive = selectedArchive.value
+    if (activeSearchQuery.value) params.search = activeSearchQuery.value
 
     const posts = await blogApi.getList(params)
-    
-    if (posts && posts.length > 0) {
-      blogPosts.value = isLoadMore ? [...blogPosts.value, ...posts] : posts
-      hasMore.value = posts.length === pageSize.value
-      page.value++
-    } else {
-      hasMore.value = false
+
+    if (requestId !== activeRequestId) {
+      return
     }
 
-    initFuse()
+    const normalizedPosts = Array.isArray(posts) ? posts : []
+    const nextPosts = normalizedPosts.slice(0, pageSize)
+
+    blogPosts.value = append ? [...blogPosts.value, ...nextPosts] : nextPosts
+    hasMore.value = normalizedPosts.length > pageSize
+
+    await nextTick()
+    observeLoadMore()
   } catch (error) {
     console.error('Failed to load posts:', error)
   } finally {
-    isLoading.value = false
+    if (requestId === activeRequestId) {
+      isLoading.value = false
+      isLoadingMore.value = false
+    }
   }
 }
 
@@ -381,35 +480,25 @@ const loadPosts = async (isLoadMore = false) => {
  */
 const loadMore = () => {
   if (hasMore.value) {
-    loadPosts(true)
+    loadPosts({ append: true })
   }
 }
-
-/**
- * 监听筛选条件变化，重置列表
- */
-watch([selectedGenre, selectedTag, selectedArchive], () => {
-  loadPosts()
-})
 
 /**
  * 加载元数据（分类和标签）
  */
 const loadMetadata = async () => {
   try {
-    const [genresData, tagsData] = await Promise.all([
-      blogApi.getAllGenres({ status: 'published' }),
-      blogApi.getAllTags({ status: 'published' })
-    ])
-    allGenres.value = genresData || []
-    allTags.value = tagsData || []
+    const metadataResponse = await blogApi.getMetadata()
+    metadata.value = {
+      genres: metadataResponse?.genres || [],
+      tags: metadataResponse?.tags || [],
+      archives: metadataResponse?.archives || []
+    }
   } catch (error) {
     console.error('Failed to load metadata:', error)
   }
 }
-
-const genres = computed(() => allGenres.value)
-const tags = computed(() => allTags.value)
 
 /**
  * 加载博客统计信息
@@ -440,9 +529,6 @@ const calculateHeat = (post) => {
   return Math.min(Math.round(heat * 10) / 10, 200)
 }
 
-// 收藏管理
-const { value: favorites } = useLocalStorage('blog-favorites', [])
-
 /**
  * 获取标签颜色样式
  */
@@ -451,80 +537,36 @@ const getTagColor = (tagName) => {
   return getTagStyle(tagName, isDarkMode)
 }
 
-/**
- * 解析日期字符串为月份格式
- */
-const parseDateToMonth = (dateStr) => {
-  return formatBlogArchiveLabel(dateStr)
-}
-
-/**
- * 归档筛选逻辑（保持前端计算，或后续优化为后端）
- */
-const archives = computed(() => {
-  const archiveMap = new Map()
-  blogPosts.value.forEach(post => {
-    const blogDate = getBlogDateValue(post)
-    if (blogDate) {
-      const month = parseDateToMonth(blogDate)
-      archiveMap.set(month, (archiveMap.get(month) || 0) + 1)
-    }
-  })
-  return Array.from(archiveMap.entries())
-    .map(([month, count]) => ({ month, count }))
-    .sort((a, b) => new Date(b.month) - new Date(a.month))
-})
-
 const toggleGenreFilter = (genre) => {
-  selectedGenre.value = selectedGenre.value === genre ? null : genre
-  selectedTag.value = null
-  selectedArchive.value = null
+  showMobileFilters.value = false
+  replaceBlogQuery({
+    genre: selectedGenre.value === genre ? null : genre,
+    tag: null,
+    archive: null
+  })
 }
 
 const toggleTagFilter = (tagName) => {
-  selectedTag.value = selectedTag.value === tagName ? null : tagName
-  selectedGenre.value = null
-  selectedArchive.value = null
+  showMobileFilters.value = false
+  replaceBlogQuery({
+    genre: null,
+    tag: selectedTag.value === tagName ? null : tagName,
+    archive: null
+  })
 }
 
-const toggleArchiveFilter = (month) => {
-  selectedArchive.value = selectedArchive.value === month ? null : month
-  selectedGenre.value = null
-  selectedTag.value = null
+const toggleArchiveFilter = (archive) => {
+  showMobileFilters.value = false
+  replaceBlogQuery({
+    genre: null,
+    tag: null,
+    archive: selectedArchive.value === archive ? null : archive
+  })
 }
 
-/**
- * Fuse.js 搜索实例
- */
-let fuseInstance = null
-const initFuse = () => {
-  const options = {
-    keys: [{ name: 'title', weight: 0.7 }, { name: 'excerpt', weight: 0.5 }, { name: 'content', weight: 0.3 }, { name: 'genre', weight: 0.4 }, { name: 'tags', weight: 0.6 }],
-    threshold: 0.3,
-    includeScore: true,
-  }
-  fuseInstance = new Fuse(blogPosts.value, options)
+const clearSearch = () => {
+  searchInput.value = ''
 }
-
-const filteredPosts = computed(() => {
-  let result = blogPosts.value
-  
-  if (selectedTag.value) {
-    result = result.filter(post => post.tags?.includes(selectedTag.value))
-  }
-  
-  if (selectedArchive.value) {
-    result = result.filter(post => parseDateToMonth(getBlogDateValue(post)) === selectedArchive.value)
-  }
-  
-  if (searchQuery.value?.trim()) {
-    if (!fuseInstance) initFuse()
-    fuseInstance.setCollection(result)
-    result = fuseInstance.search(searchQuery.value.trim()).map(r => r.item)
-  }
-  
-  return result
-})
 
 const highlightText = (text, query) => {
   if (!text || !query?.trim()) return text || ''
@@ -532,10 +574,80 @@ const highlightText = (text, query) => {
   return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-900/50 text-yellow-900 dark:text-yellow-200 px-1 rounded">$1</mark>')
 }
 
+const observeLoadMore = () => {
+  if (!supportsInfiniteScroll || !loadMoreSentinel.value) return
+
+  if (loadMoreObserver) {
+    loadMoreObserver.disconnect()
+  }
+
+  loadMoreObserver = new IntersectionObserver(
+    entries => {
+      if (entries.some(entry => entry.isIntersecting) && hasMore.value && !isLoading.value && !isLoadingMore.value) {
+        loadMore()
+      }
+    },
+    {
+      root: typeof document !== 'undefined'
+        ? document.querySelector('.blog-posts-scroll') || document.getElementById('main-scroll')
+        : null,
+      rootMargin: '220px 0px'
+    }
+  )
+
+  loadMoreObserver.observe(loadMoreSentinel.value)
+}
+
+watch(activeSearchQuery, value => {
+  if (searchInput.value !== value) {
+    searchInput.value = value
+  }
+}, { immediate: true })
+
+watch(searchInput, value => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+  }
+
+  searchTimer = setTimeout(() => {
+    const normalizedValue = value.trim()
+    if (normalizedValue === activeSearchQuery.value) {
+      return
+    }
+
+    replaceBlogQuery({ search: normalizedValue || null })
+  }, 300)
+})
+
+watch(
+  () => JSON.stringify({
+    genre: selectedGenre.value,
+    tag: selectedTag.value,
+    archive: selectedArchive.value,
+    search: activeSearchQuery.value
+  }),
+  () => {
+    loadPosts({ append: false })
+  },
+  { immediate: true }
+)
+
 onMounted(() => {
-  loadPosts()
   loadMetadata()
   loadBlogStats()
+  nextTick(() => {
+    observeLoadMore()
+  })
+})
+
+onUnmounted(() => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+  }
+
+  if (loadMoreObserver) {
+    loadMoreObserver.disconnect()
+  }
 })
 </script>
 

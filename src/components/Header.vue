@@ -4,14 +4,14 @@
 -->
 <template>
   <header
-    class="h-16 sm:h-[4.5rem] px-4 sm:px-6 md:px-8 flex items-center justify-between shrink-0 relative gap-3 sm:gap-4 divider-strong-b"
-    style="background: color-mix(in srgb, var(--surface-elevated) 70%, transparent);"
+    class="h-16 sm:h-[4.5rem] px-4 sm:px-6 md:px-8 flex items-center justify-between shrink-0 relative gap-3 sm:gap-4"
+    style="background: transparent;"
   >
     <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
       <!-- 移动端菜单按钮 -->
       <button
         @click="$emit('toggle-mobile-menu')"
-        class="md:hidden icon-btn flex-shrink-0"
+        class="md:hidden icon-btn flex-shrink-0 !bg-transparent !border-0"
         :title="$t('common.menu')"
       >
         <svg 
@@ -46,16 +46,17 @@
       </button>
       <!-- 页面标题：亮色模式使用深色，暗色模式使用浅色，确保在背景上有足够对比度 -->
       <div class="min-w-0">
-        <p class="section-kicker mb-1 hidden sm:block">Workspace</p>
         <h2 class="text-lg sm:text-xl font-bold text-main tracking-tight truncate">{{ currentTabName }}</h2>
       </div>
       <span 
         v-if="currentTab === 'tools'" 
         class="eyebrow text-[0.66rem] px-2.5 py-1"
       >
-        v3.0.0
+        v3.1.0
       </span>
     </div>
+
+    <HeaderGiftPanel />
     
     <div class="flex items-center gap-2 sm:gap-3">
       <!-- 世界时钟 - 显示本地时间，其他地区时间在下拉栏（放在右侧） -->
@@ -107,7 +108,7 @@
                       @click="relocateAdmin"
                       :disabled="isRelocating"
                       class="icon-btn p-1.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                      :title="$t('tools.worldClock.relocate') || 'Relocate'"
+                      :title="$t('tools.worldClock.relocate')"
                     >
                       <svg 
                         v-if="!isRelocating"
@@ -141,7 +142,7 @@
                 <div v-if="adminSettings?.timezone" class="text-xs text-muted font-mono">{{ formatDateByTimezone(adminSettings.timezone) }}</div>
                 <div v-else class="text-xs text-muted font-mono">--</div>
                 <!-- 修复：只显示location，不要回退到timezone -->
-                <div class="text-xs text-muted mt-0.5">{{ adminSettings?.location || 'Click to locate' }}</div>
+                <div class="text-xs text-muted mt-0.5">{{ adminSettings?.location || $t('admin.clickToLocate') }}</div>
               </div>
               
               <!-- 访客位置 -->
@@ -185,25 +186,24 @@
       <!-- 位置信息 -->
       <div 
         v-if="weather && (weather.city || weather.country)" 
-        class="hidden xl:flex topbar-chip"
+        class="hidden xl:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/30 dark:bg-white/5 text-secondary border border-white/20"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
           <circle cx="12" cy="10" r="3"/>
         </svg>
-        <span>{{ formatLocation(weather) }}</span>
+        <span class="text-sm font-medium">{{ formatLocation(weather) }}</span>
       </div>
       
       <!-- 天气信息 -->
       <div 
         v-if="weather" 
-        class="hidden lg:flex topbar-chip"
+        class="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/30 dark:bg-white/5 text-secondary border border-white/20"
       >
-        <!-- 使用SVG太阳图标 -->
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-orange-400">
           <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
         </svg>
-        <span>{{ weather.temp }}°C</span>
+        <span class="text-sm font-bold">{{ weather.temp }}°C</span>
       </div>
       
       <!-- 用户菜单 -->
@@ -302,7 +302,7 @@
       <button
         @click="$emit('toggle-theme')"
         class="icon-btn"
-        :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+        :title="isDark ? $t('admin.lightMode') : $t('admin.darkMode')"
       >
         <!-- 太阳图标（亮色模式时显示） -->
         <svg 
@@ -344,6 +344,7 @@ import { useAuth } from '../composables/useAuth'
 import { adminSettingsApi } from '../utils/api'
 import { getClientLocationInfo } from '../utils/ipLocation'
 import AuthModal from './AuthModal.vue'
+import HeaderGiftPanel from './HeaderGiftPanel.vue'
 
 const props = defineProps({
   currentTab: {
@@ -643,11 +644,11 @@ const relocateAdmin = async () => {
       
       console.log('Admin location updated successfully:', updatedSettings.location)
     } else {
-      throw new Error('Failed to get location information. Please try again later.')
+      throw new Error(t('admin.relocateFailed'))
     }
   } catch (error) {
     console.error('Failed to relocate admin:', error)
-    alert(error.message || 'Failed to relocate. Please try again later.')
+    alert(error.message || t('admin.relocateFailed'))
   } finally {
     isRelocating.value = false
   }

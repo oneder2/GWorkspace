@@ -161,14 +161,10 @@ export function getCachedFaviconUrl(url, size = 64) {
   // 检查缓存
   const cached = getCacheEntry(domain)
   if (cached) {
-    // 如果之前加载失败，返回失败标记
-    if (!cached.isValid) {
-      return { url: '', fromCache: true, isValid: false }
-    }
     return { 
-      url: cached.url, 
+      url: cached.url || getFaviconUrl(url, size),
       fromCache: true, 
-      isValid: true 
+      isValid: cached.isValid !== false
     }
   }
   
@@ -258,4 +254,3 @@ export function getCacheStats() {
 if (typeof window !== 'undefined') {
   loadCacheFromStorage()
 }
-

@@ -10,13 +10,13 @@ import { useLocalStorage } from './useStorage'
  * 预设主题配置
  */
 const availablePresets = {
-  none: { name: 'None', primary: '#475569', primaryDark: '#334155' },
-  aurora: { name: 'Aurora', primary: '#10b981', primaryDark: '#059669' },
-  ocean: { name: 'Ocean', primary: '#0ea5e9', primaryDark: '#0284c7' },
-  sunset: { name: 'Sunset', primary: '#f59e0b', primaryDark: '#d97706' },
-  royal: { name: 'Royal', primary: '#8b5cf6', primaryDark: '#7c3aed' },
-  sakura: { name: 'Sakura', primary: '#ec4899', primaryDark: '#db2777' },
-  crimson: { name: 'Crimson', primary: '#ef4444', primaryDark: '#dc2626' }
+  none: { nameKey: 'theme.presetsMap.none', primary: '#475569', primaryDark: '#334155' },
+  aurora: { nameKey: 'theme.presetsMap.aurora', primary: '#10b981', primaryDark: '#059669' },
+  ocean: { nameKey: 'theme.presetsMap.ocean', primary: '#0ea5e9', primaryDark: '#0284c7' },
+  sunset: { nameKey: 'theme.presetsMap.sunset', primary: '#f59e0b', primaryDark: '#d97706' },
+  royal: { nameKey: 'theme.presetsMap.royal', primary: '#8b5cf6', primaryDark: '#7c3aed' },
+  sakura: { nameKey: 'theme.presetsMap.sakura', primary: '#ec4899', primaryDark: '#db2777' },
+  crimson: { nameKey: 'theme.presetsMap.crimson', primary: '#ef4444', primaryDark: '#dc2626' }
 }
 
 const FALLBACK_PRIMARY = availablePresets.none.primary
@@ -95,12 +95,14 @@ export function useCustomTheme() {
   const currentPresetStore = useLocalStorage('themePreset', 'none')
   const glassBlurStore = useLocalStorage('themeGlassBlur', 12)
   const bgOpacityStore = useLocalStorage('themeBgOpacity', 0.4)
+  const panelOpacityStore = useLocalStorage('themePanelOpacity', 0.68)
 
   // 提取真正的 Ref
   const customTheme = customThemeStore.value
   const currentPreset = currentPresetStore.value
   const glassBlur = glassBlurStore.value
   const bgOpacity = bgOpacityStore.value
+  const panelOpacity = panelOpacityStore.value
 
   /**
    * 当前主题颜色数据
@@ -130,6 +132,7 @@ export function useCustomTheme() {
     // 应用玻璃效果参数
     root.style.setProperty('--glass-blur', `${glassBlur.value}px`)
     root.style.setProperty('--bg-opacity', bgOpacity.value)
+    root.style.setProperty('--panel-opacity', panelOpacity.value)
   }
 
   /**
@@ -158,11 +161,12 @@ export function useCustomTheme() {
     currentPresetStore.update('none')
     glassBlurStore.update(12)
     bgOpacityStore.update(0.4)
+    panelOpacityStore.update(0.68)
     applyTheme()
   }
 
   // 监听玻璃效果变化即时应用
-  watch([glassBlur, bgOpacity], () => {
+  watch([glassBlur, bgOpacity, panelOpacity], () => {
     applyTheme()
   })
 
@@ -177,6 +181,7 @@ export function useCustomTheme() {
     currentPreset,
     glassBlur,
     bgOpacity,
+    panelOpacity,
     setPresetTheme,
     setCustomTheme,
     resetTheme,

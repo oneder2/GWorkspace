@@ -6,7 +6,7 @@
 <template>
   <div class="animate-fade-in max-w-6xl mx-auto space-y-8">
     <div class="hero-panel rounded-[32px] p-8 sm:p-10 text-center">
-      <span class="section-kicker">Selected Work</span>
+      <span class="section-kicker">{{ $t('portfolio.eyebrow') }}</span>
       <h2 class="section-title mt-3">{{ $t('portfolio.title') }}</h2>
       <p class="section-copy mt-3 mx-auto">{{ $t('portfolio.subtitle') }}</p>
     </div>
@@ -16,6 +16,7 @@
         :key="work.title" 
         :href="work.url" 
         target="_blank" 
+        rel="noopener noreferrer"
         class="surface-card p-3 rounded-[28px] group flex flex-col h-full hover:shadow-2xl transition-all duration-500"
       >
         <!-- 作品预览图 -->
@@ -77,13 +78,18 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { portfolioConfig } from '../config/portfolio'
 import { getIcon } from '../utils/iconMapper'
+
+const { t } = useI18n()
 
 // 从配置文件加载作品数据，并映射图标组件
 const portfolio = computed(() => {
   return portfolioConfig.map(work => ({
     ...work,
+    title: t(work.titleKey),
+    desc: t(work.descKey),
     icon: getIcon(work.iconName)
   }))
 })

@@ -43,7 +43,7 @@
           >
             <!-- 优先使用动态获取的favicon -->
             <img 
-              v-if="link.url"
+              v-if="link.url && !failedFaviconUrls.has(link.url)"
               :src="getFaviconUrl(link.url, 64)" 
               @error="handleIconError($event, link)"
               class="w-10 h-10 rounded-lg opacity-90 transition-opacity"
@@ -143,7 +143,7 @@
 </template>
 
 <script setup>
-import { ref, watch, markRaw } from 'vue'
+import { ref, reactive, markRaw } from 'vue'
 import { getIcon } from '../utils/iconMapper'
 import { getFaviconUrl, ensureAbsoluteUrl } from '../utils/urlHelper'
 
@@ -169,6 +169,7 @@ const localLinks = ref(
     }
   })
 )
+const failedFaviconUrls = reactive(new Set())
 
 /**
  * 添加新链接
@@ -194,14 +195,13 @@ const removeLink = (index) => {
 
 /**
  * 处理图标加载错误
- * 当favicon加载失败时，隐藏图片元素
+ * 当favicon加载失败时，记录该URL并展示回退图标
  * @param {Event} event - 错误事件
  * @param {Object} link - 链接对象
  */
-const handleIconError = (event, link) => {
-  // 隐藏图片，让回退方案（SVG图标或首字母）显示
-  if (event.target) {
-    event.target.style.display = 'none'
+const handleIconError = (_event, link) => {
+  if (link?.url) {
+    failedFaviconUrls.add(link.url)
   }
 }
 

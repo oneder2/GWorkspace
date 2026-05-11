@@ -44,6 +44,16 @@ jobs:
           cd backend
           npm ci --omit=dev
 
+      - name: Prepare database schema
+        run: |
+          cd backend
+          DATABASE_PATH="$RUNNER_TEMP/gworkspace-ci.db" npm run db:prepare
+
+      - name: Check database health
+        run: |
+          cd backend
+          DATABASE_PATH="$RUNNER_TEMP/gworkspace-ci.db" npm run db:check
+
       - name: Verify backend modules load
         run: |
           cd backend

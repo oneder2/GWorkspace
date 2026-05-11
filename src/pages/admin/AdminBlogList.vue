@@ -7,9 +7,9 @@
     <div class="admin-panel rounded-[24px] overflow-hidden">
       <div class="admin-toolbar flex-col sm:flex-row sm:items-end">
         <div class="space-y-2">
-          <span class="section-kicker">Publishing</span>
+          <span class="section-kicker">{{ $t('admin.publishing') }}</span>
           <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.blogs') }}</h2>
-          <p class="text-sm text-secondary">Review drafts, monitor status, and jump into editing without leaving the list.</p>
+          <p class="text-sm text-secondary">{{ $t('admin.blogsCopy') }}</p>
         </div>
         <router-link
           to="/admin/blogs/new"

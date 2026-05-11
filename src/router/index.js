@@ -5,6 +5,7 @@
  */
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '../composables/useAuth.js'
+import { i18n } from '../i18n/index.js'
 
 /**
  * 路由懒加载函数
@@ -23,8 +24,10 @@ const AdminDashboard = () => import('../pages/admin/AdminDashboard.vue')
 const AdminBlogList = () => import('../pages/admin/AdminBlogList.vue')
 const AdminBlogEditorPage = () => import('../pages/admin/AdminBlogEditorPage.vue')
 const AdminAnalytics = () => import('../pages/admin/AdminAnalytics.vue')
+const AdminAiStudio = () => import('../pages/admin/AdminAiStudio.vue')
 const AdminComments = () => import('../pages/admin/AdminComments.vue')
 const AdminGuestbook = () => import('../pages/admin/AdminGuestbook.vue')
+const AdminSystem = () => import('../pages/admin/AdminSystem.vue')
 
 /**
  * 路由配置
@@ -35,38 +38,38 @@ const routes = [
     path: '/',
     name: 'home',
     component: HomePage,
-    meta: { title: 'Home' }
+    meta: { titleKey: 'routes.home' }
   },
   {
     path: '/sites',
     name: 'sites',
     component: SitesPage,
-    meta: { title: 'Sites' }
+    meta: { titleKey: 'routes.sites' }
   },
   {
     path: '/tools',
     name: 'tools',
     component: ToolsPage,
-    meta: { title: 'Tools' }
+    meta: { titleKey: 'routes.tools' }
   },
   {
     path: '/blog',
     name: 'blog',
     component: BlogPage,
-    meta: { title: 'Blog' }
+    meta: { titleKey: 'routes.blog' }
   },
   {
     path: '/blog/:id',
     name: 'blog-detail',
     component: BlogDetailPage,
-    meta: { title: 'Blog Detail' },
+    meta: { titleKey: 'routes.blogDetail' },
     props: true
   },
   {
     path: '/portfolio',
     name: 'portfolio',
     component: PortfolioPage,
-    meta: { title: 'Portfolio' }
+    meta: { titleKey: 'routes.portfolio' }
   },
   // 管理后台路由
   {
@@ -78,44 +81,56 @@ const routes = [
         path: '',
         name: 'admin-dashboard',
         component: AdminDashboard,
-        meta: { title: 'Admin Dashboard' }
+        meta: { titleKey: 'admin.routeTitles.dashboard' }
       },
       {
         path: 'blogs',
         name: 'admin-blogs',
         component: AdminBlogList,
-        meta: { title: 'Blog Management' }
+        meta: { titleKey: 'admin.routeTitles.blogs' }
       },
       {
         path: 'blogs/new',
         name: 'admin-blog-new',
         component: AdminBlogEditorPage,
-        meta: { title: 'New Blog' }
+        meta: { titleKey: 'admin.routeTitles.newBlog' }
       },
       {
         path: 'blogs/:id',
         name: 'admin-blog-edit',
         component: AdminBlogEditorPage,
-        meta: { title: 'Edit Blog' },
+        meta: { titleKey: 'admin.routeTitles.editBlog' },
         props: true
       },
       {
         path: 'analytics',
         name: 'admin-analytics',
         component: AdminAnalytics,
-        meta: { title: 'Analytics' }
+        meta: { titleKey: 'admin.routeTitles.analytics' }
+      },
+      {
+        path: 'ai',
+        name: 'admin-ai',
+        component: AdminAiStudio,
+        meta: { titleKey: 'admin.routeTitles.ai' }
       },
       {
         path: 'comments',
         name: 'admin-comments',
         component: AdminComments,
-        meta: { title: 'Comments' }
+        meta: { titleKey: 'admin.routeTitles.comments' }
       },
       {
         path: 'guestbook',
         name: 'admin-guestbook',
         component: AdminGuestbook,
-        meta: { title: 'Guestbook Management' }
+        meta: { titleKey: 'admin.routeTitles.guestbook' }
+      },
+      {
+        path: 'system',
+        name: 'admin-system',
+        component: AdminSystem,
+        meta: { titleKey: 'admin.routeTitles.system' }
       }
     ]
   },
@@ -144,10 +159,10 @@ const router = createRouter({
  */
 router.beforeEach(async (to, from, next) => {
   // 根据路由 meta 更新标题
-  if (to.meta.title) {
-    document.title = `${to.meta.title} - GWorkspace`
+  if (to.meta.titleKey) {
+    document.title = `${i18n.global.t(to.meta.titleKey)} - GWorkspace`
   } else {
-    document.title = 'GWorkspace - Personal Workspace'
+    document.title = i18n.global.t('seo.siteTitle')
   }
 
   const { user, isAdmin, authReady } = useAuth()

@@ -8,9 +8,8 @@ import cors from 'cors'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
 import { getDatabase, closeDatabase } from './config/database.js'
-import { readFileSync } from 'fs'
-import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
+import { runMigrations } from './config/migrations.js'
+import { checkDatabaseHealth } from './config/databaseHealth.js'
 
 // 导入路由
 import blogRoutes from './routes/blog.js'
@@ -19,15 +18,16 @@ import commentsRoutes from './routes/comments.js'
 import analyticsRoutes from './routes/analytics.js'
 import authRoutes from './routes/auth.js'
 import adminRoutes from './routes/admin.js'
+import adminAiRoutes from './routes/adminAi.js'
+import aiRoutes from './routes/ai.js'
 import guestbookRoutes from './routes/guestbook.js'
 import uploadRoutes from './routes/upload.js'
 import seoRoutes from './routes/seo.js'
+import spotifyRoutes from './routes/spotify.js'
+import { startAiDailyCapsuleScheduler } from './services/aiScheduler.js'
 
 // 加载环境变量
 dotenv.config()
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -70,51 +70,60 @@ app.use(express.urlencoded({ extended: true, limit: '20mb' }))
 // 初始化数据库
 const db = getDatabase()
 
-// 执行数据库迁移
-const migrationFiles = [
-  '001_initial_schema.sql',
-  '002_user_system.sql',
-  '003_guestbook.sql',
-  '004_guestbook_user_id.sql',
-  '005_admin_settings.sql',
-  '006_user_favorites.sql'
-]
-
 try {
-  migrationFiles.forEach(migrationFile => {
-    try {
-      const migrationSQL = readFileSync(join(__dirname, '../database/migrations', migrationFile), 'utf-8')
-      let cleanSQL = migrationSQL.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
-        .map(line => {
-          const commentIndex = line.indexOf('--')
-          return commentIndex >= 0 ? line.substring(0, commentIndex) : line
-        }).join('\n')
-      const statements = cleanSQL.split(';').map(s => s.trim()).filter(s => s.length > 0)
-      statements.forEach(statement => {
-        if (statement) {
-          try { db.exec(statement + ';') } catch (e) {
-            if (!e.message.includes('already exists') && !e.message.includes('duplicate column name')) console.warn(e.message)
-          }
-        }
-      })
-    } catch (e) { if (e.code !== 'ENOENT') console.warn(e) }
-  })
-} catch (e) { console.error('Migration error:', e) }
+  runMigrations({ db })
+} catch (error) {
+  console.error('Migration error:', error)
+  process.exit(1)
+}
 
 // API 路由
 app.use('/api/auth', authRoutes)
+app.use('/api/ai', aiRoutes)
 app.use('/api/blogs', likesRoutes)
 app.use('/api/blogs', blogRoutes)
 app.use('/api/blogs', commentsRoutes)
 app.use('/api/comments', commentsRoutes)
 app.use('/api/analytics', analyticsRoutes)
+app.use('/api/admin/ai', adminAiRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/guestbook', guestbookRoutes)
 app.use('/api/upload', uploadRoutes)
 app.use('/api/seo', seoRoutes)
+app.use('/api/spotify', spotifyRoutes)
 
 // 健康检查
-app.get('/health', (req, res) => res.json({ status: 'ok' }))
+app.get('/health', (req, res) => {
+  try {
+    const health = checkDatabaseHealth({ db, full: false })
+
+    if (!health.ok) {
+      return res.status(503).json({
+        status: 'degraded',
+        checks: {
+          database: 'error'
+        },
+        details: health
+      })
+    }
+
+    res.json({
+      status: 'ok',
+      checks: {
+        database: 'ok'
+      }
+    })
+  } catch (error) {
+    console.error('Health check failed:', error)
+    res.status(503).json({
+      status: 'error',
+      checks: {
+        database: 'error'
+      },
+      error: error.message
+    })
+  }
+})
 app.get('/', (req, res) => res.json({ message: 'GWorkspace API Server' }))
 
 app.use((req, res) => res.status(404).json({ error: 'Not Found' }))
@@ -123,7 +132,10 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' })
 })
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+  startAiDailyCapsuleScheduler({ logger: console })
+})
 
 process.on('SIGINT', () => { closeDatabase(); process.exit(0); })
 process.on('SIGTERM', () => { closeDatabase(); process.exit(0); })

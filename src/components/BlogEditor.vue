@@ -287,10 +287,17 @@
             <!-- 预览区域 -->
             <div class="flex flex-col">
               <label class="text-sm font-semibold text-secondary mb-2">{{ $t('tools.preview') }}</label>
-              <div 
-                class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2"
-                v-html="previewContent"
-              ></div>
+              <div class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base overflow-y-auto custom-scrollbar">
+                <div class="prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2">
+                  <div
+                    v-for="block in previewBlocks"
+                    :key="block.key"
+                    class="preview-block"
+                    :class="block.type === 'image' ? 'preview-block-image' : 'preview-block-html'"
+                    v-html="block.html"
+                  ></div>
+                </div>
+              </div>
             </div>
           </div>
           
@@ -305,10 +312,17 @@
           
           <!-- 纯预览视图 -->
           <div v-else-if="viewMode === 'preview'" class="flex-1" style="min-height: 600px;">
-            <div 
-              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base overflow-y-auto custom-scrollbar prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2"
-              v-html="previewContent"
-            ></div>
+            <div class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base overflow-y-auto custom-scrollbar">
+              <div class="prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2">
+                <div
+                  v-for="block in previewBlocks"
+                  :key="block.key"
+                  class="preview-block"
+                  :class="block.type === 'image' ? 'preview-block-image' : 'preview-block-html'"
+                  v-html="block.html"
+                ></div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -410,6 +424,7 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github.css' // 亮色主题作为基础
 import { adminApi, blogApi, generateSlug, uploadApi } from '../utils/api'
 import { formatBlogDate, getBlogDateValue } from '../utils/blogDate'
+import { buildMarkdownPreviewBlocks, reconcileMarkdownPreviewBlocks } from '../utils/blogMarkdown'
 import { getTagStyle } from '../utils/tagColor'
 import { getCachedGenres, getCachedTags, setCachedGenres, setCachedTags } from '../utils/suggestionCache'
 
@@ -448,6 +463,10 @@ const emit = defineEmits(['close', 'success'])
 
 const { t } = useI18n()
 const UNTITLED_DRAFT_TITLE = '未命名文件'
+const MARKDOWN_OPTIONS = {
+  breaks: true,
+  gfm: true
+}
 
 /**
  * 检查主题色是否为透明
@@ -471,20 +490,8 @@ const checkThemeTransparent = () => {
   }
 }
 
-// 配置 marked - 启用 GFM 支持（包括表格、任务列表等）
-marked.setOptions({
-  breaks: true,
-  gfm: true,
-  headerIds: true,
-  mangle: false,
-  pedantic: false,
-  sanitize: false,
-  smartLists: true,
-  smartypants: false
-})
-
 // 配置代码块渲染器（使用 highlight.js 进行语法高亮）
-const renderer = new marked.Renderer()
+const previewRenderer = new marked.Renderer()
 
 /**
  * 代码块渲染器 - 使用 highlight.js 进行语法高亮
@@ -492,7 +499,7 @@ const renderer = new marked.Renderer()
  * @param {Object} token - token 对象，包含 text 和 lang 属性
  * @returns {string} - 渲染后的 HTML
  */
-renderer.code = function(token) {
+previewRenderer.code = function(token) {
   // 从 token 对象中提取代码文本和语言
   // token.text 是代码内容，token.lang 是语言（可能为 null 或 undefined）
   const code = token.text || ''
@@ -538,18 +545,18 @@ renderer.code = function(token) {
 }
 
 // marked v17的table函数接收一个token对象，包含header和rows数组
-renderer.table = function(token) {
+previewRenderer.table = function(token) {
   // 先使用默认的table渲染逻辑，然后包装样式
   let header = ''
   for (let i = 0; i < token.header.length; i++) {
-    header += renderer.tablecell(token.header[i])
+    header += previewRenderer.tablecell(token.header[i])
   }
   
   let body = ''
   for (let i = 0; i < token.rows.length; i++) {
     let row = ''
     for (let j = 0; j < token.rows[i].length; j++) {
-      row += renderer.tablecell(token.rows[i][j])
+      row += previewRenderer.tablecell(token.rows[i][j])
     }
     body += `<tr>${row}</tr>`
   }
@@ -563,15 +570,13 @@ renderer.table = function(token) {
 }
 
 // marked v17的tablecell函数接收一个token对象
-renderer.tablecell = function(token) {
+previewRenderer.tablecell = function(token) {
   // 使用parser来解析inline tokens（如粗体、斜体等）
-  const content = renderer.parser.parseInline(token.tokens)
+  const content = previewRenderer.parser.parseInline(token.tokens)
   const tag = token.header ? 'th' : 'td'
   const align = token.align ? ` style="text-align: ${token.align}"` : ''
   return `<${tag}${align} class="border border-slate-300 dark:border-slate-600 px-4 py-2">${content}</${tag}>`
 }
-
-marked.setOptions({ renderer })
 
 /**
  * 表单数据
@@ -604,6 +609,7 @@ const viewMode = ref('split')
 const isSubmitting = ref(false)
 const isUploadingImage = ref(false)
 const fileInputRef = ref(null)
+const activeObjectUrls = new Set()
 const draftActionLabel = computed(() => {
   if (props.isEditMode && formData.value.status === 'published') {
     return t('blog.convertToDraft') || 'Convert to Draft'
@@ -620,12 +626,13 @@ const handleFileUpload = async (event) => {
 
   // 1. 创建本地预览 URL，实现“秒开”预览
   const localPreviewUrl = URL.createObjectURL(file)
+  activeObjectUrls.add(localPreviewUrl)
   const placeholderId = `uploading-${Date.now()}`
   const imageMarkdown = `\n![${file.name}](${localPreviewUrl}#${placeholderId})\n`
   
   // 记录光标位置或简单追加
   formData.value.content += imageMarkdown
-  renderMarkdown(formData.value.content) // 立即触发一次渲染
+  renderPreviewImmediately(formData.value.content)
 
   isUploadingImage.value = true
   try {
@@ -641,13 +648,16 @@ const handleFileUpload = async (event) => {
     
     // 释放内存
     URL.revokeObjectURL(localPreviewUrl)
-    renderMarkdown(formData.value.content)
+    activeObjectUrls.delete(localPreviewUrl)
+    renderPreviewImmediately(formData.value.content)
   } catch (error) {
     console.error('Image upload failed:', error)
     // 如果失败，移除预览图
     formData.value.content = formData.value.content.replace(imageMarkdown, '')
-    renderMarkdown(formData.value.content)
-    alert('Image upload failed. Please check network or backend configuration.')
+    URL.revokeObjectURL(localPreviewUrl)
+    activeObjectUrls.delete(localPreviewUrl)
+    renderPreviewImmediately(formData.value.content)
+    alert(t('blog.imageUploadFailed'))
   } finally {
     isUploadingImage.value = false
     if (fileInputRef.value) fileInputRef.value.value = ''
@@ -860,36 +870,90 @@ const handleClickOutside = (event) => {
 }
 
 /**
- * Markdown预览内容 - 改为 ref，使用防抖更新，解决图片频繁加载问题
+ * Markdown预览块 - 使用块级增量更新，避免文本改动导致所有图片重建
  */
-const previewContent = ref('')
+const previewBlocks = ref([])
 let renderTimer = null
+let previewBlockId = 0
+let skipNextScheduledPreview = false
+
+const createPreviewBlockKey = () => {
+  previewBlockId += 1
+  return `preview-block-${previewBlockId}`
+}
 
 /**
- * 渲染 Markdown 内容
+ * 渲染 Markdown 预览块
  */
-const renderMarkdown = (content) => {
+const renderPreviewBlocks = (content) => {
   if (!content.trim()) {
-    previewContent.value = `<p class="text-slate-400 dark:text-slate-500">${t('blog.previewPlaceholder')}</p>`
+    previewBlocks.value = [{
+      key: createPreviewBlockKey(),
+      type: 'html',
+      signature: 'placeholder:empty',
+      html: `<p class="text-slate-400 dark:text-slate-500">${t('blog.previewPlaceholder')}</p>`
+    }]
     return
   }
+
   try {
-    previewContent.value = marked.parse(content)
+    const nextBlocks = buildMarkdownPreviewBlocks({
+      content,
+      renderer: previewRenderer,
+      markedOptions: MARKDOWN_OPTIONS
+    })
+
+    previewBlocks.value = reconcileMarkdownPreviewBlocks({
+      previousBlocks: previewBlocks.value,
+      nextBlocks,
+      createKey: createPreviewBlockKey
+    })
   } catch (error) {
     console.error('Markdown parsing error:', error)
-    previewContent.value = `<p class="text-red-500">${t('blog.previewError')}</p>`
+    previewBlocks.value = [{
+      key: createPreviewBlockKey(),
+      type: 'html',
+      signature: `error:${error.message}`,
+      html: `<p class="text-red-500">${t('blog.previewError')}</p>`
+    }]
   }
 }
 
 /**
- * 监听内容变化，实施防抖渲染
+ * 调度预览渲染
  */
-watch(() => formData.value.content, (newContent) => {
+const schedulePreviewRender = (content, { immediate = false } = {}) => {
   if (renderTimer) clearTimeout(renderTimer)
+
+  if (immediate) {
+    renderPreviewBlocks(content)
+    return
+  }
+
   renderTimer = setTimeout(() => {
-    renderMarkdown(newContent)
-  }, 300) // 300ms 防抖
-})
+    renderPreviewBlocks(content)
+  }, 300)
+}
+
+const renderPreviewImmediately = (content) => {
+  skipNextScheduledPreview = true
+  schedulePreviewRender(content, { immediate: true })
+}
+
+/**
+ * 监听内容变化，实施块级防抖渲染
+ */
+watch(
+  () => formData.value.content,
+  (newContent) => {
+    if (skipNextScheduledPreview) {
+      skipNextScheduledPreview = false
+      return
+    }
+
+    schedulePreviewRender(newContent)
+  }
+)
 
 /**
  * 初始化表单数据
@@ -925,7 +989,7 @@ const initFormData = () => {
     }
   }
   // 初始化时立即同步渲染内容，确保初次打开有内容
-  renderMarkdown(formData.value.content)
+  renderPreviewBlocks(formData.value.content)
 }
 
 /**
@@ -1052,35 +1116,35 @@ const validateForm = (targetStatus = 'published') => {
   errors.value = []
   
   if (targetStatus === 'published' && (!formData.value.title || formData.value.title.trim().length === 0)) {
-    errors.value.push(t('blog.titleRequired') || 'Title is required')
+    errors.value.push(t('blog.titleRequired'))
   }
 
   const hasDate = !!formData.value.date
   const hasValidDate = !hasDate || /^\d{4}-\d{2}-\d{2}/.test(formData.value.date)
 
   if (!hasValidDate) {
-    errors.value.push(t('blog.dateRequired') || 'Date must be in YYYY-MM-DD format')
+    errors.value.push(t('blog.dateRequired'))
   }
 
   if (targetStatus === 'published') {
     if (!formData.value.genre || formData.value.genre.trim().length === 0) {
-      errors.value.push(t('blog.genreRequired') || 'Genre is required')
+      errors.value.push(t('blog.genreRequired'))
     }
 
     if (!hasDate) {
-      errors.value.push(t('blog.dateRequired') || 'Date is required and must be in YYYY-MM-DD format')
+      errors.value.push(t('blog.dateRequired'))
     }
 
     if (!formData.value.excerpt || formData.value.excerpt.trim().length === 0) {
-      errors.value.push(t('blog.excerptRequired') || 'Excerpt is required')
+      errors.value.push(t('blog.excerptRequired'))
     }
 
     if (!Array.isArray(formData.value.tags) || formData.value.tags.length === 0) {
-      errors.value.push(t('blog.tagsRequired') || 'At least one tag is required')
+      errors.value.push(t('blog.tagsRequired'))
     }
 
     if (!formData.value.content.trim()) {
-      errors.value.push(t('blog.contentRequired') || 'Content is required')
+      errors.value.push(t('blog.contentRequired'))
     }
   }
 
@@ -1093,7 +1157,7 @@ const validateForm = (targetStatus = 'published') => {
 const handleDelete = async () => {
   if (!formData.value.id) return
   
-  if (!confirm(t('admin.confirmDelete') || 'Are you sure you want to delete this article?')) {
+  if (!confirm(t('admin.confirmDelete'))) {
     return
   }
 
@@ -1111,7 +1175,7 @@ const handleDelete = async () => {
     handleClose()
   } catch (error) {
     console.error('Failed to delete article:', error)
-    alert(t('admin.deleteFailed') || 'Failed to delete article')
+    alert(t('admin.deleteFailed'))
   } finally {
     isSubmitting.value = false
   }
@@ -1125,7 +1189,7 @@ const handleSubmit = async (targetStatus = 'published') => {
     targetStatus === 'draft' &&
     props.isEditMode &&
     formData.value.status === 'published' &&
-    !confirm(t('blog.confirmConvertToDraft') || 'Move this published article back to draft?')
+    !confirm(t('blog.confirmConvertToDraft'))
   ) {
     return
   }
@@ -1165,27 +1229,27 @@ const handleSubmit = async (targetStatus = 'published') => {
 
     // 再次验证所有必需字段（双重检查）
     if (targetStatus === 'published' && !resolvedTitle) {
-      errors.value.push(t('blog.titleRequired') || 'Title is required')
+      errors.value.push(t('blog.titleRequired'))
       isSubmitting.value = false
       return
     }
     if (targetStatus === 'published' && !formData.value.genre?.trim()) {
-      errors.value.push(t('blog.genreRequired') || 'Genre is required')
+      errors.value.push(t('blog.genreRequired'))
       isSubmitting.value = false
       return
     }
     if (targetStatus === 'published' && !formData.value.content?.trim()) {
-      errors.value.push(t('blog.contentRequired') || 'Content is required')
+      errors.value.push(t('blog.contentRequired'))
       isSubmitting.value = false
       return
     }
     if (targetStatus === 'published' && !formData.value.excerpt?.trim()) {
-      errors.value.push(t('blog.excerptRequired') || 'Excerpt is required')
+      errors.value.push(t('blog.excerptRequired'))
       isSubmitting.value = false
       return
     }
     if (targetStatus === 'published' && (!Array.isArray(formData.value.tags) || formData.value.tags.length === 0)) {
-      errors.value.push(t('blog.tagsRequired') || 'At least one tag is required')
+      errors.value.push(t('blog.tagsRequired'))
       isSubmitting.value = false
       return
     }
@@ -1278,6 +1342,13 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  if (renderTimer) clearTimeout(renderTimer)
+
+  activeObjectUrls.forEach(url => {
+    URL.revokeObjectURL(url)
+  })
+  activeObjectUrls.clear()
+
   // 移除点击外部关闭下拉框的事件监听
   document.removeEventListener('click', handleClickOutside)
 })

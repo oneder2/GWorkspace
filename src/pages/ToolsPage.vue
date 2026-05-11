@@ -102,6 +102,7 @@ import MarkdownTool from '../components/tools/MarkdownTool.vue'
 import PomodoroTool from '../components/tools/PomodoroTool.vue'
 import QRCodeTool from '../components/tools/QRCodeTool.vue'
 import StopwatchTool from '../components/tools/StopwatchTool.vue'
+import ThesisParserTool from '../components/tools/ThesisParserTool.vue'
 import TodoTool from '../components/tools/TodoTool.vue'
 import WorldClockTool from '../components/tools/WorldClockTool.vue'
 import { useLocalStorage } from '../composables/useStorage'
@@ -118,11 +119,12 @@ const toolComponentMap = {
   pomodoro: PomodoroTool,
   qrcode: QRCodeTool,
   stopwatch: StopwatchTool,
+  'thesis-parser': ThesisParserTool,
   todo: TodoTool,
   worldclock: WorldClockTool
 }
 
-const scrollableToolIds = new Set(['blog-assistant', 'markdown', 'todo', 'json', 'encode'])
+const scrollableToolIds = new Set(['blog-assistant', 'markdown', 'todo', 'json', 'encode', 'thesis-parser'])
 const validToolIds = new Set(toolsConfig.map(tool => tool.id))
 
 const { t } = useI18n()
@@ -159,7 +161,9 @@ const groupNameMap = computed(() => Object.fromEntries(
 ))
 
 const recentTools = computed(() => sanitizeIds(recentToolIds.value).map(toolId => toolMap.value[toolId]).filter(Boolean))
-const featuredTool = computed(() => toolMap.value['blog-assistant'] || tools.value[0] || null)
+const featuredTool = computed(() => (
+  toolMap.value['thesis-parser'] || toolMap.value['blog-assistant'] || tools.value[0] || null
+))
 
 const activeToolData = computed(() => {
   const normalizedId = normalizeToolId(activeToolId.value)

@@ -7,14 +7,14 @@
     <header class="admin-panel rounded-[28px] p-5 sm:p-6 shrink-0">
       <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
         <div class="space-y-3">
-          <span class="section-kicker">Administration</span>
+          <span class="section-kicker">{{ $t('admin.eyebrow') }}</span>
           <div class="flex items-center gap-4 flex-wrap">
             <h1 class="text-3xl font-extrabold text-main tracking-tight">{{ $t('admin.title') }}</h1>
             <span class="px-2.5 py-0.5 bg-red-500/10 text-red-500 text-[10px] uppercase font-bold rounded-full border border-red-500/20">
           {{ $t('admin.adminOnly') }}
             </span>
           </div>
-          <p class="section-copy text-sm sm:text-base">A calmer, denser management workspace focused on operations, moderation, and publishing flow.</p>
+          <p class="section-copy text-sm sm:text-base">{{ $t('admin.workspaceCopy') }}</p>
         </div>
         <div class="flex items-center gap-3 w-full sm:w-auto">
           <button

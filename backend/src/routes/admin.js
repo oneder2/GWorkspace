@@ -4,17 +4,80 @@
  */
 
 import express from 'express'
+import { existsSync, statSync } from 'fs'
 import { authenticate, requireAdmin, optionalAuthenticate } from '../middleware/auth.js'
 import { Blog } from '../models/Blog.js'
-import { Comment } from '../models/Comment.js'
 import { Visit } from '../models/Visit.js'
-import { User } from '../models/User.js'
 import { AdminSettings } from '../models/AdminSettings.js'
 import { Guestbook } from '../models/Guestbook.js'
-import { getDatabase } from '../config/database.js'
+import { createDatabaseBackup, getBackupDirectory, listDatabaseBackups } from '../config/databaseBackup.js'
+import { checkDatabaseHealth } from '../config/databaseHealth.js'
+import { getDatabase, getDatabasePath } from '../config/database.js'
+import { scanBlogImageReferences } from '../utils/blogImageAssets.js'
+import { isCloudflarePurgeConfigured, purgeCloudflareUrls } from '../utils/cloudflare.js'
 import { getLocationByIP, isLocalOrReservedIP } from '../utils/ipLocation.js'
+import { deleteR2Object, getMissingR2Fields, getUploadCacheControl, isR2Configured, listR2Objects } from '../utils/r2.js'
+import { getSpotifyStatus } from '../utils/spotify.js'
 
 const router = express.Router()
+
+const getFileSize = (filePath) => {
+  if (!existsSync(filePath)) {
+    return 0
+  }
+
+  return statSync(filePath).size
+}
+
+const parsePositiveInteger = (value, fallback) => {
+  const parsed = parseInt(value, 10)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
+
+const getSystemHealthPayload = (req) => {
+  const db = getDatabase()
+  const dbPath = getDatabasePath()
+  const recentBackups = listDatabaseBackups({ limit: 5 })
+  const backupCount = listDatabaseBackups({ limit: Number.MAX_SAFE_INTEGER }).length
+  const database = checkDatabaseHealth({ db, full: false })
+  const spotify = getSpotifyStatus(req)
+
+  return {
+    api: {
+      status: 'ok',
+      uptime_seconds: Math.round(process.uptime()),
+      node_version: process.version
+    },
+    database: {
+      ...database,
+      status: database.ok ? 'ok' : 'degraded',
+      path: dbPath,
+      size_bytes: getFileSize(dbPath),
+      wal_size_bytes: getFileSize(`${dbPath}-wal`),
+      shm_size_bytes: getFileSize(`${dbPath}-shm`)
+    },
+    backups: {
+      directory: getBackupDirectory(),
+      count: backupCount,
+      recent: recentBackups,
+      latest: recentBackups[0] || null
+    },
+    object_storage: {
+      configured: isR2Configured(),
+      missing_fields: getMissingR2Fields(),
+      public_domain: process.env.R2_PUBLIC_DOMAIN || null,
+      cache_control: getUploadCacheControl(),
+      purge_configured: isCloudflarePurgeConfigured(),
+      deletion_policy: 'unreferenced-only'
+    },
+    spotify: {
+      ...spotify,
+      status: spotify.configured
+        ? 'ok'
+        : (spotify.auth_configured || spotify.playback_configured ? 'degraded' : 'missing')
+    }
+  }
+}
 
 /**
  * 获取管理员设置（公开访问，仅返回位置和时区信息）
@@ -27,10 +90,11 @@ router.get('/settings', optionalAuthenticate, (req, res) => {
     if (!settings) {
       return res.status(404).json({ error: 'Settings not found' })
     }
-    // 只返回位置和时区信息，不返回其他敏感设置
+    // 只返回公开可用的站点信息
     res.json({
       location: settings.location,
-      timezone: settings.timezone
+      timezone: settings.timezone,
+      homepage_content: settings.homepage_content
     })
   } catch (error) {
     console.error('Error fetching admin settings:', error)
@@ -171,13 +235,24 @@ router.get('/guestbook', (req, res) => {
 
 router.get('/analytics/overview', (req, res) => {
   try {
-    const { days = 7 } = req.query
-    const trend = Visit.getTrend({ days: parseInt(days) })
+    const days = parsePositiveInteger(req.query.days, 7)
+    const endDate = new Date()
+    const startDate = new Date()
+    startDate.setUTCHours(0, 0, 0, 0)
+    startDate.setUTCDate(startDate.getUTCDate() - (days - 1))
+
+    const trend = Visit.getTrend({ days })
     const overall = Visit.getOverallStats()
+    const range = Visit.getOverallStats({
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString()
+    })
 
     res.json({
+      days,
       trend,
-      overall
+      overall,
+      range
     })
   } catch (error) {
     console.error('Error fetching admin analytics overview:', error)
@@ -199,9 +274,9 @@ router.get('/stats', (req, res) => {
         COUNT(*) as total,
         COUNT(CASE WHEN status = 'published' THEN 1 END) as published,
         COUNT(CASE WHEN status = 'draft' THEN 1 END) as draft,
-        SUM(views) as total_views,
-        SUM(likes_count) as total_likes,
-        SUM(comments_count) as total_comments
+        COALESCE(SUM(views), 0) as total_views,
+        COALESCE(SUM(likes_count), 0) as total_likes,
+        COALESCE(SUM(comments_count), 0) as total_comments
       FROM blogs
     `).get()
 
@@ -228,6 +303,147 @@ router.get('/stats', (req, res) => {
   }
 })
 
+router.get('/system/health', (req, res) => {
+  try {
+    res.json(getSystemHealthPayload(req))
+  } catch (error) {
+    console.error('Error fetching system health:', error)
+    res.status(500).json({ error: 'Failed to fetch system health' })
+  }
+})
+
+router.post('/system/backup', (req, res) => {
+  try {
+    const backup = createDatabaseBackup()
+    const health = getSystemHealthPayload(req)
+
+    res.status(201).json({
+      backup,
+      backups: health.backups
+    })
+  } catch (error) {
+    console.error('Error creating system backup:', error)
+    res.status(500).json({ error: 'Failed to create database backup' })
+  }
+})
+
+router.get('/system/assets', async (req, res) => {
+  try {
+    if (!isR2Configured()) {
+      return res.json({
+        configured: false,
+        missing_fields: getMissingR2Fields(),
+        cache_control: getUploadCacheControl(),
+        purge_configured: isCloudflarePurgeConfigured(),
+        summary: {
+          total: 0,
+          referenced: 0,
+          orphaned: 0
+        },
+        assets: []
+      })
+    }
+
+    const objects = await listR2Objects({ prefix: 'blog/' })
+    const { references } = scanBlogImageReferences()
+    const assets = objects
+      .map(object => {
+        const referencedBy = references.get(object.key) || []
+
+        return {
+          ...object,
+          referenced: referencedBy.length > 0,
+          can_delete: referencedBy.length === 0,
+          reference_count: referencedBy.length,
+          referenced_by: referencedBy
+        }
+      })
+      .sort((left, right) => {
+        if (left.referenced !== right.referenced) {
+          return Number(left.referenced) - Number(right.referenced)
+        }
+        return (right.last_modified || '').localeCompare(left.last_modified || '')
+      })
+
+    const referencedCount = assets.filter(asset => asset.referenced).length
+
+    res.json({
+      configured: true,
+      missing_fields: [],
+      cache_control: getUploadCacheControl(),
+      purge_configured: isCloudflarePurgeConfigured(),
+      summary: {
+        total: assets.length,
+        referenced: referencedCount,
+        orphaned: assets.length - referencedCount
+      },
+      assets
+    })
+  } catch (error) {
+    console.error('Error fetching system assets:', error)
+    res.status(500).json({ error: 'Failed to fetch system assets' })
+  }
+})
+
+router.delete('/system/assets', async (req, res) => {
+  try {
+    const requestedKey = typeof req.body?.key === 'string' ? req.body.key.trim().replace(/^\/+/, '') : ''
+    if (!requestedKey) {
+      return res.status(400).json({ error: 'Asset key is required' })
+    }
+
+    if (!requestedKey.startsWith('blog/')) {
+      return res.status(400).json({ error: 'Only blog assets can be managed here' })
+    }
+
+    if (!isR2Configured()) {
+      return res.status(503).json({
+        error: 'Cloudflare R2 is not fully configured',
+        missingFields: getMissingR2Fields()
+      })
+    }
+
+    const { references } = scanBlogImageReferences()
+    const referencedBy = references.get(requestedKey) || []
+
+    if (referencedBy.length > 0) {
+      return res.status(409).json({
+        error: 'Asset is still referenced by at least one article',
+        referenced_by: referencedBy
+      })
+    }
+
+    const deletedAsset = await deleteR2Object(requestedKey)
+    let purge = {
+      attempted: false,
+      configured: isCloudflarePurgeConfigured(),
+      purged: 0
+    }
+
+    if (deletedAsset.url) {
+      try {
+        purge = await purgeCloudflareUrls([deletedAsset.url])
+      } catch (error) {
+        purge = {
+          attempted: true,
+          configured: true,
+          purged: 0,
+          error: error.message
+        }
+      }
+    }
+
+    res.json({
+      deleted: true,
+      asset: deletedAsset,
+      purge
+    })
+  } catch (error) {
+    console.error('Error deleting system asset:', error)
+    res.status(500).json({ error: 'Failed to delete system asset' })
+  }
+})
+
 /**
  * 更新管理员设置（位置、时区）
  * PUT /api/admin/settings
@@ -243,6 +459,7 @@ router.get('/stats', (req, res) => {
 router.put('/settings', async (req, res) => {
   try {
     const { location, timezone, ip_address, forceRelocate } = req.body
+    const homepageContent = req.body.homepage_content ?? req.body.homepageContent
     const userId = req.user.id
 
     // DEBUG: 输出请求参数
@@ -250,13 +467,22 @@ router.put('/settings', async (req, res) => {
       ip_address: ip_address || null,
       location: location || null,
       timezone: timezone || null,
+      homepage_content: homepageContent ? '[provided]' : null,
       forceRelocate: forceRelocate || false
     })
+
+    const updatePayload = {}
+
+    if (homepageContent !== undefined) {
+      updatePayload.homepage_content = homepageContent
+    }
+
+    const hasLocationPayload = ip_address !== undefined || location !== undefined || timezone !== undefined || forceRelocate === true
 
     let locationInfo = { location, timezone, ip_address }
 
     // 情况1：前端提供了完整的位置信息（推荐方式）
-    if (ip_address && location && timezone) {
+    if (hasLocationPayload && ip_address && location && timezone) {
       // 验证IP地址不是本地/保留IP
       if (isLocalOrReservedIP(ip_address)) {
         return res.status(400).json({ 
@@ -276,7 +502,7 @@ router.put('/settings', async (req, res) => {
       locationInfo = { ip_address, location, timezone }
     }
     // 情况2：前端只提供了IP地址，后端根据IP获取位置信息
-    else if (ip_address && (!location || !timezone)) {
+    else if (hasLocationPayload && ip_address && (!location || !timezone)) {
       // 验证IP地址
       if (isLocalOrReservedIP(ip_address)) {
         return res.status(400).json({ 
@@ -317,7 +543,7 @@ router.put('/settings', async (req, res) => {
       }
     }
     // 情况3：只提供了location和timezone，没有IP（兼容旧代码）
-    else if (location && timezone && !ip_address) {
+    else if (hasLocationPayload && location && timezone && !ip_address) {
       // 尝试从请求中获取IP作为备用
       const userIp = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress
       if (userIp && !isLocalOrReservedIP(userIp)) {
@@ -331,7 +557,7 @@ router.put('/settings', async (req, res) => {
       })
     }
     // 情况4：forceRelocate为true（已废弃，保留兼容性）
-    else if (forceRelocate === true) {
+    else if (hasLocationPayload && forceRelocate === true) {
       // 尝试从请求中获取IP
       const userIp = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress
       
@@ -362,8 +588,8 @@ router.put('/settings', async (req, res) => {
         })
       }
     }
-    // 情况5：参数不足
-    else {
+    // 情况5：参数不足，但允许仅更新首页内容
+    else if (!homepageContent && !hasLocationPayload) {
       return res.status(400).json({ 
         error: 'Missing required parameters',
         message: 'Please provide ip_address (from frontend), or location and timezone manually.'
@@ -377,8 +603,21 @@ router.put('/settings', async (req, res) => {
       ip_address: locationInfo.ip_address || null
     })
 
+    if (hasLocationPayload) {
+      updatePayload.location = locationInfo.location || null
+      updatePayload.timezone = locationInfo.timezone || null
+      updatePayload.ip_address = locationInfo.ip_address || null
+    }
+
+    if (Object.keys(updatePayload).length === 0) {
+      return res.status(400).json({
+        error: 'Missing required parameters',
+        message: 'Please provide homepage_content or location fields to update.'
+      })
+    }
+
     // 更新管理员设置
-    const updatedSettings = AdminSettings.update(locationInfo, userId)
+    const updatedSettings = AdminSettings.update(updatePayload, userId)
 
     res.json(updatedSettings)
   } catch (error) {
