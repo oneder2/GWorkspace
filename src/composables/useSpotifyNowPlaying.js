@@ -1,6 +1,10 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { API_BASE_URL } from '../utils/api'
 
-const SPOTIFY_NOW_PLAYING_URL = (import.meta.env.VITE_SPOTIFY_NOW_PLAYING_URL || '').trim()
+const SPOTIFY_NOW_PLAYING_URL = (
+  import.meta.env.VITE_SPOTIFY_NOW_PLAYING_URL ||
+  `${API_BASE_URL}/spotify/now-playing`
+).trim()
 const SPOTIFY_REFRESH_MS = Math.max(
   Number.parseInt(import.meta.env.VITE_SPOTIFY_NOW_PLAYING_REFRESH_MS || '60000', 10) || 60000,
   15000

@@ -192,6 +192,98 @@
           </p>
         </div>
       </div>
+
+      <div class="admin-panel p-6 rounded-[24px] space-y-5">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.spotifyIntegration') }}</h3>
+            <p class="text-sm text-secondary">{{ $t('admin.spotifyStatusCopy') }}</p>
+          </div>
+          <span class="status-pill" :class="statusClass(spotifyStatusTone)">
+            {{ health.spotify.configured ? $t('admin.connected') : $t('admin.notConfigured') }}
+          </span>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <span class="status-pill" :class="statusClass(health.spotify.auth_configured ? 'success' : 'danger')">
+            {{ health.spotify.auth_configured ? $t('admin.spotifyAuthReady') : $t('admin.spotifyAuthMissing') }}
+          </span>
+          <span class="status-pill" :class="statusClass(health.spotify.playback_configured ? 'success' : 'danger')">
+            {{ health.spotify.playback_configured ? $t('admin.spotifyPlaybackReady') : $t('admin.spotifyPlaybackMissing') }}
+          </span>
+          <span class="status-pill" :class="statusClass(health.spotify.refresh_token_present ? 'success' : 'danger')">
+            {{ health.spotify.refresh_token_present ? $t('admin.spotifyRefreshTokenReady') : $t('admin.spotifyRefreshTokenMissing') }}
+          </span>
+          <span class="status-pill" :class="statusClass(health.spotify.access_token_cached ? 'success' : 'warm')">
+            {{ health.spotify.access_token_cached ? $t('admin.spotifyAccessTokenCached') : $t('admin.spotifyAccessTokenEmpty') }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 space-y-2">
+            <p class="text-xs uppercase tracking-widest text-slate-400">{{ $t('admin.spotifyRedirectUri') }}</p>
+            <p class="font-semibold text-slate-800 dark:text-slate-200 break-all">{{ health.spotify.redirect_uri || '—' }}</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 space-y-2">
+            <p class="text-xs uppercase tracking-widest text-slate-400">{{ $t('admin.spotifyNowPlayingEndpoint') }}</p>
+            <p class="font-semibold text-slate-800 dark:text-slate-200 break-all">{{ health.spotify.now_playing_url || '—' }}</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex items-start justify-between gap-4 text-sm">
+            <span class="text-slate-500 dark:text-slate-400">{{ $t('admin.spotifyMissingFields') }}</span>
+            <span class="font-semibold text-right text-slate-800 dark:text-slate-200 break-all">
+              {{ health.spotify.missing_fields?.length ? health.spotify.missing_fields.join(', ') : '—' }}
+            </span>
+          </div>
+          <div class="flex items-start justify-between gap-4 text-sm">
+            <span class="text-slate-500 dark:text-slate-400">{{ $t('admin.spotifyScopes') }}</span>
+            <span class="font-semibold text-right text-slate-800 dark:text-slate-200 break-all">
+              {{ health.spotify.scopes?.length ? health.spotify.scopes.join(', ') : '—' }}
+            </span>
+          </div>
+          <div class="flex items-start justify-between gap-4 text-sm">
+            <span class="text-slate-500 dark:text-slate-400">{{ $t('admin.spotifyGrantedScopes') }}</span>
+            <span class="font-semibold text-right text-slate-800 dark:text-slate-200 break-all">
+              {{ health.spotify.granted_scopes?.length ? health.spotify.granted_scopes.join(', ') : '—' }}
+            </span>
+          </div>
+          <div class="flex items-start justify-between gap-4 text-sm">
+            <span class="text-slate-500 dark:text-slate-400">{{ $t('admin.spotifyCachedUntil') }}</span>
+            <span class="font-semibold text-right text-slate-800 dark:text-slate-200 break-all">
+              {{ health.spotify.access_token_expires_at ? formatDateTime(health.spotify.access_token_expires_at) : '—' }}
+            </span>
+          </div>
+          <div v-if="health.spotify.callback_success_url" class="flex items-start justify-between gap-4 text-sm">
+            <span class="text-slate-500 dark:text-slate-400">{{ $t('admin.spotifyCallbackSuccessUrl') }}</span>
+            <span class="font-semibold text-right text-slate-800 dark:text-slate-200 break-all">
+              {{ health.spotify.callback_success_url }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <a
+            v-if="health.spotify.login_url"
+            :href="health.spotify.login_url"
+            target="_blank"
+            rel="noreferrer"
+            class="action-btn action-btn-primary text-sm"
+          >
+            {{ $t('admin.spotifyAuthorize') }}
+          </a>
+          <a
+            v-if="health.spotify.now_playing_url"
+            :href="health.spotify.now_playing_url"
+            target="_blank"
+            rel="noreferrer"
+            class="action-btn action-btn-secondary text-sm"
+          >
+            {{ $t('admin.spotifyOpenNowPlaying') }}
+          </a>
+        </div>
+      </div>
     </div>
 
     <div class="admin-panel rounded-[24px] overflow-hidden">
@@ -338,7 +430,17 @@ const health = ref({
     count: 0,
     recent: []
   },
-  object_storage: {}
+  object_storage: {},
+  spotify: {
+    configured: false,
+    auth_configured: false,
+    playback_configured: false,
+    missing_fields: [],
+    scopes: [],
+    granted_scopes: [],
+    refresh_token_present: false,
+    access_token_cached: false
+  }
 })
 
 const assets = ref({
@@ -417,6 +519,12 @@ const summaryCards = computed(() => [
     tone: assets.value.summary.orphaned ? 'warm' : 'success'
   }
 ])
+
+const spotifyStatusTone = computed(() => {
+  if (health.value.spotify.configured) return 'success'
+  if (health.value.spotify.auth_configured || health.value.spotify.playback_configured) return 'warm'
+  return 'danger'
+})
 
 const filteredAssets = computed(() => {
   const allAssets = assets.value.assets || []

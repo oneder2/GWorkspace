@@ -17,6 +17,7 @@ import { scanBlogImageReferences } from '../utils/blogImageAssets.js'
 import { isCloudflarePurgeConfigured, purgeCloudflareUrls } from '../utils/cloudflare.js'
 import { getLocationByIP, isLocalOrReservedIP } from '../utils/ipLocation.js'
 import { deleteR2Object, getMissingR2Fields, getUploadCacheControl, isR2Configured, listR2Objects } from '../utils/r2.js'
+import { getSpotifyStatus } from '../utils/spotify.js'
 
 const router = express.Router()
 
@@ -33,12 +34,13 @@ const parsePositiveInteger = (value, fallback) => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
 }
 
-const getSystemHealthPayload = () => {
+const getSystemHealthPayload = (req) => {
   const db = getDatabase()
   const dbPath = getDatabasePath()
   const recentBackups = listDatabaseBackups({ limit: 5 })
   const backupCount = listDatabaseBackups({ limit: Number.MAX_SAFE_INTEGER }).length
   const database = checkDatabaseHealth({ db, full: false })
+  const spotify = getSpotifyStatus(req)
 
   return {
     api: {
@@ -67,6 +69,12 @@ const getSystemHealthPayload = () => {
       cache_control: getUploadCacheControl(),
       purge_configured: isCloudflarePurgeConfigured(),
       deletion_policy: 'unreferenced-only'
+    },
+    spotify: {
+      ...spotify,
+      status: spotify.configured
+        ? 'ok'
+        : (spotify.auth_configured || spotify.playback_configured ? 'degraded' : 'missing')
     }
   }
 }
@@ -297,7 +305,7 @@ router.get('/stats', (req, res) => {
 
 router.get('/system/health', (req, res) => {
   try {
-    res.json(getSystemHealthPayload())
+    res.json(getSystemHealthPayload(req))
   } catch (error) {
     console.error('Error fetching system health:', error)
     res.status(500).json({ error: 'Failed to fetch system health' })
@@ -307,7 +315,7 @@ router.get('/system/health', (req, res) => {
 router.post('/system/backup', (req, res) => {
   try {
     const backup = createDatabaseBackup()
-    const health = getSystemHealthPayload()
+    const health = getSystemHealthPayload(req)
 
     res.status(201).json({
       backup,
