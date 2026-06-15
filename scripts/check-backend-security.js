@@ -4,9 +4,11 @@ import { join } from 'path'
 const serverPath = join(process.cwd(), 'backend', 'src', 'server.js')
 const userModelPath = join(process.cwd(), 'backend', 'src', 'models', 'User.js')
 const authConfigPath = join(process.cwd(), 'backend', 'src', 'config', 'auth.js')
+const authRoutesPath = join(process.cwd(), 'backend', 'src', 'routes', 'auth.js')
 const serverSource = readFileSync(serverPath, 'utf-8')
 const userModelSource = readFileSync(userModelPath, 'utf-8')
 const authConfigSource = readFileSync(authConfigPath, 'utf-8')
+const authRoutesSource = readFileSync(authRoutesPath, 'utf-8')
 const failures = []
 
 if (!serverSource.includes("app.disable('x-powered-by')") && !serverSource.includes('app.disable("x-powered-by")')) {
@@ -59,6 +61,11 @@ if (!authConfigSource.includes("process.env.NODE_ENV === 'production'")) {
 
 if (!authConfigSource.includes('JWT_SECRET must be configured')) {
   failures.push('backend/src/config/auth.js must fail loudly when production JWT_SECRET is missing or placeholder')
+}
+
+const refreshRouteSource = authRoutesSource.split("router.post('/refresh'")[1] || ''
+if (!refreshRouteSource.includes('User.isSessionValid(token)')) {
+  failures.push('backend/src/routes/auth.js must reject refresh requests when the existing session is no longer valid')
 }
 
 const requiredHelmetOptions = [

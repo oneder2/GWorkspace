@@ -261,6 +261,10 @@ router.post('/refresh', (req, res) => {
       return res.status(401).json({ error: 'Invalid token' })
     }
 
+    if (!User.isSessionValid(token)) {
+      return res.status(401).json({ error: 'Session expired' })
+    }
+
     const user = User.getById(decoded.id)
     if (!user) {
       return res.status(401).json({ error: 'User not found' })
@@ -288,4 +292,3 @@ router.post('/refresh', (req, res) => {
 })
 
 export default router
-
