@@ -211,6 +211,14 @@ jobs:
               -H "Access-Control-Request-Headers: authorization,content-type")"
             echo "$CORS_OUTPUT" | grep -i '^Access-Control-Allow-Origin: https://www.gellaronline.cc' >/dev/null
             echo "$CORS_OUTPUT" | grep -i '^Access-Control-Allow-Methods: .*PATCH' >/dev/null
+            BLOCKED_CORS_OUTPUT="$(curl -isS -X OPTIONS "http://127.0.0.1:3001/api/admin/ai/seeds/2" \
+              -H "Origin: https://evil-localhost.example" \
+              -H "Access-Control-Request-Method: PATCH" \
+              -H "Access-Control-Request-Headers: authorization,content-type" || true)"
+            if echo "$BLOCKED_CORS_OUTPUT" | grep -i '^Access-Control-Allow-Origin:' >/dev/null; then
+              echo "CORS allowed an origin that only contains localhost as a substring" >&2
+              exit 1
+            fi
 
             # 回归检查：动态 sitemap 必须指向前台 canonical URL，不再暴露旧入口。
             SITEMAP_OUTPUT="$(curl -fsS "http://127.0.0.1:3001/api/seo/sitemap.xml")"

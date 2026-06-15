@@ -58,10 +58,23 @@ const allowedOrigins = [
   'https://workspace.gellaronline.cc'
 ];
 
+function isLocalDevelopmentOrigin(origin) {
+  try {
+    const { hostname } = new URL(origin)
+    return hostname === 'localhost' || hostname === '127.0.0.1'
+  } catch {
+    return false
+  }
+}
+
+function isAllowedCorsOrigin(origin) {
+  return allowedOrigins.includes(origin) || isLocalDevelopmentOrigin(origin)
+}
+
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+    if (isAllowedCorsOrigin(origin)) {
       callback(null, true);
     } else {
       console.warn('CORS Blocked for origin:', origin);

@@ -25,6 +25,7 @@
 - **后端指纹头收口**：禁用 Express `X-Powered-By` 响应头，并在 CI、部署前检查和部署后 live gate 中防止该指纹重新暴露。
 - **后端安全头启用**：启用 Helmet 通用安全响应头，并保留跨子域 API 所需的 CORS 兼容性配置；部署后会验证 `X-Content-Type-Options: nosniff`。
 - **HSTS 单一来源**：后端 Helmet 不再直接发送 HSTS，避免与 Cloudflare HSTS 重复；部署阶段会验证后端本机响应不含 HSTS。
+- **CORS 来源匹配收紧**：开发来源改为基于 URL hostname 精确判断，不再用字符串包含匹配放行 `localhost` / `127.0.0.1`。
 - **后端审计 gate**：CI 新增后端生产依赖审计边界，要求 critical 为 0，并只允许当前已知的 `better-sqlite3/tar` 漏洞节点和 advisory 集合继续存在。
 - **后端依赖减面**：将 `bcrypt` 升级到 `6.0.0`，移除旧 `@mapbox/node-pre-gyp` 安装链，后端高危审计项从 4 个减少到 2 个。
 - **保留 better-sqlite3 稳定版本**：继续固定 `better-sqlite3@9.4.3`，避免 `12.x` 在当前服务器较旧 glibc/g++ 环境下回退源码编译导致部署失败。

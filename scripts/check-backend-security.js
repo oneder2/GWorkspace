@@ -9,6 +9,18 @@ if (!serverSource.includes("app.disable('x-powered-by')") && !serverSource.inclu
   failures.push("backend/src/server.js must disable Express x-powered-by header")
 }
 
+if (serverSource.includes("origin.includes('localhost')") || serverSource.includes('origin.includes("localhost")')) {
+  failures.push('backend/src/server.js must not use substring matching for localhost CORS origins')
+}
+
+if (serverSource.includes("origin.includes('127.0.0.1')") || serverSource.includes('origin.includes("127.0.0.1")')) {
+  failures.push('backend/src/server.js must not use substring matching for 127.0.0.1 CORS origins')
+}
+
+if (!serverSource.includes('function isAllowedCorsOrigin(origin)')) {
+  failures.push('backend/src/server.js must centralize CORS origin checks in isAllowedCorsOrigin')
+}
+
 if (!serverSource.includes("import helmet from 'helmet'") && !serverSource.includes('import helmet from "helmet"')) {
   failures.push('backend/src/server.js must import helmet')
 }
