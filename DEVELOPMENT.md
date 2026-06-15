@@ -33,8 +33,14 @@
 
 ## 开发环境要求
 
-- Node.js >= 16.0.0
-- npm >= 7.0.0
+- Node.js 20.x（使用 `.nvmrc`，与 CI 和生产部署保持一致）
+- npm 10.x（随 Node 20 安装）
+
+```bash
+nvm use
+node -v
+npm -v
+```
 
 ## 项目启动
 
@@ -56,9 +62,22 @@ npm run dev
 
 ```bash
 npm run build
+npm run check:seo
+npm run check:cors
+npm run check:backend-seo
 ```
 
 构建产物将输出到 `dist/` 目录。
+
+### 4. 后端基础验证
+
+```bash
+cd backend
+npm ci --omit=dev
+DATABASE_PATH="/tmp/gworkspace-dev-check.db" npm run db:prepare
+DATABASE_PATH="/tmp/gworkspace-dev-check.db" npm run db:check
+node --input-type=module -e "const routes=['admin','adminAi','ai','analytics','auth','blog','comments','guestbook','likes','seo','spotify','upload'].map(name => './src/routes/' + name + '.js'); await Promise.all(routes.map(p => import(p))); console.log('backend route modules ok', routes.length)"
+```
 
 ## 项目架构
 
@@ -217,6 +236,22 @@ export const i18n = createI18n({
 - Netlify
 - GitHub Pages
 - 其他静态托管服务
+
+当前生产前台使用 Vercel。`vercel.json` 负责两类托管层配置：
+
+- 将旧 `/sites`、`/tools` 永久重定向到 `/workspace`
+- 为前台响应补充低风险安全头：`X-Content-Type-Options`、`Referrer-Policy`、`Permissions-Policy`、`X-Frame-Options`
+
+### 后端部署 gate
+
+后端通过 GitHub Actions 部署到自建服务器。部署脚本会在启动 PM2 后执行 live gate：
+
+- `/health` 必须返回 `status: ok` 和 `database: ok`
+- 后台 AI 种子接口的 `PATCH` CORS 预检必须通过
+- 动态 sitemap 必须输出 `https://www.gellaronline.cc/workspace`
+- 动态 sitemap 不能包含 `workspace.gellaronline.cc`、`/sites`、`/tools`
+
+`better-sqlite3` 当前固定在 `9.4.3`。不要在没有服务器编译链验证的情况下升级到 `12.x`，该版本在当前服务器环境可能回退到源码编译并导致部署失败。
 
 ### 环境变量
 

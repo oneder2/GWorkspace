@@ -2,6 +2,23 @@
 
 本文档记录项目的所有重要更新和变更。
 
+## v3.1.0 生产加固补记 (2026-06-16)
+
+### 工作台与公开入口收口
+- **工作台成为统一入口**：将原导航页与工具箱页的职责收拢到 `/workspace`，以启动器式搜索、常用外链、站内工具、资源索引和最近使用记录作为主要结构。
+- **旧入口托管层重定向**：新增 Vercel 配置，将 `/sites` 与 `/tools` 永久重定向到 `/workspace`，避免旧路径继续以 `200` 暴露。
+- **前台安全响应头**：为 Vercel 前台响应补充 `X-Content-Type-Options`、`Referrer-Policy`、`Permissions-Policy` 与 `X-Frame-Options`，并纳入公开 SEO 检查。
+
+### SEO 与部署回归检查
+- **静态与动态 sitemap 对齐**：公开 `sitemap.xml` 和后端动态 `/api/seo/sitemap.xml` 统一指向 `https://www.gellaronline.cc`，不再暴露后端域名和旧 `/sites`、`/tools` 入口。
+- **SEO 回归脚本**：新增公开 SEO 检查、后端 sitemap 检查和 CORS 方法检查，CI 会验证 canonical URL、公开资源、旧入口、响应头和后端 CORS 方法覆盖。
+- **后端部署 live gate**：后端部署完成后除了 `/health`，还会验证 PATCH 预检和动态 sitemap canonical 输出，防止已修复问题在部署阶段回归。
+
+### 安全依赖与运行时基线
+- **Node 运行时统一**：新增 `.nvmrc` 并让 CI 使用 Node 20，减少本地、CI 与服务器之间的运行时漂移。
+- **后端依赖减面**：将 `bcrypt` 升级到 `6.0.0`，移除旧 `@mapbox/node-pre-gyp` 安装链，后端高危审计项从 4 个减少到 2 个。
+- **保留 better-sqlite3 稳定版本**：继续固定 `better-sqlite3@9.4.3`，避免 `12.x` 在当前服务器较旧 glibc/g++ 环境下回退源码编译导致部署失败。
+
 ## v3.1.0 (个人化首页、轻运营闭环与 Spotify 接入 - 2026-05-11)
 
 ### 相比 v3.0.0 的版本转向
