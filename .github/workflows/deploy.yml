@@ -187,6 +187,22 @@ jobs:
             HEALTH_OUTPUT="$(curl -fsS "http://127.0.0.1:3001/health")"
             echo "$HEALTH_OUTPUT" | grep '"status":"ok"' >/dev/null
             echo "$HEALTH_OUTPUT" | grep '"database":"ok"' >/dev/null
+
+            # 回归检查：部署后必须保留后台 PATCH 预检支持。
+            CORS_OUTPUT="$(curl -isS -X OPTIONS "http://127.0.0.1:3001/api/admin/ai/seeds/2" \
+              -H "Origin: https://www.gellaronline.cc" \
+              -H "Access-Control-Request-Method: PATCH" \
+              -H "Access-Control-Request-Headers: authorization,content-type")"
+            echo "$CORS_OUTPUT" | grep -i '^Access-Control-Allow-Origin: https://www.gellaronline.cc' >/dev/null
+            echo "$CORS_OUTPUT" | grep -i '^Access-Control-Allow-Methods: .*PATCH' >/dev/null
+
+            # 回归检查：动态 sitemap 必须指向前台 canonical URL，不再暴露旧入口。
+            SITEMAP_OUTPUT="$(curl -fsS "http://127.0.0.1:3001/api/seo/sitemap.xml")"
+            echo "$SITEMAP_OUTPUT" | grep '<loc>https://www.gellaronline.cc/workspace</loc>' >/dev/null
+            if echo "$SITEMAP_OUTPUT" | grep -E 'workspace\.gellaronline\.cc|/sites|/tools' >/dev/null; then
+              echo "Dynamic sitemap contains stale backend domain or legacy routes" >&2
+              exit 1
+            fi
             
             # 清理
             rm -rf $TEMP_DIR
