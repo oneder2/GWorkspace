@@ -81,8 +81,7 @@ router.post('/:id/likes', optionalAuthenticate, (req, res) => {
     res.json(result)
   } catch (error) {
     console.error('Error toggling like:', error)
-    console.error('Error stack:', error.stack)
-    res.status(500).json({ error: error.message || 'Failed to toggle like' })
+    res.status(500).json({ error: 'Failed to toggle like' })
   }
 })
 

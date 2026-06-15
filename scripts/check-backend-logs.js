@@ -6,6 +6,8 @@ const disallowedPatterns = [
   /\[DEBUG\]/,
   /Like toggle request/,
   /Like toggle result/,
+  /Error stack/,
+  /console\.error\([^)]*error\.stack/,
   /\[Upload\] Attempting/,
   /\[Upload\] Success/
 ]
