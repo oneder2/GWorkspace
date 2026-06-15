@@ -95,22 +95,14 @@ export function useAuth() {
       const locationInfo = await getClientLocationInfo()
       
       if (locationInfo && locationInfo.ip && locationInfo.location && locationInfo.timezone) {
-        // DEBUG: 输出获取到的位置信息
-        console.debug('[DEBUG] updateAdminLocationOnLogin - Client location info:', {
-          ip: locationInfo.ip,
-          location: locationInfo.location,
-          timezone: locationInfo.timezone
-        })
-        
         // 发送给后端更新
         await adminSettingsApi.update({
           ip_address: locationInfo.ip,
           location: locationInfo.location,
           timezone: locationInfo.timezone
         })
-        console.log('[DEBUG] Admin location updated on login:', locationInfo.location)
       } else {
-        console.warn('[DEBUG] Failed to get location info on login:', locationInfo)
+        console.warn('Failed to get location info on login:', locationInfo)
       }
     } catch (error) {
       console.error('Failed to update admin location on login:', error)
@@ -174,4 +166,3 @@ export function useAuth() {
     isAdmin
   }
 }
-

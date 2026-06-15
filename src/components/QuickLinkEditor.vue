@@ -209,7 +209,6 @@ const handleIconError = (_event, link) => {
  * 保存链接
  */
 const saveLinks = () => {
-  console.log('[QuickLinkEditor] saveLinks called, localLinks:', localLinks.value)
   // 过滤掉空链接，并清理图标对象（只保留iconName作为回退）
   const validLinks = localLinks.value
     .filter(link => link.name && link.url)
@@ -222,7 +221,6 @@ const saveLinks = () => {
         iconName: link.iconName || 'HomeIcon'
       }
     })
-  console.log('[QuickLinkEditor] Valid links to emit:', validLinks)
   emit('save', validLinks)
   emit('close')
 }

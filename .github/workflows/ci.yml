@@ -28,6 +28,9 @@ jobs:
       - name: Audit frontend dependencies
         run: npm run audit:frontend
 
+      - name: Check frontend debug logs
+        run: npm run check:frontend-debug
+
       - name: Build frontend
         run: npm run build
 

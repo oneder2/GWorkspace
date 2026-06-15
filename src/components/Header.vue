@@ -625,13 +625,6 @@ const relocateAdmin = async () => {
     const locationInfo = await getClientLocationInfo()
     
     if (locationInfo && locationInfo.ip && locationInfo.location && locationInfo.timezone) {
-      // DEBUG: 输出获取到的位置信息
-      console.debug('[DEBUG] relocateAdmin - Client location info:', {
-        ip: locationInfo.ip,
-        location: locationInfo.location,
-        timezone: locationInfo.timezone
-      })
-      
       // 发送给后端更新
       const updatedSettings = await adminSettingsApi.update({
         ip_address: locationInfo.ip,
@@ -642,7 +635,6 @@ const relocateAdmin = async () => {
       // 更新本地状态
       adminSettings.value = updatedSettings
       
-      console.log('Admin location updated successfully:', updatedSettings.location)
     } else {
       throw new Error(t('admin.relocateFailed'))
     }
@@ -664,13 +656,6 @@ async function updateAdminLocationOnVisit() {
     const locationInfo = await getClientLocationInfo()
     
     if (locationInfo && locationInfo.ip && locationInfo.location && locationInfo.timezone) {
-      // DEBUG: 输出获取到的位置信息
-      console.debug('[DEBUG] updateAdminLocationOnVisit - Client location info:', {
-        ip: locationInfo.ip,
-        location: locationInfo.location,
-        timezone: locationInfo.timezone
-      })
-      
       // 发送给后端更新
       await adminSettingsApi.update({
         ip_address: locationInfo.ip,
@@ -680,9 +665,8 @@ async function updateAdminLocationOnVisit() {
       
       // 重新加载设置
       await loadAdminSettings()
-      console.log('[DEBUG] Admin location updated on visit:', locationInfo.location)
     } else {
-      console.warn('[DEBUG] Failed to get location info on visit:', locationInfo)
+      console.warn('Failed to get location info on visit:', locationInfo)
     }
   } catch (error) {
     console.error('Failed to update admin location on visit:', error)

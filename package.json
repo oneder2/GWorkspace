@@ -20,6 +20,7 @@
     "check:backend-routes": "node scripts/check-backend-routes.js",
     "check:env": "node scripts/check-env-examples.js",
     "check:frontend-budget": "node scripts/check-frontend-budget.js",
+    "check:frontend-debug": "node scripts/check-frontend-debug-logs.js",
     "audit:frontend": "npm audit --audit-level=moderate",
     "audit:backend": "node scripts/check-backend-audit.js"
   },

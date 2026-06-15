@@ -20,6 +20,7 @@
 - **浏览器兼容性数据刷新**：更新 `caniuse-lite` 与 `baseline-browser-mapping` lockfile 数据，消除构建阶段 Browserslist 过期警告，保持 CSS/JS 目标环境判断新鲜。
 - **前端审计 gate**：CI 新增 `npm audit --audit-level=moderate`，阻断前端 moderate/high/critical 依赖漏洞回归。
 - **前端体积预算 gate**：CI 在构建后检查 JS/CSS 单文件与总量预算，防止依赖或页面改动导致前端产物无意识膨胀。
+- **前端调试日志收口**：移除 localStorage、todo、快捷链接和管理员定位中的开发期调试输出，并在 CI 中阻断这些历史 debug marker 回归。
 - **后端审计 gate**：CI 新增后端生产依赖审计边界，要求 critical 为 0，并只允许当前已知的 `better-sqlite3/tar` 漏洞节点和 advisory 集合继续存在。
 - **后端依赖减面**：将 `bcrypt` 升级到 `6.0.0`，移除旧 `@mapbox/node-pre-gyp` 安装链，后端高危审计项从 4 个减少到 2 个。
 - **保留 better-sqlite3 稳定版本**：继续固定 `better-sqlite3@9.4.3`，避免 `12.x` 在当前服务器较旧 glibc/g++ 环境下回退源码编译导致部署失败。
