@@ -32,6 +32,9 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3001
 
+// 避免在生产响应中暴露 Express 指纹。
+app.disable('x-powered-by')
+
 // 配置信任代理 (关键：确保能正确识别来自 Nginx 的 Origin)
 app.set('trust proxy', true)
 

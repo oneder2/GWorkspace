@@ -81,6 +81,9 @@ jobs:
       - name: Check backend log hygiene
         run: npm run check:backend-logs
 
+      - name: Check backend security configuration
+        run: npm run check:backend-security
+
       - name: Check backend CORS methods
         run: npm run check:cors
 
