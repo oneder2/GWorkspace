@@ -42,6 +42,13 @@ function getLocs(xml) {
   return [...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1])
 }
 
+function hasVercelHeader(vercelConfig, key, value) {
+  return vercelConfig.headers?.some((entry) =>
+    entry.source === '/(.*)' &&
+    entry.headers?.some((header) => header.key === key && header.value === value)
+  )
+}
+
 function checkPublicSources() {
   const robots = readText('public/robots.txt')
   const sitemap = readText('public/sitemap.xml')
@@ -74,6 +81,10 @@ function checkPublicSources() {
     vercelConfig.redirects?.some((redirect) => redirect.source === '/tools' && redirect.destination === '/workspace' && redirect.permanent === true),
     'vercel.json must permanently redirect /tools to /workspace'
   )
+  assert(hasVercelHeader(vercelConfig, 'X-Content-Type-Options', 'nosniff'), 'vercel.json must set X-Content-Type-Options')
+  assert(hasVercelHeader(vercelConfig, 'Referrer-Policy', 'strict-origin-when-cross-origin'), 'vercel.json must set Referrer-Policy')
+  assert(hasVercelHeader(vercelConfig, 'Permissions-Policy', 'camera=(), microphone=(), geolocation=()'), 'vercel.json must set Permissions-Policy')
+  assert(hasVercelHeader(vercelConfig, 'X-Frame-Options', 'DENY'), 'vercel.json must set X-Frame-Options')
 
   assert(exists(`public${DEFAULT_OG_IMAGE}`), `default OG image is missing: public${DEFAULT_OG_IMAGE}`)
   assert(exists(`public${DEFAULT_LOGO_IMAGE}`), `default logo image is missing: public${DEFAULT_LOGO_IMAGE}`)
