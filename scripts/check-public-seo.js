@@ -48,6 +48,7 @@ function checkPublicSources() {
   const index = readText('index.html')
   const viteConfig = readText('vite.config.js')
   const useSEO = readText('src/composables/useSEO.js')
+  const vercelConfig = JSON.parse(readText('vercel.json'))
 
   assert(robots.includes(`Sitemap: ${SITE_URL}/sitemap.xml`), 'robots.txt must point to the public sitemap URL')
   assert(sitemap.trim().startsWith('<?xml'), 'public/sitemap.xml must be XML')
@@ -65,6 +66,14 @@ function checkPublicSources() {
   assert(viteConfig.includes('sitemap.xml'), 'PWA includeAssets must include sitemap.xml')
   assert(useSEO.includes(`const DEFAULT_OG_IMAGE = '${DEFAULT_OG_IMAGE}'`), 'useSEO must use the deployed default OG image')
   assert(useSEO.includes(`const DEFAULT_LOGO_IMAGE = '${DEFAULT_LOGO_IMAGE}'`), 'useSEO must use the deployed icon as logo')
+  assert(
+    vercelConfig.redirects?.some((redirect) => redirect.source === '/sites' && redirect.destination === '/workspace' && redirect.permanent === true),
+    'vercel.json must permanently redirect /sites to /workspace'
+  )
+  assert(
+    vercelConfig.redirects?.some((redirect) => redirect.source === '/tools' && redirect.destination === '/workspace' && redirect.permanent === true),
+    'vercel.json must permanently redirect /tools to /workspace'
+  )
 
   assert(exists(`public${DEFAULT_OG_IMAGE}`), `default OG image is missing: public${DEFAULT_OG_IMAGE}`)
   assert(exists(`public${DEFAULT_LOGO_IMAGE}`), `default logo image is missing: public${DEFAULT_LOGO_IMAGE}`)
@@ -74,6 +83,7 @@ function checkPublicSources() {
   assertNoStaleReferences('index.html', index)
   assertNoStaleReferences('vite.config.js', viteConfig)
   assertNoStaleReferences('src/composables/useSEO.js', useSEO)
+  assertNoStaleReferences('vercel.json', JSON.stringify(vercelConfig))
 }
 
 function checkDistIfPresent() {

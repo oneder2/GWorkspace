@@ -1,0 +1,14 @@
+{
+  "redirects": [
+    {
+      "source": "/sites",
+      "destination": "/workspace",
+      "permanent": true
+    },
+    {
+      "source": "/tools",
+      "destination": "/workspace",
+      "permanent": true
+    }
+  ]
+}
