@@ -23,6 +23,7 @@
 - **前端调试日志收口**：移除 localStorage、todo、快捷链接和管理员定位中的开发期调试输出，并在 CI 中阻断这些历史 debug marker 回归。
 - **后端日志卫生 gate**：移除点赞、上传和管理员设置接口中的请求级调试日志，并在 CI 与后端部署前阻断敏感 debug marker 回归。
 - **后端指纹头收口**：禁用 Express `X-Powered-By` 响应头，并在 CI、部署前检查和部署后 live gate 中防止该指纹重新暴露。
+- **后端安全头启用**：启用 Helmet 通用安全响应头，并保留跨子域 API 所需的 CORS 兼容性配置；部署后会验证 `X-Content-Type-Options: nosniff`。
 - **后端审计 gate**：CI 新增后端生产依赖审计边界，要求 critical 为 0，并只允许当前已知的 `better-sqlite3/tar` 漏洞节点和 advisory 集合继续存在。
 - **后端依赖减面**：将 `bcrypt` 升级到 `6.0.0`，移除旧 `@mapbox/node-pre-gyp` 安装链，后端高危审计项从 4 个减少到 2 个。
 - **保留 better-sqlite3 稳定版本**：继续固定 `better-sqlite3@9.4.3`，避免 `12.x` 在当前服务器较旧 glibc/g++ 环境下回退源码编译导致部署失败。

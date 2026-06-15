@@ -5,6 +5,7 @@
 
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
 import { getDatabase, closeDatabase } from './config/database.js'
@@ -37,6 +38,13 @@ app.disable('x-powered-by')
 
 // 配置信任代理 (关键：确保能正确识别来自 Nginx 的 Origin)
 app.set('trust proxy', true)
+
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false
+}))
 
 /**
  * 极其稳健的 CORS 配置：
