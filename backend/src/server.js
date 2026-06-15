@@ -11,6 +11,7 @@ import dotenv from 'dotenv'
 import { getDatabase, closeDatabase } from './config/database.js'
 import { runMigrations } from './config/migrations.js'
 import { checkDatabaseHealth } from './config/databaseHealth.js'
+import { validateAuthConfig } from './config/auth.js'
 
 // 导入路由
 import blogRoutes from './routes/blog.js'
@@ -29,6 +30,7 @@ import { startAiDailyCapsuleScheduler } from './services/aiScheduler.js'
 
 // 加载环境变量
 dotenv.config()
+validateAuthConfig()
 
 const app = express()
 const PORT = process.env.PORT || 3001

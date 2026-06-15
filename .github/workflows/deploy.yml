@@ -103,10 +103,30 @@ jobs:
             require_secret "R2_ACCOUNT_ID" "$R2_ACCOUNT_ID"
             require_secret "R2_BUCKET_NAME" "$R2_BUCKET_NAME"
             require_secret "R2_PUBLIC_DOMAIN" "$R2_PUBLIC_DOMAIN"
-            
+
             # 创建必要的目录
             mkdir -p $DEPLOY_DIR
             mkdir -p $BACKUP_DIR
+
+            require_env_file_value() {
+              key="$1"
+              file="$2"
+              if [ ! -f "$file" ]; then
+                echo "Missing backend .env file; cannot verify $key before deployment" >&2
+                exit 1
+              fi
+
+              value="$(grep -E "^${key}=" "$file" | tail -n 1 | cut -d= -f2- | tr -d '\r')"
+              case "$value" in
+                ""|"replace_with_a_strong_random_secret"|"your-secret-key-change-in-production"|"your-very-secure-secret-key"|"your-very-secure-secret-key-change-this-in-production")
+                  echo "Missing or placeholder backend .env value: $key" >&2
+                  exit 1
+                  ;;
+              esac
+            }
+
+            # 必须在停服前验证，避免环境变量缺失导致旧服务被停止后新服务无法启动。
+            require_env_file_value "JWT_SECRET" "$DEPLOY_DIR/.env"
             
             # 保存现有的.env文件到临时位置
             ENV_TEMP="/tmp/.env.backup-$$"

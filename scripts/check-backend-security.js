@@ -2,7 +2,11 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 
 const serverPath = join(process.cwd(), 'backend', 'src', 'server.js')
+const userModelPath = join(process.cwd(), 'backend', 'src', 'models', 'User.js')
+const authConfigPath = join(process.cwd(), 'backend', 'src', 'config', 'auth.js')
 const serverSource = readFileSync(serverPath, 'utf-8')
+const userModelSource = readFileSync(userModelPath, 'utf-8')
+const authConfigSource = readFileSync(authConfigPath, 'utf-8')
 const failures = []
 
 if (!serverSource.includes("app.disable('x-powered-by')") && !serverSource.includes('app.disable("x-powered-by")')) {
@@ -27,6 +31,26 @@ if (!serverSource.includes("import helmet from 'helmet'") && !serverSource.inclu
 
 if (!serverSource.includes('app.use(helmet(')) {
   failures.push('backend/src/server.js must enable helmet middleware')
+}
+
+if (!serverSource.includes('validateAuthConfig()')) {
+  failures.push('backend/src/server.js must validate auth configuration during startup')
+}
+
+if (userModelSource.includes('your-secret-key-change-in-production')) {
+  failures.push('backend/src/models/User.js must not include a hardcoded production JWT fallback')
+}
+
+if (!userModelSource.includes('getJwtSecret()')) {
+  failures.push('backend/src/models/User.js must resolve JWT secrets through backend/src/config/auth.js')
+}
+
+if (!authConfigSource.includes("process.env.NODE_ENV === 'production'")) {
+  failures.push('backend/src/config/auth.js must distinguish production JWT validation from local development')
+}
+
+if (!authConfigSource.includes('JWT_SECRET must be configured')) {
+  failures.push('backend/src/config/auth.js must fail loudly when production JWT_SECRET is missing or placeholder')
 }
 
 const requiredHelmetOptions = [

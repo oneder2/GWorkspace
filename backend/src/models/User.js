@@ -6,9 +6,7 @@
 import { getDatabase } from '../config/database.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
+import { getJwtExpiresIn, getJwtSecret } from '../config/auth.js'
 
 /**
  * 用户模型类
@@ -120,8 +118,8 @@ export class User {
         username: user.username,
         role: user.role
       },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
+      getJwtSecret(),
+      { expiresIn: getJwtExpiresIn() }
     )
   }
 
@@ -132,7 +130,7 @@ export class User {
    */
   static verifyToken(token) {
     try {
-      return jwt.verify(token, JWT_SECRET)
+      return jwt.verify(token, getJwtSecret())
     } catch (error) {
       return null
     }
@@ -352,4 +350,3 @@ export class User {
     return db.prepare(query).all(...params)
   }
 }
-
