@@ -198,6 +198,10 @@ jobs:
               echo "Backend health response still exposes X-Powered-By" >&2
               exit 1
             fi
+            if echo "$HEALTH_HEADERS" | grep -iq '^Strict-Transport-Security:'; then
+              echo "Backend health response should not emit HSTS directly; Cloudflare owns HSTS" >&2
+              exit 1
+            fi
             echo "$HEALTH_HEADERS" | grep -i '^X-Content-Type-Options: nosniff' >/dev/null
 
             # 回归检查：部署后必须保留后台 PATCH 预检支持。

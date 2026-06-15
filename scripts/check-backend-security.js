@@ -21,7 +21,8 @@ const requiredHelmetOptions = [
   'contentSecurityPolicy: false',
   'crossOriginEmbedderPolicy: false',
   'crossOriginOpenerPolicy: false',
-  'crossOriginResourcePolicy: false'
+  'crossOriginResourcePolicy: false',
+  'strictTransportSecurity: false'
 ]
 
 for (const option of requiredHelmetOptions) {
