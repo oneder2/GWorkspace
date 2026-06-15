@@ -65,6 +65,7 @@ npm run build
 npm run check:seo
 npm run check:cors
 npm run check:backend-seo
+npm run check:backend-routes
 ```
 
 构建产物将输出到 `dist/` 目录。
@@ -76,7 +77,8 @@ cd backend
 npm ci --omit=dev
 DATABASE_PATH="/tmp/gworkspace-dev-check.db" npm run db:prepare
 DATABASE_PATH="/tmp/gworkspace-dev-check.db" npm run db:check
-node --input-type=module -e "const routes=['admin','adminAi','ai','analytics','auth','blog','comments','guestbook','likes','seo','spotify','upload'].map(name => './src/routes/' + name + '.js'); await Promise.all(routes.map(p => import(p))); console.log('backend route modules ok', routes.length)"
+cd ..
+npm run check:backend-routes
 ```
 
 ## 项目架构

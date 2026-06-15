@@ -199,6 +199,7 @@ npm run build
 npm run check:seo
 npm run check:cors
 npm run check:backend-seo
+npm run check:backend-routes
 ```
 
 构建产物将输出到 `dist/` 目录。

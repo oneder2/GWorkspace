@@ -61,9 +61,7 @@ jobs:
           DATABASE_PATH="$RUNNER_TEMP/gworkspace-ci.db" npm run db:check
 
       - name: Verify backend modules load
-        run: |
-          cd backend
-          node --input-type=module -e "const routes=['admin','adminAi','ai','analytics','auth','blog','comments','guestbook','likes','seo','spotify','upload'].map(name => './src/routes/' + name + '.js'); await Promise.all(routes.map(p => import(p))); console.log('backend route modules ok', routes.length)"
+        run: npm run check:backend-routes
 
       - name: Check backend CORS methods
         run: npm run check:cors

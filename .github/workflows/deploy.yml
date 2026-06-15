@@ -38,9 +38,7 @@ jobs:
           npm ci --omit=dev
 
       - name: Verify backend modules load
-        run: |
-          cd backend
-          node --input-type=module -e "const routes=['admin','adminAi','ai','analytics','auth','blog','comments','guestbook','likes','seo','spotify','upload'].map(name => './src/routes/' + name + '.js'); await Promise.all(routes.map(p => import(p))); console.log('backend route modules ok', routes.length)"
+        run: npm run check:backend-routes
 
       - name: Create deployment package
         run: |
