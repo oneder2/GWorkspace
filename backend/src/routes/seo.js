@@ -6,6 +6,26 @@ import express from 'express'
 import { Blog } from '../models/Blog.js'
 
 const router = express.Router()
+const DEFAULT_SITE_URL = 'https://www.gellaronline.cc'
+
+function normalizeBaseUrl(url) {
+  return String(url || DEFAULT_SITE_URL).replace(/\/+$/, '')
+}
+
+function getCanonicalSiteUrl() {
+  if (process.env.SITE_URL) return normalizeBaseUrl(process.env.SITE_URL)
+  if (process.env.PUBLIC_SITE_URL) return normalizeBaseUrl(process.env.PUBLIC_SITE_URL)
+  return DEFAULT_SITE_URL
+}
+
+function escapeXml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
 
 /**
  * 动态生成 sitemap.xml
@@ -13,22 +33,8 @@ const router = express.Router()
  */
 router.get('/sitemap.xml', async (req, res) => {
   try {
-    // 1. 获取站点基础 URL
-    let origin = req.get('origin') || req.get('referer')
-    if (origin) {
-      try {
-        origin = new URL(origin).origin
-      } catch (e) {
-        origin = null
-      }
-    }
-    
-    // 生产环境兜底
-    if (!origin) {
-      origin = process.env.NODE_ENV === 'production' 
-        ? 'https://workspace.gellaronline.cc' 
-        : `http://${req.get('host')}`
-    }
+    // 1. Dynamic SEO must point to the public frontend canonical host.
+    const siteUrl = getCanonicalSiteUrl()
 
     // 2. 获取所有已发布的博客
     const blogs = Blog.getAll({ status: 'published' })
@@ -37,9 +43,8 @@ router.get('/sitemap.xml', async (req, res) => {
     const staticPages = [
       { url: '/', changefreq: 'daily', priority: '1.0' },
       { url: '/blog', changefreq: 'daily', priority: '0.9' },
-      { url: '/sites', changefreq: 'weekly', priority: '0.8' },
-      { url: '/tools', changefreq: 'weekly', priority: '0.8' },
-      { url: '/portfolio', changefreq: 'weekly', priority: '0.8' },
+      { url: '/workspace', changefreq: 'weekly', priority: '0.8' },
+      { url: '/portfolio', changefreq: 'monthly', priority: '0.7' },
     ]
 
     // 4. 构造 XML
@@ -50,7 +55,7 @@ router.get('/sitemap.xml', async (req, res) => {
     staticPages.forEach(page => {
       xml += `
   <url>
-    <loc>${origin}${page.url}</loc>
+    <loc>${escapeXml(`${siteUrl}${page.url}`)}</loc>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>`
@@ -62,7 +67,7 @@ router.get('/sitemap.xml', async (req, res) => {
       const date = new Date(lastMod).toISOString().split('T')[0]
       xml += `
   <url>
-    <loc>${origin}/blog/${blog.id}</loc>
+    <loc>${escapeXml(`${siteUrl}/blog/${blog.id}`)}</loc>
     <lastmod>${date}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

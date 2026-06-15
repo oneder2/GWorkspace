@@ -15,7 +15,8 @@
     "migrate": "cd backend && npm run migrate",
     "generate-sitemap": "node scripts/generate-sitemap.js",
     "check:seo": "node scripts/check-public-seo.js",
-    "check:cors": "node scripts/check-backend-cors.js"
+    "check:cors": "node scripts/check-backend-cors.js",
+    "check:backend-seo": "node scripts/check-backend-seo.js"
   },
   "dependencies": {
     "chart.js": "^4.5.1",

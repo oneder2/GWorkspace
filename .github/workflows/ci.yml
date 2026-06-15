@@ -67,3 +67,6 @@ jobs:
 
       - name: Check backend CORS methods
         run: npm run check:cors
+
+      - name: Check backend SEO sitemap
+        run: npm run check:backend-seo
