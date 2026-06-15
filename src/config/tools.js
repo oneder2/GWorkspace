@@ -1,169 +1,104 @@
 /**
- * 工具箱页面配置文件
- * 通过元数据驱动工作台分组、展示层级和默认固定项
+ * 工作台核心工具配置
+ * 保留真正会在站内使用的写作与轻量操作能力
  */
-
-export const toolGroups = [
-  {
-    id: 'content',
-    titleKey: 'tools.workspace.groups.content.title',
-    descriptionKey: 'tools.workspace.groups.content.description'
-  },
-  {
-    id: 'operations',
-    titleKey: 'tools.workspace.groups.operations.title',
-    descriptionKey: 'tools.workspace.groups.operations.description'
-  },
-  {
-    id: 'utility',
-    titleKey: 'tools.workspace.groups.utility.title',
-    descriptionKey: 'tools.workspace.groups.utility.description'
-  }
-]
 
 export const toolsConfig = [
   {
-    id: 'thesis-parser',
-    nameKey: 'tools.thesisParser.title',
-    descriptionKey: 'tools.toolDescriptions.thesisParser',
-    iconName: 'BrainIcon',
-    group: 'content',
-    priority: 'primary',
-    badgeKey: 'tools.workspace.badges.featured',
+    id: 'time-suite',
+    nameKey: 'tools.timeSuite.title',
+    descriptionKey: 'tools.toolDescriptions.timeSuite',
+    iconName: 'ClockIcon',
+    badgeKey: 'tools.workspace.badges.utility',
+    categoryKey: 'tools.workspace.categories.utility',
+    keywords: ['time', 'clock', 'timer', 'stopwatch', 'pomodoro', '时间', '计时', '番茄钟'],
     defaultPinned: true,
-    workspacePadding: 'default',
-    keywords: ['thesis', 'analysis', 'thinking', 'proposition']
+    workspaceGroup: 'utility',
+    workspacePadding: 'compact'
   },
   {
-    id: 'blog-assistant',
-    nameKey: 'tools.blogAssistant.title',
-    descriptionKey: 'tools.toolDescriptions.blogAssistant',
-    iconName: 'ArticleIcon',
-    group: 'content',
-    priority: 'primary',
-    badgeKey: 'tools.workspace.badges.featured',
+    id: 'calculator',
+    nameKey: 'tools.calculator',
+    descriptionKey: 'tools.toolDescriptions.calc',
+    iconName: 'CalculatorIcon',
+    badgeKey: 'tools.workspace.badges.utility',
+    categoryKey: 'tools.workspace.categories.utility',
+    keywords: ['calculator', 'math', 'scientific', '计算器', '函数', '科学计算'],
     defaultPinned: true,
-    workspacePadding: 'default',
-    keywords: ['blog', 'publish', 'summary', 'slug']
-  },
-  {
-    id: 'markdown',
-    nameKey: 'tools.markdown',
-    descriptionKey: 'tools.toolDescriptions.markdown',
-    iconName: 'FileTextIcon',
-    group: 'content',
-    priority: 'primary',
-    badgeKey: 'tools.workspace.badges.writing',
-    defaultPinned: true,
-    workspacePadding: 'default',
-    keywords: ['markdown', 'writing', 'preview']
-  },
-  {
-    id: 'qrcode',
-    nameKey: 'tools.qrCode',
-    descriptionKey: 'tools.toolDescriptions.qrcode',
-    iconName: 'QrCodeIcon',
-    group: 'content',
-    priority: 'primary',
-    badgeKey: 'tools.workspace.badges.share',
-    defaultPinned: false,
-    workspacePadding: 'default',
-    keywords: ['qr', 'share', 'poster']
-  },
-  {
-    id: 'colorpicker',
-    nameKey: 'tools.colorPicker',
-    descriptionKey: 'tools.toolDescriptions.colorpicker',
-    iconName: 'PaintIcon',
-    group: 'content',
-    priority: 'primary',
-    badgeKey: 'tools.workspace.badges.visual',
-    defaultPinned: false,
-    workspacePadding: 'compact',
-    keywords: ['color', 'palette', 'design']
-  },
-  {
-    id: 'todo',
-    nameKey: 'todo.title',
-    descriptionKey: 'tools.toolDescriptions.todo',
-    iconName: 'ListIcon',
-    group: 'operations',
-    priority: 'primary',
-    badgeKey: 'tools.workspace.badges.workflow',
-    defaultPinned: true,
-    workspacePadding: 'default',
-    keywords: ['todo', 'task', 'plan']
-  },
-  {
-    id: 'pomodoro',
-    nameKey: 'tools.pomodoro',
-    descriptionKey: 'tools.toolDescriptions.pomodoro',
-    iconName: 'TimerIcon',
-    group: 'operations',
-    priority: 'primary',
-    badgeKey: 'tools.workspace.badges.focus',
-    defaultPinned: true,
-    workspacePadding: 'compact',
-    keywords: ['focus', 'timer', 'pomodoro']
+    workspaceGroup: 'utility',
+    workspacePadding: 'compact'
   },
   {
     id: 'json',
     nameKey: 'tools.json',
     descriptionKey: 'tools.toolDescriptions.json',
     iconName: 'FileCodeIcon',
-    group: 'operations',
-    priority: 'primary',
-    badgeKey: 'tools.workspace.badges.quick',
-    defaultPinned: false,
-    workspacePadding: 'default',
-    keywords: ['json', 'format', 'api']
+    badgeKey: 'tools.workspace.badges.utility',
+    categoryKey: 'tools.workspace.categories.utility',
+    keywords: ['json', 'format', 'minify', '格式化', '压缩'],
+    defaultPinned: true,
+    workspaceGroup: 'utility',
+    workspacePadding: 'default'
   },
   {
-    id: 'worldclock',
-    nameKey: 'tools.worldClock.title',
-    descriptionKey: 'tools.toolDescriptions.worldclock',
-    iconName: 'ClockIcon',
-    group: 'utility',
-    priority: 'secondary',
-    badgeKey: 'tools.workspace.badges.quick',
-    defaultPinned: false,
-    workspacePadding: 'compact',
-    keywords: ['time', 'clock', 'timezone']
-  },
-  {
-    id: 'calc',
-    nameKey: 'tools.calculator',
-    descriptionKey: 'tools.toolDescriptions.calc',
-    iconName: 'CalculatorIcon',
-    group: 'utility',
-    priority: 'secondary',
-    badgeKey: 'tools.workspace.badges.quick',
-    defaultPinned: false,
-    workspacePadding: 'compact',
-    keywords: ['calc', 'math']
-  },
-  {
-    id: 'stopwatch',
-    nameKey: 'tools.stopwatch',
-    descriptionKey: 'tools.toolDescriptions.stopwatch',
-    iconName: 'StopwatchIcon',
-    group: 'utility',
-    priority: 'secondary',
-    badgeKey: 'tools.workspace.badges.quick',
-    defaultPinned: false,
-    workspacePadding: 'compact',
-    keywords: ['stopwatch', 'timing']
-  },
-  {
-    id: 'encode',
+    id: 'encoder',
     nameKey: 'tools.encoder',
     descriptionKey: 'tools.toolDescriptions.encode',
     iconName: 'CodeIcon',
-    group: 'utility',
-    priority: 'secondary',
-    badgeKey: 'tools.workspace.badges.quick',
+    badgeKey: 'tools.workspace.badges.utility',
+    categoryKey: 'tools.workspace.categories.utility',
+    keywords: ['base64', 'url', 'encode', 'decode', '编码', '解码'],
+    defaultPinned: true,
+    workspaceGroup: 'utility',
+    workspacePadding: 'default'
+  },
+  {
+    id: 'thesis-parser',
+    nameKey: 'tools.thesisParser.title',
+    descriptionKey: 'tools.toolDescriptions.thesisParser',
+    iconName: 'BrainIcon',
+    badgeKey: 'tools.workspace.badges.featured',
+    categoryKey: 'tools.workspace.categories.writing',
+    keywords: ['thesis', 'analysis', 'thinking', 'proposition', '命题', '拆句'],
+    defaultPinned: true,
+    workspaceGroup: 'writing',
+    workspacePadding: 'default'
+  },
+  {
+    id: 'blog-assistant',
+    nameKey: 'tools.blogAssistant.title',
+    descriptionKey: 'tools.toolDescriptions.blogAssistant',
+    iconName: 'ArticleIcon',
+    badgeKey: 'tools.workspace.badges.featured',
+    categoryKey: 'tools.workspace.categories.publishing',
+    keywords: ['blog', 'publish', 'summary', 'slug', '博客', '发布'],
     defaultPinned: false,
-    workspacePadding: 'default',
-    keywords: ['encode', 'base64', 'url']
+    workspaceGroup: 'writing',
+    workspacePadding: 'default'
+  },
+  {
+    id: 'markdown',
+    nameKey: 'tools.markdown',
+    descriptionKey: 'tools.toolDescriptions.markdown',
+    iconName: 'FileTextIcon',
+    badgeKey: 'tools.workspace.badges.writing',
+    categoryKey: 'tools.workspace.categories.drafting',
+    keywords: ['markdown', 'writing', 'preview', '草稿'],
+    defaultPinned: false,
+    workspaceGroup: 'writing',
+    workspacePadding: 'default'
+  },
+  {
+    id: 'cottee',
+    nameKey: 'tools.cottee.title',
+    descriptionKey: 'tools.toolDescriptions.cottee',
+    iconName: 'BookIcon',
+    badgeKey: 'tools.workspace.badges.future',
+    categoryKey: 'tools.workspace.categories.lab',
+    keywords: ['cottee', '口替', 'writing', 'automation', '写作自动化'],
+    defaultPinned: false,
+    workspaceGroup: 'lab',
+    disabled: true,
+    workspacePadding: 'default'
   }
 ]

@@ -95,8 +95,7 @@ export function useTerminalAgent() {
   const publicRouteTargets = computed(() => {
     return [
       { to: '/', label: i18n.global.t('routes.home') },
-      { to: '/sites', label: i18n.global.t('routes.sites') },
-      { to: '/tools', label: i18n.global.t('routes.tools') },
+      { to: '/workspace', label: i18n.global.t('routes.workspace') },
       { to: '/blog', label: i18n.global.t('routes.blog') },
       { to: '/portfolio', label: i18n.global.t('routes.portfolio') }
     ]
@@ -321,7 +320,7 @@ export function useTerminalAgent() {
             {
               label: copy.value.commands.capsule.openAnalyzerLabel,
               meta: copy.value.commands.capsule.openAnalyzerMeta,
-              to: '/tools?tool=thesis-parser'
+              to: '/workspace?tool=thesis-parser'
             }
           ]
         }
@@ -350,12 +349,12 @@ export function useTerminalAgent() {
             {
               label: copy.value.commands.ask.analyzerLabel,
               meta: copy.value.commands.ask.analyzerMeta,
-              to: '/tools?tool=thesis-parser'
+              to: '/workspace?tool=thesis-parser'
             },
             {
               label: copy.value.commands.ask.blogAssistantLabel,
               meta: copy.value.commands.ask.blogAssistantMeta,
-              to: '/tools?tool=blog-assistant'
+              to: '/workspace?tool=blog-assistant'
             }
           ]
         }

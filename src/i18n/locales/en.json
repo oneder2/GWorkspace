@@ -1,8 +1,7 @@
 {
   "nav": {
     "home": "Home",
-    "sites": "Navigation",
-    "tools": "Toolbox",
+    "workspace": "Workspace",
     "blog": "Blog",
     "portfolio": "Portfolio"
   },
@@ -123,7 +122,7 @@
     }
   },
   "tools": {
-    "title": "Toolbox",
+    "title": "Workspace",
     "utilities": "Utilities",
     "subtitle": "A shared workspace for creation, distribution, and lightweight operations.",
     "calculator": "Calculator",
@@ -156,6 +155,7 @@
     "markdownPreviewError": "Markdown parsing error",
     "todo": "Todo List",
     "toolDescriptions": {
+      "timeSuite": "Keep world clocks, stopwatch, timer, and pomodoro mode inside one light panel.",
       "thesisParser": "Turn one sentence into a testable proposition, then expose its premises, limits, and real-world use.",
       "blogAssistant": "Prepare title, slug, excerpt, tags, and publish date before opening the real blog editor.",
       "markdown": "Draft and preview Markdown content quickly for article structure and reusable snippets.",
@@ -165,9 +165,10 @@
       "pomodoro": "Tie focus sessions to creator workflows instead of keeping a timer isolated from the work.",
       "json": "Handle API payloads and config fragments while working on admin and content system tasks.",
       "worldclock": "Check multiple timezones quickly when scheduling posts, releases, or cross-region work.",
-      "calc": "Keep fast math available as a lightweight utility instead of a primary workspace surface.",
+      "calc": "A practical scientific calculator with parentheses, functions, powers, percentages, and constants.",
       "stopwatch": "Retain quick timing for occasional use without giving it primary page weight.",
-      "encode": "Run Base64 and URL transformations fast while debugging or cleaning pasted content."
+      "encode": "Run Base64 and URL transformations fast while debugging or cleaning pasted content.",
+      "cottee": "A reserved writing automation entry for future Cottee / Kout替 work."
     },
     "jsonToolTitle": "JSON Prettier",
     "format": "Format",
@@ -202,8 +203,8 @@
     },
     "workspace": {
       "heroEyebrow": "Creative Operations Deck",
-      "heroTitle": "Put writing, publishing, and daily site operations into one workflow",
-      "heroDescription": "This is no longer a loose pile of micro-tools. It is a workspace centered on blog production, share assets, and site upkeep. Start with a workflow, then open the specific tool.",
+      "heroTitle": "Keep writing, publishing, and frequent entry points on one desk",
+      "heroDescription": "This is where the things I actually reopen live. A few internal writing tools, a few external resources, and no attempt to impersonate a general-purpose utility site.",
       "stats": {
         "tools": "{count} curated tools",
         "groups": "{count} workflows",
@@ -218,8 +219,15 @@
       "recentDescription": "Jump back to where you last stopped.",
       "recentEmpty": "No recent tools yet. Starting with the blog publishing assistant is the strongest default.",
       "pinnedTitle": "Pinned Tools",
-      "pinnedDescription": "Keep your high-frequency workflows on the front page.",
-      "pinnedEmpty": "Pin a few repeat tools here and the toolbox starts behaving like a real workspace.",
+      "pinnedDescription": "Keep high-frequency entries at the front, like a desk that actually gets used.",
+      "pinnedEmpty": "Pin a few repeat entries here and the workspace starts behaving like your own desk.",
+      "quickLaunchTitle": "Quick Launch",
+      "quickLaunchDescription": "Put the entries you reopen most often first so the workspace behaves like a launcher.",
+      "coreTitle": "Core Internal Tools",
+      "coreDescription": "Keep the lightweight operations and writing helpers that are worth doing inside the site.",
+      "labKicker": "Writing Lab",
+      "labTitle": "Writing Lab",
+      "labDescription": "Cottee / Kout替 will live here as a future entry for writing optimization and automation.",
       "workspaceLabel": "Workspace",
       "workspaceEmptyTitle": "Choose a tool above to start working",
       "workspaceEmptyDescription": "Prefer the content and operations groups first. Low-frequency generic utilities have been moved into the lightweight section.",
@@ -231,25 +239,22 @@
         "featured": "Featured",
         "writing": "Writing",
         "share": "Share",
-        "visual": "Visual",
-        "workflow": "Workflow",
-        "focus": "Focus",
-        "quick": "Light"
+        "utility": "Tool",
+        "future": "Future"
       },
-      "groups": {
-        "content": {
-          "title": "Content Creation",
-          "description": "Writing, structuring, previewing, and share-asset preparation built around blog and portfolio output."
-        },
-        "operations": {
-          "title": "Site Operations",
-          "description": "Tasks, focus rhythm, and system fragments that help content work actually move forward."
-        },
-        "utility": {
-          "title": "Light Utilities",
-          "description": "Generic helpers still exist, but they no longer dominate the primary workspace surface."
-        }
+      "categories": {
+        "writing": "Proposition Breakdown",
+        "publishing": "Publish Prep",
+        "drafting": "Draft Preview",
+        "utility": "Utility",
+        "lab": "Writing Lab"
       }
+    },
+    "timeSuite": {
+      "title": "Time Suite"
+    },
+    "cottee": {
+      "title": "Cottee / Kout替"
     },
     "blogAssistant": {
       "title": "Blog Publishing Assistant",
@@ -341,6 +346,91 @@
       "sameTime": "Same time",
       "timezoneUnknown": "Unknown"
     }
+  },
+  "workspace": {
+    "searchPlaceholder": "Search entries, tags, or use cases...",
+    "searchMeta": "{count} entries",
+    "searchResultsTitle": "Search Results",
+    "searchResultsDescription": "Search internal tools, external links, and future writing experiments together.",
+    "noSearchResults": "No matching entry found.",
+    "filters": {
+      "all": "All",
+      "internal": "Internal",
+      "external": "External"
+    },
+    "externalTitle": "External Resources",
+    "externalDescription": "Do not rebuild what already works better elsewhere. Keep the sites I genuinely reopen here instead.",
+    "emptyExternal": "No external entries matched the current filter.",
+    "entryKinds": {
+      "internal": "Internal tool",
+      "external": "External entry"
+    },
+    "externalGroups": {
+      "aiSearch": {
+        "title": "AI and Search",
+        "description": "Frequent entries for idea compression, research tracing, and knowledge computation."
+      },
+      "devDeploy": {
+        "title": "Development and Deploy",
+        "description": "Platforms for code, domains, deployment, and environment variables."
+      },
+      "mediaContent": {
+        "title": "Media and Content",
+        "description": "High-frequency entries for music, video, and content consumption."
+      },
+      "diagramData": {
+        "title": "Diagram and Data",
+        "description": "Tools for flowcharts, structure diagrams, and database sketches."
+      },
+      "formatTools": {
+        "title": "Format Conversion",
+        "description": "Mature external converters that do not need to be rebuilt inside the site."
+      },
+      "friends": {
+        "title": "Friend Sites and Return Paths",
+        "description": "A small set of links worth keeping in long-term view."
+      }
+    },
+    "links": {
+      "chatgpt": "A standing entry for compressing ideas and testing possible phrasing.",
+      "openaiApi": "Primary entry for model, API, and developer documentation.",
+      "gemini": "Google's conversational AI entry for cross-checking ideas.",
+      "wolframAlpha": "Knowledge computation, math queries, and fact-oriented derivation.",
+      "github": "The baseline entry for code, versions, and repository work.",
+      "cloudflare": "DNS, CDN, domain, and edge service configuration.",
+      "vercel": "Where deployment status, environment variables, and releases get checked most often.",
+      "spotify": "Music and now-playing related entry.",
+      "youtube": "Video content, tutorials, and media discovery.",
+      "drawio": "Quick flowcharts, architecture diagrams, and relationship maps.",
+      "drawdb": "Database sketching and relationship modeling.",
+      "toolwa": "A general online utility entry for temporary conversions.",
+      "fileFormatFactory": "File format conversion entry.",
+      "imageFormatFactory": "Image conversion and compression entry.",
+      "yysuni": "One of the long-kept friend-site links.",
+      "elysiumstack": "One of the long-kept friend-site links."
+    }
+  },
+  "timeSuite": {
+    "clock": "World Clock",
+    "stopwatch": "Stopwatch",
+    "timer": "Timer",
+    "pomodoro": "Pomodoro",
+    "local": "Local",
+    "start": "Start",
+    "stop": "Stop",
+    "pause": "Pause",
+    "reset": "Reset",
+    "lap": "Lap",
+    "stopwatchLap": "Lap Time",
+    "lapIndex": "Lap {count}",
+    "focus": "Focus Time",
+    "break": "Break Time",
+    "focusMode": "Focus 25m",
+    "breakMode": "Break 5m"
+  },
+  "calculator": {
+    "hint": "Try sin(30), sqrt(9), 2^8, 50%*200",
+    "error": "Error"
   },
   "blog": {
     "genre": "Genre",
@@ -633,13 +723,24 @@
     "customize": "Customize Theme",
     "comingSoon": "Theme customization feature coming soon!",
     "customHint": "Choose a base color and the system will derive a coordinated scale plus a glassy background treatment.",
+    "presetsDesc": "Start from a ready-made direction, then decide whether the palette needs finer manual tuning.",
     "panelOpacity": "Main Panel Opacity",
     "bgOpacity": "Glass Layer Opacity",
     "glassBlur": "Glass Blur",
+    "glassParameters": "Surface Texture",
+    "glassParametersDesc": "Opacity and blur shape the whole site's panel treatment, and they stay intact when you switch colors.",
     "previewPrimary": "Primary Theme Color",
     "previewPrimaryMeta": "Primary theme application",
     "previewGlass": "Glass Texture",
     "previewGlassMeta": "Glassmorphism texture",
+    "previewTitle": "Live Preview",
+    "previewDesc": "This preview updates immediately to reflect the current color and surface settings.",
+    "previewMode": "Preview Mode",
+    "primaryColorDesc": "Pick a single base color and the system will derive the supporting scale for the rest of the site.",
+    "primaryColorHint": "Use the swatch for quick experiments, or reset any time if you want to return to the default baseline.",
+    "pick": "Pick",
+    "saveAndClose": "Save and Close",
+    "crimsonSurfaceHint": "The crimson preset defaults to a thinner glass layer and a more restrained surface shine.",
     "presetsMap": {
       "none": "Default",
       "aurora": "Aurora",
@@ -875,13 +976,12 @@
   },
   "seo": {
     "siteTitle": "GWorkspace - Personal Workspace",
-    "siteDescription": "A personal workspace site built with Vue.js, combining blog, toolbox, navigation, and portfolio surfaces.",
-    "siteKeywords": "workspace, blog, toolbox, portfolio, vue.js"
+    "siteDescription": "A personal workspace site built with Vue.js, organized around blog writing, a curated workspace, and portfolio surfaces.",
+    "siteKeywords": "workspace, blog, portfolio, writing tools, vue.js"
   },
   "routes": {
     "home": "Home",
-    "sites": "Navigation",
-    "tools": "Toolbox",
+    "workspace": "Workspace",
     "blog": "Blog",
     "blogDetail": "Blog Detail",
     "portfolio": "Portfolio"

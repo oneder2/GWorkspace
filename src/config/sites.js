@@ -1,84 +1,71 @@
 /**
- * 站点导航配置文件
- * 包含站点分类和链接配置
+ * 工作台外部资源配置
+ * 外链强调快速抵达，不在站内重复实现成熟服务
  */
 
 export const sitesConfig = [
   {
-    id: 'dev',
-    nameKey: 'sites.categories.dev',
+    id: 'ai-search',
+    nameKey: 'workspace.externalGroups.aiSearch.title',
+    descriptionKey: 'workspace.externalGroups.aiSearch.description',
+    iconName: 'GeminiIcon',
+    links: [
+      { id: 'chatgpt', title: 'ChatGPT', url: 'https://chat.openai.com', descKey: 'workspace.links.chatgpt', tags: ['ai', 'writing', 'chat'] },
+      { id: 'openai-api', title: 'OpenAI API', url: 'https://platform.openai.com/docs', descKey: 'workspace.links.openaiApi', tags: ['api', 'ai', 'docs'] },
+      { id: 'gemini', title: 'Gemini', url: 'https://gemini.google.com/', descKey: 'workspace.links.gemini', tags: ['ai', 'google', 'chat'] },
+      { id: 'wolfram-alpha', title: 'WolframAlpha', url: 'https://www.wolframalpha.com/', descKey: 'workspace.links.wolframAlpha', tags: ['search', 'math', 'knowledge'] }
+    ]
+  },
+  {
+    id: 'dev-deploy',
+    nameKey: 'workspace.externalGroups.devDeploy.title',
+    descriptionKey: 'workspace.externalGroups.devDeploy.description',
     iconName: 'CodeIcon',
     links: [
-      { title: 'GitHub', url: 'https://github.com', descKey: 'sites.links.github' },
-      { title: 'Stack Overflow', url: 'https://stackoverflow.com', descKey: 'sites.links.stackoverflow' },
-      { title: 'MDN Web Docs', url: 'https://developer.mozilla.org', descKey: 'sites.links.mdn' },
-      { title: 'Vue.js', url: 'https://vuejs.org', descKey: 'sites.links.vue' },
-      { title: 'Tailwind CSS', url: 'https://tailwindcss.com', descKey: 'sites.links.tailwind' },
-      { title: 'Regex101', url: 'https://regex101.com', descKey: 'sites.links.regex101' },
-      { title: 'Vercel', url: 'https://vercel.com', descKey: 'sites.links.vercel' },
-      { title: '菜鸟教程', url: 'https://www.runoob.com', descKey: 'sites.links.runoob' },
+      { id: 'github', title: 'GitHub', url: 'https://github.com', descKey: 'workspace.links.github', tags: ['code', 'repo', 'publish'] },
+      { id: 'cloudflare', title: 'Cloudflare', url: 'https://dash.cloudflare.com/', descKey: 'workspace.links.cloudflare', tags: ['dns', 'cdn', 'deploy'] },
+      { id: 'vercel', title: 'Vercel', url: 'https://vercel.com', descKey: 'workspace.links.vercel', tags: ['deploy', 'env', 'frontend'] }
     ]
   },
   {
-    id: 'tools',
-    nameKey: 'sites.categories.tools',
+    id: 'media-content',
+    nameKey: 'workspace.externalGroups.mediaContent.title',
+    descriptionKey: 'workspace.externalGroups.mediaContent.description',
+    iconName: 'YouTubeIcon',
+    links: [
+      { id: 'spotify', title: 'Spotify', url: 'https://open.spotify.com/', descKey: 'workspace.links.spotify', tags: ['music', 'listen'] },
+      { id: 'youtube', title: 'YouTube', url: 'https://www.youtube.com/', descKey: 'workspace.links.youtube', tags: ['video', 'media'] }
+    ]
+  },
+  {
+    id: 'diagram-data',
+    nameKey: 'workspace.externalGroups.diagramData.title',
+    descriptionKey: 'workspace.externalGroups.diagramData.description',
+    iconName: 'LayoutIcon',
+    links: [
+      { id: 'drawio', title: 'Draw.io', url: 'https://app.diagrams.net/', descKey: 'workspace.links.drawio', tags: ['diagram', 'flowchart'] },
+      { id: 'drawdb', title: 'drawDB', url: 'https://drawdb.app/', descKey: 'workspace.links.drawdb', tags: ['database', 'diagram'] }
+    ]
+  },
+  {
+    id: 'format-tools',
+    nameKey: 'workspace.externalGroups.formatTools.title',
+    descriptionKey: 'workspace.externalGroups.formatTools.description',
     iconName: 'ToolIcon',
     links: [
-      { title: 'Strudel', url: 'https://strudel.cc', descKey: 'sites.links.strudel' },
-      { title: 'Beepbox', url:"https://beepbox.co/", descKey: 'sites.links.beepbox' },
-      { title: 'WolframAlpha', url:"https://www.wolframalpha.com/", descKey: 'sites.links.wolframalpha' },
-      { title: '工具蛙', url:"https://toolwa.com", descKey: 'sites.links.toolwa' },
-      { title: 'iLoveSVG', url:"https://www.ilovesvg.com/", descKey: 'sites.links.ilovesvg' }
-    ]
-  },
-  {
-    id: 'ai',
-    nameKey: 'sites.categories.ai',
-    iconName: 'BrainIcon',
-    links: [
-      { title: 'Gemini', url: 'https://gemini.google.com', descKey: 'sites.links.gemini' },
-      { title: 'Qwen', url: 'https://chat.qwen.ai', descKey: 'sites.links.qwen' },
-      { title: 'ChatGPT', url: 'https://chat.openai.com', descKey: 'sites.links.chatgpt' },
-      { title: 'Claude', url: 'https://claude.ai', descKey: 'sites.links.claude' },
-      { title: 'Perplexity', url: 'https://www.perplexity.ai', descKey: 'sites.links.perplexity' },
-      { title: 'Grok', url: 'https://grok.com', descKey: 'sites.links.grok' },
-    ]
-  },
-  {
-    id: 'design',
-    nameKey: 'sites.categories.design',
-    iconName: 'PaintIcon',
-    links: [
-      { title: 'Canva', url: 'https://www.canva.com/', descKey: 'sites.links.canva' },
-      { title: 'Krita', url: 'https://docs.krita.org/en/', descKey: 'sites.links.krita' },
-      { title: 'Inkscape', url: 'https://inkscape.org/', descKey: 'sites.links.inkscape' },
-      { title: 'GIMP', url: 'https://www.gimp.org/', descKey: 'sites.links.gimp' },
-      { title: 'Blender', url: 'https://www.blender.org/', descKey: 'sites.links.blender' },
-      { title: 'Kdenlive', url: 'https://kdenlive.org/', descKey: 'sites.links.kdenlive' },
-      { title: 'Audacity', url: 'https://www.audacityteam.org/', descKey: 'sites.links.audacity' },
-      { title: 'OBS', url: 'https://obsproject.com/', descKey: 'sites.links.obs' },
-      { title: 'Handbrake', url: 'https://handbrake.fr/', descKey: 'sites.links.handbrake' },
-      { title: 'VLC', url: 'https://www.videolan.org/vlc/', descKey: 'sites.links.vlc' },
-    ]
-  },
-  {
-    id: 'learn',
-    nameKey: 'sites.categories.learn',
-    iconName: 'BookIcon',
-    links: [
-      { title: 'Hacker News', url: 'https://news.ycombinator.com', descKey: 'sites.links.hackernews' },
-      { title: 'Medium', url: 'https://medium.com', descKey: 'sites.links.medium' },
-      { title: 'Coursera', url: 'https://www.coursera.org', descKey: 'sites.links.coursera' },
-      { title: 'Dev.to', url: 'https://dev.to', descKey: 'sites.links.devto' }
+      { id: 'toolwa', title: '工具哇', url: 'https://www.toolwa.com/', descKey: 'workspace.links.toolwa', tags: ['tools', 'utility'] },
+      { id: 'file-format-factory', title: '文件格式工厂', url: 'https://www.alltoall.net/', descKey: 'workspace.links.fileFormatFactory', tags: ['file', 'convert'] },
+      { id: 'image-format-factory', title: '图片格式工厂', url: 'https://www.gaitubao.com/', descKey: 'workspace.links.imageFormatFactory', tags: ['image', 'convert'] }
     ]
   },
   {
     id: 'friends',
-    nameKey: 'sites.categories.friends',
+    nameKey: 'workspace.externalGroups.friends.title',
+    descriptionKey: 'workspace.externalGroups.friends.description',
     iconName: 'LinkIcon',
     links: [
-      { title: 'YYSUNI', url: 'https://www.yysuni.com/', descKey: 'sites.links.yysuni' },
-      { title: 'ElysiumStack', url: 'https://www.elysium-stack.cn/', descKey: 'sites.links.elysiumstack' }
+      { id: 'yysuni', title: 'YYSUNI', url: 'https://www.yysuni.com/', descKey: 'workspace.links.yysuni', tags: ['friend'] },
+      { id: 'elysiumstack', title: 'ElysiumStack', url: 'https://www.elysium-stack.cn/', descKey: 'workspace.links.elysiumstack', tags: ['friend'] }
     ]
   }
 ]

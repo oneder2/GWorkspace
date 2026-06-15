@@ -1,8 +1,7 @@
 {
   "nav": {
     "home": "首页",
-    "sites": "导航",
-    "tools": "工具箱",
+    "workspace": "工作台",
     "blog": "博客",
     "portfolio": "作品集"
   },
@@ -123,7 +122,7 @@
     }
   },
   "tools": {
-    "title": "工具箱",
+    "title": "工作台",
     "utilities": "工具",
     "subtitle": "创作、分享与轻量运营的统一工作台",
     "calculator": "计算器",
@@ -156,6 +155,7 @@
     "markdownPreviewError": "Markdown 解析错误",
     "todo": "待办事项",
     "toolDescriptions": {
+      "timeSuite": "把世界时钟、秒表、计时器和番茄钟收在同一个轻量面板里。",
       "thesisParser": "把一句话先还原成命题，再拆前提、边界和现实落点，作为你方法论的公开入口。",
       "blogAssistant": "为博客创作预先整理标题、slug、摘要、标签和发布时间，减少发布前的重复劳动。",
       "markdown": "快速起草与预览 Markdown 内容，适合文章结构和片段草稿。",
@@ -165,9 +165,10 @@
       "pomodoro": "把专注时间和休息节奏绑定到站长工作流里，而不是独立计时器。",
       "json": "处理接口返回和配置片段，适合后台和内容系统联调时使用。",
       "worldclock": "快速查看多地时间，适合跨时区更新、发布和协作判断。",
-      "calc": "低频但必要的快速计算，保留为轻量工具而不是主工作区。",
+      "calc": "支持括号、函数、幂、百分比和常量的常用科学计算器。",
       "stopwatch": "处理临时计时需求，作为次级工具保留。",
-      "encode": "做 Base64 和 URL 编解码等快速转换，适合调试和粘贴处理。"
+      "encode": "做 Base64 和 URL 编解码等快速转换，适合调试和粘贴处理。",
+      "cottee": "未来用于写作优化和快速辅助的实验入口，现在先占位。"
     },
     "jsonToolTitle": "JSON 整理",
     "format": "格式化",
@@ -202,8 +203,8 @@
     },
     "workspace": {
       "heroEyebrow": "Creative Operations Deck",
-      "heroTitle": "把创作、发布与日常运营放进同一个工作流",
-      "heroDescription": "这里不再是零散小工具集合，而是围绕博客、分享物料和站点维护整理出来的工作台。先选工作流，再进入具体工具。",
+      "heroTitle": "把写作、发布与常用入口收进同一张桌面",
+      "heroDescription": "这里放的是我真正会反复打开的东西。少量站内写作工具，加上少量外部常用入口，不再把页面做成一个泛用工具站。",
       "stats": {
         "tools": "{count} 个整理后的工具",
         "groups": "{count} 条工作流",
@@ -218,8 +219,15 @@
       "recentDescription": "回到你刚刚停下来的地方。",
       "recentEmpty": "还没有最近使用记录，先从博客发布助手开始会更合适。",
       "pinnedTitle": "固定工具",
-      "pinnedDescription": "把高频工作入口钉在首页。",
-      "pinnedEmpty": "把常用工具固定到这里，工具箱才会逐渐变成你的工作台。",
+      "pinnedDescription": "把高频入口钉在最前面，像一张真正会被反复使用的桌面。",
+      "pinnedEmpty": "把常用入口固定到这里，工作台才会逐渐变成你自己的工作桌。",
+      "quickLaunchTitle": "快速启动",
+      "quickLaunchDescription": "优先放置最常被重新打开的入口，减少在导航和工具之间来回跳转。",
+      "coreTitle": "站内核心工具",
+      "coreDescription": "保留真正需要在站内完成的轻量操作和写作辅助。",
+      "labKicker": "Writing Lab",
+      "labTitle": "写作实验室",
+      "labDescription": "Cottee / 口替会放在这里，作为未来写作优化和自动化辅助的入口。",
       "workspaceLabel": "工作区",
       "workspaceEmptyTitle": "从上方选择一个工具开始工作",
       "workspaceEmptyDescription": "优先从内容创作和站长运营两个分组进入。低频的通用工具已经被收进轻量区，不再占据主舞台。",
@@ -231,25 +239,22 @@
         "featured": "特色",
         "writing": "写作",
         "share": "分享",
-        "visual": "视觉",
-        "workflow": "流程",
-        "focus": "专注",
-        "quick": "轻量"
+        "utility": "工具",
+        "future": "预留"
       },
-      "groups": {
-        "content": {
-          "title": "内容创作",
-          "description": "围绕写作、整理、预览与分享物料，优先服务博客和作品内容生产。"
-        },
-        "operations": {
-          "title": "站长运营",
-          "description": "处理待办、专注节奏和系统片段，让内容运营真正形成推进闭环。"
-        },
-        "utility": {
-          "title": "轻量效率",
-          "description": "保留必要的通用小工具，但不再让它们占据页面主舞台。"
-        }
+      "categories": {
+        "writing": "命题拆解",
+        "publishing": "发布整理",
+        "drafting": "草稿预览",
+        "utility": "轻量工具",
+        "lab": "写作实验"
       }
+    },
+    "timeSuite": {
+      "title": "混合时间工具"
+    },
+    "cottee": {
+      "title": "Cottee / 口替"
     },
     "blogAssistant": {
       "title": "博客发布助手",
@@ -341,6 +346,91 @@
       "sameTime": "同时",
       "timezoneUnknown": "未知"
     }
+  },
+  "workspace": {
+    "searchPlaceholder": "搜索入口、标签或用途...",
+    "searchMeta": "{count} 个入口",
+    "searchResultsTitle": "搜索结果",
+    "searchResultsDescription": "统一搜索站内工具、外部入口和未来写作实验。",
+    "noSearchResults": "没有匹配的入口。",
+    "filters": {
+      "all": "全部",
+      "internal": "站内",
+      "external": "外部"
+    },
+    "externalTitle": "常用外部入口",
+    "externalDescription": "不在站内重复造轮子，而是把我真正常开的网页收在这里。",
+    "emptyExternal": "当前筛选下没有匹配到外部入口。",
+    "entryKinds": {
+      "internal": "站内工具",
+      "external": "外部入口"
+    },
+    "externalGroups": {
+      "aiSearch": {
+        "title": "AI 与搜索",
+        "description": "思路压缩、资料追踪和知识计算的常用入口。"
+      },
+      "devDeploy": {
+        "title": "开发与部署",
+        "description": "代码、域名、部署和环境变量相关的平台。"
+      },
+      "mediaContent": {
+        "title": "媒体与内容",
+        "description": "音乐、视频和内容消费的高频入口。"
+      },
+      "diagramData": {
+        "title": "图表与数据",
+        "description": "流程图、结构图和数据库草图工具。"
+      },
+      "formatTools": {
+        "title": "格式转换",
+        "description": "外部成熟转换工具，不在站内重复造轮子。"
+      },
+      "friends": {
+        "title": "友站与常去之处",
+        "description": "少量愿意长期挂在这里的连接。"
+      }
+    },
+    "links": {
+      "chatgpt": "用来压缩思路、试探表达方向的常驻入口。",
+      "openaiApi": "模型、接口和开发文档的主要入口。",
+      "gemini": "Google 的对话式 AI 入口，适合交叉验证思路。",
+      "wolframAlpha": "做知识计算、数学查询和事实型推导。",
+      "github": "代码、版本和仓库协作的基础入口。",
+      "cloudflare": "域名、DNS、CDN 和边缘服务配置入口。",
+      "vercel": "发布、环境变量和部署状态会经常在这里确认。",
+      "spotify": "音乐和正在听状态相关的常用入口。",
+      "youtube": "视频内容、教程和素材检索入口。",
+      "drawio": "快速绘制流程图、架构图和关系图。",
+      "drawdb": "数据库结构草图和关系建模工具。",
+      "toolwa": "聚合型在线工具入口，适合临时转换。",
+      "fileFormatFactory": "文件格式转换入口。",
+      "imageFormatFactory": "图片格式转换和压缩处理入口。",
+      "yysuni": "长期保留的友站入口之一。",
+      "elysiumstack": "长期保留的友站入口之一。"
+    }
+  },
+  "timeSuite": {
+    "clock": "世界时钟",
+    "stopwatch": "秒表",
+    "timer": "计时器",
+    "pomodoro": "番茄钟",
+    "local": "本地",
+    "start": "开始",
+    "stop": "停止",
+    "pause": "暂停",
+    "reset": "重置",
+    "lap": "计次",
+    "stopwatchLap": "单圈计时",
+    "lapIndex": "计次 {count}",
+    "focus": "专注时间",
+    "break": "休息时间",
+    "focusMode": "专注 25m",
+    "breakMode": "休息 5m"
+  },
+  "calculator": {
+    "hint": "支持 sin(30)、sqrt(9)、2^8、50%*200",
+    "error": "错误"
   },
   "blog": {
     "genre": "分类",
@@ -518,7 +608,7 @@
     "daysAgo": "{days} 天前",
     "loading": "加载中...",
     "allRightsReserved": "保留所有权利",
-    "workspace": "工作区",
+    "workspace": "工作台",
     "navigation": "导航",
     "updates": "更新",
     "changelog": "更新日志",
@@ -636,13 +726,24 @@
     "customize": "自定义主题",
     "comingSoon": "主题自定义功能即将推出，敬请期待！",
     "customHint": "选择您最喜欢的基准色，系统将自动生成配套的协调色阶和磨砂感背景。",
+    "presetsDesc": "先从一组现成的色调里选一个方向，再决定是否继续手动微调。",
     "panelOpacity": "主面板透明度",
     "bgOpacity": "玻璃层透明度",
     "glassBlur": "毛玻璃强度",
+    "glassParameters": "页面质感",
+    "glassParametersDesc": "透明度和模糊度会影响整个站点的表面层次，不会因为切换颜色而被重置。",
     "previewPrimary": "主色应用",
     "previewPrimaryMeta": "主题主色效果",
     "previewGlass": "玻璃质感",
     "previewGlassMeta": "毛玻璃层次",
+    "previewTitle": "实时预览",
+    "previewDesc": "这里会即时反映当前的主色与页面质感组合。",
+    "previewMode": "预览模式",
+    "primaryColorDesc": "自由选择一枚主色，系统会基于它推导整站的配套色阶。",
+    "primaryColorHint": "如果只是想快速试色，直接点击色块即可；如果想回到默认状态，可以随时重置。",
+    "pick": "选色",
+    "saveAndClose": "完成并关闭",
+    "crimsonSurfaceHint": "绯红主题默认会收紧为更薄的玻璃层与更克制的表面反光。",
     "presetsMap": {
       "none": "默认",
       "aurora": "极光",
@@ -878,13 +979,12 @@
   },
   "seo": {
     "siteTitle": "GWorkspace - 个人工作台",
-    "siteDescription": "一个基于 Vue.js 的个人工作台站点，整合博客、工具箱、导航和作品集。",
-    "siteKeywords": "工作台, 博客, 工具箱, 作品集, Vue.js"
+    "siteDescription": "一个基于 Vue.js 的个人工作台站点，围绕博客、工作台与作品页组织个人内容和常用入口。",
+    "siteKeywords": "工作台, 博客, 作品集, 写作工具, Vue.js"
   },
   "routes": {
     "home": "首页",
-    "sites": "导航",
-    "tools": "工具箱",
+    "workspace": "工作台",
     "blog": "博客",
     "blogDetail": "文章详情",
     "portfolio": "作品集"

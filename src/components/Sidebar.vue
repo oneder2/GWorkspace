@@ -139,7 +139,6 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import HomeIcon from './icons/HomeIcon.vue'
-import CompassIcon from './icons/CompassIcon.vue'
 import WrenchIcon from './icons/WrenchIcon.vue'
 import ArticleIcon from './icons/ArticleIcon.vue'
 import BriefcaseIcon from './icons/BriefcaseIcon.vue'
@@ -187,8 +186,7 @@ onMounted(() => {
 
 const navItems = computed(() => [
   { id: 'home', name: t('nav.home'), icon: HomeIcon, route: '/' },
-  { id: 'sites', name: t('nav.sites'), icon: CompassIcon, route: '/sites' },
-  { id: 'tools', name: t('nav.tools'), icon: WrenchIcon, route: '/tools' },
+  { id: 'workspace', name: t('nav.workspace'), icon: WrenchIcon, route: '/workspace' },
   { id: 'blog', name: t('nav.blog'), icon: ArticleIcon, route: '/blog' },
   { id: 'portfolio', name: t('nav.portfolio'), icon: BriefcaseIcon, route: '/portfolio' },
 ])

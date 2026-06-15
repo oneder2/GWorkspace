@@ -49,7 +49,7 @@
         <h2 class="text-lg sm:text-xl font-bold text-main tracking-tight truncate">{{ currentTabName }}</h2>
       </div>
       <span 
-        v-if="currentTab === 'tools'" 
+        v-if="currentTab === 'workspace'"
         class="eyebrow text-[0.66rem] px-2.5 py-1"
       >
         v3.1.0
@@ -797,8 +797,7 @@ const vClickOutside = {
 const currentTabName = computed(() => {
   const tabMap = {
     'home': t('nav.home'),
-    'sites': t('nav.sites'),
-    'tools': t('nav.tools'),
+    'workspace': t('nav.workspace'),
     'blog': t('nav.blog'),
     'portfolio': t('nav.portfolio')
   }

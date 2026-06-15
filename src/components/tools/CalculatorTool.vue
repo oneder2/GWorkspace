@@ -1,106 +1,21 @@
-<!--
-  计算器工具组件
-  提供基本的数学计算功能
--->
 <template>
-  <div class="h-full flex items-center justify-center">
-    <div class="bg-surface/90 p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-md md:max-w-lg border border-border-base">
-      <!-- 显示屏 -->
-      <div class="bg-border-base/20 rounded-2xl p-4 mb-6 text-right border border-border-base/30">
-        <div class="text-muted text-xs font-mono h-4">{{ calcHistory }}</div>
-        <div class="text-main font-mono text-4xl h-12 flex items-end justify-end break-all tracking-wider">
-          {{ calcDisplay }}
-        </div>
+  <div class="scientific-calculator">
+    <div class="calculator-shell">
+      <div class="calculator-display">
+        <span class="calculator-history">{{ expression || $t('calculator.hint') }}</span>
+        <strong class="calculator-result">{{ displayValue }}</strong>
       </div>
-      
-      <!-- 按钮网格 -->
-      <div class="grid grid-cols-4 gap-3">
-        <button 
-          @click="calcClear" 
-          class="col-span-1 h-14 rounded-xl bg-red-500/20 dark:bg-red-500/30 text-red-400 dark:text-red-300 font-bold hover:bg-red-500/30 dark:hover:bg-red-500/40 transition-colors border border-red-500/20 dark:border-red-500/30"
+
+      <div class="calculator-grid">
+        <button
+          v-for="button in buttons"
+          :key="button.label"
+          type="button"
+          class="calculator-key"
+          :class="button.variant ? `calculator-key-${button.variant}` : ''"
+          @click="handleButton(button)"
         >
-          AC
-        </button>
-        <button 
-          @click="calcAppend('/')" 
-          class="h-14 rounded-xl bg-border-base/50 text-[var(--theme-primary-darker)] dark:text-[var(--theme-primary-light)] font-bold hover:bg-border-base transition-colors border border-border-base/50"
-        >
-          ÷
-        </button>
-        <button 
-          @click="calcAppend('*')" 
-          class="h-14 rounded-xl bg-border-base/50 text-[var(--theme-primary-darker)] dark:text-[var(--theme-primary-light)] font-bold hover:bg-border-base transition-colors border border-border-base/50"
-        >
-          ×
-        </button>
-        <button 
-          @click="calcDelete" 
-          class="h-14 rounded-xl bg-border-base/50 text-secondary hover:bg-border-base transition-colors border border-border-base/50"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mx-auto">
-            <path d="M22 6h-4l-3 4H3a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h12l3 4h4"/>
-          </svg>
-        </button>
-        
-        <button 
-          v-for="n in [7,8,9]" 
-          :key="n"
-          @click="calcAppend(n)" 
-          class="h-14 rounded-xl bg-border-base/50 text-main font-bold hover:bg-border-base transition-colors text-xl border border-border-base/50"
-        >
-          {{ n }}
-        </button>
-        <button 
-          @click="calcAppend('-')" 
-          class="h-14 rounded-xl bg-border-base/50 text-[var(--theme-primary-darker)] dark:text-[var(--theme-primary-light)] font-bold hover:bg-border-base transition-colors border border-border-base/50"
-        >
-          -
-        </button>
-        
-        <button 
-          v-for="n in [4,5,6]" 
-          :key="n"
-          @click="calcAppend(n)" 
-          class="h-14 rounded-xl bg-border-base/50 text-main font-bold hover:bg-border-base transition-colors text-xl border border-border-base/50"
-        >
-          {{ n }}
-        </button>
-        <button 
-          @click="calcAppend('+')" 
-          class="h-14 rounded-xl bg-border-base/50 text-[var(--theme-primary-darker)] dark:text-[var(--theme-primary-light)] font-bold hover:bg-border-base transition-colors border border-border-base/50"
-        >
-          +
-        </button>
-        
-        <button 
-          v-for="n in [1,2,3]" 
-          :key="n"
-          @click="calcAppend(n)" 
-          class="h-14 rounded-xl bg-slate-100 dark:bg-slate-700/80 text-slate-900 dark:text-slate-100 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-xl border border-slate-300 dark:border-slate-600/50"
-        >
-          {{ n }}
-        </button>
-        <button 
-          @click="calcEqual" 
-          class="row-span-2 h-[7.5rem] rounded-xl text-white font-bold shadow-lg text-xl border transition-all"
-          style="background: linear-gradient(to bottom, var(--theme-primary), var(--theme-primary-darker)); box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--theme-primary) 20%, transparent), 0 4px 6px -2px color-mix(in srgb, var(--theme-primary) 30%, transparent); border-color: color-mix(in srgb, var(--theme-primary-light) 20%, transparent);"
-          @mouseenter="$event.currentTarget.style.background = 'linear-gradient(to bottom, var(--theme-primary-light), var(--theme-primary))'"
-          @mouseleave="$event.currentTarget.style.background = 'linear-gradient(to bottom, var(--theme-primary), var(--theme-primary-darker))'"
-        >
-          =
-        </button>
-        
-        <button 
-          @click="calcAppend(0)" 
-          class="col-span-2 h-14 rounded-xl bg-border-base/50 text-main font-bold hover:bg-border-base transition-colors text-xl border border-border-base/50"
-        >
-          0
-        </button>
-        <button 
-          @click="calcAppend('.')" 
-          class="h-14 rounded-xl bg-border-base/50 text-main font-bold hover:bg-border-base transition-colors border border-border-base/50"
-        >
-          .
+          {{ button.label }}
         </button>
       </div>
     </div>
@@ -109,169 +24,310 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-const calcDisplay = ref('0')
-const calcHistory = ref('')
+const { t } = useI18n()
 
-/**
- * 追加字符到计算器显示
- */
-const calcAppend = (val) => {
-  if (calcDisplay.value === '0' && val !== '.') calcDisplay.value = ''
-  calcDisplay.value += val
+const expression = ref('')
+const displayValue = ref('0')
+
+const buttons = [
+  { label: 'AC', action: 'clear', variant: 'danger' },
+  { label: '⌫', action: 'delete' },
+  { label: '(', value: '(' },
+  { label: ')', value: ')' },
+  { label: 'sin', value: 'sin(' },
+  { label: 'cos', value: 'cos(' },
+  { label: 'tan', value: 'tan(' },
+  { label: '÷', value: '/' },
+  { label: 'log', value: 'log(' },
+  { label: 'ln', value: 'ln(' },
+  { label: '√', value: 'sqrt(' },
+  { label: '×', value: '*' },
+  { label: '7', value: '7' },
+  { label: '8', value: '8' },
+  { label: '9', value: '9' },
+  { label: '-', value: '-' },
+  { label: '4', value: '4' },
+  { label: '5', value: '5' },
+  { label: '6', value: '6' },
+  { label: '+', value: '+' },
+  { label: '1', value: '1' },
+  { label: '2', value: '2' },
+  { label: '3', value: '3' },
+  { label: '^', value: '^' },
+  { label: '0', value: '0' },
+  { label: '.', value: '.' },
+  { label: '%', value: '%' },
+  { label: '=', action: 'equals', variant: 'primary' },
+  { label: 'π', value: 'pi' },
+  { label: 'e', value: 'e' }
+]
+
+function handleButton(button) {
+  if (button.action === 'clear') {
+    expression.value = ''
+    displayValue.value = '0'
+    return
+  }
+
+  if (button.action === 'delete') {
+    expression.value = expression.value.slice(0, -1)
+    displayValue.value = expression.value || '0'
+    return
+  }
+
+  if (button.action === 'equals') {
+    calculate()
+    return
+  }
+
+  expression.value += button.value
+  displayValue.value = expression.value
 }
 
-/**
- * 清空计算器
- */
-const calcClear = () => { 
-  calcDisplay.value = '0'
-  calcHistory.value = ''
-}
-
-/**
- * 删除最后一个字符
- */
-const calcDelete = () => {
-  calcDisplay.value = calcDisplay.value.slice(0, -1)
-  if (calcDisplay.value === '') calcDisplay.value = '0'
-}
-
-/**
- * 安全的数学表达式计算
- * 手动解析表达式，只支持基本的四则运算，完全避免eval和Function
- * @param {string} expression - 数学表达式字符串
- * @returns {number} 计算结果
- */
-const safeCalculate = (expression) => {
+function calculate() {
   try {
-    // 将显示的操作符转换为标准操作符
-    let expr = expression.replace(/×/g, '*').replace(/÷/g, '/')
-    
-    // 移除所有空格
-    expr = expr.replace(/\s/g, '')
-    
-    // 验证表达式只包含数字、运算符和小数点
-    if (!/^[0-9+\-*/.]+$/.test(expr)) {
-      throw new Error('Invalid characters')
-    }
-    
-    // 使用正则表达式匹配数字（包括小数）和运算符
-    // 处理负数开头的情况
-    const tokens = []
-    let i = 0
-    while (i < expr.length) {
-      if (expr[i] >= '0' && expr[i] <= '9' || expr[i] === '.') {
-        // 匹配数字（包括小数）
-        let num = ''
-        while (i < expr.length && (expr[i] >= '0' && expr[i] <= '9' || expr[i] === '.')) {
-          num += expr[i]
-          i++
-        }
-        tokens.push(parseFloat(num))
-      } else if (expr[i] === '+' || expr[i] === '-' || expr[i] === '*' || expr[i] === '/') {
-        tokens.push(expr[i])
-        i++
-      } else {
-        i++
-      }
-    }
-    
-    if (tokens.length === 0) {
-      throw new Error('Invalid expression')
-    }
-    
-    // 处理负数开头的情况
-    if (tokens[0] === '-' && tokens.length > 1) {
-      tokens[1] = -tokens[1]
-      tokens.shift()
-    }
-    
-    // 先处理乘除（从左到右）
-    const processMulDiv = (tokens) => {
-      const result = []
-      let i = 0
-      while (i < tokens.length) {
-        if (typeof tokens[i] === 'number') {
-          result.push(tokens[i])
-          i++
-        } else if (tokens[i] === '*' || tokens[i] === '/') {
-          const op = tokens[i]
-          const prev = result.pop()
-          i++
-          const next = tokens[i]
-          if (typeof next !== 'number') {
-            throw new Error('Invalid expression')
-          }
-          if (op === '*') {
-            result.push(prev * next)
-          } else {
-            if (next === 0) throw new Error('Division by zero')
-            result.push(prev / next)
-          }
-          i++
-        } else {
-          result.push(tokens[i])
-          i++
-        }
-      }
-      return result
-    }
-    
-    // 处理加减（从左到右）
-    const processAddSub = (tokens) => {
-      let result = tokens[0]
-      if (typeof result !== 'number') {
-        throw new Error('Invalid expression')
-      }
-      for (let i = 1; i < tokens.length; i += 2) {
-        const op = tokens[i]
-        const num = tokens[i + 1]
-        if (typeof num !== 'number') {
-          throw new Error('Invalid expression')
-        }
-        if (op === '+') {
-          result += num
-        } else if (op === '-') {
-          result -= num
-        } else {
-          throw new Error('Invalid operator')
-        }
-      }
-      return result
-    }
-    
-    // 先处理乘除，再处理加减
-    const afterMulDiv = processMulDiv(tokens)
-    return processAddSub(afterMulDiv)
-  } catch (e) {
-    throw new Error('Invalid expression')
+    const parser = new ExpressionParser(expression.value)
+    const result = parser.parse()
+    if (!Number.isFinite(result)) throw new Error('Invalid result')
+    displayValue.value = formatResult(result)
+    expression.value = displayValue.value
+  } catch (error) {
+    displayValue.value = t('calculator.error')
   }
 }
 
-/**
- * 计算结果
- * 使用安全的数学表达式计算函数，完全避免eval
- */
-const calcEqual = () => {
-  try {
-    const res = safeCalculate(calcDisplay.value)
-    
-    // 处理结果，保留合理的小数位数
-    let result = res.toString()
-    if (result.includes('.')) {
-      // 限制小数位数为10位，避免过长
-      const parts = result.split('.')
-      if (parts[1] && parts[1].length > 10) {
-        result = res.toFixed(10).replace(/\.?0+$/, '')
-      }
+function formatResult(value) {
+  if (Number.isInteger(value)) return String(value)
+  return Number(value.toPrecision(12)).toString()
+}
+
+class ExpressionParser {
+  constructor(input) {
+    this.input = input.replace(/\s/g, '').replace(/×/g, '*').replace(/÷/g, '/')
+    this.index = 0
+  }
+
+  parse() {
+    const value = this.parseExpression()
+    if (this.index < this.input.length) throw new Error('Unexpected token')
+    return value
+  }
+
+  parseExpression() {
+    let value = this.parseTerm()
+    while (this.match('+') || this.match('-')) {
+      const operator = this.previous()
+      const right = this.parseTerm()
+      value = operator === '+' ? value + right : value - right
     }
-    
-    calcHistory.value = calcDisplay.value + ' ='
-    calcDisplay.value = result
-  } catch (e) {
-    calcDisplay.value = 'Error'
-    setTimeout(() => calcDisplay.value = '0', 1000)
+    return value
+  }
+
+  parseTerm() {
+    let value = this.parsePower()
+    while (this.match('*') || this.match('/')) {
+      const operator = this.previous()
+      const right = this.parsePower()
+      if (operator === '/' && right === 0) throw new Error('Division by zero')
+      value = operator === '*' ? value * right : value / right
+    }
+    return value
+  }
+
+  parsePower() {
+    let value = this.parseUnary()
+    while (this.match('^')) {
+      value = Math.pow(value, this.parseUnary())
+    }
+    return value
+  }
+
+  parseUnary() {
+    if (this.match('+')) return this.parseUnary()
+    if (this.match('-')) return -this.parseUnary()
+    return this.parsePercent()
+  }
+
+  parsePercent() {
+    let value = this.parsePrimary()
+    while (this.match('%')) {
+      value /= 100
+    }
+    return value
+  }
+
+  parsePrimary() {
+    if (this.match('(')) {
+      const value = this.parseExpression()
+      if (!this.match(')')) throw new Error('Missing closing parenthesis')
+      return value
+    }
+
+    if (this.isAlpha(this.peek())) {
+      const name = this.readName()
+      if (name === 'pi') return Math.PI
+      if (name === 'e') return Math.E
+      if (!this.match('(')) throw new Error('Missing function parenthesis')
+      const value = this.parseExpression()
+      if (!this.match(')')) throw new Error('Missing closing parenthesis')
+      return this.applyFunction(name, value)
+    }
+
+    return this.readNumber()
+  }
+
+  applyFunction(name, value) {
+    const degrees = value * Math.PI / 180
+    const functions = {
+      sin: () => Math.sin(degrees),
+      cos: () => Math.cos(degrees),
+      tan: () => Math.tan(degrees),
+      sqrt: () => Math.sqrt(value),
+      log: () => Math.log10(value),
+      ln: () => Math.log(value)
+    }
+
+    if (!functions[name]) throw new Error('Unknown function')
+    return functions[name]()
+  }
+
+  readNumber() {
+    const start = this.index
+    while (this.isDigit(this.peek()) || this.peek() === '.') {
+      this.index += 1
+    }
+
+    if (start === this.index) throw new Error('Expected number')
+    const value = Number(this.input.slice(start, this.index))
+    if (!Number.isFinite(value)) throw new Error('Invalid number')
+    return value
+  }
+
+  readName() {
+    const start = this.index
+    while (this.isAlpha(this.peek())) {
+      this.index += 1
+    }
+    return this.input.slice(start, this.index)
+  }
+
+  match(char) {
+    if (this.peek() !== char) return false
+    this.index += 1
+    return true
+  }
+
+  previous() {
+    return this.input[this.index - 1]
+  }
+
+  peek() {
+    return this.input[this.index] || ''
+  }
+
+  isDigit(char) {
+    return char >= '0' && char <= '9'
+  }
+
+  isAlpha(char) {
+    return /^[a-z]$/i.test(char)
   }
 }
 </script>
+
+<style scoped>
+.scientific-calculator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+}
+
+.calculator-shell {
+  display: grid;
+  gap: 0.9rem;
+  width: min(100%, 34rem);
+  padding: 1rem;
+  border-radius: 1.35rem;
+  border: 1px solid var(--border-base);
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.dark .calculator-shell {
+  background: rgba(15, 23, 42, 0.38);
+}
+
+.calculator-display {
+  display: grid;
+  gap: 0.35rem;
+  min-height: 6.6rem;
+  padding: 0.9rem;
+  border-radius: 1rem;
+  text-align: right;
+  border: 1px solid var(--border-base);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.dark .calculator-display {
+  background: rgba(2, 6, 23, 0.32);
+}
+
+.calculator-history {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 720;
+  word-break: break-all;
+}
+
+.calculator-result {
+  align-self: end;
+  color: var(--text-main);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  line-height: 1.05;
+  word-break: break-all;
+}
+
+.calculator-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.calculator-key {
+  min-height: 3rem;
+  border-radius: 0.86rem;
+  border: 1px solid var(--border-base);
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--text-main);
+  font-size: 0.94rem;
+  font-weight: 850;
+  transition: transform 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.dark .calculator-key {
+  background: rgba(15, 23, 42, 0.44);
+}
+
+.calculator-key:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--theme-primary) 28%, var(--border-strong));
+}
+
+.calculator-key-primary {
+  color: white;
+  background: linear-gradient(135deg, var(--theme-primary), var(--theme-primary-darker));
+}
+
+.calculator-key-danger {
+  color: rgb(185, 28, 28);
+  background: rgba(254, 226, 226, 0.72);
+}
+
+.dark .calculator-key-danger {
+  color: rgb(252, 165, 165);
+  background: rgba(127, 29, 29, 0.36);
+}
+</style>

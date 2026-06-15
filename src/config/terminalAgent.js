@@ -22,7 +22,7 @@ const TERMINAL_AGENT_LOCALES = {
         'Eclospy732 online.'
       ],
       emptyTitle: '代理舱待命中',
-      emptyBody: '这里不是另一个工具栏。更像一个站内代理节点。',
+      emptyBody: '这里不是另一个工具箱。更像一个站内代理节点。',
       hints: [
         'help 查看可用命令',
         'signal 查看站内信号',
@@ -39,7 +39,7 @@ const TERMINAL_AGENT_LOCALES = {
     labels: {
       articles: '文章',
       projects: '项目',
-      tools: '工具',
+      tools: '核心入口',
       currentRoute: '当前页面',
       latestSignal: '最新信号',
       theme: '主题',
@@ -69,7 +69,7 @@ const TERMINAL_AGENT_LOCALES = {
         blocks: [
           {
             type: 'text',
-            content: '我是 Eclospy732。负责做站内代理，不负责假装成另一个工具箱。'
+            content: '我是 Eclospy732。负责做站内代理，不负责假装成另一个聊天壳。'
           },
           {
             type: 'text',
@@ -99,7 +99,7 @@ const TERMINAL_AGENT_LOCALES = {
         intro: '今日拆句已经挂上来了。',
         empty: '今日拆句暂时还没生成出来。',
         openAnalyzerLabel: '一句话命题解析器',
-        openAnalyzerMeta: '进入工具箱继续拆'
+        openAnalyzerMeta: '进入工作台继续拆'
       },
       drift: {
         description: '随机跳转到一个站内目标',
@@ -111,7 +111,7 @@ const TERMINAL_AGENT_LOCALES = {
       },
       ask: {
         description: '查看 AI 入口',
-        intro: 'AI 没被塞进一个聊天壳里，而是被拆成了几个更具体的入口。',
+        intro: 'AI 没被塞进一个聊天壳里，而是被拆成了几个更具体的站内入口。',
         analyzerLabel: '一句话命题解析器',
         analyzerMeta: '公开展示思路拆解',
         blogAssistantLabel: 'Blog Assistant 2.0',
@@ -146,7 +146,7 @@ const TERMINAL_AGENT_LOCALES = {
         'Eclospy732 online.'
       ],
       emptyTitle: 'Agent standing by',
-      emptyBody: 'This is a site-side relay, not another toolbox.',
+      emptyBody: 'This is a site-side relay, not another toolbox clone.',
       hints: [
         'help for commands',
         'signal for site status',
@@ -163,7 +163,7 @@ const TERMINAL_AGENT_LOCALES = {
     labels: {
       articles: 'Articles',
       projects: 'Projects',
-      tools: 'Tools',
+      tools: 'Core entries',
       currentRoute: 'Current route',
       latestSignal: 'Latest signal',
       theme: 'Theme',
@@ -193,7 +193,7 @@ const TERMINAL_AGENT_LOCALES = {
         blocks: [
           {
             type: 'text',
-            content: 'I am Eclospy732. A site-side relay, not a utility drawer.'
+            content: 'I am Eclospy732. A site-side relay, not another chat shell.'
           },
           {
             type: 'text',
@@ -214,7 +214,7 @@ const TERMINAL_AGENT_LOCALES = {
         intro: 'Today\'s capsule is already staged.',
         empty: 'Today\'s capsule has not been generated yet.',
         openAnalyzerLabel: 'Thesis Parser',
-        openAnalyzerMeta: 'Continue the breakdown in the toolbox'
+        openAnalyzerMeta: 'Continue the breakdown in the workspace'
       },
       drift: {
         description: 'Jump to a random site target',

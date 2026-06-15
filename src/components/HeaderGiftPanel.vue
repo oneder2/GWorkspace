@@ -78,10 +78,10 @@
           </div>
 
           <div class="gift-panel-actions">
-            <router-link to="/tools?tool=thesis-parser" class="gift-link">
+            <router-link to="/workspace?tool=thesis-parser" class="gift-link">
               {{ $t('common.stationGiftRead') }}
             </router-link>
-            <router-link to="/tools?tool=blog-assistant" class="gift-link gift-link-primary">
+            <router-link to="/workspace?tool=blog-assistant" class="gift-link gift-link-primary">
               {{ $t('common.stationGiftWrite') }}
             </router-link>
           </div>

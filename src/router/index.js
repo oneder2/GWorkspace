@@ -12,7 +12,6 @@ import { i18n } from '../i18n/index.js'
  * 使用动态 import 实现代码分割，提升首屏加载速度
  */
 const HomePage = () => import('../pages/HomePage.vue')
-const SitesPage = () => import('../pages/SitesPage.vue')
 const ToolsPage = () => import('../pages/ToolsPage.vue')
 const BlogPage = () => import('../pages/BlogPage.vue')
 const BlogDetailPage = () => import('../pages/BlogDetailPage.vue')
@@ -41,16 +40,18 @@ const routes = [
     meta: { titleKey: 'routes.home' }
   },
   {
+    path: '/workspace',
+    name: 'workspace',
+    component: ToolsPage,
+    meta: { titleKey: 'routes.workspace' }
+  },
+  {
     path: '/sites',
-    name: 'sites',
-    component: SitesPage,
-    meta: { titleKey: 'routes.sites' }
+    redirect: '/workspace'
   },
   {
     path: '/tools',
-    name: 'tools',
-    component: ToolsPage,
-    meta: { titleKey: 'routes.tools' }
+    redirect: '/workspace'
   },
   {
     path: '/blog',
