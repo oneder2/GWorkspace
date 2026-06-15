@@ -235,6 +235,7 @@ jobs:
               -H "Origin: https://evil-localhost.example" \
               -H "Access-Control-Request-Method: PATCH" \
               -H "Access-Control-Request-Headers: authorization,content-type" || true)"
+            echo "$BLOCKED_CORS_OUTPUT" | grep -E '^HTTP/[0-9.]+ 403' >/dev/null
             if echo "$BLOCKED_CORS_OUTPUT" | grep -i '^Access-Control-Allow-Origin:' >/dev/null; then
               echo "CORS allowed an origin that only contains localhost as a substring" >&2
               exit 1

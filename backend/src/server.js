@@ -80,7 +80,9 @@ app.use(cors({
       callback(null, true);
     } else {
       console.warn('CORS Blocked for origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+      const error = new Error('Not allowed by CORS')
+      error.status = 403
+      callback(error);
     }
   },
   credentials: true,
@@ -155,6 +157,10 @@ app.get('/', (req, res) => res.json({ message: 'GWorkspace API Server' }))
 
 app.use((req, res) => res.status(404).json({ error: 'Not Found' }))
 app.use((err, req, res, next) => {
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ error: 'CORS origin not allowed' })
+  }
+
   console.error('Server Error:', err)
   res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' })
 })

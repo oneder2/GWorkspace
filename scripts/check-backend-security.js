@@ -25,6 +25,14 @@ if (!serverSource.includes('function isAllowedCorsOrigin(origin)')) {
   failures.push('backend/src/server.js must centralize CORS origin checks in isAllowedCorsOrigin')
 }
 
+if (!serverSource.includes('error.status = 403')) {
+  failures.push('backend/src/server.js must reject disallowed CORS origins with HTTP 403')
+}
+
+if (!serverSource.includes("err.message === 'Not allowed by CORS'")) {
+  failures.push('backend/src/server.js must handle expected CORS rejections before generic server errors')
+}
+
 if (!serverSource.includes("import helmet from 'helmet'") && !serverSource.includes('import helmet from "helmet"')) {
   failures.push('backend/src/server.js must import helmet')
 }
