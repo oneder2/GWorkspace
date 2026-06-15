@@ -63,4 +63,4 @@ jobs:
       - name: Verify backend modules load
         run: |
           cd backend
-          node --input-type=module -e "await Promise.all(['./src/routes/blog.js','./src/routes/comments.js','./src/routes/likes.js','./src/routes/guestbook.js','./src/routes/analytics.js','./src/routes/admin.js'].map(p => import(p))); console.log('backend modules ok')"
+          node --input-type=module -e "const routes=['admin','adminAi','ai','analytics','auth','blog','comments','guestbook','likes','seo','spotify','upload'].map(name => './src/routes/' + name + '.js'); await Promise.all(routes.map(p => import(p))); console.log('backend route modules ok', routes.length)"
