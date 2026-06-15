@@ -56,6 +56,9 @@ jobs:
           cd backend
           npm ci --omit=dev
 
+      - name: Audit backend dependencies
+        run: npm run audit:backend
+
       - name: Prepare database schema
         run: |
           cd backend
