@@ -17,6 +17,7 @@
 ### 安全依赖与运行时基线
 - **Node 运行时统一**：新增 `.nvmrc` 并让 CI 使用 Node 20，减少本地、CI 与服务器之间的运行时漂移。
 - **前端构建链升级**：移除未使用的 `gray-matter`，升级到 Vite 8、`@vitejs/plugin-vue` 6 与 `vite-plugin-pwa` 1.3，前端根项目 `npm audit` 已归零。
+- **浏览器兼容性数据刷新**：更新 `caniuse-lite` 与 `baseline-browser-mapping` lockfile 数据，消除构建阶段 Browserslist 过期警告，保持 CSS/JS 目标环境判断新鲜。
 - **前端审计 gate**：CI 新增 `npm audit --audit-level=moderate`，阻断前端 moderate/high/critical 依赖漏洞回归。
 - **前端体积预算 gate**：CI 在构建后检查 JS/CSS 单文件与总量预算，防止依赖或页面改动导致前端产物无意识膨胀。
 - **后端审计 gate**：CI 新增后端生产依赖审计边界，要求 critical 为 0，并只允许当前已知的 `better-sqlite3/tar` 漏洞节点和 advisory 集合继续存在。
