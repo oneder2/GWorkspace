@@ -67,6 +67,7 @@ npm run check:cors
 npm run check:backend-seo
 npm run check:backend-routes
 npm run check:env
+npm run audit:frontend
 ```
 
 构建产物将输出到 `dist/` 目录。

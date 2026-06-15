@@ -18,7 +18,8 @@
     "check:cors": "node scripts/check-backend-cors.js",
     "check:backend-seo": "node scripts/check-backend-seo.js",
     "check:backend-routes": "node scripts/check-backend-routes.js",
-    "check:env": "node scripts/check-env-examples.js"
+    "check:env": "node scripts/check-env-examples.js",
+    "audit:frontend": "npm audit --audit-level=moderate"
   },
   "dependencies": {
     "chart.js": "^4.5.1",
