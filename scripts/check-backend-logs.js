@@ -22,6 +22,20 @@ function walk(dir) {
 }
 
 const failures = []
+const serverPath = join(backendSrcDir, 'server.js')
+const serverSource = readFileSync(serverPath, 'utf-8')
+
+if (serverSource.includes("morgan('dev')") || serverSource.includes('morgan("dev")')) {
+  failures.push('backend/src/server.js must not force development request logging in production')
+}
+
+if (!serverSource.includes("process.env.NODE_ENV === 'production' ? 'combined' : 'dev'")) {
+  failures.push('backend/src/server.js must use combined request logs in production and dev logs locally')
+}
+
+if (!serverSource.includes("req.path === '/health'")) {
+  failures.push('backend/src/server.js must skip health-check requests in request logs')
+}
 
 for (const file of walk(backendSrcDir)) {
   const lines = readFileSync(file, 'utf-8').split('\n')

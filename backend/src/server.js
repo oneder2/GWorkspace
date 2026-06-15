@@ -34,6 +34,7 @@ validateAuthConfig()
 
 const app = express()
 const PORT = process.env.PORT || 3001
+const requestLogFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev'
 
 // 避免在生产响应中暴露 Express 指纹。
 app.disable('x-powered-by')
@@ -90,7 +91,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }))
 
-app.use(morgan('dev'))
+app.use(morgan(requestLogFormat, {
+  skip: (req) => req.path === '/health'
+}))
 
 // 解析中间件
 app.use(express.json({ limit: '20mb' }))
