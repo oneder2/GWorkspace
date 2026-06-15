@@ -27,8 +27,6 @@ router.post('/blog-image', authenticate, requireAdmin, upload.single('image'), a
 
     // 修复 Multer 中文文件名乱码问题：从 Latin1 转回 UTF-8
     const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
-    
-    console.log(`[Upload] Attempting to upload ${originalName} (${req.file.size} bytes)`);
 
     // 检查核心环境变量是否配置
     const missingKeys = getMissingR2Fields()
@@ -42,8 +40,6 @@ router.post('/blog-image', authenticate, requireAdmin, upload.single('image'), a
     }
 
     const result = await uploadToR2(req.file.buffer, originalName, req.file.mimetype);
-    
-    console.log(`[Upload] Success: ${result.url}`);
     res.json({
       url: result.url,
       key: result.key,

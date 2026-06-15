@@ -78,6 +78,9 @@ jobs:
       - name: Verify backend modules load
         run: npm run check:backend-routes
 
+      - name: Check backend log hygiene
+        run: npm run check:backend-logs
+
       - name: Check backend CORS methods
         run: npm run check:cors
 
