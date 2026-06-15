@@ -15,10 +15,19 @@
               <path d="m20 20-3.5-3.5"></path>
             </svg>
             <input
+              ref="searchInputRef"
               v-model.trim="searchQuery"
               type="search"
               :placeholder="$t('workspace.searchPlaceholder')"
+              @keydown.down.prevent="moveActiveSearchResult(1)"
+              @keydown.up.prevent="moveActiveSearchResult(-1)"
+              @keydown.enter.prevent="confirmActiveSearchResult"
+              @keydown.esc.prevent="clearSearch"
             >
+            <span class="workspace-search-shortcuts" aria-hidden="true">
+              <kbd>/</kbd>
+              <kbd>⌘K</kbd>
+            </span>
             <span class="workspace-search-count">{{ searchMetaLabel }}</span>
           </label>
 
@@ -46,30 +55,52 @@
           <span class="workspace-section-badge">{{ searchResults.length }}</span>
         </div>
 
-        <div v-if="searchResults.length" class="workspace-result-list">
-          <button
-            v-for="entry in searchResults"
-            :key="`${entry.kind}-${entry.id}`"
-            type="button"
-            class="workspace-result-card"
-            :class="{ 'is-disabled': entry.disabled }"
-            @click="activateEntry(entry)"
+        <div v-if="searchResults.length" class="workspace-result-command" role="listbox">
+          <section
+            v-for="group in searchResultGroups"
+            :key="group.id"
+            class="workspace-result-group"
           >
-            <span class="workspace-entry-icon">
-              <component :is="entry.icon" class="w-4 h-4" />
-            </span>
-            <span class="workspace-result-body">
-              <span class="workspace-result-title-row">
-                <span class="workspace-result-title">{{ entry.name }}</span>
-                <span class="workspace-recent-type">{{ entry.kindLabel }}</span>
-              </span>
-              <span class="workspace-result-copy">{{ entry.description }}</span>
-            </span>
-            <svg v-if="!entry.disabled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" class="workspace-link-arrow">
-              <path d="M7 17 17 7"></path>
-              <path d="M9 7h8v8"></path>
-            </svg>
-          </button>
+            <div class="workspace-result-group-head">
+              <span>{{ group.label }}</span>
+              <span>{{ group.entries.length }}</span>
+            </div>
+
+            <div class="workspace-result-list">
+              <button
+                v-for="entry in group.entries"
+                :key="`${entry.kind}-${entry.id}`"
+                type="button"
+                class="workspace-result-card"
+                :class="{ 'is-disabled': entry.disabled, 'is-active': isActiveSearchEntry(entry) }"
+                role="option"
+                :aria-selected="isActiveSearchEntry(entry)"
+                @mouseenter="setActiveSearchEntry(entry)"
+                @click="activateEntry(entry)"
+              >
+                <span class="workspace-entry-icon">
+                  <component :is="entry.icon" class="w-4 h-4" />
+                </span>
+                <span class="workspace-result-body">
+                  <span class="workspace-result-title-row">
+                    <span class="workspace-result-title">{{ entry.name }}</span>
+                    <span class="workspace-recent-type">{{ entry.kindLabel }}</span>
+                  </span>
+                  <span class="workspace-result-copy">{{ entry.description }}</span>
+                </span>
+                <svg v-if="!entry.disabled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" class="workspace-link-arrow">
+                  <path d="M7 17 17 7"></path>
+                  <path d="M9 7h8v8"></path>
+                </svg>
+              </button>
+            </div>
+          </section>
+
+          <div class="workspace-command-hints" aria-hidden="true">
+            <span>↑↓ {{ $t('workspace.keyboardNavigate') }}</span>
+            <span>Enter {{ $t('workspace.keyboardOpen') }}</span>
+            <span>Esc {{ $t('workspace.keyboardClear') }}</span>
+          </div>
         </div>
 
         <p v-else class="workspace-empty-copy">{{ $t('workspace.noSearchResults') }}</p>
@@ -278,7 +309,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import BlogAssistantTool from '../components/tools/BlogAssistantTool.vue'
@@ -311,9 +342,11 @@ const route = useRoute()
 const router = useRouter()
 
 const workspaceRef = ref(null)
+const searchInputRef = ref(null)
 const activeToolId = ref(null)
 const activeFilter = ref('all')
 const searchQuery = ref('')
+const activeSearchIndex = ref(0)
 
 const { value: recentEntriesStore } = useLocalStorage('workspace-recent-entries', [])
 const { value: lastActiveToolId } = useLocalStorage('workspace-last-tool', '')
@@ -407,10 +440,25 @@ const searchResults = computed(() => [
   ...filteredExternalGroups.value.flatMap((group) => group.links)
 ])
 
+const searchResultGroups = computed(() => [
+  {
+    id: 'internal',
+    label: t('workspace.searchGroups.internal'),
+    entries: filteredTools.value
+  },
+  {
+    id: 'external',
+    label: t('workspace.searchGroups.external'),
+    entries: filteredExternalGroups.value.flatMap((group) => group.links)
+  }
+].filter((group) => group.entries.length > 0))
+
 const searchMetaLabel = computed(() => {
   const count = hasSearchQuery.value ? searchResults.value.length : quickLaunchEntries.value.length
   return t('workspace.searchMeta', { count })
 })
+
+const activeSearchEntry = computed(() => searchResults.value[activeSearchIndex.value] || null)
 
 const activeToolData = computed(() => {
   const normalizedId = normalizeToolId(activeToolId.value)
@@ -476,9 +524,73 @@ watch(activeToolId, (toolId) => {
   })
 })
 
+watch([searchResults, normalizedQuery, () => activeFilter.value], () => {
+  activeSearchIndex.value = 0
+})
+
+onMounted(() => {
+  window.addEventListener('keydown', handleGlobalSearchShortcut)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalSearchShortcut)
+})
+
 function matchesQuery(entry, fields) {
   if (!normalizedQuery.value) return true
   return fields.join(' ').toLowerCase().includes(normalizedQuery.value)
+}
+
+function getEntryKey(entry) {
+  return entry ? `${entry.kind}-${entry.id}` : ''
+}
+
+function isActiveSearchEntry(entry) {
+  return getEntryKey(entry) === getEntryKey(activeSearchEntry.value)
+}
+
+function setActiveSearchEntry(entry) {
+  const nextIndex = searchResults.value.findIndex((item) => getEntryKey(item) === getEntryKey(entry))
+  if (nextIndex >= 0) {
+    activeSearchIndex.value = nextIndex
+  }
+}
+
+function moveActiveSearchResult(direction) {
+  if (!hasSearchQuery.value || searchResults.value.length === 0) return
+  const resultCount = searchResults.value.length
+  activeSearchIndex.value = (activeSearchIndex.value + direction + resultCount) % resultCount
+}
+
+function confirmActiveSearchResult() {
+  if (!hasSearchQuery.value) return
+  activateEntry(activeSearchEntry.value)
+}
+
+function clearSearch() {
+  if (!hasSearchQuery.value) return
+  searchQuery.value = ''
+  activeSearchIndex.value = 0
+  searchInputRef.value?.blur()
+}
+
+function handleGlobalSearchShortcut(event) {
+  if (activeToolData.value || isTypingTarget(event.target)) return
+
+  const isCommandK = event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)
+  const isSlash = event.key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey
+
+  if (!isCommandK && !isSlash) return
+
+  event.preventDefault()
+  searchInputRef.value?.focus()
+  searchInputRef.value?.select()
+}
+
+function isTypingTarget(target) {
+  if (!(target instanceof HTMLElement)) return false
+  const tagName = target.tagName.toLowerCase()
+  return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || target.isContentEditable
 }
 
 function normalizeToolId(toolId) {

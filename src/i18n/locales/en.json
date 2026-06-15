@@ -353,6 +353,13 @@
     "searchResultsTitle": "Search Results",
     "searchResultsDescription": "Search internal tools, external links, and future writing experiments together.",
     "noSearchResults": "No matching entry found.",
+    "keyboardNavigate": "Select",
+    "keyboardOpen": "Open",
+    "keyboardClear": "Clear",
+    "searchGroups": {
+      "internal": "Internal Tools",
+      "external": "External Entries"
+    },
     "filters": {
       "all": "All",
       "internal": "Internal",

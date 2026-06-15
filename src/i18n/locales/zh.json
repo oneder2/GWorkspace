@@ -353,6 +353,13 @@
     "searchResultsTitle": "搜索结果",
     "searchResultsDescription": "统一搜索站内工具、外部入口和未来写作实验。",
     "noSearchResults": "没有匹配的入口。",
+    "keyboardNavigate": "选择",
+    "keyboardOpen": "打开",
+    "keyboardClear": "清空",
+    "searchGroups": {
+      "internal": "站内工具",
+      "external": "外部入口"
+    },
     "filters": {
       "all": "全部",
       "internal": "站内",
