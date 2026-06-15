@@ -11,8 +11,7 @@ import { getDatabase } from '../backend/src/config/database.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-// 网站基础URL（需要根据实际部署修改）
-const BASE_URL = process.env.SITE_URL || 'https://your-domain.com'
+const BASE_URL = process.env.SITE_URL || 'https://www.gellaronline.cc'
 
 /**
  * 生成 sitemap.xml
@@ -33,8 +32,7 @@ async function generateSitemap() {
     // 静态页面路由
     const staticRoutes = [
       { path: '', priority: '1.0', changefreq: 'daily' },
-      { path: '/sites', priority: '0.8', changefreq: 'weekly' },
-      { path: '/tools', priority: '0.8', changefreq: 'weekly' },
+      { path: '/workspace', priority: '0.8', changefreq: 'weekly' },
       { path: '/blog', priority: '0.9', changefreq: 'daily' },
       { path: '/portfolio', priority: '0.7', changefreq: 'monthly' }
     ]
@@ -88,4 +86,3 @@ async function generateSitemap() {
 }
 
 generateSitemap()
-
