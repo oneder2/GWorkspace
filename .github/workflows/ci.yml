@@ -31,6 +31,9 @@ jobs:
       - name: Check public SEO entrypoints
         run: npm run check:seo
 
+      - name: Check environment examples
+        run: npm run check:env
+
   backend-smoke:
     name: Backend Smoke Check
     runs-on: ubuntu-latest

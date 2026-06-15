@@ -17,7 +17,8 @@
     "check:seo": "node scripts/check-public-seo.js",
     "check:cors": "node scripts/check-backend-cors.js",
     "check:backend-seo": "node scripts/check-backend-seo.js",
-    "check:backend-routes": "node scripts/check-backend-routes.js"
+    "check:backend-routes": "node scripts/check-backend-routes.js",
+    "check:env": "node scripts/check-env-examples.js"
   },
   "dependencies": {
     "chart.js": "^4.5.1",
