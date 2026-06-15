@@ -16,6 +16,7 @@
 
 ### 安全依赖与运行时基线
 - **Node 运行时统一**：新增 `.nvmrc` 并让 CI 使用 Node 20，减少本地、CI 与服务器之间的运行时漂移。
+- **前端构建链升级**：移除未使用的 `gray-matter`，升级到 Vite 8、`@vitejs/plugin-vue` 6 与 `vite-plugin-pwa` 1.3，前端根项目 `npm audit` 已归零。
 - **后端依赖减面**：将 `bcrypt` 升级到 `6.0.0`，移除旧 `@mapbox/node-pre-gyp` 安装链，后端高危审计项从 4 个减少到 2 个。
 - **保留 better-sqlite3 稳定版本**：继续固定 `better-sqlite3@9.4.3`，避免 `12.x` 在当前服务器较旧 glibc/g++ 环境下回退源码编译导致部署失败。
 
