@@ -15,7 +15,7 @@ export default defineConfig({
       manifest: {
         name: 'GWorkspace',
         short_name: 'GWorkspace',
-        description: 'Personal workspace website with Vue.js, featuring blog, tools, and portfolio management.',
+        description: 'A personal workspace site built with Vue.js, organized around blog writing, a curated workspace, and portfolio surfaces.',
         theme_color: '#475569',
         icons: [
           {
