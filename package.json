@@ -19,6 +19,7 @@
     "check:backend-seo": "node scripts/check-backend-seo.js",
     "check:backend-routes": "node scripts/check-backend-routes.js",
     "check:env": "node scripts/check-env-examples.js",
+    "check:frontend-budget": "node scripts/check-frontend-budget.js",
     "audit:frontend": "npm audit --audit-level=moderate",
     "audit:backend": "node scripts/check-backend-audit.js"
   },

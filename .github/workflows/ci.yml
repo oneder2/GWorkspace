@@ -31,6 +31,9 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      - name: Check frontend budget
+        run: npm run check:frontend-budget
+
       - name: Check public SEO entrypoints
         run: npm run check:seo
 

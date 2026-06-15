@@ -201,6 +201,7 @@ npm run check:cors
 npm run check:backend-seo
 npm run check:backend-routes
 npm run check:env
+npm run check:frontend-budget
 npm run audit:frontend
 npm run audit:backend
 ```
