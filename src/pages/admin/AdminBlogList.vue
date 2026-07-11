@@ -48,69 +48,116 @@
         <div v-if="filteredBlogs.length === 0" class="p-8 text-center text-slate-500 dark:text-slate-400">
           {{ $t('admin.noBlogsInFilter') }}
         </div>
-        <table v-else class="admin-table">
-        <thead>
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.title') }}</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.status') }}</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.views') }}</th>
-            <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.date') }}</th>
-            <th class="px-6 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.actions') }}</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-          <tr
-            v-for="blog in filteredBlogs"
-            :key="blog.id"
-            class="hover:bg-white/20 dark:hover:bg-white/5 transition-colors"
-          >
-            <td class="px-6 py-4">
-              <div class="font-semibold text-slate-800 dark:text-slate-200">{{ blog.title }}</div>
-              <div class="text-sm text-slate-500 dark:text-slate-400">{{ blog.genre }}</div>
-            </td>
-            <td class="px-6 py-4">
-              <span
-                class="px-2 py-1 text-xs font-semibold rounded-full"
-                :class="blog.status === 'published'
-                  ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'"
-              >
-                {{ blog.status === 'published' ? $t('admin.published') : $t('admin.draft') }}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-slate-600 dark:text-slate-400">
-              {{ blog.views || 0 }}
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-              {{ blog.status === 'published' && blog.published_at ? formatBlogDate(blog.published_at) : '—' }}
-            </td>
-            <td class="px-6 py-4 text-right">
-              <div class="flex items-center justify-end gap-2">
+        <template v-else>
+          <div class="sm:hidden space-y-3 p-4">
+            <article
+              v-for="blog in filteredBlogs"
+              :key="blog.id"
+              class="admin-blog-card"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <h3 class="font-semibold text-main line-clamp-2">{{ blog.title }}</h3>
+                  <p class="text-sm text-secondary mt-1">{{ blog.genre || '—' }}</p>
+                </div>
+                <span
+                  class="px-2 py-1 text-xs font-semibold rounded-full shrink-0"
+                  :class="blog.status === 'published'
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'"
+                >
+                  {{ blog.status === 'published' ? $t('admin.published') : $t('admin.draft') }}
+                </span>
+              </div>
+
+              <div class="admin-blog-meta">
+                <span>{{ $t('admin.views') }} · {{ blog.views || 0 }}</span>
+                <span>{{ blog.status === 'published' && blog.published_at ? formatBlogDate(blog.published_at) : '—' }}</span>
+              </div>
+
+              <div class="flex items-center gap-2 pt-1">
                 <button
                   @click="editBlog(blog.id)"
-                  class="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                  :title="$t('admin.edit')"
+                  class="action-btn action-btn-secondary flex-1 text-sm"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                  </svg>
+                  {{ $t('admin.edit') }}
                 </button>
                 <button
                   @click="deleteBlog(blog.id)"
-                  class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                  :title="$t('admin.delete')"
+                  class="action-btn flex-1 text-sm bg-red-500 hover:bg-red-600 text-white"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                  </svg>
+                  {{ $t('admin.delete') }}
                 </button>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </article>
+          </div>
+
+          <div class="hidden sm:block admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.title') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.status') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.views') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.date') }}</th>
+                  <th class="px-6 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{{ $t('admin.actions') }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                <tr
+                  v-for="blog in filteredBlogs"
+                  :key="blog.id"
+                  class="hover:bg-white/20 dark:hover:bg-white/5 transition-colors"
+                >
+                  <td class="px-6 py-4">
+                    <div class="font-semibold text-slate-800 dark:text-slate-200">{{ blog.title }}</div>
+                    <div class="text-sm text-slate-500 dark:text-slate-400">{{ blog.genre }}</div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <span
+                      class="px-2 py-1 text-xs font-semibold rounded-full"
+                      :class="blog.status === 'published'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'"
+                    >
+                      {{ blog.status === 'published' ? $t('admin.published') : $t('admin.draft') }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-slate-600 dark:text-slate-400">
+                    {{ blog.views || 0 }}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
+                    {{ blog.status === 'published' && blog.published_at ? formatBlogDate(blog.published_at) : '—' }}
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button
+                        @click="editBlog(blog.id)"
+                        class="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                        :title="$t('admin.edit')"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                      <button
+                        @click="deleteBlog(blog.id)"
+                        class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        :title="$t('admin.delete')"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
       </template>
     </div>
   </div>
@@ -198,3 +245,26 @@ onMounted(() => {
   loadBlogs()
 })
 </script>
+
+<style scoped>
+.admin-blog-card {
+  border-radius: 20px;
+  padding: 1rem;
+  border: 1px solid var(--border-strong);
+  background: color-mix(in srgb, var(--surface-admin-panel) 90%, transparent);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.admin-blog-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+</style>

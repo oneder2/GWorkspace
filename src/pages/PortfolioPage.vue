@@ -4,13 +4,13 @@
   模块化设计，便于添加新作品
 -->
 <template>
-  <div class="animate-fade-in max-w-6xl mx-auto space-y-8">
-    <div class="hero-panel rounded-[32px] p-8 sm:p-10 text-center">
+  <div class="animate-fade-in max-w-6xl mx-auto space-y-6 sm:space-y-8">
+    <div class="hero-panel rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 lg:p-10 text-center">
       <span class="section-kicker">{{ $t('portfolio.eyebrow') }}</span>
       <h2 class="section-title mt-3">{{ $t('portfolio.title') }}</h2>
       <p class="section-copy mt-3 mx-auto">{{ $t('portfolio.subtitle') }}</p>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
       <a 
         v-for="work in portfolio" 
         :key="work.title" 

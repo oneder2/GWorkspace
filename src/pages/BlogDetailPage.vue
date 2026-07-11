@@ -136,7 +136,7 @@
       </div>
 
       <!-- 右侧信息栏 (仅大屏显示) -->
-      <aside class="hidden lg:block w-80 sticky top-24 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto custom-scrollbar">
+      <aside class="hidden xl:block w-80 sticky top-24 space-y-6 max-h-[calc(100dvh-120px)] overflow-y-auto custom-scrollbar">
         <!-- 文章概览卡片 -->
         <div v-if="post" class="surface-card p-6 rounded-[28px] animate-fade-in">
           <h3 class="text-xs font-bold text-muted mb-4 uppercase tracking-widest">{{ $t('blog.articleOverview') }}</h3>

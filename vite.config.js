@@ -11,12 +11,12 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt', 'images/icons/*.svg', 'backgrounds/*.jpg'],
+      includeAssets: ['robots.txt', 'sitemap.xml', 'images/icons/favicon.ico', 'images/icons/*.svg', 'backgrounds/*.jpg', 'backgrounds/workplace/*.webp'],
       manifest: {
         name: 'GWorkspace',
         short_name: 'GWorkspace',
-        description: 'Personal workspace website with Vue.js, featuring blog, tools, and portfolio management.',
-        theme_color: '#475569',
+        description: 'A personal workspace site built with Vue.js, organized around blog writing, a curated workspace, and portfolio surfaces.',
+        theme_color: '#22c55e',
         icons: [
           {
             src: 'images/icons/icon.svg',

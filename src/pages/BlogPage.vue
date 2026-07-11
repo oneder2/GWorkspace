@@ -540,26 +540,20 @@ const getTagColor = (tagName) => {
 const toggleGenreFilter = (genre) => {
   showMobileFilters.value = false
   replaceBlogQuery({
-    genre: selectedGenre.value === genre ? null : genre,
-    tag: null,
-    archive: null
+    genre: selectedGenre.value === genre ? null : genre
   })
 }
 
 const toggleTagFilter = (tagName) => {
   showMobileFilters.value = false
   replaceBlogQuery({
-    genre: null,
-    tag: selectedTag.value === tagName ? null : tagName,
-    archive: null
+    tag: selectedTag.value === tagName ? null : tagName
   })
 }
 
 const toggleArchiveFilter = (archive) => {
   showMobileFilters.value = false
   replaceBlogQuery({
-    genre: null,
-    tag: null,
     archive: selectedArchive.value === archive ? null : archive
   })
 }

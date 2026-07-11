@@ -4,15 +4,15 @@
   模块化设计，便于添加新的分类和链接
 -->
 <template>
-  <div class="animate-fade-in relative max-w-6xl mx-auto">
+  <div class="animate-fade-in relative max-w-6xl mx-auto sites-page-shell">
     <!-- 搜索栏 - 不固定，随页面滚动 -->
     <div class="mb-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 surface-panel p-5 rounded-[28px]">
-        <div>
+        <div class="min-w-0">
           <h2 class="text-lg font-bold text-main">{{ $t('sites.title') }}</h2>
           <p class="text-xs text-muted">{{ $t('sites.subtitle') }}</p>
         </div>
-        <div class="relative w-full max-w-xs">
+        <div class="relative w-full sm:max-w-xs">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted">
             <circle cx="11" cy="11" r="8"/>
             <path d="m21 21-4.35-4.35"/>
@@ -27,9 +27,9 @@
       </div>
     </div>
 
-    <div class="flex gap-8">
+    <div class="sites-page-layout">
       <!-- 站点列表 -->
-      <div class="flex-1 space-y-8 pb-10">
+      <div class="flex-1 min-w-0 space-y-8 pb-10">
         <div 
           v-for="category in filteredSites" 
           :key="category.id" 
@@ -204,4 +204,21 @@ const handleIconError = (event, url) => {
 <style scoped>
 /* 导入页面样式 */
 @import '../styles/pages/SitesPage.css';
+
+.sites-page-layout {
+  display: flex;
+  gap: 2rem;
+}
+
+@media (max-width: 1279px) {
+  .sites-page-layout {
+    display: block;
+  }
+}
+
+@media (max-width: 640px) {
+  .sites-page-shell {
+    padding-bottom: 0.5rem;
+  }
+}
 </style>

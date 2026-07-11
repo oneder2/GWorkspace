@@ -5,18 +5,21 @@ on:
     branches: [ main ]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   frontend-build:
     name: Frontend Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: Install frontend dependencies
@@ -25,17 +28,20 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      - name: Check public SEO entrypoints
+        run: npm run check:seo
+
   backend-smoke:
     name: Backend Smoke Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
@@ -57,4 +63,10 @@ jobs:
       - name: Verify backend modules load
         run: |
           cd backend
-          node --input-type=module -e "await Promise.all(['./src/routes/blog.js','./src/routes/comments.js','./src/routes/likes.js','./src/routes/guestbook.js','./src/routes/analytics.js','./src/routes/admin.js'].map(p => import(p))); console.log('backend modules ok')"
+          node --input-type=module -e "const routes=['admin','adminAi','ai','analytics','auth','blog','comments','guestbook','likes','seo','spotify','upload'].map(name => './src/routes/' + name + '.js'); await Promise.all(routes.map(p => import(p))); console.log('backend route modules ok', routes.length)"
+
+      - name: Check backend CORS methods
+        run: npm run check:cors
+
+      - name: Check backend SEO sitemap
+        run: npm run check:backend-seo

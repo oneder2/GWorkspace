@@ -99,8 +99,12 @@ const buildQueryFilters = (options = {}) => {
   }
 
   if (tag) {
-    clauses.push('tags LIKE ? ESCAPE \'\\\\\'')
-    params.push(`%${escapeLikePattern(JSON.stringify(tag))}%`)
+    clauses.push(`EXISTS (
+      SELECT 1
+      FROM json_each(CASE WHEN json_valid(tags) THEN tags ELSE '[]' END)
+      WHERE LOWER(TRIM(json_each.value)) = LOWER(TRIM(?))
+    )`)
+    params.push(String(tag).trim())
   }
 
   if (archive) {

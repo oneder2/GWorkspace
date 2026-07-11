@@ -6,7 +6,7 @@
 -->
 <template>
   <div :class="isPageMode ? 'w-full' : 'fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm p-4'" @click.self="!isPageMode && handleClose">
-    <div :class="isPageMode ? 'w-full space-y-6' : 'glass-card-panel rounded-3xl p-6 md:p-8 w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in'">
+    <div :class="isPageMode ? 'w-full space-y-6' : 'glass-card-panel rounded-3xl p-4 sm:p-6 md:p-8 w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in'">
       <!-- 头部（仅弹窗模式显示） -->
       <div v-if="!isPageMode" class="flex items-center justify-between mb-6 shrink-0">
         <h2 class="text-2xl font-bold text-main">
@@ -25,9 +25,9 @@
       </div>
 
       <!-- 内容区域 - 可滚动 -->
-      <div :class="isPageMode ? 'space-y-6 pb-24' : 'flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-2 pb-24'">
+      <div :class="isPageMode ? 'space-y-6 pb-24' : 'flex-1 overflow-y-auto custom-scrollbar space-y-6 pr-1 sm:pr-2 pb-24'">
         <!-- 元数据表单 -->
-        <div class="glass-card p-6 rounded-2xl space-y-4 relative z-10">
+        <div class="glass-card p-4 sm:p-6 rounded-2xl space-y-4 relative z-10">
           <h3 class="text-lg font-bold text-main mb-4">{{ $t('blog.articleMeta') }}</h3>
           
           <!-- 标题 -->
@@ -47,7 +47,7 @@
           </div>
 
           <!-- 分类和日期 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <!-- 分类 -->
             <div>
               <label class="block text-sm font-semibold text-secondary mb-2">
@@ -145,7 +145,7 @@
                 </button>
               </span>
             </div>
-            <div class="flex gap-2 relative">
+            <div class="blog-editor-tag-row relative">
               <div class="flex-1 relative" ref="tagContainerRef">
                 <input 
                   v-model="newTag"
@@ -183,7 +183,7 @@
               </div>
               <button 
                 @click="addTag"
-                class="px-4 py-2 rounded-lg transition-colors font-semibold"
+                class="blog-editor-add-tag-btn px-4 py-2 rounded-lg transition-colors font-semibold"
                 :style="isThemeTransparent
                   ? (isDarkMode
                       ? {
@@ -208,10 +208,10 @@
         </div>
 
         <!-- Markdown编辑器 -->
-        <div class="glass-card p-6 rounded-2xl flex flex-col relative z-0">
-          <div class="flex items-center justify-between mb-4">
+        <div class="glass-card p-4 sm:p-6 rounded-2xl flex flex-col relative z-0">
+          <div class="blog-editor-toolbar mb-4">
             <h3 class="text-lg font-bold text-main">{{ $t('blog.content') }}</h3>
-            <div class="flex items-center gap-3">
+            <div class="blog-editor-toolbar-actions">
               <!-- 图片上传 -->
               <div class="flex items-center">
                 <input 
@@ -224,7 +224,7 @@
                 <button 
                   @click="$refs.fileInputRef.click()"
                   :disabled="isUploadingImage"
-                  class="flex items-center gap-1.5 px-3 py-1 text-sm font-semibold bg-white/40 dark:bg-slate-800/40 border border-border-base rounded-lg hover:bg-[var(--theme-primary)] hover:text-white transition-all disabled:opacity-50"
+                  class="blog-editor-inline-btn"
                 >
                   <svg v-if="!isUploadingImage" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                   <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -232,13 +232,13 @@
                 </button>
               </div>
               <!-- 视图切换开关 -->
-              <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+              <div class="blog-editor-view-switch">
                 <button
                   @click="viewMode = 'split'"
                   :class="viewMode === 'split' 
                     ? 'bg-white dark:bg-slate-700 shadow-sm text-main'
                     : 'text-secondary'"
-                  class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
+                  class="blog-editor-view-btn"
                   :title="$t('blog.viewSplit')"
                 >
                   {{ $t('blog.viewSplit') }}
@@ -248,7 +248,7 @@
                   :class="viewMode === 'editor' 
                     ? 'bg-white dark:bg-slate-700 shadow-sm text-main'
                     : 'text-secondary'"
-                  class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
+                  class="blog-editor-view-btn"
                   :title="$t('blog.viewEditor')"
                 >
                   {{ $t('blog.viewEditor') }}
@@ -258,7 +258,7 @@
                   :class="viewMode === 'preview' 
                     ? 'bg-white dark:bg-slate-700 shadow-sm text-main'
                     : 'text-secondary'"
-                  class="px-3 py-1.5 text-sm font-semibold rounded transition-all"
+                  class="blog-editor-view-btn"
                   :title="$t('blog.viewPreview')"
                 >
                   {{ $t('blog.viewPreview') }}
@@ -266,7 +266,7 @@
               </div>
               <button 
                 @click="clearContent"
-                class="px-3 py-1 text-sm text-muted hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                class="blog-editor-inline-text-btn"
               >
                 {{ $t('tools.clear') }}
               </button>
@@ -274,20 +274,20 @@
           </div>
           
           <!-- 分屏视图 -->
-          <div v-if="viewMode === 'split'" class="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-[400px]">
+          <div v-if="viewMode === 'split'" class="grid grid-cols-1 xl:grid-cols-2 gap-4 flex-1 min-h-[420px]">
             <!-- 编辑区域 -->
             <div class="flex flex-col">
               <label class="text-sm font-semibold text-secondary mb-2">{{ $t('tools.editor') }}</label>
               <textarea 
                 v-model="formData.content"
-                class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main font-mono text-sm resize-none custom-scrollbar"
+                class="blog-editor-textarea flex-1 w-full px-4 py-3 rounded-lg border text-main font-mono text-sm resize-none custom-scrollbar"
                 :placeholder="$t('blog.contentPlaceholder')"
               ></textarea>
             </div>
             <!-- 预览区域 -->
             <div class="flex flex-col">
               <label class="text-sm font-semibold text-secondary mb-2">{{ $t('tools.preview') }}</label>
-              <div class="flex-1 w-full px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base overflow-y-auto custom-scrollbar">
+              <div class="blog-editor-preview flex-1 w-full px-4 py-3 rounded-lg border overflow-y-auto custom-scrollbar">
                 <div class="prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2">
                   <div
                     v-for="block in previewBlocks"
@@ -302,17 +302,17 @@
           </div>
           
           <!-- 纯编辑器视图 -->
-          <div v-else-if="viewMode === 'editor'" class="flex-1" style="min-height: 600px;">
+          <div v-else-if="viewMode === 'editor'" class="flex-1 min-h-[420px] sm:min-h-[540px]">
             <textarea 
               v-model="formData.content"
-              class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base text-main font-mono text-sm resize-none custom-scrollbar"
+              class="blog-editor-textarea w-full h-full min-h-[420px] sm:min-h-[540px] px-4 py-3 rounded-lg border text-main font-mono text-sm resize-none custom-scrollbar"
               :placeholder="$t('blog.contentPlaceholder')"
             ></textarea>
           </div>
           
           <!-- 纯预览视图 -->
-          <div v-else-if="viewMode === 'preview'" class="flex-1" style="min-height: 600px;">
-            <div class="w-full h-full min-h-[600px] px-4 py-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-border-base overflow-y-auto custom-scrollbar">
+          <div v-else-if="viewMode === 'preview'" class="flex-1 min-h-[420px] sm:min-h-[540px]">
+            <div class="blog-editor-preview w-full h-full min-h-[420px] sm:min-h-[540px] px-4 py-3 rounded-lg border overflow-y-auto custom-scrollbar">
               <div class="prose prose-slate dark:prose-invert max-w-none prose-pre:bg-slate-100 prose-pre:dark:bg-slate-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-table:w-full prose-table:border-collapse prose-th:border prose-th:border-slate-300 prose-th:dark:border-slate-600 prose-th:px-4 prose-th:py-2 prose-th:bg-slate-100 prose-th:dark:bg-slate-800 prose-td:border prose-td:border-slate-300 prose-td:dark:border-slate-600 prose-td:px-4 prose-td:py-2 prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-1 prose-li:pl-2">
                 <div
                   v-for="block in previewBlocks"
@@ -345,8 +345,8 @@
       </div>
 
       <!-- 底部操作栏 -->
-      <div :class="isPageMode ? 'flex items-center justify-between gap-4 pt-6 border-t border-border-base' : 'flex items-center justify-between gap-4 mt-6 pt-6 border-t border-border-base shrink-0'">
-        <div class="flex items-center gap-4">
+      <div :class="isPageMode ? 'blog-editor-footer pt-6 border-t border-border-base' : 'blog-editor-footer mt-6 pt-6 border-t border-border-base shrink-0'">
+        <div class="flex items-center gap-4 flex-wrap">
           <button 
             v-if="isEditMode"
             @click="handleDelete"
@@ -363,24 +363,24 @@
             {{ $t('blog.saveHint') }}
           </div>
         </div>
-        <div class="flex gap-3">
+        <div class="blog-editor-footer-actions">
           <button 
             @click="handleClose"
-            class="px-6 py-2 bg-slate-200 dark:bg-slate-700 text-secondary rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+            class="blog-editor-secondary-btn"
           >
             {{ $t('common.cancel') }}
           </button>
           <button 
             @click="handleSubmit('draft')"
             :disabled="isSubmitting"
-            class="px-6 py-2 border border-border-base bg-white/40 dark:bg-slate-800/40 text-secondary rounded-lg hover:bg-white/70 dark:hover:bg-slate-700/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+            class="blog-editor-secondary-btn disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
           >
             {{ draftActionLabel }}
           </button>
           <button 
             @click="handleSubmit('published')"
             :disabled="isSubmitting"
-            class="px-6 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
+            class="blog-editor-primary-btn disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-semibold"
             :style="isThemeTransparent
               ? (isDarkMode
                   ? {
@@ -1353,3 +1353,168 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
+
+<style scoped>
+.blog-editor-tag-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.blog-editor-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.blog-editor-toolbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.blog-editor-inline-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-base);
+  background: color-mix(in srgb, var(--surface-elevated) 84%, transparent);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.blog-editor-inline-btn:hover {
+  transform: translateY(-1px);
+  background: var(--theme-primary);
+  color: white;
+}
+
+.blog-editor-inline-text-btn {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.blog-editor-inline-text-btn:hover {
+  color: var(--accent-danger);
+}
+
+.blog-editor-view-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--surface-base) 86%, transparent);
+  border: 1px solid var(--border-strong);
+}
+
+.blog-editor-view-btn {
+  padding: 0.6rem 0.85rem;
+  border-radius: 0.7rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.blog-editor-textarea,
+.blog-editor-preview {
+  background: color-mix(in srgb, var(--surface-elevated) 84%, transparent);
+  border-color: var(--border-strong);
+}
+
+.blog-editor-textarea:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--theme-primary) 24%, var(--border-strong));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-primary) 10%, transparent);
+}
+
+.blog-editor-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.blog-editor-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.blog-editor-secondary-btn {
+  padding: 0.7rem 1rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--surface-elevated) 88%, transparent);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.blog-editor-secondary-btn:hover {
+  transform: translateY(-1px);
+  color: var(--text-main);
+}
+
+.blog-editor-primary-btn {
+  padding: 0.7rem 1rem;
+  border-radius: 0.75rem;
+  transition: transform 0.2s ease;
+}
+
+.blog-editor-primary-btn:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1023px) {
+  .blog-editor-toolbar-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .blog-editor-tag-row {
+    flex-direction: column;
+  }
+
+  .blog-editor-add-tag-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .blog-editor-view-switch {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .blog-editor-view-btn {
+    flex: 1;
+    text-align: center;
+  }
+
+  .blog-editor-footer-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .blog-editor-secondary-btn,
+  .blog-editor-primary-btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
+</style>

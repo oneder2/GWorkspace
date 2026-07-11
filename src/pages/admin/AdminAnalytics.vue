@@ -36,7 +36,7 @@
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-      <div class="xl:col-span-2 admin-panel p-6 rounded-[24px] h-[360px]">
+      <div class="xl:col-span-2 admin-panel p-6 rounded-[24px] min-h-[320px] lg:min-h-[360px]">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.visitTrends') }}</h3>
           <span class="text-xs font-mono text-slate-400">{{ selectedDays }}D</span>

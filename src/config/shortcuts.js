@@ -23,20 +23,12 @@ export const shortcutsConfig = [
     key: '2',
     ctrl: true,
     meta: true,
-    description: '切换到站点导航',
+    description: '切换到工作台',
     action: 'navigate',
-    route: '/sites'
+    route: '/workspace'
   },
   {
     key: '3',
-    ctrl: true,
-    meta: true,
-    description: '切换到工具箱',
-    action: 'navigate',
-    route: '/tools'
-  },
-  {
-    key: '4',
     ctrl: true,
     meta: true,
     description: '切换到博客',
@@ -44,7 +36,7 @@ export const shortcutsConfig = [
     route: '/blog'
   },
   {
-    key: '5',
+    key: '4',
     ctrl: true,
     meta: true,
     description: '切换到作品集',

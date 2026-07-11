@@ -45,28 +45,28 @@
           <div class="grid grid-cols-2 gap-3">
             <button
               @click="$router.push('/admin/blogs/new')"
-              class="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800/50 hover:bg-[var(--theme-primary)] hover:text-white rounded-xl transition-all group"
+              class="admin-quick-action"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 mb-2 group-hover:scale-110 transition-transform"><path d="M12 5v14M5 12h14"/></svg>
               <span class="text-xs font-bold">{{ $t('admin.createBlog') }}</span>
             </button>
             <button
               @click="$router.push('/admin/comments')"
-              class="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800/50 hover:bg-[var(--theme-primary)] hover:text-white rounded-xl transition-all group"
+              class="admin-quick-action"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 mb-2 group-hover:scale-110 transition-transform"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
               <span class="text-xs font-bold">{{ $t('admin.comments') }}</span>
             </button>
             <button
               @click="$router.push('/admin/ai')"
-              class="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800/50 hover:bg-[var(--theme-primary)] hover:text-white rounded-xl transition-all group"
+              class="admin-quick-action"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 mb-2 group-hover:scale-110 transition-transform"><path d="M12 3v3"/><path d="M18.36 6.64l-2.12 2.12"/><path d="M21 12h-3"/><path d="M18.36 17.36l-2.12-2.12"/><path d="M12 21v-3"/><path d="M5.64 17.36l2.12-2.12"/><path d="M3 12h3"/><path d="M5.64 6.64l2.12 2.12"/><circle cx="12" cy="12" r="3"/></svg>
               <span class="text-xs font-bold">{{ $t('admin.ai') }}</span>
             </button>
             <button
               @click="$router.push('/admin/system')"
-              class="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-slate-800/50 hover:bg-[var(--theme-primary)] hover:text-white rounded-xl transition-all group"
+              class="admin-quick-action"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 mb-2 group-hover:scale-110 transition-transform"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20h10"/><path d="M9 16v4"/><path d="M15 16v4"/></svg>
               <span class="text-xs font-bold">{{ $t('admin.system') }}</span>
@@ -93,13 +93,13 @@
       </div>
 
       <div class="lg:col-span-2 space-y-6">
-        <div class="admin-panel p-6 rounded-[24px] h-[300px]">
+        <div class="admin-panel p-5 sm:p-6 rounded-[24px] min-h-[260px] sm:min-h-[300px] lg:min-h-[320px]">
           <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">{{ $t('admin.visitTrends') }}</h3>
           <canvas ref="chartCanvas"></canvas>
         </div>
 
         <div class="admin-panel p-6 rounded-[24px]">
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
               {{ $t('admin.comments') }}
               <span v-if="pendingComments.length" class="px-2 py-0.5 bg-orange-100 text-orange-600 text-[10px] rounded-full uppercase">{{ $t('admin.pending') }}</span>
@@ -127,7 +127,7 @@
         </div>
 
         <div class="admin-panel p-6 rounded-[24px]">
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ $t('admin.recentPosts') }}</h3>
             <button @click="$router.push('/admin/blogs')" class="text-xs text-[var(--theme-primary)] font-bold hover:underline">{{ $t('admin.manage') }}</button>
           </div>
@@ -135,7 +135,7 @@
             <div
               v-for="blog in recentBlogs"
               :key="blog.id"
-              class="flex items-center justify-between p-3 hover:bg-white/40 dark:hover:bg-slate-800/40 rounded-xl transition-colors cursor-pointer group"
+              class="flex items-center justify-between gap-3 p-3 hover:bg-white/40 dark:hover:bg-slate-800/40 rounded-xl transition-colors cursor-pointer group"
               @click="$router.push(`/admin/blogs/${blog.id}`)"
             >
               <div class="flex items-center gap-4 min-w-0">
@@ -356,3 +356,26 @@ onUnmounted(() => {
   }
 })
 </script>
+
+<style scoped>
+.admin-quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 7rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--surface-admin-panel) 88%, transparent);
+  border: 1px solid var(--border-strong);
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-quick-action:hover {
+  transform: translateY(-1px);
+  background: var(--theme-primary);
+  color: white;
+  border-color: color-mix(in srgb, var(--theme-primary) 48%, transparent);
+}
+</style>

@@ -3,7 +3,7 @@
   包含整体布局、导航栏、主题切换、语言切换等功能
 -->
 <template>
-  <div class="overflow-hidden h-screen w-screen text-slate-800 dark:text-slate-200">
+  <div class="overflow-hidden min-h-screen h-[100dvh] w-screen text-slate-800 dark:text-slate-200">
     <!-- 全局背景图 -->
     <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
       <div
@@ -13,15 +13,15 @@
     </div>
 
     <!-- 管理后台路由：使用与普通路由类似的布局，但侧边栏和内容组件不同 -->
-    <div v-if="isAdminRoute" class="relative z-10 flex h-full w-full p-2 sm:p-4 gap-3 box-border">
+    <div v-if="isAdminRoute" class="relative z-10 flex h-full w-full p-1.5 sm:p-3 xl:p-4 gap-2.5 sm:gap-3 box-border">
       <!-- 后台侧边栏 -->
       <AdminSidebar 
         :collapsed="sidebarCollapsed"
         @toggle-collapse="sidebarCollapsed = !sidebarCollapsed"
-        class="hidden md:flex"
+        class="hidden xl:flex"
       />
 
-      <main class="flex-1 admin-shell rounded-[32px] flex flex-col min-w-0 relative overflow-hidden">
+      <main class="flex-1 admin-shell rounded-[24px] sm:rounded-[28px] xl:rounded-[32px] flex flex-col min-w-0 relative overflow-hidden">
         <div class="flex-1 overflow-y-auto scroll-smooth relative custom-scrollbar">
           <router-view />
         </div>
@@ -29,14 +29,14 @@
     </div>
 
     <!-- 普通路由：使用标准布局（侧边栏 + 顶部栏） -->
-    <div v-else class="relative z-10 flex h-full w-full p-2 sm:p-4 gap-3 box-border">
+    <div v-else class="relative z-10 flex h-full w-full p-1.5 sm:p-3 xl:p-4 gap-2.5 sm:gap-3 box-border">
       <!-- 左侧导航栏 - 移动端隐藏，平板和桌面显示 -->
       <Sidebar 
         :collapsed="sidebarCollapsed"
         @toggle-collapse="sidebarCollapsed = !sidebarCollapsed"
         :current-tab="currentTab"
         @open-update-log="showUpdateLogModal = true"
-        class="hidden md:flex"
+        class="hidden xl:flex"
       />
 
       <!-- 移动端抽屉式导航遮罩层 -->
@@ -51,7 +51,7 @@
         <div
           v-if="showMobileMenu"
           @click="showMobileMenu = false"
-          class="fixed inset-0 bg-black/50 dark:bg-black/70 z-40 md:hidden"
+          class="fixed inset-0 bg-black/50 dark:bg-black/70 z-40 xl:hidden"
         ></div>
       </transition>
 
@@ -66,7 +66,7 @@
       >
         <div
           v-if="showMobileMenu"
-          class="fixed left-0 top-0 bottom-0 w-64 z-50 md:hidden shadow-2xl"
+          class="fixed left-0 top-0 bottom-0 w-[min(20rem,86vw)] z-50 xl:hidden shadow-2xl"
         >
           <Sidebar 
             :collapsed="false"
@@ -80,7 +80,7 @@
       </transition>
 
       <!-- 中间主内容区 -->
-      <main class="flex-1 surface-shell rounded-[32px] flex flex-col min-w-0 relative overflow-hidden">
+      <main class="flex-1 surface-shell rounded-[24px] sm:rounded-[28px] xl:rounded-[32px] flex flex-col min-w-0 relative overflow-hidden">
         <!-- 顶部状态栏 -->
         <Header 
           :current-tab="currentTab"
@@ -178,6 +178,7 @@ const isAdminRoute = computed(() => {
 
 const isBlogIndexRoute = computed(() => route.name === 'blog')
 const isHomeRoute = computed(() => route.name === 'home')
+const isWorkspaceRoute = computed(() => route.name === 'workspace')
 
 /**
  * 根据当前路由获取当前标签页
@@ -186,8 +187,7 @@ const isHomeRoute = computed(() => route.name === 'home')
 const currentTab = computed(() => {
   const routeToTab = {
     'home': 'home',
-    'sites': 'sites',
-    'tools': 'tools',
+    'workspace': 'workspace',
     'blog': 'blog',
     'blog-detail': 'blog',
     'portfolio': 'portfolio'
@@ -196,10 +196,11 @@ const currentTab = computed(() => {
 })
 
 const mainScrollClass = computed(() => [
-  'flex-1 scroll-smooth relative custom-scrollbar flex flex-col min-h-0',
-  isHomeRoute.value ? 'overflow-hidden' : 'overflow-y-auto',
+  'flex-1 scroll-smooth relative flex flex-col min-h-0',
+  isHomeRoute.value ? 'overflow-y-auto xl:overflow-hidden' : 'overflow-y-auto',
+  isHomeRoute.value || isWorkspaceRoute.value ? '' : 'custom-scrollbar',
   isBlogIndexRoute.value ? '2xl:overflow-hidden' : '',
-  isHomeRoute.value ? 'p-3 sm:p-4 md:p-5 lg:p-6' : 'p-5 sm:p-7 md:p-10 lg:p-12'
+  isHomeRoute.value ? 'p-2 sm:p-3 md:p-4 lg:p-5 xl:p-6' : 'p-4 sm:p-5 md:p-6 lg:p-8 xl:p-10'
 ])
 
 

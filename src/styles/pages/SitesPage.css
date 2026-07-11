@@ -22,3 +22,9 @@
   color: var(--hover-text-dark);
 }
 
+@media (max-width: 767px) {
+  .sites-link-icon {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+}

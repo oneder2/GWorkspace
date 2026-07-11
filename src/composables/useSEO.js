@@ -3,9 +3,33 @@
  * 用于动态更新页面的 meta 标签、Open Graph、Twitter Card 等
  */
 
-import { watch, onMounted, onUnmounted } from 'vue'
+import { watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+
+const DEFAULT_OG_IMAGE = '/images/portfolio/glass-dashboard.jpg'
+const DEFAULT_LOGO_IMAGE = '/images/icons/icon.svg'
+
+function getSiteOrigin() {
+  return typeof window !== 'undefined' ? window.location.origin : 'https://www.gellaronline.cc'
+}
+
+function toAbsoluteUrl(value) {
+  if (!value) return ''
+  if (/^https?:\/\//i.test(value)) return value
+  const path = value.startsWith('/') ? value : `/${value}`
+  return `${getSiteOrigin()}${path}`
+}
+
+function getApiBaseUrl() {
+  return import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://workspace.gellaronline.cc/api' : 'http://localhost:3001/api')
+}
+
+function getBlogImageUrl(article) {
+  if (article?.image) return toAbsoluteUrl(article.image)
+  if (article?.id) return `${getApiBaseUrl()}/blogs/${article.id}/og-image`
+  return toAbsoluteUrl(DEFAULT_OG_IMAGE)
+}
 
 /**
  * 默认 SEO 配置
@@ -14,8 +38,8 @@ const getDefaultSEO = (t) => ({
   title: t('seo.siteTitle'),
   description: t('seo.siteDescription'),
   keywords: t('seo.siteKeywords'),
-  image: '/og-image.jpg',
-  url: typeof window !== 'undefined' ? window.location.origin : '',
+  image: toAbsoluteUrl(DEFAULT_OG_IMAGE),
+  url: getSiteOrigin(),
   type: 'website'
 })
 
@@ -93,6 +117,7 @@ export function useSEO(seoConfig = {}) {
       ...config,
       url: config.url || (typeof window !== 'undefined' ? window.location.href : getDefaultSEO(t).url)
     }
+    configWithDefaults.image = toAbsoluteUrl(configWithDefaults.image)
     
     // 更新标题
     updateTitle(configWithDefaults.title)
@@ -154,7 +179,7 @@ export function generateBlogStructuredData(article) {
     '@type': 'BlogPosting',
     headline: article.title,
     description: article.excerpt || article.title,
-    image: article.image || '/og-image.jpg',
+    image: getBlogImageUrl(article),
     datePublished: article.published_at || article.created_at,
     dateModified: article.updated_at || article.published_at || article.created_at,
     author: {
@@ -166,7 +191,7 @@ export function generateBlogStructuredData(article) {
       name: 'GWorkspace',
       logo: {
         '@type': 'ImageObject',
-        url: typeof window !== 'undefined' ? `${window.location.origin}/logo.png` : ''
+        url: toAbsoluteUrl(DEFAULT_LOGO_IMAGE)
       }
     },
     mainEntityOfPage: {

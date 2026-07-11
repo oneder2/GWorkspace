@@ -7,8 +7,10 @@ on:
     branches: [ main ]
     paths:
       - 'backend/**'
-      - '.github/workflows/deploy.yml'
   workflow_dispatch: # 允许手动触发
+
+permissions:
+  contents: read
 
 concurrency:
   group: backend-deploy
@@ -21,12 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
@@ -38,7 +40,7 @@ jobs:
       - name: Verify backend modules load
         run: |
           cd backend
-          node --input-type=module -e "await Promise.all(['./src/routes/blog.js','./src/routes/comments.js','./src/routes/likes.js','./src/routes/guestbook.js','./src/routes/analytics.js','./src/routes/admin.js'].map(p => import(p))); console.log('backend modules ok')"
+          node --input-type=module -e "const routes=['admin','adminAi','ai','analytics','auth','blog','comments','guestbook','likes','seo','spotify','upload'].map(name => './src/routes/' + name + '.js'); await Promise.all(routes.map(p => import(p))); console.log('backend route modules ok', routes.length)"
 
       - name: Create deployment package
         run: |

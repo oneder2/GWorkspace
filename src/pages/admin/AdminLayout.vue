@@ -33,6 +33,19 @@
       </div>
     </header>
 
+    <nav class="admin-mobile-nav xl:hidden">
+      <button
+        v-for="item in navItems"
+        :key="item.path"
+        type="button"
+        class="admin-mobile-nav-btn"
+        :class="{ 'is-active': isActive(item.path) }"
+        @click="$router.push(item.path)"
+      >
+        {{ item.name }}
+      </button>
+    </nav>
+
     <main class="flex-1 min-w-0">
       <router-view />
     </main>
@@ -41,13 +54,29 @@
 
 <script setup>
 import { watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '../../composables/useAuth'
 
 const router = useRouter()
+const route = useRoute()
 const { t } = useI18n()
 const { logout, isAdmin, user } = useAuth()
+
+const navItems = [
+  { path: '/admin', name: t('admin.dashboard') },
+  { path: '/admin/blogs', name: t('admin.blogs') },
+  { path: '/admin/analytics', name: t('admin.analytics') },
+  { path: '/admin/ai', name: t('admin.ai') },
+  { path: '/admin/comments', name: t('admin.comments') },
+  { path: '/admin/guestbook', name: t('admin.guestbook') },
+  { path: '/admin/system', name: t('admin.system') }
+]
+
+const isActive = (path) => {
+  if (path === '/admin') return route.path === '/admin'
+  return route.path.startsWith(path)
+}
 
 // 检查是否是管理员 - 增加容错，等待用户信息加载
 watch([isAdmin, user], ([newIsAdmin, newUser], [oldIsAdmin, oldUser]) => {

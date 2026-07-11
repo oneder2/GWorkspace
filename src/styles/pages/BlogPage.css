@@ -82,6 +82,28 @@
   }
 }
 
+@media (max-width: 1279px) {
+  .blog-layout {
+    overflow: visible;
+  }
+
+  .blog-posts-scroll {
+    padding-bottom: 4rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .blog-layout {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .blog-layout {
+    gap: 1rem;
+  }
+}
+
 /* ==================== 文章卡片 ==================== */
 .blog-article-card {
   --hover-border: var(--theme-primary);
