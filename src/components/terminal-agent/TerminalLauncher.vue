@@ -44,15 +44,16 @@ defineEmits(['toggle'])
 <style scoped>
 .terminal-launcher {
   position: fixed;
-  right: 1.4rem;
-  bottom: calc(1.45rem + env(safe-area-inset-bottom, 0px));
+  right: 1.35rem;
+  bottom: calc(0.68rem + env(safe-area-inset-bottom, 0px));
   z-index: 90;
   display: inline-flex;
   align-items: center;
-  gap: 0.85rem;
-  min-width: 13rem;
-  padding: 0.82rem 0.95rem;
-  border-radius: 26px;
+  gap: 0.62rem;
+  width: 11.5rem;
+  min-height: 2.8rem;
+  padding: 0.3rem 0.65rem 0.3rem 0.38rem;
+  border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--agent-signal) 18%, var(--border-base));
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--surface-elevated) 94%, transparent), color-mix(in srgb, var(--surface-overlay) 90%, transparent)),
@@ -78,7 +79,7 @@ defineEmits(['toggle'])
 }
 
 .terminal-launcher:hover {
-  transform: translateY(-3px) scale(1.01);
+  transform: translateY(-1px);
   border-color: color-mix(in srgb, var(--agent-signal) 30%, var(--border-base));
   box-shadow:
     0 24px 54px rgba(15, 23, 42, 0.2),
@@ -96,10 +97,10 @@ defineEmits(['toggle'])
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 3rem;
-  height: 3rem;
+  width: 2.25rem;
+  height: 2.25rem;
   flex-shrink: 0;
-  border-radius: 20px;
+  border-radius: 7px;
   border: 1px solid color-mix(in srgb, var(--agent-signal) 18%, var(--border-base));
   background: linear-gradient(180deg, color-mix(in srgb, var(--surface-elevated) 98%, transparent), color-mix(in srgb, var(--surface-panel) 90%, transparent));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.66), 0 10px 24px color-mix(in srgb, var(--agent-signal) 10%, transparent);
@@ -115,8 +116,8 @@ defineEmits(['toggle'])
 
 .terminal-launcher-icon {
   position: relative;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.15rem;
+  height: 1.15rem;
   background-color: var(--theme-primary-darker);
   -webkit-mask: url('/images/icons/terminal.svg') center / contain no-repeat;
   mask: url('/images/icons/terminal.svg') center / contain no-repeat;
@@ -141,9 +142,9 @@ defineEmits(['toggle'])
 .terminal-launcher-label {
   max-width: 100%;
   color: var(--text-main);
-  font-size: 0.9rem;
+  font-size: 0.76rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -154,7 +155,7 @@ defineEmits(['toggle'])
   align-items: center;
   gap: 0.4rem;
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -170,21 +171,21 @@ defineEmits(['toggle'])
 
 @media (max-width: 767px) {
   .terminal-launcher {
-    right: 1rem;
-    bottom: calc(1.15rem + env(safe-area-inset-bottom, 0px));
+    right: 0.85rem;
+    bottom: calc(0.62rem + env(safe-area-inset-bottom, 0px));
     min-width: 0;
-    width: auto;
-    max-width: calc(100vw - 2rem);
-    padding: 0.78rem 0.88rem;
+    width: 2.65rem;
+    min-height: 2.65rem;
+    padding: 0.2rem;
   }
 
   .terminal-launcher-icon-shell {
-    width: 2.7rem;
-    height: 2.7rem;
+    width: 2.2rem;
+    height: 2.2rem;
   }
 
-  .terminal-launcher-label {
-    font-size: 0.84rem;
+  .terminal-launcher-copy {
+    display: none;
   }
 }
 </style>

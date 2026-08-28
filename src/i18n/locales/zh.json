@@ -1,9 +1,9 @@
 {
   "nav": {
-    "home": "首页",
-    "workspace": "工作台",
-    "blog": "博客",
-    "portfolio": "作品集"
+    "home": "桌面",
+    "workspace": "工具箱",
+    "blog": "写作",
+    "portfolio": "档案"
   },
   "home": {
     "title": "欢迎来到我的一处线上角落",
@@ -122,9 +122,9 @@
     }
   },
   "tools": {
-    "title": "工作台",
+    "title": "工具箱",
     "utilities": "工具",
-    "subtitle": "创作、分享与轻量运营的统一工作台",
+    "subtitle": "站内工具与常用资源的集中入口",
     "calculator": "计算器",
     "encoder": "编码转换",
     "json": "JSON格式化",
@@ -202,9 +202,9 @@
       "placeholder": "#000000"
     },
     "workspace": {
-      "heroEyebrow": "Creative Operations Deck",
-      "heroTitle": "把写作、发布与常用入口收进同一张桌面",
-      "heroDescription": "这里放的是我真正会反复打开的东西。少量站内写作工具，加上少量外部常用入口，不再把页面做成一个泛用工具站。",
+      "heroEyebrow": "Toolbox / Internal",
+      "heroTitle": "站内工具与常用入口",
+      "heroDescription": "按工作用途挑选一个工具，或从资源抽屉前往常用站点。最近打开的内容会保留在全局工作架中。",
       "stats": {
         "tools": "{count} 个整理后的工具",
         "groups": "{count} 条工作流",
@@ -223,8 +223,8 @@
       "pinnedEmpty": "把常用入口固定到这里，工作台才会逐渐变成你自己的工作桌。",
       "quickLaunchTitle": "快速启动",
       "quickLaunchDescription": "优先放置最常被重新打开的入口，减少在导航和工具之间来回跳转。",
-      "coreTitle": "站内核心工具",
-      "coreDescription": "保留真正需要在站内完成的轻量操作和写作辅助。",
+      "coreTitle": "可用工具",
+      "coreDescription": "写作流程与日常实用工具分区放置，选择后直接进入操作界面。",
       "labKicker": "Writing Lab",
       "labTitle": "写作实验室",
       "labDescription": "Cottee / 口替会放在这里，作为未来写作优化和自动化辅助的入口。",
@@ -347,6 +347,14 @@
       "timezoneUnknown": "未知"
     }
   },
+  "workShelf": {
+    "label": "工作架",
+    "location": "所在区域",
+    "recent": "最近工作",
+    "empty": "暂无最近项目",
+    "resumeItem": "继续 {name}",
+    "openToolbox": "打开工具箱"
+  },
   "workspace": {
     "searchPlaceholder": "搜索入口、标签或用途...",
     "searchMeta": "{count} 个入口",
@@ -357,13 +365,23 @@
     "keyboardOpen": "打开",
     "keyboardClear": "清空",
     "statusKicker": "Workspace State",
-    "statusTitle": "当前工作台",
-    "statusDescription": "保留高频入口、最近路径和未来写作实验的轻量状态。",
+    "statusTitle": "当前工具箱",
+    "statusDescription": "保留高频入口与最近路径的轻量状态。",
     "shortcutKicker": "Shortcuts",
     "shortcutSearch": "聚焦搜索",
     "shortcutCommand": "打开命令搜索",
     "internalKicker": "Internal Tools",
     "externalKicker": "External Jumps",
+    "toolGroups": {
+      "writing": {
+        "title": "写作与发布",
+        "description": "从命题拆解到草稿和发布准备。"
+      },
+      "utility": {
+        "title": "日常实用",
+        "description": "计时、计算与开发数据处理。"
+      }
+    },
     "searchGroups": {
       "internal": "站内工具",
       "external": "外部入口"
@@ -991,15 +1009,15 @@
     }
   },
   "seo": {
-    "siteTitle": "GWorkspace - 个人工作台",
-    "siteDescription": "一个基于 Vue.js 的个人工作台站点，围绕博客、工作台与作品页组织个人内容和常用入口。",
-    "siteKeywords": "工作台, 博客, 作品集, 写作工具, Vue.js"
+    "siteTitle": "GWorkspace - 个人工作空间",
+    "siteDescription": "一个基于 Vue.js 的个人工作空间，以桌面、工具箱、写作与档案组织持续进行的工作和个人内容。",
+    "siteKeywords": "工作空间, 工具箱, 写作, 档案, Vue.js"
   },
   "routes": {
-    "home": "首页",
-    "workspace": "工作台",
-    "blog": "博客",
+    "home": "桌面",
+    "workspace": "工具箱",
+    "blog": "写作",
     "blogDetail": "文章详情",
-    "portfolio": "作品集"
+    "portfolio": "档案"
   }
 }

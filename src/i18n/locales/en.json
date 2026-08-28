@@ -1,9 +1,9 @@
 {
   "nav": {
-    "home": "Home",
-    "workspace": "Workspace",
-    "blog": "Blog",
-    "portfolio": "Portfolio"
+    "home": "Desk",
+    "workspace": "Toolbox",
+    "blog": "Writing",
+    "portfolio": "Archive"
   },
   "home": {
     "title": "Welcome to a Small Corner of My Web",
@@ -122,9 +122,9 @@
     }
   },
   "tools": {
-    "title": "Workspace",
+    "title": "Toolbox",
     "utilities": "Utilities",
-    "subtitle": "A shared workspace for creation, distribution, and lightweight operations.",
+    "subtitle": "A focused entry point for internal tools and frequent resources.",
     "calculator": "Calculator",
     "encoder": "Encoder",
     "json": "JSON Formatter",
@@ -202,9 +202,9 @@
       "placeholder": "#000000"
     },
     "workspace": {
-      "heroEyebrow": "Creative Operations Deck",
-      "heroTitle": "Keep writing, publishing, and frequent entry points on one desk",
-      "heroDescription": "This is where the things I actually reopen live. A few internal writing tools, a few external resources, and no attempt to impersonate a general-purpose utility site.",
+      "heroEyebrow": "Toolbox / Internal",
+      "heroTitle": "Internal tools and frequent entries",
+      "heroDescription": "Choose a tool by purpose or open a frequent site from the resource drawer. Recent activity remains available from the global work shelf.",
       "stats": {
         "tools": "{count} curated tools",
         "groups": "{count} workflows",
@@ -223,8 +223,8 @@
       "pinnedEmpty": "Pin a few repeat entries here and the workspace starts behaving like your own desk.",
       "quickLaunchTitle": "Quick Launch",
       "quickLaunchDescription": "Put the entries you reopen most often first so the workspace behaves like a launcher.",
-      "coreTitle": "Core Internal Tools",
-      "coreDescription": "Keep the lightweight operations and writing helpers that are worth doing inside the site.",
+      "coreTitle": "Available Tools",
+      "coreDescription": "Writing workflows and everyday utilities are grouped by purpose and open directly into their working view.",
       "labKicker": "Writing Lab",
       "labTitle": "Writing Lab",
       "labDescription": "Cottee / Kout替 will live here as a future entry for writing optimization and automation.",
@@ -347,6 +347,14 @@
       "timezoneUnknown": "Unknown"
     }
   },
+  "workShelf": {
+    "label": "Work shelf",
+    "location": "Current area",
+    "recent": "Recent work",
+    "empty": "No recent items",
+    "resumeItem": "Continue {name}",
+    "openToolbox": "Open toolbox"
+  },
   "workspace": {
     "searchPlaceholder": "Search entries, tags, or use cases...",
     "searchMeta": "{count} entries",
@@ -357,13 +365,23 @@
     "keyboardOpen": "Open",
     "keyboardClear": "Clear",
     "statusKicker": "Workspace State",
-    "statusTitle": "Current Desk",
-    "statusDescription": "A compact status layer for frequent entries, recent paths, and future writing experiments.",
+    "statusTitle": "Current Toolbox",
+    "statusDescription": "A compact state layer for frequent entries and recent paths.",
     "shortcutKicker": "Shortcuts",
     "shortcutSearch": "Focus search",
     "shortcutCommand": "Open command search",
     "internalKicker": "Internal Tools",
     "externalKicker": "External Jumps",
+    "toolGroups": {
+      "writing": {
+        "title": "Writing and Publishing",
+        "description": "From proposition breakdown to drafting and publish prep."
+      },
+      "utility": {
+        "title": "Everyday Utility",
+        "description": "Timing, calculation, and development data tasks."
+      }
+    },
     "searchGroups": {
       "internal": "Internal Tools",
       "external": "External Entries"
@@ -989,14 +1007,14 @@
   },
   "seo": {
     "siteTitle": "GWorkspace - Personal Workspace",
-    "siteDescription": "A personal workspace site built with Vue.js, organized around blog writing, a curated workspace, and portfolio surfaces.",
-    "siteKeywords": "workspace, blog, portfolio, writing tools, vue.js"
+    "siteDescription": "A personal workspace built with Vue.js, organized as a desk, toolbox, writing area, and archive for ongoing work and personal content.",
+    "siteKeywords": "workspace, toolbox, writing, archive, vue.js"
   },
   "routes": {
-    "home": "Home",
-    "workspace": "Workspace",
-    "blog": "Blog",
+    "home": "Desk",
+    "workspace": "Toolbox",
+    "blog": "Writing",
     "blogDetail": "Blog Detail",
-    "portfolio": "Portfolio"
+    "portfolio": "Archive"
   }
 }

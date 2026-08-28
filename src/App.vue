@@ -105,6 +105,8 @@
           <!-- 使用 router-view 渲染路由组件 -->
           <router-view />
         </div>
+
+        <WorkShelf />
       </main>
 
       <TerminalAgent />
@@ -138,6 +140,7 @@ import {
 } from './config/backgroundScenes'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
+import WorkShelf from './components/WorkShelf.vue'
 import AdminSidebar from './components/admin/AdminSidebar.vue'
 import TerminalAgent from './components/terminal-agent/TerminalAgent.vue'
 import ThemeCustomizer from './components/ThemeCustomizer.vue'
@@ -195,7 +198,6 @@ const isAdminRoute = computed(() => {
   return route.path.startsWith('/admin')
 })
 
-const isBlogIndexRoute = computed(() => route.name === 'blog')
 const isHomeRoute = computed(() => route.name === 'home')
 const isWorkspaceRoute = computed(() => route.name === 'workspace')
 
@@ -222,9 +224,8 @@ const currentTab = computed(() => {
 
 const mainScrollClass = computed(() => [
   'flex-1 scroll-smooth relative flex flex-col min-h-0',
-  isHomeRoute.value ? 'overflow-y-auto xl:overflow-hidden' : 'overflow-y-auto',
+  'overflow-y-auto',
   isHomeRoute.value || isWorkspaceRoute.value ? '' : 'custom-scrollbar',
-  isBlogIndexRoute.value ? '2xl:overflow-hidden' : '',
   isHomeRoute.value ? 'p-2 sm:p-3 md:p-4 lg:p-5 xl:p-6' : 'p-4 sm:p-5 md:p-6 lg:p-8 xl:p-10'
 ])
 

@@ -107,7 +107,7 @@
       </section>
 
       <section v-if="!activeToolData" class="workspace-overview" :class="{ 'has-search-panel': hasSearchQuery }">
-        <section class="workspace-card workspace-card-tools surface-panel shadow-lg">
+        <section class="workspace-toolbox">
           <div class="workspace-section-head workspace-section-head-large">
             <div>
               <span class="workspace-eyebrow">{{ $t('workspace.internalKicker') }}</span>
@@ -117,27 +117,39 @@
             <span class="workspace-section-badge">{{ visibleTools.length }}</span>
           </div>
 
-          <div class="workspace-tool-grid">
-            <button
-              v-for="tool in visibleTools"
-              :key="tool.id"
-              type="button"
-              class="workspace-tool-card"
-              :class="{ 'is-disabled': tool.disabled }"
-              @click="openTool(tool.id)"
-            >
-              <span class="workspace-entry-icon workspace-entry-icon-strong">
-                <component :is="tool.icon" class="w-5 h-5" />
-              </span>
-              <div class="workspace-tool-meta">
-                <span class="workspace-tool-title-row">
-                  <span class="workspace-tool-title">{{ tool.name }}</span>
-                  <span class="workspace-tool-label">{{ tool.categoryLabel }}</span>
-                </span>
-                <span class="workspace-tool-copy">{{ tool.description }}</span>
+          <div class="workspace-tool-groups">
+            <section v-for="group in groupedTools" :key="group.id" class="workspace-tool-group">
+              <header class="workspace-tool-group-head">
+                <div>
+                  <h3>{{ group.label }}</h3>
+                  <p>{{ group.description }}</p>
+                </div>
+                <span>{{ group.tools.length }}</span>
+              </header>
+
+              <div class="workspace-tool-grid">
+                <button
+                  v-for="tool in group.tools"
+                  :key="tool.id"
+                  type="button"
+                  class="workspace-tool-card"
+                  :class="{ 'is-disabled': tool.disabled }"
+                  @click="openTool(tool.id)"
+                >
+                  <span class="workspace-entry-icon workspace-entry-icon-strong">
+                    <component :is="tool.icon" class="w-5 h-5" />
+                  </span>
+                  <div class="workspace-tool-meta">
+                    <span class="workspace-tool-title-row">
+                      <span class="workspace-tool-title">{{ tool.name }}</span>
+                      <span class="workspace-tool-label">{{ tool.categoryLabel }}</span>
+                    </span>
+                    <span class="workspace-tool-copy">{{ tool.description }}</span>
+                  </div>
+                  <span v-if="tool.badge" class="workspace-entry-badge">{{ tool.badge }}</span>
+                </button>
               </div>
-              <span v-if="tool.badge" class="workspace-entry-badge">{{ tool.badge }}</span>
-            </button>
+            </section>
           </div>
         </section>
 
@@ -155,17 +167,32 @@
           </button>
         </section>
 
-        <section class="workspace-card workspace-card-external surface-panel shadow-lg">
-          <div class="workspace-section-head workspace-section-head-large">
+        <section class="workspace-resource-drawer" :class="{ 'is-open': showResourceDrawer }">
+          <button
+            type="button"
+            class="workspace-resource-trigger"
+            :aria-expanded="showResourceDrawer"
+            aria-controls="workspace-resource-content"
+            @click="resourceDrawerOpen = !showResourceDrawer"
+          >
             <div>
               <span class="workspace-eyebrow">{{ $t('workspace.externalKicker') }}</span>
               <h2 class="workspace-section-title">{{ $t('workspace.externalTitle') }}</h2>
               <p class="workspace-section-copy">{{ $t('workspace.externalDescription') }}</p>
             </div>
-            <span class="workspace-section-badge">{{ filteredExternalGroups.length }}</span>
-          </div>
+            <span class="workspace-resource-trigger-meta">
+              <span class="workspace-section-badge">{{ filteredExternalGroups.length }}</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </span>
+          </button>
 
-          <div v-if="filteredExternalGroups.length" class="workspace-resource-grid">
+          <div
+            v-if="showResourceDrawer && filteredExternalGroups.length"
+            id="workspace-resource-content"
+            class="workspace-resource-grid"
+          >
             <section
               v-for="group in filteredExternalGroups"
               :key="group.id"
@@ -207,7 +234,7 @@
             </section>
           </div>
 
-          <p v-else class="workspace-empty-copy">{{ $t('workspace.emptyExternal') }}</p>
+          <p v-else-if="showResourceDrawer" id="workspace-resource-content" class="workspace-empty-copy">{{ $t('workspace.emptyExternal') }}</p>
         </section>
       </section>
 
@@ -283,6 +310,7 @@ const activeToolId = ref(null)
 const activeFilter = ref('all')
 const searchQuery = ref('')
 const activeSearchIndex = ref(0)
+const resourceDrawerOpen = ref(false)
 
 const { value: recentEntriesStore } = useLocalStorage('workspace-recent-entries', [])
 const { value: lastActiveToolId } = useLocalStorage('workspace-last-tool', '')
@@ -326,7 +354,22 @@ const externalGroups = computed(() => sitesConfig.map((group) => ({
 
 const externalEntries = computed(() => externalGroups.value.flatMap((group) => group.links))
 const visibleTools = computed(() => filteredTools.value.filter((tool) => tool.workspaceGroup !== 'lab'))
-const labTool = computed(() => tools.value.find((tool) => tool.workspaceGroup === 'lab'))
+const groupedTools = computed(() => [
+  {
+    id: 'writing',
+    label: t('workspace.toolGroups.writing.title'),
+    description: t('workspace.toolGroups.writing.description'),
+    tools: visibleTools.value.filter((tool) => tool.workspaceGroup === 'writing')
+  },
+  {
+    id: 'utility',
+    label: t('workspace.toolGroups.utility.title'),
+    description: t('workspace.toolGroups.utility.description'),
+    tools: visibleTools.value.filter((tool) => tool.workspaceGroup === 'utility')
+  }
+].filter((group) => group.tools.length))
+
+const showResourceDrawer = computed(() => resourceDrawerOpen.value || activeFilter.value === 'external')
 
 const filteredTools = computed(() => {
   if (activeFilter.value === 'external') return []
@@ -447,6 +490,7 @@ watch(activeToolId, (toolId) => {
   }
 
   lastActiveToolId.value = normalizedId
+  dispatchActivityUpdate()
 
   if (normalizedId === currentRouteTool) {
     return
@@ -466,11 +510,16 @@ watch([searchResults, normalizedQuery, () => activeFilter.value], () => {
 
 onMounted(() => {
   window.addEventListener('keydown', handleGlobalSearchShortcut)
+  window.addEventListener('gworkspace:focus-toolbox', focusToolboxSearch)
+  focusSearchFromRoute()
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleGlobalSearchShortcut)
+  window.removeEventListener('gworkspace:focus-toolbox', focusToolboxSearch)
 })
+
+watch(() => route.query.focus, focusSearchFromRoute)
 
 function matchesQuery(entry, fields) {
   if (!normalizedQuery.value) return true
@@ -523,6 +572,28 @@ function handleGlobalSearchShortcut(event) {
   searchInputRef.value?.select()
 }
 
+async function focusToolboxSearch() {
+  if (activeToolData.value) {
+    closeToolView()
+    await nextTick()
+  }
+
+  searchInputRef.value?.focus()
+  searchInputRef.value?.select()
+}
+
+async function focusSearchFromRoute() {
+  const focusTarget = Array.isArray(route.query.focus) ? route.query.focus[0] : route.query.focus
+  if (focusTarget !== 'search') return
+
+  await nextTick()
+  await focusToolboxSearch()
+
+  const nextQuery = { ...route.query }
+  delete nextQuery.focus
+  await router.replace({ query: nextQuery })
+}
+
 function isTypingTarget(target) {
   if (!(target instanceof HTMLElement)) return false
   const tagName = target.tagName.toLowerCase()
@@ -566,6 +637,8 @@ function rememberEntry(entry) {
     next,
     ...sanitizeRecentEntries(recentEntriesStore.value).filter((item) => !(item.id === next.id && item.kind === next.kind))
   ].slice(0, 8)
+
+  dispatchActivityUpdate()
 }
 
 async function openTool(toolId) {
@@ -591,6 +664,15 @@ function closeToolView() {
 
 function trackExternalVisit(link) {
   rememberEntry(link)
+}
+
+function dispatchActivityUpdate() {
+  window.dispatchEvent(new CustomEvent('gworkspace:activity', {
+    detail: {
+      recentEntries: recentEntriesStore.value,
+      lastToolId: lastActiveToolId.value
+    }
+  }))
 }
 
 function activateEntry(entry) {

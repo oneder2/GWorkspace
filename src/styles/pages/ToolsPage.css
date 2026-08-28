@@ -55,10 +55,10 @@
 }
 
 .workspace-title {
-  font-size: clamp(1.3rem, 2.1vw, 1.9rem);
+  font-size: 1.75rem;
   line-height: 1.02;
   font-weight: 900;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   color: var(--text-main);
 }
 
@@ -226,6 +226,56 @@
   padding: 1.15rem;
 }
 
+.workspace-toolbox {
+  display: grid;
+  gap: 1rem;
+  padding: 0.25rem 0.1rem 0;
+}
+
+.workspace-tool-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.35rem;
+}
+
+.workspace-tool-group {
+  display: grid;
+  align-content: start;
+  gap: 0.7rem;
+  min-width: 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-strong);
+}
+
+.workspace-tool-group-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  min-height: 3.2rem;
+}
+
+.workspace-tool-group-head h3 {
+  color: var(--text-main);
+  font-size: 0.88rem;
+  font-weight: 850;
+}
+
+.workspace-tool-group-head p {
+  margin-top: 0.14rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.workspace-tool-group-head > span {
+  flex: none;
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 780;
+}
+
 .workspace-card-launch {
   border-color: color-mix(in srgb, var(--theme-primary) 30%, rgba(255, 255, 255, 0.46));
   background:
@@ -259,9 +309,9 @@
 
 .workspace-section-title {
   color: var(--text-main);
-  font-size: clamp(1.16rem, 1.7vw, 1.55rem);
+  font-size: 1.42rem;
   font-weight: 860;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 .workspace-section-copy {
@@ -393,7 +443,7 @@
 
 .workspace-tool-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 0.62rem;
 }
 
@@ -476,6 +526,46 @@
     radial-gradient(circle at 92% 8%, color-mix(in srgb, var(--theme-primary) 15%, transparent), transparent 34%);
 }
 
+.workspace-resource-drawer {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0.85rem 0.1rem 0.1rem;
+  border-top: 1px solid var(--border-strong);
+}
+
+.workspace-resource-trigger {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  text-align: left;
+}
+
+.workspace-resource-trigger-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: none;
+}
+
+.workspace-resource-trigger-meta > svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--text-muted);
+  transition: transform 0.18s ease;
+}
+
+.workspace-resource-drawer.is-open .workspace-resource-trigger-meta > svg {
+  transform: rotate(180deg);
+}
+
+.workspace-resource-trigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--theme-primary) 42%, transparent);
+  outline-offset: 5px;
+  border-radius: 4px;
+}
+
 .dark .workspace-card-tools {
   border-color: color-mix(in srgb, var(--theme-primary) 18%, rgba(255, 255, 255, 0.08));
   background:
@@ -532,14 +622,13 @@
   grid-template-columns: minmax(8.5rem, 0.34fr) minmax(0, 1fr);
   align-items: start;
   gap: 0.65rem;
-  padding: 0.7rem;
-  border-radius: 1rem;
-  border: 1px solid color-mix(in srgb, var(--theme-primary) 6%, var(--border-strong));
-  background: rgba(255, 255, 255, 0.24);
+  padding: 0.7rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--theme-primary) 6%, var(--border-strong));
+  background: transparent;
 }
 
 .dark .workspace-resource-group {
-  background: rgba(15, 23, 42, 0.32);
+  background: transparent;
 }
 
 .workspace-group-title-row {
@@ -920,7 +1009,7 @@
   color: var(--text-main);
   font-size: 1.24rem;
   font-weight: 850;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 .workspace-tool-body {
@@ -950,7 +1039,6 @@
     grid-template-columns: 1fr;
   }
 
-  .workspace-tool-grid,
   .workspace-resource-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -966,7 +1054,7 @@
 }
 
 @media (max-width: 960px) {
-  .workspace-tool-grid,
+  .workspace-tool-groups,
   .workspace-resource-grid {
     grid-template-columns: 1fr;
   }
@@ -996,8 +1084,28 @@
     border-radius: 1.15rem;
   }
 
+  .workspace-toolbox {
+    padding-inline: 0;
+  }
+
+  .workspace-resource-trigger {
+    align-items: center;
+  }
+
+  .workspace-resource-trigger .workspace-section-copy {
+    display: none;
+  }
+
   .workspace-command-copy {
     gap: 0.28rem;
+  }
+
+  .workspace-title {
+    font-size: 1.45rem;
+  }
+
+  .workspace-section-title {
+    font-size: 1.2rem;
   }
 
   .workspace-description {
