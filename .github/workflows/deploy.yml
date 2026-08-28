@@ -110,7 +110,7 @@ jobs:
 
             prune_backend_backups() {
               find "$BACKUP_DIR" -type f -name 'backend-backup-*.tar.gz' -mtime +14 -delete 2>/dev/null || true
-              ls -1t "$BACKUP_DIR"/backend-backup-*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm -f
+              ls -1t "$BACKUP_DIR"/backend-backup-*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm -f || true
             }
 
             require_env_file_value() {
