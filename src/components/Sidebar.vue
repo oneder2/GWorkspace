@@ -5,7 +5,7 @@
 -->
 <template>
   <aside 
-    class="surface-panel rounded-none md:rounded-[28px] flex flex-col shrink-0 transition-all duration-300 h-full shadow-lg overflow-hidden" 
+    class="app-sidebar-shell rounded-none md:rounded-[28px] flex flex-col shrink-0 transition-all duration-300 h-full overflow-hidden"
     :class="collapsed ? 'w-16 sm:w-20' : 'w-full md:w-64'"
   >
     <!-- 头部 Logo - 点击可收起/展开（桌面端）或关闭（移动端） -->

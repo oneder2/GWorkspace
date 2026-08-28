@@ -3,13 +3,17 @@
   包含整体布局、导航栏、主题切换、语言切换等功能
 -->
 <template>
-  <div class="overflow-hidden min-h-screen h-[100dvh] w-screen text-slate-800 dark:text-slate-200">
+  <div
+    class="app-frame overflow-hidden min-h-screen h-[100dvh] w-screen text-slate-800 dark:text-slate-200"
+    :data-ambience="ambienceLevel"
+  >
     <!-- 全局背景图 -->
-    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+    <div class="app-background fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
       <div
-        class="absolute inset-0 bg-cover bg-center transition-all duration-1000 transform scale-105"
+        class="app-background-image absolute inset-0 bg-cover transition-all duration-1000"
         :style="backgroundImageStyle"
       ></div>
+      <div class="app-background-tone absolute inset-0 transition-all duration-700" :style="backgroundToneStyle"></div>
     </div>
 
     <!-- 管理后台路由：使用与普通路由类似的布局，但侧边栏和内容组件不同 -->
@@ -51,7 +55,7 @@
         <div
           v-if="showMobileMenu"
           @click="showMobileMenu = false"
-          class="fixed inset-0 bg-black/50 dark:bg-black/70 z-40 xl:hidden"
+          class="fixed inset-0 bg-black/55 dark:bg-black/72 backdrop-blur-sm z-40 xl:hidden"
         ></div>
       </transition>
 
@@ -128,6 +132,7 @@ import { useCustomTheme } from './composables/useCustomTheme'
 import { useSEO } from './composables/useSEO'
 import { getWeatherInfo } from './utils/weather'
 import {
+  buildOverlayGradient,
   defaultBackgroundSceneId,
   resolveBackgroundPhase
 } from './config/backgroundScenes'
@@ -166,7 +171,21 @@ const activeBackground = computed(() =>
 
 const backgroundImageStyle = computed(() => ({
   backgroundImage: `url('${activeBackground.value.src}')`,
-  filter: `brightness(${activeBackground.value.brightness})`
+  '--background-position': activeBackground.value.focalPoint || '50% 50%',
+  '--background-position-mobile': activeBackground.value.mobileFocalPoint || activeBackground.value.focalPoint || '50% 50%',
+  transform: `scale(${activeBackground.value.scale || 1.02})`,
+  filter: [
+    `brightness(${activeBackground.value.brightness})`,
+    `contrast(${activeBackground.value.contrast || 1})`,
+    `saturate(${activeBackground.value.saturation || 1})`
+  ].join(' ')
+}))
+
+const backgroundToneStyle = computed(() => ({
+  background: buildOverlayGradient(
+    isDark.value ? activeBackground.value.darkOverlay : activeBackground.value.lightOverlay,
+    isDark.value ? 'dark' : 'light'
+  )
 }))
 
 /**
@@ -179,6 +198,12 @@ const isAdminRoute = computed(() => {
 const isBlogIndexRoute = computed(() => route.name === 'blog')
 const isHomeRoute = computed(() => route.name === 'home')
 const isWorkspaceRoute = computed(() => route.name === 'workspace')
+
+const ambienceLevel = computed(() => {
+  if (isAdminRoute.value) return 'low'
+  if (isHomeRoute.value || route.name === 'portfolio') return 'high'
+  return 'medium'
+})
 
 /**
  * 根据当前路由获取当前标签页

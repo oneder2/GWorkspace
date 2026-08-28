@@ -101,6 +101,15 @@ jobs:
             # 创建必要的目录
             mkdir -p $DEPLOY_DIR
             mkdir -p $BACKUP_DIR
+
+            prune_backend_backups() {
+              find "$BACKUP_DIR" -type f -name 'backend-backup-*.tar.gz' -mtime +14 -delete 2>/dev/null || true
+              ls -1t "$BACKUP_DIR"/backend-backup-*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm -f
+            }
+
+            echo "Disk usage before deploy:"
+            df -h "$HOME" "$BACKUP_DIR" || true
+            prune_backend_backups
             
             # 保存现有的.env文件到临时位置
             ENV_TEMP="/tmp/.env.backup-$$"
@@ -115,8 +124,13 @@ jobs:
             # 在服务停止后再备份，避免 WAL 模式下只备份到过旧的主库快照
             if [ -d "$DEPLOY_DIR" ] && [ "$(ls -A $DEPLOY_DIR 2>/dev/null)" ]; then
               echo "Backing up current version..."
-              tar -czf "$BACKUP_DIR/backend-backup-$TIMESTAMP.tar.gz" -C $DEPLOY_DIR . 2>/dev/null || true
+              tar -czf "$BACKUP_DIR/backend-backup-$TIMESTAMP.tar.gz" \
+                --exclude='./node_modules' \
+                --exclude='./public/cache' \
+                --exclude='./*.log' \
+                -C $DEPLOY_DIR . 2>/dev/null || true
             fi
+            prune_backend_backups
 
             # 解压新版本到临时目录
             TEMP_DIR="/tmp/gworkspace-deploy-$TIMESTAMP"
@@ -191,6 +205,8 @@ jobs:
             # 清理
             rm -rf $TEMP_DIR
             rm -f /tmp/backend-deploy.tar.gz
+            echo "Disk usage after deploy:"
+            df -h "$HOME" "$BACKUP_DIR" || true
             
             echo "Deployment completed with R2 secrets injected!"
 

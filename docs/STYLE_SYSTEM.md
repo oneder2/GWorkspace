@@ -60,7 +60,22 @@ import '../styles/pages/BlogPage.css'
 }
 ```
 
-### 2. 支持暗色模式
+### 2. 固定表面层级
+
+页面透明度与模糊度由全局语义令牌统一管理，不提供运行时调节入口。组件应按信息层级选择表面类：
+
+| 层级 | 语义类 | 用途 |
+| --- | --- | --- |
+| 主壳体 | `.surface-shell` / `.app-sidebar-shell` | 页面工作区与导航容器，保留少量环境背景 |
+| 内容面板 | `.surface-panel` | 页面主要区块，优先保证文字对比度 |
+| 内容卡片 | `.surface-card` | 列表项、文章卡片、可操作内容 |
+| 浮层 | `.surface-float` / `.glass-card-panel` | 下拉菜单、弹窗与编辑器，使用最高不透明度 |
+
+模糊度只使用 `--blur-subtle`、`--blur-panel`、`--blur-shell` 和 `--blur-float`。不要在页面组件中新增可持久化的透明度或模糊度设置，也不要用低透明度工具类覆盖核心表面。
+
+主页面外壳通过 `data-ambience="high | medium | low"` 控制背景参与度。首页与作品集使用高环境感，工作台与博客使用中等环境感，管理后台使用低环境感。背景素材的视觉焦点、明暗遮罩与色彩参数统一维护在 `src/config/backgroundScenes.js`，不要在页面组件中为单张背景增加硬编码覆盖。
+
+### 3. 支持暗色模式
 
 使用 `.dark` 类选择器支持暗色模式：
 
@@ -74,7 +89,7 @@ import '../styles/pages/BlogPage.css'
 }
 ```
 
-### 3. 使用伪类处理交互
+### 4. 使用伪类处理交互
 
 使用 `:hover`、`:active` 等伪类处理交互效果，避免在JavaScript中操作样式：
 
@@ -89,7 +104,7 @@ import '../styles/pages/BlogPage.css'
 }
 ```
 
-### 4. 类命名规范
+### 5. 类命名规范
 
 - 使用 `{page}-{component}-{state}` 格式
 - 例如：`blog-article-card`、`tool-select-btn-selected`
@@ -167,4 +182,3 @@ const handleCopy = async (text) => {
 - 为其他页面（HomePage、PortfolioPage等）创建独立CSS文件
 - 创建组件样式目录（`src/styles/components/`）用于共享组件样式
 - 考虑使用CSS Modules或Scoped CSS进一步隔离样式
-

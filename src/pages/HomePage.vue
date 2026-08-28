@@ -528,11 +528,11 @@ onUnmounted(() => {
   border: 1px solid color-mix(in srgb, var(--theme-primary) 10%, var(--border-strong));
   background: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--surface-panel) 36%, transparent),
-    color-mix(in srgb, var(--surface-elevated) 18%, transparent)
+    color-mix(in srgb, var(--surface-panel) 92%, transparent),
+    color-mix(in srgb, var(--surface-elevated) 74%, transparent)
   );
-  backdrop-filter: blur(calc(var(--glass-blur) + 7px));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 7px));
+  backdrop-filter: blur(var(--blur-panel));
+  -webkit-backdrop-filter: blur(var(--blur-panel));
   padding: clamp(1rem, 1.5vw, 1.25rem);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.18);
@@ -570,8 +570,8 @@ onUnmounted(() => {
   border-color: color-mix(in srgb, var(--theme-primary) 30%, var(--border-strong));
   background: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--surface-panel) 44%, transparent),
-    color-mix(in srgb, var(--theme-primary) 8%, transparent)
+    color-mix(in srgb, var(--surface-panel) 96%, transparent),
+    color-mix(in srgb, var(--surface-elevated) 82%, transparent)
   );
   box-shadow: var(--shadow-medium), inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transform: translateY(-1px);
@@ -649,7 +649,7 @@ onUnmounted(() => {
 
 .home-status-card {
   grid-area: status;
-  background: linear-gradient(155deg, color-mix(in srgb, var(--theme-primary) 10%, var(--surface-panel) 32%), color-mix(in srgb, var(--surface-elevated) 18%, transparent));
+  background: linear-gradient(155deg, color-mix(in srgb, var(--theme-primary) 8%, var(--surface-panel) 92%), color-mix(in srgb, var(--surface-elevated) 74%, transparent));
 }
 
 .home-spotify-card {
@@ -677,7 +677,7 @@ onUnmounted(() => {
 .home-tasks-card { 
   grid-area: tasks;
   min-height: 0;
-  background: linear-gradient(155deg, color-mix(in srgb, var(--surface-panel) 26%, transparent), color-mix(in srgb, var(--theme-primary) 6%, transparent));
+  background: linear-gradient(155deg, color-mix(in srgb, var(--surface-panel) 90%, transparent), color-mix(in srgb, var(--surface-elevated) 72%, transparent));
 }
 
 .home-tasks-list {
@@ -1098,9 +1098,9 @@ onUnmounted(() => {
   padding: 0.78rem 0.9rem;
   border-radius: var(--radius-card);
   border: 1px solid color-mix(in srgb, var(--theme-primary) 10%, var(--border-strong));
-  background: linear-gradient(155deg, color-mix(in srgb, var(--theme-primary) 7%, var(--surface-panel) 28%), color-mix(in srgb, var(--surface-elevated) 18%, transparent));
-  backdrop-filter: blur(calc(var(--glass-blur) + 7px));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 7px));
+  background: linear-gradient(155deg, color-mix(in srgb, var(--theme-primary) 7%, var(--surface-panel) 91%), color-mix(in srgb, var(--surface-elevated) 72%, transparent));
+  backdrop-filter: blur(var(--blur-panel));
+  -webkit-backdrop-filter: blur(var(--blur-panel));
   box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   text-decoration: none;
 }
@@ -1137,7 +1137,7 @@ a.home-spotify-panel {
 
 a.home-spotify-panel:hover {
   border-color: color-mix(in srgb, var(--theme-primary) 28%, var(--border-strong));
-  background: linear-gradient(155deg, color-mix(in srgb, var(--theme-primary) 9%, var(--surface-panel) 32%), color-mix(in srgb, var(--surface-elevated) 24%, transparent));
+  background: linear-gradient(155deg, color-mix(in srgb, var(--theme-primary) 9%, var(--surface-panel) 94%), color-mix(in srgb, var(--surface-elevated) 80%, transparent));
   box-shadow: var(--shadow-medium), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
 }

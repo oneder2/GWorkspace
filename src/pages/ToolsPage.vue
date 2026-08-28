@@ -107,200 +107,108 @@
       </section>
 
       <section v-if="!activeToolData" class="workspace-overview" :class="{ 'has-search-panel': hasSearchQuery }">
-        <div class="workspace-main-column">
-          <section class="workspace-card workspace-card-launch surface-panel shadow-lg">
-            <div class="workspace-section-head">
-              <div>
-                <h2 class="workspace-section-title">{{ $t('tools.workspace.quickLaunchTitle') }}</h2>
-                <p class="workspace-section-copy">{{ $t('tools.workspace.quickLaunchDescription') }}</p>
-              </div>
-              <span class="workspace-section-badge">{{ quickLaunchEntries.length }}</span>
+        <section class="workspace-card workspace-card-tools surface-panel shadow-lg">
+          <div class="workspace-section-head workspace-section-head-large">
+            <div>
+              <span class="workspace-eyebrow">{{ $t('workspace.internalKicker') }}</span>
+              <h2 class="workspace-section-title">{{ $t('tools.workspace.coreTitle') }}</h2>
+              <p class="workspace-section-copy">{{ $t('tools.workspace.coreDescription') }}</p>
             </div>
+            <span class="workspace-section-badge">{{ visibleTools.length }}</span>
+          </div>
 
-            <div class="workspace-launch-grid">
-              <button
-                v-for="entry in quickLaunchEntries"
-                :key="`${entry.kind}-${entry.id}`"
-                type="button"
-                class="workspace-launch-card"
-                @click="activateEntry(entry)"
-              >
-                <span class="workspace-entry-icon workspace-entry-icon-strong">
-                  <component :is="entry.icon" class="w-5 h-5" />
-                </span>
-                <span class="workspace-launch-name">{{ entry.name }}</span>
-                <span class="workspace-launch-meta">{{ entry.kindLabel }}</span>
-              </button>
-            </div>
-          </section>
-
-          <section class="workspace-card workspace-card-tools surface-panel shadow-lg">
-            <div class="workspace-section-head">
-              <div>
-                <h2 class="workspace-section-title">{{ $t('tools.workspace.coreTitle') }}</h2>
-                <p class="workspace-section-copy">{{ $t('tools.workspace.coreDescription') }}</p>
-              </div>
-              <span class="workspace-section-badge">{{ visibleTools.length }}</span>
-            </div>
-
-            <div class="workspace-tool-grid">
-              <button
-                v-for="tool in visibleTools"
-                :key="tool.id"
-                type="button"
-                class="workspace-tool-card"
-                :class="{ 'is-disabled': tool.disabled }"
-                @click="openTool(tool.id)"
-              >
-                <div class="workspace-tool-head">
-                  <span class="workspace-entry-icon workspace-entry-icon-strong">
-                    <component :is="tool.icon" class="w-5 h-5" />
-                  </span>
-                  <div class="workspace-tool-meta">
-                    <div class="workspace-tool-title-row">
-                      <span class="workspace-tool-title">{{ tool.name }}</span>
-                      <span v-if="tool.badge" class="workspace-entry-badge">{{ tool.badge }}</span>
-                    </div>
-                    <span class="workspace-tool-label">{{ tool.categoryLabel }}</span>
-                  </div>
-                </div>
-                <p class="workspace-tool-copy">{{ tool.description }}</p>
-              </button>
-            </div>
-          </section>
-
-          <section class="workspace-card workspace-card-external surface-panel shadow-lg">
-            <div class="workspace-section-head">
-              <div>
-                <h2 class="workspace-section-title">{{ $t('workspace.externalTitle') }}</h2>
-                <p class="workspace-section-copy">{{ $t('workspace.externalDescription') }}</p>
-              </div>
-              <span class="workspace-section-badge">{{ filteredExternalGroups.length }}</span>
-            </div>
-
-            <div v-if="filteredExternalGroups.length" class="workspace-resource-grid">
-              <section
-                v-for="group in filteredExternalGroups"
-                :key="group.id"
-                class="workspace-resource-group"
-              >
-                <div class="workspace-group-head">
-                  <div class="workspace-group-title-row">
-                    <span class="workspace-entry-icon">
-                      <component :is="group.icon" class="w-4 h-4" />
-                    </span>
-                    <div>
-                      <h3 class="workspace-group-title">{{ group.name }}</h3>
-                      <p class="workspace-group-copy">{{ group.description }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="workspace-link-list">
-                  <a
-                    v-for="link in group.links"
-                    :key="link.id"
-                    :href="link.url"
-                    target="_blank"
-                    rel="noreferrer"
-                    class="workspace-link-row"
-                    @click="trackExternalVisit(link)"
-                  >
-                    <span class="workspace-link-title">{{ link.title }}</span>
-                    <span class="workspace-link-copy">{{ link.description }}</span>
-                    <span class="workspace-link-tags" aria-hidden="true">
-                      <span v-for="tag in link.tags.slice(0, 2)" :key="tag">{{ tag }}</span>
-                    </span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" class="workspace-link-arrow">
-                      <path d="M7 17 17 7"></path>
-                      <path d="M9 7h8v8"></path>
-                    </svg>
-                  </a>
-                </div>
-              </section>
-            </div>
-
-            <p v-else class="workspace-empty-copy">{{ $t('workspace.emptyExternal') }}</p>
-          </section>
-        </div>
-
-        <aside class="workspace-side-column">
-          <section class="workspace-card workspace-card-status surface-panel shadow-lg">
-            <span class="workspace-lab-kicker">{{ $t('workspace.statusKicker') }}</span>
-            <h2 class="workspace-section-title">{{ $t('workspace.statusTitle') }}</h2>
-            <p class="workspace-section-copy">{{ $t('workspace.statusDescription') }}</p>
-            <div class="workspace-status-grid">
-              <span>
-                <strong>{{ quickLaunchEntries.length }}</strong>
-                <small>{{ $t('tools.workspace.quickLaunchTitle') }}</small>
-              </span>
-              <span>
-                <strong>{{ recentEntries.length }}</strong>
-                <small>{{ $t('tools.workspace.recentTitle') }}</small>
-              </span>
-            </div>
-          </section>
-
-          <section class="workspace-card workspace-card-recent surface-panel shadow-lg">
-            <div class="workspace-section-head workspace-section-head-compact">
-              <div>
-                <h2 class="workspace-section-title">{{ $t('tools.workspace.recentTitle') }}</h2>
-                <p class="workspace-section-copy">{{ $t('tools.workspace.recentDescription') }}</p>
-              </div>
-              <span class="workspace-section-badge">{{ recentEntries.length }}</span>
-            </div>
-
-            <div v-if="recentEntries.length" class="workspace-recent-list">
-              <button
-                v-for="entry in recentEntries"
-                :key="`${entry.kind}-${entry.id}`"
-                type="button"
-                class="workspace-recent-card"
-                @click="activateEntry(entry)"
-              >
-                <span class="workspace-recent-top">
-                  <span class="workspace-entry-icon">
-                    <component :is="entry.icon" class="w-4 h-4" />
-                  </span>
-                  <span class="workspace-recent-type">{{ entry.kindLabel }}</span>
-                </span>
-                <span class="workspace-recent-name">{{ entry.name }}</span>
-              </button>
-            </div>
-
-            <p v-else class="workspace-empty-copy">{{ $t('tools.workspace.recentEmpty') }}</p>
-          </section>
-
-          <section class="workspace-card workspace-card-lab surface-panel shadow-lg">
-            <span class="workspace-lab-kicker">{{ $t('tools.workspace.labKicker') }}</span>
-            <h2 class="workspace-section-title">{{ $t('tools.workspace.labTitle') }}</h2>
-            <p class="workspace-section-copy">{{ $t('tools.workspace.labDescription') }}</p>
+          <div class="workspace-tool-grid">
             <button
-              v-if="labTool"
+              v-for="tool in visibleTools"
+              :key="tool.id"
               type="button"
-              class="workspace-lab-card"
-              disabled
+              class="workspace-tool-card"
+              :class="{ 'is-disabled': tool.disabled }"
+              @click="openTool(tool.id)"
             >
               <span class="workspace-entry-icon workspace-entry-icon-strong">
-                <component :is="labTool.icon" class="w-5 h-5" />
+                <component :is="tool.icon" class="w-5 h-5" />
               </span>
-              <span>
-                <span class="workspace-tool-title">{{ labTool.name }}</span>
-                <span class="workspace-tool-copy">{{ labTool.description }}</span>
-              </span>
-              <span class="workspace-entry-badge">{{ labTool.badge }}</span>
+              <div class="workspace-tool-meta">
+                <span class="workspace-tool-title-row">
+                  <span class="workspace-tool-title">{{ tool.name }}</span>
+                  <span class="workspace-tool-label">{{ tool.categoryLabel }}</span>
+                </span>
+                <span class="workspace-tool-copy">{{ tool.description }}</span>
+              </div>
+              <span v-if="tool.badge" class="workspace-entry-badge">{{ tool.badge }}</span>
             </button>
-          </section>
+          </div>
+        </section>
 
-          <section class="workspace-card workspace-card-shortcuts surface-panel shadow-lg">
-            <span class="workspace-lab-kicker">{{ $t('workspace.shortcutKicker') }}</span>
-            <div class="workspace-shortcut-list">
-              <span><kbd>/</kbd>{{ $t('workspace.shortcutSearch') }}</span>
-              <span><kbd>⌘K</kbd>{{ $t('workspace.shortcutCommand') }}</span>
-              <span><kbd>Esc</kbd>{{ $t('workspace.keyboardClear') }}</span>
+        <section v-if="recentEntries.length" class="workspace-recent-strip">
+          <span class="workspace-strip-label">{{ $t('tools.workspace.recentTitle') }}</span>
+          <button
+            v-for="entry in recentEntries.slice(0, 6)"
+            :key="`${entry.kind}-${entry.id}`"
+            type="button"
+            class="workspace-strip-card"
+            @click="activateEntry(entry)"
+          >
+            <component :is="entry.icon" class="w-4 h-4" />
+            <span>{{ entry.name }}</span>
+          </button>
+        </section>
+
+        <section class="workspace-card workspace-card-external surface-panel shadow-lg">
+          <div class="workspace-section-head workspace-section-head-large">
+            <div>
+              <span class="workspace-eyebrow">{{ $t('workspace.externalKicker') }}</span>
+              <h2 class="workspace-section-title">{{ $t('workspace.externalTitle') }}</h2>
+              <p class="workspace-section-copy">{{ $t('workspace.externalDescription') }}</p>
             </div>
-          </section>
-        </aside>
+            <span class="workspace-section-badge">{{ filteredExternalGroups.length }}</span>
+          </div>
+
+          <div v-if="filteredExternalGroups.length" class="workspace-resource-grid">
+            <section
+              v-for="group in filteredExternalGroups"
+              :key="group.id"
+              class="workspace-resource-group"
+            >
+              <div class="workspace-group-head">
+                <div class="workspace-group-title-row">
+                  <span class="workspace-entry-icon">
+                    <component :is="group.icon" class="w-4 h-4" />
+                  </span>
+                  <div>
+                    <h3 class="workspace-group-title">{{ group.name }}</h3>
+                    <p class="workspace-group-copy">{{ group.description }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="workspace-link-list">
+                <a
+                  v-for="link in group.links"
+                  :key="link.id"
+                  :href="link.url"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="workspace-link-row"
+                  @click="trackExternalVisit(link)"
+                >
+                  <span class="workspace-link-title">{{ link.title }}</span>
+                  <span class="workspace-link-copy">{{ link.description }}</span>
+                  <span class="workspace-link-tags" aria-hidden="true">
+                    <span v-for="tag in link.tags.slice(0, 2)" :key="tag">{{ tag }}</span>
+                  </span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" class="workspace-link-arrow">
+                    <path d="M7 17 17 7"></path>
+                    <path d="M9 7h8v8"></path>
+                  </svg>
+                </a>
+              </div>
+            </section>
+          </div>
+
+          <p v-else class="workspace-empty-copy">{{ $t('workspace.emptyExternal') }}</p>
+        </section>
       </section>
 
       <section

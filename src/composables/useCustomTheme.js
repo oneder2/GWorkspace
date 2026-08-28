@@ -3,7 +3,7 @@
  * 提供主题颜色自定义功能，支持预设切换和主色推导
  */
 
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useLocalStorage } from './useStorage'
 
 /**
@@ -24,12 +24,7 @@ const availablePresets = {
 }
 
 const FALLBACK_PRIMARY = availablePresets.none.primary
-const DEFAULT_SURFACE_SETTINGS = {
-  glassBlur: 1,
-  bgOpacity: 0.25,
-  panelOpacity: 0.5
-}
-
+const LEGACY_SURFACE_KEYS = ['themeGlassBlur', 'themeBgOpacity', 'themePanelOpacity']
 const normalizeHexColor = (value, fallback = FALLBACK_PRIMARY) => {
   const input = String(value || '').trim()
 
@@ -76,18 +71,6 @@ const normalizeThemeColors = (colors) => {
   return generateThemeColors(colors.primary)
 }
 
-const clampNumber = (value, min, max, fallback) => {
-  const numeric = Number(value)
-  if (!Number.isFinite(numeric)) return fallback
-  return Math.min(max, Math.max(min, numeric))
-}
-
-const normalizeSurfaceSettings = (settings = {}) => ({
-  glassBlur: clampNumber(settings.glassBlur, 0, 40, DEFAULT_SURFACE_SETTINGS.glassBlur),
-  bgOpacity: clampNumber(settings.bgOpacity, 0.05, 0.95, DEFAULT_SURFACE_SETTINGS.bgOpacity),
-  panelOpacity: clampNumber(settings.panelOpacity, 0.2, 0.95, DEFAULT_SURFACE_SETTINGS.panelOpacity)
-})
-
 /**
  * 从主色生成完整的主题色系
  * @param {string} primary - 主色 (HEX格式)
@@ -114,16 +97,10 @@ export function useCustomTheme() {
   // useLocalStorage 返回的是 { value: Ref, update, reset }
   const customThemeStore = useLocalStorage('customTheme', null)
   const currentPresetStore = useLocalStorage('themePreset', 'none')
-  const glassBlurStore = useLocalStorage('themeGlassBlur', DEFAULT_SURFACE_SETTINGS.glassBlur)
-  const bgOpacityStore = useLocalStorage('themeBgOpacity', DEFAULT_SURFACE_SETTINGS.bgOpacity)
-  const panelOpacityStore = useLocalStorage('themePanelOpacity', DEFAULT_SURFACE_SETTINGS.panelOpacity)
 
   // 提取真正的 Ref
   const customTheme = customThemeStore.value
   const currentPreset = currentPresetStore.value
-  const glassBlur = glassBlurStore.value
-  const bgOpacity = bgOpacityStore.value
-  const panelOpacity = panelOpacityStore.value
 
   /**
    * 当前主题颜色数据
@@ -150,16 +127,6 @@ export function useCustomTheme() {
     if (theme.primaryLighter) root.style.setProperty('--theme-primary-lighter', theme.primaryLighter)
     if (theme.primaryDarker) root.style.setProperty('--theme-primary-darker', theme.primaryDarker)
 
-    // 应用玻璃效果参数
-    const surface = normalizeSurfaceSettings({
-      glassBlur: glassBlur.value,
-      bgOpacity: bgOpacity.value,
-      panelOpacity: panelOpacity.value
-    })
-
-    root.style.setProperty('--glass-blur', `${surface.glassBlur}px`)
-    root.style.setProperty('--bg-opacity', `${surface.bgOpacity}`)
-    root.style.setProperty('--panel-opacity', `${surface.panelOpacity}`)
   }
 
   /**
@@ -186,19 +153,12 @@ export function useCustomTheme() {
   const resetTheme = () => {
     customThemeStore.update(null)
     currentPresetStore.update('none')
-    glassBlurStore.update(DEFAULT_SURFACE_SETTINGS.glassBlur)
-    bgOpacityStore.update(DEFAULT_SURFACE_SETTINGS.bgOpacity)
-    panelOpacityStore.update(DEFAULT_SURFACE_SETTINGS.panelOpacity)
     applyTheme()
   }
 
-  // 监听玻璃效果变化即时应用
-  watch([glassBlur, bgOpacity, panelOpacity], () => {
-    applyTheme()
-  })
-
   // 初始化应用
   onMounted(() => {
+    LEGACY_SURFACE_KEYS.forEach(key => localStorage.removeItem(key))
     applyTheme()
   })
 
@@ -206,13 +166,9 @@ export function useCustomTheme() {
     presetThemes: availablePresets,
     themeColors,
     currentPreset,
-    glassBlur,
-    bgOpacity,
-    panelOpacity,
     setPresetTheme,
     setCustomTheme,
     resetTheme,
-    defaultSurfaceSettings: DEFAULT_SURFACE_SETTINGS,
     applyTheme
   }
 }
