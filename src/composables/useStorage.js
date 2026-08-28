@@ -42,7 +42,6 @@ export function useLocalStorage(key, defaultValue = null, options = {}) {
         isUpdating = false
         return
       }
-      console.log(`[useLocalStorage] Watch triggered, saving to ${key}:`, newValue)
       ls.set(key, newValue)
     }, { deep: true })
   }
@@ -52,13 +51,11 @@ export function useLocalStorage(key, defaultValue = null, options = {}) {
    * @param {any} newValue - 新值
    */
   const update = (newValue) => {
-    console.log(`[useLocalStorage] Updating ${key}:`, newValue)
     isUpdating = true
     // 先更新响应式值
     value.value = newValue
     // 立即同步到存储（不依赖 watch）
     ls.set(key, newValue)
-    console.log(`[useLocalStorage] After update, value.value:`, value.value)
   }
 
   /**

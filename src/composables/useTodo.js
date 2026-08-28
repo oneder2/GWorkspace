@@ -24,7 +24,6 @@ export function useTodo() {
   const getTodosArray = () => {
     // todos 本身已经是 ref，所以直接访问 todos.value
     const value = todos.value
-    console.log('[useTodo] getTodosArray, todos.value type:', typeof value, 'isArray:', Array.isArray(value), 'value:', value)
     // 检查是否是数组（包括 Proxy 包装的数组）
     if (!value) {
       return []
@@ -51,7 +50,6 @@ export function useTodo() {
    * @param {string} priority - 优先级（low, medium, high）
    */
   const addTodo = (text, priority = 'medium') => {
-    console.log('[useTodo] addTodo called with:', { text, priority })
     const newTodo = {
       id: Date.now(),
       text,
@@ -61,14 +59,8 @@ export function useTodo() {
     }
     // 使用 getTodosArray() 获取当前数组，确保类型安全
     const currentTodos = getTodosArray()
-    console.log('[useTodo] Current todos before add:', currentTodos)
     const updatedTodos = [...currentTodos, newTodo]
-    console.log('[useTodo] Updated todos:', updatedTodos)
     todosStorage.update(updatedTodos)
-    // 等待下一个 tick 后检查值
-    setTimeout(() => {
-      console.log('[useTodo] After update (next tick), todos.value:', todos.value)
-    }, 0)
   }
 
   /**
@@ -113,14 +105,7 @@ export function useTodo() {
   const activeTodos = computed(() => {
     // 使用 getTodosArray() 确保类型安全
     const todosArray = getTodosArray()
-    console.log('[useTodo] activeTodos computed, todosArray:', todosArray, 'length:', todosArray.length)
-    const filtered = todosArray.filter(todo => {
-      const isActive = !todo.completed
-      console.log('[useTodo] Filtering todo:', todo.text, 'completed:', todo.completed, 'isActive:', isActive)
-      return isActive
-    })
-    console.log('[useTodo] activeTodos filtered result:', filtered, 'length:', filtered.length)
-    return filtered
+    return todosArray.filter(todo => !todo.completed)
   })
 
   /**

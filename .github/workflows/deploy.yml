@@ -7,6 +7,8 @@ on:
     branches: [ main ]
     paths:
       - 'backend/**'
+      - '!backend/.env.example'
+      - '!backend/**/*.md'
   workflow_dispatch: # 允许手动触发
 
 permissions:
@@ -38,9 +40,13 @@ jobs:
           npm ci --omit=dev
 
       - name: Verify backend modules load
-        run: |
-          cd backend
-          node --input-type=module -e "const routes=['admin','adminAi','ai','analytics','auth','blog','comments','guestbook','likes','seo','spotify','upload'].map(name => './src/routes/' + name + '.js'); await Promise.all(routes.map(p => import(p))); console.log('backend route modules ok', routes.length)"
+        run: npm run check:backend-routes
+
+      - name: Check backend log hygiene
+        run: npm run check:backend-logs
+
+      - name: Check backend security configuration
+        run: npm run check:backend-security
 
       - name: Create deployment package
         run: |
@@ -97,7 +103,7 @@ jobs:
             require_secret "R2_ACCOUNT_ID" "$R2_ACCOUNT_ID"
             require_secret "R2_BUCKET_NAME" "$R2_BUCKET_NAME"
             require_secret "R2_PUBLIC_DOMAIN" "$R2_PUBLIC_DOMAIN"
-            
+
             # 创建必要的目录
             mkdir -p $DEPLOY_DIR
             mkdir -p $BACKUP_DIR
@@ -106,6 +112,26 @@ jobs:
               find "$BACKUP_DIR" -type f -name 'backend-backup-*.tar.gz' -mtime +14 -delete 2>/dev/null || true
               ls -1t "$BACKUP_DIR"/backend-backup-*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm -f
             }
+
+            require_env_file_value() {
+              key="$1"
+              file="$2"
+              if [ ! -f "$file" ]; then
+                echo "Missing backend .env file; cannot verify $key before deployment" >&2
+                exit 1
+              fi
+
+              value="$(grep -E "^${key}=" "$file" | tail -n 1 | cut -d= -f2- | tr -d '\r')"
+              case "$value" in
+                ""|"replace_with_a_strong_random_secret"|"your-secret-key-change-in-production"|"your-very-secure-secret-key"|"your-very-secure-secret-key-change-this-in-production")
+                  echo "Missing or placeholder backend .env value: $key" >&2
+                  exit 1
+                  ;;
+              esac
+            }
+
+            # 必须在停服前验证，避免环境变量缺失导致旧服务被停止后新服务无法启动。
+            require_env_file_value "JWT_SECRET" "$DEPLOY_DIR/.env"
 
             echo "Disk usage before deploy:"
             df -h "$HOME" "$BACKUP_DIR" || true
@@ -201,6 +227,41 @@ jobs:
             HEALTH_OUTPUT="$(curl -fsS "http://127.0.0.1:3001/health")"
             echo "$HEALTH_OUTPUT" | grep '"status":"ok"' >/dev/null
             echo "$HEALTH_OUTPUT" | grep '"database":"ok"' >/dev/null
+            HEALTH_HEADERS="$(curl -sS "http://127.0.0.1:3001/health" -o /dev/null -D -)"
+            if echo "$HEALTH_HEADERS" | grep -iq '^X-Powered-By:'; then
+              echo "Backend health response still exposes X-Powered-By" >&2
+              exit 1
+            fi
+            if echo "$HEALTH_HEADERS" | grep -iq '^Strict-Transport-Security:'; then
+              echo "Backend health response should not emit HSTS directly; Cloudflare owns HSTS" >&2
+              exit 1
+            fi
+            echo "$HEALTH_HEADERS" | grep -i '^X-Content-Type-Options: nosniff' >/dev/null
+
+            # 回归检查：部署后必须保留后台 PATCH 预检支持。
+            CORS_OUTPUT="$(curl -isS -X OPTIONS "http://127.0.0.1:3001/api/admin/ai/seeds/2" \
+              -H "Origin: https://www.gellaronline.cc" \
+              -H "Access-Control-Request-Method: PATCH" \
+              -H "Access-Control-Request-Headers: authorization,content-type")"
+            echo "$CORS_OUTPUT" | grep -i '^Access-Control-Allow-Origin: https://www.gellaronline.cc' >/dev/null
+            echo "$CORS_OUTPUT" | grep -i '^Access-Control-Allow-Methods: .*PATCH' >/dev/null
+            BLOCKED_CORS_OUTPUT="$(curl -isS -X OPTIONS "http://127.0.0.1:3001/api/admin/ai/seeds/2" \
+              -H "Origin: https://evil-localhost.example" \
+              -H "Access-Control-Request-Method: PATCH" \
+              -H "Access-Control-Request-Headers: authorization,content-type" || true)"
+            echo "$BLOCKED_CORS_OUTPUT" | grep -E '^HTTP/[0-9.]+ 403' >/dev/null
+            if echo "$BLOCKED_CORS_OUTPUT" | grep -i '^Access-Control-Allow-Origin:' >/dev/null; then
+              echo "CORS allowed an origin that only contains localhost as a substring" >&2
+              exit 1
+            fi
+
+            # 回归检查：动态 sitemap 必须指向前台 canonical URL，不再暴露旧入口。
+            SITEMAP_OUTPUT="$(curl -fsS "http://127.0.0.1:3001/api/seo/sitemap.xml")"
+            echo "$SITEMAP_OUTPUT" | grep '<loc>https://www.gellaronline.cc/workspace</loc>' >/dev/null
+            if echo "$SITEMAP_OUTPUT" | grep -E 'workspace\.gellaronline\.cc|/sites|/tools' >/dev/null; then
+              echo "Dynamic sitemap contains stale backend domain or legacy routes" >&2
+              exit 1
+            fi
             
             # 清理
             rm -rf $TEMP_DIR

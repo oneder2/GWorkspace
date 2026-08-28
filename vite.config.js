@@ -64,10 +64,12 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-ui': ['vue', 'vue-router', 'vue-i18n'],
-          'vendor-charts': ['chart.js'],
-          'vendor-utils': ['marked', 'highlight.js', 'fuse.js']
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined
+          if (/[\\/]node_modules[\\/](vue|vue-router|vue-i18n)[\\/]/.test(id)) return 'vendor-ui'
+          if (/[\\/]node_modules[\\/]chart\.js[\\/]/.test(id)) return 'vendor-charts'
+          if (/[\\/]node_modules[\\/](marked|highlight\.js|fuse\.js)[\\/]/.test(id)) return 'vendor-utils'
+          return undefined
         }
       }
     },

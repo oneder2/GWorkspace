@@ -5,11 +5,13 @@
 
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
 import { getDatabase, closeDatabase } from './config/database.js'
 import { runMigrations } from './config/migrations.js'
 import { checkDatabaseHealth } from './config/databaseHealth.js'
+import { validateAuthConfig } from './config/auth.js'
 
 // 导入路由
 import blogRoutes from './routes/blog.js'
@@ -28,12 +30,25 @@ import { startAiDailyCapsuleScheduler } from './services/aiScheduler.js'
 
 // 加载环境变量
 dotenv.config()
+validateAuthConfig()
 
 const app = express()
 const PORT = process.env.PORT || 3001
+const requestLogFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev'
+
+// 避免在生产响应中暴露 Express 指纹。
+app.disable('x-powered-by')
 
 // 配置信任代理 (关键：确保能正确识别来自 Nginx 的 Origin)
 app.set('trust proxy', true)
+
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false,
+  strictTransportSecurity: false
+}))
 
 /**
  * 极其稳健的 CORS 配置：
@@ -46,14 +61,29 @@ const allowedOrigins = [
   'https://workspace.gellaronline.cc'
 ];
 
+function isLocalDevelopmentOrigin(origin) {
+  try {
+    const { hostname } = new URL(origin)
+    return hostname === 'localhost' || hostname === '127.0.0.1'
+  } catch {
+    return false
+  }
+}
+
+function isAllowedCorsOrigin(origin) {
+  return allowedOrigins.includes(origin) || isLocalDevelopmentOrigin(origin)
+}
+
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+    if (isAllowedCorsOrigin(origin)) {
       callback(null, true);
     } else {
       console.warn('CORS Blocked for origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+      const error = new Error('Not allowed by CORS')
+      error.status = 403
+      callback(error);
     }
   },
   credentials: true,
@@ -61,7 +91,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }))
 
-app.use(morgan('dev'))
+app.use(morgan(requestLogFormat, {
+  skip: (req) => req.path === '/health'
+}))
 
 // 解析中间件
 app.use(express.json({ limit: '20mb' }))
@@ -128,6 +160,10 @@ app.get('/', (req, res) => res.json({ message: 'GWorkspace API Server' }))
 
 app.use((req, res) => res.status(404).json({ error: 'Not Found' }))
 app.use((err, req, res, next) => {
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ error: 'CORS origin not allowed' })
+  }
+
   console.error('Server Error:', err)
   res.status(err.status || 500).json({ error: err.message || 'Internal Server Error' })
 })

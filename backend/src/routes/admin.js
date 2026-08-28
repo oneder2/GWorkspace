@@ -462,15 +462,6 @@ router.put('/settings', async (req, res) => {
     const homepageContent = req.body.homepage_content ?? req.body.homepageContent
     const userId = req.user.id
 
-    // DEBUG: 输出请求参数
-    console.debug('[DEBUG] PUT /api/admin/settings - Request body:', {
-      ip_address: ip_address || null,
-      location: location || null,
-      timezone: timezone || null,
-      homepage_content: homepageContent ? '[provided]' : null,
-      forceRelocate: forceRelocate || false
-    })
-
     const updatePayload = {}
 
     if (homepageContent !== undefined) {
@@ -491,13 +482,6 @@ router.put('/settings', async (req, res) => {
         })
       }
       
-      // DEBUG: 输出使用前端提供的位置信息
-      console.debug('[DEBUG] PUT /api/admin/settings - Using frontend-provided location info:', {
-        ip: ip_address,
-        location: location,
-        timezone: timezone
-      })
-      
       // 直接使用前端提供的信息
       locationInfo = { ip_address, location, timezone }
     }
@@ -513,20 +497,11 @@ router.put('/settings', async (req, res) => {
       
       const processedIp = ip_address.split(',')[0].trim()
       
-      // DEBUG: 输出接收到的IP地址
-      console.debug('[DEBUG] PUT /api/admin/settings - Received IP from frontend:', processedIp)
-      
       // 根据IP获取位置信息
       const autoLocationInfo = await getLocationByIP(processedIp, {
         useCache: false, // 不使用缓存，确保获取最新位置
         maxRetries: 2,
         retryDelay: 2000
-      })
-      
-      // DEBUG: 输出API获取到的位置信息
-      console.debug('[DEBUG] PUT /api/admin/settings - API Response:', {
-        location: autoLocationInfo?.location || null,
-        timezone: autoLocationInfo?.timezone || null
       })
       
       if (autoLocationInfo && autoLocationInfo.location && autoLocationInfo.timezone) {
@@ -549,12 +524,6 @@ router.put('/settings', async (req, res) => {
       if (userIp && !isLocalOrReservedIP(userIp)) {
         locationInfo.ip_address = userIp.split(',')[0].trim()
       }
-      
-      console.debug('[DEBUG] PUT /api/admin/settings - Manual location info (no IP from frontend):', {
-        location: location,
-        timezone: timezone,
-        ip_address: locationInfo.ip_address || null
-      })
     }
     // 情况4：forceRelocate为true（已废弃，保留兼容性）
     else if (hasLocationPayload && forceRelocate === true) {
@@ -595,13 +564,6 @@ router.put('/settings', async (req, res) => {
         message: 'Please provide ip_address (from frontend), or location and timezone manually.'
       })
     }
-
-    // DEBUG: 输出最终要更新的位置信息
-    console.debug('[DEBUG] PUT /api/admin/settings - Final location info to update:', {
-      location: locationInfo.location || null,
-      timezone: locationInfo.timezone || null,
-      ip_address: locationInfo.ip_address || null
-    })
 
     if (hasLocationPayload) {
       updatePayload.location = locationInfo.location || null

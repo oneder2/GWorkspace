@@ -2,6 +2,34 @@
 
 本文档记录项目的所有重要更新和变更。
 
+## v3.1.0 生产加固补记 (2026-06-16)
+
+### 工作台与公开入口收口
+- **工作台成为统一入口**：将原导航页与工具箱页的职责收拢到 `/workspace`，以启动器式搜索、常用外链、站内工具、资源索引和最近使用记录作为主要结构。
+- **旧入口托管层重定向**：新增 Vercel 配置，将 `/sites` 与 `/tools` 永久重定向到 `/workspace`，避免旧路径继续以 `200` 暴露。
+- **前台安全响应头**：为 Vercel 前台响应补充 `X-Content-Type-Options`、`Referrer-Policy`、`Permissions-Policy` 与 `X-Frame-Options`，并纳入公开 SEO 检查。
+
+### SEO 与部署回归检查
+- **静态与动态 sitemap 对齐**：公开 `sitemap.xml` 和后端动态 `/api/seo/sitemap.xml` 统一指向 `https://www.gellaronline.cc`，不再暴露后端域名和旧 `/sites`、`/tools` 入口。
+- **SEO 回归脚本**：新增公开 SEO 检查、后端 sitemap 检查和 CORS 方法检查，CI 会验证 canonical URL、公开资源、旧入口、响应头和后端 CORS 方法覆盖。
+- **后端部署 live gate**：后端部署完成后除了 `/health`，还会验证 PATCH 预检和动态 sitemap canonical 输出，防止已修复问题在部署阶段回归。
+
+### 安全依赖与运行时基线
+- **Node 运行时统一**：新增 `.nvmrc` 并让 CI 使用 Node 20，减少本地、CI 与服务器之间的运行时漂移。
+- **前端构建链升级**：移除未使用的 `gray-matter`，升级到 Vite 8、`@vitejs/plugin-vue` 6 与 `vite-plugin-pwa` 1.3，前端根项目 `npm audit` 已归零。
+- **浏览器兼容性数据刷新**：更新 `caniuse-lite` 与 `baseline-browser-mapping` lockfile 数据，消除构建阶段 Browserslist 过期警告，保持 CSS/JS 目标环境判断新鲜。
+- **前端审计 gate**：CI 新增 `npm audit --audit-level=moderate`，阻断前端 moderate/high/critical 依赖漏洞回归。
+- **前端体积预算 gate**：CI 在构建后检查 JS/CSS 单文件与总量预算，防止依赖或页面改动导致前端产物无意识膨胀。
+- **前端调试日志收口**：移除 localStorage、todo、快捷链接和管理员定位中的开发期调试输出，并在 CI 中阻断这些历史 debug marker 回归。
+- **后端日志卫生 gate**：移除点赞、上传和管理员设置接口中的请求级调试日志，并在 CI 与后端部署前阻断敏感 debug marker 回归。
+- **后端指纹头收口**：禁用 Express `X-Powered-By` 响应头，并在 CI、部署前检查和部署后 live gate 中防止该指纹重新暴露。
+- **后端安全头启用**：启用 Helmet 通用安全响应头，并保留跨子域 API 所需的 CORS 兼容性配置；部署后会验证 `X-Content-Type-Options: nosniff`。
+- **HSTS 单一来源**：后端 Helmet 不再直接发送 HSTS，避免与 Cloudflare HSTS 重复；部署阶段会验证后端本机响应不含 HSTS。
+- **CORS 来源匹配收紧**：开发来源改为基于 URL hostname 精确判断，不再用字符串包含匹配放行 `localhost` / `127.0.0.1`。
+- **后端审计 gate**：CI 新增后端生产依赖审计边界，要求 critical 为 0，并只允许当前已知的 `better-sqlite3/tar` 漏洞节点和 advisory 集合继续存在。
+- **后端依赖减面**：将 `bcrypt` 升级到 `6.0.0`，移除旧 `@mapbox/node-pre-gyp` 安装链，后端高危审计项从 4 个减少到 2 个。
+- **保留 better-sqlite3 稳定版本**：继续固定 `better-sqlite3@9.4.3`，避免 `12.x` 在当前服务器较旧 glibc/g++ 环境下回退源码编译导致部署失败。
+
 ## v3.1.0 (个人化首页、轻运营闭环与 Spotify 接入 - 2026-05-11)
 
 ### 相比 v3.0.0 的版本转向
