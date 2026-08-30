@@ -7,8 +7,8 @@ const getApiBaseUrl = () => {
   // 1. 优先使用注入的环境变量
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL
   
-  // 2. 生产环境：公共前台与 API 共享 canonical origin
-  if (import.meta.env.PROD) return '/api'
+  // 2. 生产环境：API 仍由独立后端域名提供
+  if (import.meta.env.PROD) return 'https://workspace.gellaronline.cc/api'
   
   // 3. 开发环境
   return 'http://localhost:3001/api'

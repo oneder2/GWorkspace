@@ -22,7 +22,7 @@ function toAbsoluteUrl(value) {
 }
 
 function getApiBaseUrl() {
-  return import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api')
+  return import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://workspace.gellaronline.cc/api' : 'http://localhost:3001/api')
 }
 
 function getBlogImageUrl(article) {
