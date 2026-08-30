@@ -22,6 +22,8 @@
           <section v-if="open" class="terminal-panel surface-float">
             <TerminalHeader :copy="copy" :state="state" @close="$emit('close')" />
 
+            <TerminalActionBar :copy="copy" @select="$emit('select-action', $event)" />
+
             <div class="terminal-panel-body">
               <TerminalOutput
                 :entries="history"
@@ -37,6 +39,7 @@
                 :model-value="currentCommand"
                 :placeholder="copy.ui.inputPlaceholder"
                 :prompt="prompt"
+                :submit-label="copy.ui.submitLabel"
                 @navigate-history="$emit('navigate-history', $event)"
                 @submit="$emit('execute')"
                 @update:model-value="$emit('update:currentCommand', $event)"
@@ -52,6 +55,7 @@
 <script setup>
 import { nextTick, ref, watch } from 'vue'
 import TerminalHeader from './TerminalHeader.vue'
+import TerminalActionBar from './TerminalActionBar.vue'
 import TerminalInput from './TerminalInput.vue'
 import TerminalOutput from './TerminalOutput.vue'
 
@@ -72,6 +76,10 @@ const props = defineProps({
     type: Array,
     required: true
   },
+  focusToken: {
+    type: Number,
+    default: 0
+  },
   open: {
     type: Boolean,
     default: false
@@ -86,7 +94,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['close', 'execute', 'link-activate', 'navigate-history', 'update:currentCommand'])
+defineEmits(['close', 'execute', 'link-activate', 'navigate-history', 'select-action', 'update:currentCommand'])
 
 const inputRef = ref(null)
 
@@ -100,6 +108,13 @@ watch(
     nextTick(() => {
       inputRef.value?.focusInput()
     })
+  }
+)
+
+watch(
+  () => props.focusToken,
+  () => {
+    nextTick(() => inputRef.value?.focusInput())
   }
 )
 </script>
@@ -116,7 +131,7 @@ watch(
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at bottom right, color-mix(in srgb, var(--agent-signal) 12%, transparent), transparent 32%);
+  background: color-mix(in srgb, var(--surface-page) 12%, transparent);
 }
 
 .terminal-panel {
@@ -128,7 +143,7 @@ watch(
   height: min(37rem, calc(100vh - 8rem));
   flex-direction: column;
   overflow: hidden;
-  border-radius: 30px;
+  border-radius: 8px;
   pointer-events: auto;
   border-color: color-mix(in srgb, var(--agent-signal) 16%, var(--border-base));
 }
@@ -150,7 +165,7 @@ watch(
     bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
     width: auto;
     height: min(76vh, 40rem);
-    border-radius: 28px;
+    border-radius: 8px;
   }
 }
 </style>

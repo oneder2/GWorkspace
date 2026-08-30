@@ -13,6 +13,7 @@
     :current-command="currentCommand"
     :empty-state="emptyState"
     :history="history"
+    :focus-token="focusToken"
     :open="isOpen"
     :prompt="prompt"
     :state="launcherState"
@@ -20,6 +21,7 @@
     @execute="executeCommand"
     @link-activate="handleLinkActivate"
     @navigate-history="navigateHistory"
+    @select-action="selectAction"
     @update:current-command="setCurrentCommand"
   />
 </template>
@@ -34,12 +36,14 @@ const {
   currentCommand,
   emptyState,
   executeCommand,
+  focusToken,
   handleLinkActivate,
   history,
   isOpen,
   launcherState,
   navigateHistory,
   prompt,
+  selectAction,
   setCurrentCommand,
   togglePanel,
   closePanel

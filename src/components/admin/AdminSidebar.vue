@@ -109,6 +109,7 @@ const icons = {
   ai: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3"/><path d="M18.36 6.64l-2.12 2.12"/><path d="M21 12h-3"/><path d="M18.36 17.36l-2.12-2.12"/><path d="M12 21v-3"/><path d="M5.64 17.36l2.12-2.12"/><path d="M3 12h3"/><path d="M5.64 6.64l2.12 2.12"/><circle cx="12" cy="12" r="3"/></svg>`,
   comments: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
   guestbook: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h8"/><path d="M8 15h4"/></svg>`,
+  world: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 3.8 5.5 3.8 9S14.5 18.5 12 21c-2.5-2.5-3.8-5.5-3.8-9S9.5 5.5 12 3z"/></svg>`,
   system: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20h10"/><path d="M9 16v4"/><path d="M15 16v4"/></svg>`
 }
 
@@ -119,6 +120,7 @@ const navItems = computed(() => [
   { path: '/admin/ai', name: t('admin.ai'), icon: icons.ai },
   { path: '/admin/comments', name: t('admin.comments'), icon: icons.comments },
   { path: '/admin/guestbook', name: t('admin.guestbook'), icon: icons.guestbook },
+  { path: '/admin/world', name: t('admin.worldContent'), icon: icons.world },
   { path: '/admin/system', name: t('admin.system'), icon: icons.system }
 ])
 

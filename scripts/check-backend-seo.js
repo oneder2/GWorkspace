@@ -8,6 +8,7 @@ const requiredSnippets = [
   "const DEFAULT_SITE_URL = 'https://www.gellaronline.cc'",
   "process.env.SITE_URL",
   "process.env.PUBLIC_SITE_URL",
+  "{ url: '/archive'",
   "{ url: '/workspace'",
   'escapeXml'
 ]

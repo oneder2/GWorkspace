@@ -1,7 +1,7 @@
 name: Backend Deployment
 
 # 触发条件：推送到 main 分支时触发
-# 注意：前端通过 Vercel 的 GitHub 集成自动部署，无需在此配置
+# 前端由 deploy-frontend.yml 单独构建并发布；此工作流只处理后端。
 on:
   push:
     branches: [ main ]
@@ -41,6 +41,9 @@ jobs:
 
       - name: Verify backend modules load
         run: npm run check:backend-routes
+
+      - name: Verify public world content contract
+        run: npm run check:world-content
 
       - name: Check backend log hygiene
         run: npm run check:backend-logs

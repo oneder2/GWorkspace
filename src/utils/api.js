@@ -7,8 +7,8 @@ const getApiBaseUrl = () => {
   // 1. 优先使用注入的环境变量
   if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL
   
-  // 2. 生产环境：明确指向您的后端子域名
-  if (import.meta.env.PROD) return 'https://workspace.gellaronline.cc/api'
+  // 2. 生产环境：公共前台与 API 共享 canonical origin
+  if (import.meta.env.PROD) return '/api'
   
   // 3. 开发环境
   return 'http://localhost:3001/api'
@@ -186,6 +186,39 @@ export const uploadApi = {
 export const adminSettingsApi = {
   get: () => request('/admin/settings'),
   update: (data) => request('/admin/settings', { method: 'PUT', body: JSON.stringify(data) })
+}
+
+export const publicContentApi = {
+  getWorld: (locale = 'zh') => request(`/public/world?locale=${encodeURIComponent(locale)}`),
+  getProjects: (locale = 'zh') => request(`/public/projects?locale=${encodeURIComponent(locale)}`)
+}
+
+export const contentAdminApi = {
+  getProjects: () => request('/admin/content/projects'),
+  createProject: (data) => request('/admin/content/projects', { method: 'POST', body: JSON.stringify(data) }),
+  updateProject: (id, data) => request(`/admin/content/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteProject: (id) => request(`/admin/content/projects/${id}`, { method: 'DELETE' }),
+  getWorldExhibits: () => request('/admin/content/world-exhibits'),
+  createWorldExhibit: (data) => request('/admin/content/world-exhibits', { method: 'POST', body: JSON.stringify(data) }),
+  updateWorldExhibit: (id, data) => request(`/admin/content/world-exhibits/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteWorldExhibit: (id) => request(`/admin/content/world-exhibits/${id}`, { method: 'DELETE' })
+}
+
+export const writingAdminApi = {
+  getProjects: () => request('/admin/writing/projects'),
+  createProject: (data) => request('/admin/writing/projects', { method: 'POST', body: JSON.stringify(data) }),
+  getProject: (id) => request(`/admin/writing/projects/${id}`),
+  updateProject: (id, data) => request(`/admin/writing/projects/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteProject: (id) => request(`/admin/writing/projects/${id}`, { method: 'DELETE' }),
+  createDocument: (projectId, data) => request(`/admin/writing/projects/${projectId}/documents`, { method: 'POST', body: JSON.stringify(data) }),
+  updateDocument: (id, data) => request(`/admin/writing/documents/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteDocument: (id) => request(`/admin/writing/documents/${id}`, { method: 'DELETE' }),
+  getRevisions: (id) => request(`/admin/writing/documents/${id}/revisions`),
+  createRevision: (id, data = {}) => request(`/admin/writing/documents/${id}/revisions`, { method: 'POST', body: JSON.stringify(data) }),
+  createEntity: (projectId, data) => request(`/admin/writing/projects/${projectId}/entities`, { method: 'POST', body: JSON.stringify(data) }),
+  updateEntity: (id, data) => request(`/admin/writing/entities/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteEntity: (id) => request(`/admin/writing/entities/${id}`, { method: 'DELETE' }),
+  publishEssay: (projectId, data) => request(`/admin/writing/projects/${projectId}/publish`, { method: 'POST', body: JSON.stringify(data) })
 }
 
 export const adminApi = {

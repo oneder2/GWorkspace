@@ -2,250 +2,171 @@ const TERMINAL_AGENT_LOCALES = {
   zh: {
     meta: {
       name: 'Eclospy732',
-      badge: 'site agent',
-      prompt: 'eclospy732::$'
+      badge: 'workspace agent',
+      prompt: 'workspace::$'
     },
     launcher: {
-      label: 'Eclospy732',
-      caption: 'site agent',
-      states: ['idle', 'monitoring', 'standby', 'routing'],
-      activeState: 'listening'
+      label: '工作记录台'
     },
     header: {
-      title: 'Eclospy732',
-      subtitle: 'public relay // advisory shell'
+      title: '工作记录台',
+      subtitle: '随手留下线索，在工作台继续推进'
+    },
+    states: {
+      idle: '待命',
+      processing: '处理中',
+      saved: '已保存',
+      failed: '失败'
     },
     session: {
       bootLines: [
-        'Boot flag accepted.',
-        'Public surface relay attached.',
-        'Eclospy732 online.'
+        '工作记录层已连接。',
+        '记录只保存在当前浏览器。'
       ],
-      emptyTitle: '代理舱待命中',
-      emptyBody: '这里不是另一个工具箱。更像一个站内代理节点。',
-      hints: [
-        'help 查看可用命令',
-        'signal 查看站内信号',
-        'drift 进行随机跳转'
-      ]
+      emptyTitle: '从一条真实记录开始',
+      emptyBody: '这里处理即时想法，不承担站内导航。你保存的内容会立即出现在工作台的“今日痕迹”中。',
+      hints: ['记：需要跟进的想法', '拆：需要验证的判断', '回顾今天']
     },
     ui: {
-      inputPlaceholder: '输入命令，或先试试 help',
-      openLabel: '唤醒 Eclospy732',
-      closeLabel: '关闭 Eclospy732',
-      dismissLabel: '收起代理舱',
-      statusLabel: 'agent status'
-    },
-    labels: {
-      articles: '文章',
-      projects: '项目',
-      tools: '核心入口',
-      currentRoute: '当前页面',
-      latestSignal: '最新信号',
-      theme: '主题',
-      locale: '语言',
-      memory: '记忆',
-      mode: '模式'
-    },
-    values: {
-      themeLight: 'Light',
-      themeDark: 'Dark',
-      memoryWarm: 'Warm',
-      memoryCold: 'Cold',
-      modePublic: 'Public relay'
-    },
-    system: {
-      unknownCommand: '命令不存在：{command}',
-      unknownHint: '输入 help 查看可用交互。',
-      driftFallback: '目标暂时失联，已回退到首页。'
-    },
-    commands: {
-      help: {
-        description: '显示可用交互',
-        intro: '可用命令如下。'
-      },
-      whoami: {
-        description: '查看代理说明',
-        blocks: [
-          {
-            type: 'text',
-            content: '我是 Eclospy732。负责做站内代理，不负责假装成另一个聊天壳。'
-          },
-          {
-            type: 'text',
-            content: '你可以把这里当作一个人格化入口：负责引导、提示、随机偏航，以及以后接入轻量 AI。'
-          },
-          {
-            type: 'status',
-            items: [
-              { label: 'temperament', value: 'dry but stable' },
-              { label: 'role', value: 'site-side relay' },
-              { label: 'scope', value: 'public routes only' },
-              { label: 'future slot', value: 'lightweight AI' }
-            ]
-          }
-        ]
-      },
-      signal: {
-        description: '查看站内信号',
-        intro: '公共面已经整理好。当前信号如下。'
-      },
-      recent: {
-        description: '查看最近内容',
-        intro: '最近几条内容入口已经整理出来了。'
-      },
-      capsule: {
-        description: '查看今日拆句',
-        intro: '今日拆句已经挂上来了。',
-        empty: '今日拆句暂时还没生成出来。',
-        openAnalyzerLabel: '一句话命题解析器',
-        openAnalyzerMeta: '进入工作台继续拆'
-      },
-      drift: {
-        description: '随机跳转到一个站内目标',
-        response: '已转向 {target}。'
-      },
-      status: {
-        description: '查看代理状态',
-        intro: '运行状态如下。'
-      },
-      ask: {
-        description: '查看 AI 入口',
-        intro: 'AI 没被塞进一个聊天壳里，而是被拆成了几个更具体的站内入口。',
-        analyzerLabel: '一句话命题解析器',
-        analyzerMeta: '公开展示思路拆解',
-        blogAssistantLabel: 'Blog Assistant 2.0',
-        blogAssistantMeta: '用于起稿和提炼写作命题'
-      },
-      clear: {
-        description: '清空当前输出'
+      inputPlaceholder: '输入内容，或点击上方动作',
+      openLabel: '打开工作记录台',
+      dismissLabel: '收起工作记录台',
+      submitLabel: '执行',
+      actionsLabel: '快速动作',
+      localOnly: '仅保存在当前浏览器',
+      actions: {
+        capture: '记录',
+        analyze: '拆解',
+        review: '回顾'
       }
     },
-    commandOrder: ['help', 'whoami', 'signal', 'recent', 'capsule', 'drift', 'status', 'ask', 'clear']
+    system: {
+      unknownCommand: '我没有执行“{command}”。',
+      unknownHint: '请使用“记：内容”“拆：判断”或“回顾今天”。',
+      emptyCapture: '“记：”后面需要有具体内容。',
+      emptyAnalysis: '“拆：”后面需要有需要分析的判断。',
+      processingAnalysis: '正在拆解这条判断…',
+      timeout: 'AI 请求超时，请稍后重试。',
+      failure: '处理失败：{message}',
+      saved: '已写入今日痕迹。',
+      cleared: '当前会话已清空。'
+    },
+    commands: {
+      capture: { description: '记：内容 — 保存一条工作线索' },
+      analyze: { description: '拆：判断 — 用 AI 拆解并保存' },
+      review: { description: '回顾今天 — 汇总今天的记录与工具活动' },
+      capsule: { description: 'capsule — 查看今日拆句' },
+      help: { description: 'help — 查看使用方式' },
+      clear: { description: 'clear — 清空终端会话' }
+    },
+    responses: {
+      captureTitle: '记录',
+      analysisTitle: 'AI 拆解',
+      analysisLabels: {
+        thesis: '核心判断',
+        appeal: '吸引力',
+        boundary: '适用边界',
+        takeaway: '下一步'
+      },
+      reviewTitle: '今日回顾',
+      reviewSummary: '今天留下 {records} 条痕迹，打开 {tools} 个工作工具。',
+      reviewEmpty: '今天还没有工作痕迹。可以先记下一条需要继续推进的线索。',
+      recordsLabel: '记录',
+      toolsLabel: '工具活动',
+      capsuleTitle: '今日拆句',
+      capsuleEmpty: '今日拆句暂时还没有生成。',
+      helpIntro: '三个主动作对应三个清晰结果：',
+      sourcePage: '来源：{page}'
+    }
   },
   en: {
     meta: {
       name: 'Eclospy732',
-      badge: 'site agent',
-      prompt: 'eclospy732::$'
+      badge: 'workspace agent',
+      prompt: 'workspace::$'
     },
     launcher: {
-      label: 'Eclospy732',
-      caption: 'site agent',
-      states: ['idle', 'monitoring', 'standby', 'routing'],
-      activeState: 'listening'
+      label: 'Work log'
     },
     header: {
-      title: 'Eclospy732',
-      subtitle: 'public relay // advisory shell'
+      title: 'Work log',
+      subtitle: 'Capture a thread here, continue it from the Desk'
+    },
+    states: {
+      idle: 'Idle',
+      processing: 'Processing',
+      saved: 'Saved',
+      failed: 'Failed'
     },
     session: {
-      bootLines: [
-        'Boot flag accepted.',
-        'Public surface relay attached.',
-        'Eclospy732 online.'
-      ],
-      emptyTitle: 'Agent standing by',
-      emptyBody: 'This is a site-side relay, not another toolbox clone.',
-      hints: [
-        'help for commands',
-        'signal for site status',
-        'drift for a random jump'
-      ]
+      bootLines: ['Workspace record layer connected.', 'Records stay in this browser.'],
+      emptyTitle: 'Start with one real trace',
+      emptyBody: 'This surface handles immediate thoughts, not site navigation. Saved items appear in Today\'s traces on the Desk.',
+      hints: ['note: something to follow up', 'analyze: a claim to test', 'review']
     },
     ui: {
-      inputPlaceholder: 'Type a command, or start with help',
-      openLabel: 'Wake Eclospy732',
-      closeLabel: 'Close Eclospy732',
-      dismissLabel: 'Close terminal panel',
-      statusLabel: 'agent status'
-    },
-    labels: {
-      articles: 'Articles',
-      projects: 'Projects',
-      tools: 'Core entries',
-      currentRoute: 'Current route',
-      latestSignal: 'Latest signal',
-      theme: 'Theme',
-      locale: 'Locale',
-      memory: 'Memory',
-      mode: 'Mode'
-    },
-    values: {
-      themeLight: 'Light',
-      themeDark: 'Dark',
-      memoryWarm: 'Warm',
-      memoryCold: 'Cold',
-      modePublic: 'Public relay'
-    },
-    system: {
-      unknownCommand: 'Unknown command: {command}',
-      unknownHint: 'Type help to inspect the available commands.',
-      driftFallback: 'Target lost. Fell back to home.'
-    },
-    commands: {
-      help: {
-        description: 'Show available commands',
-        intro: 'Available commands are listed below.'
-      },
-      whoami: {
-        description: 'Inspect the agent profile',
-        blocks: [
-          {
-            type: 'text',
-            content: 'I am Eclospy732. A site-side relay, not another chat shell.'
-          },
-          {
-            type: 'text',
-            content: 'Use this shell for navigation, direction, and the future lightweight AI slot.'
-          }
-        ]
-      },
-      signal: {
-        description: 'Inspect public site signals',
-        intro: 'The public surface is stable. Current signals follow.'
-      },
-      recent: {
-        description: 'Show recent content',
-        intro: 'Recent entries are staged below.'
-      },
-      capsule: {
-        description: 'Inspect today\'s capsule',
-        intro: 'Today\'s capsule is already staged.',
-        empty: 'Today\'s capsule has not been generated yet.',
-        openAnalyzerLabel: 'Thesis Parser',
-        openAnalyzerMeta: 'Continue the breakdown in the workspace'
-      },
-      drift: {
-        description: 'Jump to a random site target',
-        response: 'Rerouted to {target}.'
-      },
-      status: {
-        description: 'Inspect relay runtime status',
-        intro: 'Runtime state follows.'
-      },
-      ask: {
-        description: 'Inspect AI entry points',
-        intro: 'The AI layer is not a chat shell here. It has been split into narrower entry points.',
-        analyzerLabel: 'Thesis Parser',
-        analyzerMeta: 'Public-facing proposition breakdown',
-        blogAssistantLabel: 'Blog Assistant 2.0',
-        blogAssistantMeta: 'Draft angles and writing hooks'
-      },
-      clear: {
-        description: 'Clear current output'
+      inputPlaceholder: 'Type something or choose an action above',
+      openLabel: 'Open work log',
+      dismissLabel: 'Close work log',
+      submitLabel: 'Run',
+      actionsLabel: 'Quick actions',
+      localOnly: 'Stored in this browser only',
+      actions: {
+        capture: 'Record',
+        analyze: 'Analyze',
+        review: 'Review'
       }
     },
-    commandOrder: ['help', 'whoami', 'signal', 'recent', 'capsule', 'drift', 'status', 'ask', 'clear']
+    system: {
+      unknownCommand: 'I did not run “{command}”.',
+      unknownHint: 'Use “note: content”, “analyze: claim”, or “review”.',
+      emptyCapture: 'Add some content after “note:”.',
+      emptyAnalysis: 'Add a claim after “analyze:”.',
+      processingAnalysis: 'Analyzing this claim…',
+      timeout: 'The AI request timed out. Please try again.',
+      failure: 'Failed: {message}',
+      saved: 'Saved to today\'s traces.',
+      cleared: 'The current session has been cleared.'
+    },
+    commands: {
+      capture: { description: 'note: content — save a work trace' },
+      analyze: { description: 'analyze: claim — analyze with AI and save' },
+      review: { description: 'review — summarize today\'s records and tool activity' },
+      capsule: { description: 'capsule — show today\'s capsule' },
+      help: { description: 'help — show usage' },
+      clear: { description: 'clear — clear this terminal session' }
+    },
+    responses: {
+      captureTitle: 'Record',
+      analysisTitle: 'AI analysis',
+      analysisLabels: {
+        thesis: 'Core claim',
+        appeal: 'Appeal',
+        boundary: 'Boundary',
+        takeaway: 'Next step'
+      },
+      reviewTitle: 'Today review',
+      reviewSummary: 'You left {records} traces and opened {tools} work tools today.',
+      reviewEmpty: 'There are no work traces today. Start by recording one thread to continue.',
+      recordsLabel: 'Records',
+      toolsLabel: 'Tool activity',
+      capsuleTitle: 'Daily capsule',
+      capsuleEmpty: 'Today\'s capsule is not available yet.',
+      helpIntro: 'Three primary actions produce three clear outcomes:',
+      sourcePage: 'Source: {page}'
+    }
   }
 }
 
 export const terminalAgentMeta = {
-  storageKey: 'terminal.agent.booted'
+  bootStorageKey: 'terminal.agent.booted',
+  historyStorageKey: 'terminal.session',
+  commandStorageKey: 'terminal.commands',
+  openEvent: 'gworkspace:terminal-open'
 }
 
 export function getTerminalAgentLocale(locale = 'zh') {
-  return locale === 'en' ? 'en' : 'zh'
+  return String(locale).toLowerCase().startsWith('en') ? 'en' : 'zh'
 }
 
 export function getTerminalAgentCopy(locale = 'zh') {

@@ -21,6 +21,16 @@ const DEFAULT_HOMEPAGE_CONTENT = {
   }
 }
 
+const DEFAULT_PROFILE_CONTENT = {
+  owner: {
+    name: '',
+    role: { zh: '', en: '' },
+    bio: { zh: '', en: '' },
+    responsibilities: { zh: [], en: [] },
+    contacts: []
+  }
+}
+
 const isPlainObject = (value) => Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 
 const normalizeText = (value, fallback = '') => (typeof value === 'string' ? value.trim() : fallback)
@@ -86,6 +96,31 @@ const parseHomepageContent = (value) => {
   }
 }
 
+const parseProfileContent = (value) => {
+  const source = parsePossibleJson(value)
+  const owner = isPlainObject(source.owner) ? source.owner : {}
+  const contacts = Array.isArray(owner.contacts)
+    ? owner.contacts
+        .filter(contact => isPlainObject(contact))
+        .map(contact => ({
+          id: normalizeText(contact.id),
+          label: normalizeText(contact.label),
+          href: normalizeText(contact.href)
+        }))
+        .filter(contact => contact.label && contact.href)
+    : DEFAULT_PROFILE_CONTENT.owner.contacts
+
+  return {
+    owner: {
+      name: normalizeText(owner.name, DEFAULT_PROFILE_CONTENT.owner.name),
+      role: readLocalizedText(owner, 'role', DEFAULT_PROFILE_CONTENT.owner.role),
+      bio: readLocalizedText(owner, 'bio', DEFAULT_PROFILE_CONTENT.owner.bio),
+      responsibilities: readLocalizedList(owner, 'responsibilities', DEFAULT_PROFILE_CONTENT.owner.responsibilities),
+      contacts
+    }
+  }
+}
+
 const mergeHomepageContent = (currentValue, nextValue) => {
   const current = parseHomepageContent(currentValue)
   const source = parsePossibleJson(nextValue)
@@ -100,6 +135,25 @@ const mergeHomepageContent = (currentValue, nextValue) => {
     status: readLocalizedText(normalizedSource, 'status', current.status),
     slogan: readLocalizedText(normalizedSource, 'slogan', current.slogan),
     tasks: readLocalizedList(normalizedSource, 'tasks', current.tasks)
+  }
+}
+
+const mergeProfileContent = (currentValue, nextValue) => {
+  const current = parseProfileContent(currentValue)
+  const source = parsePossibleJson(nextValue)
+  const nextOwner = isPlainObject(source.owner) ? source.owner : source
+  const owner = current.owner
+
+  return {
+    owner: {
+      name: normalizeText(nextOwner.name, owner.name),
+      role: readLocalizedText(nextOwner, 'role', owner.role),
+      bio: readLocalizedText(nextOwner, 'bio', owner.bio),
+      responsibilities: readLocalizedList(nextOwner, 'responsibilities', owner.responsibilities),
+      contacts: Array.isArray(nextOwner.contacts)
+        ? parseProfileContent({ owner: { ...owner, contacts: nextOwner.contacts } }).owner.contacts
+        : owner.contacts
+    }
   }
 }
 
@@ -120,7 +174,8 @@ export class AdminSettings {
 
     return {
       ...settings,
-      homepage_content: parseHomepageContent(settings.homepage_content)
+      homepage_content: parseHomepageContent(settings.homepage_content),
+      profile_content: parseProfileContent(settings.profile_content)
     }
   }
 
@@ -135,7 +190,7 @@ export class AdminSettings {
    */
   static update(data, updatedBy = null) {
     const db = getDatabase()
-    const { location, timezone, ip_address, homepage_content, homepageContent } = data
+    const { location, timezone, ip_address, homepage_content, homepageContent, profile_content, profileContent } = data
     const currentSettings = this.get()
     
     const updateFields = []
@@ -164,6 +219,16 @@ export class AdminSettings {
 
       updateFields.push('homepage_content = ?')
       updateValues.push(JSON.stringify(mergedHomepageContent))
+    }
+
+    if (profile_content !== undefined || profileContent !== undefined) {
+      const mergedProfileContent = mergeProfileContent(
+        currentSettings?.profile_content,
+        profile_content !== undefined ? profile_content : profileContent
+      )
+
+      updateFields.push('profile_content = ?')
+      updateValues.push(JSON.stringify(mergedProfileContent))
     }
 
     // 更新updated_at和updated_by

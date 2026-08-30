@@ -70,6 +70,7 @@ const navItems = [
   { path: '/admin/ai', name: t('admin.ai') },
   { path: '/admin/comments', name: t('admin.comments') },
   { path: '/admin/guestbook', name: t('admin.guestbook') },
+  { path: '/admin/world', name: t('admin.worldContent') },
   { path: '/admin/system', name: t('admin.system') }
 ]
 

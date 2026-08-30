@@ -11,12 +11,15 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
+      scope: '/workspace',
       includeAssets: ['robots.txt', 'sitemap.xml', 'images/icons/favicon.ico', 'images/icons/*.svg', 'backgrounds/*.jpg', 'backgrounds/workplace/*.webp'],
       manifest: {
         name: 'GWorkspace',
         short_name: 'GWorkspace',
         description: 'A personal workspace site built with Vue.js, organized around blog writing, a curated workspace, and portfolio surfaces.',
         theme_color: '#22c55e',
+        start_url: '/workspace',
+        scope: '/workspace',
         icons: [
           {
             src: 'images/icons/icon.svg',

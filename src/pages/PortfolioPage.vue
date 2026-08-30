@@ -77,15 +77,34 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { portfolioConfig } from '../config/portfolio'
 import { getIcon } from '../utils/iconMapper'
+import { publicContentApi } from '../utils/api'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const remoteProjects = ref(null)
+
+const contentLocale = computed(() => String(locale.value || 'zh').toLowerCase().startsWith('zh') ? 'zh' : 'en')
+
+const loadProjects = async () => {
+  try {
+    remoteProjects.value = await publicContentApi.getProjects(contentLocale.value)
+  } catch {
+    remoteProjects.value = null
+  }
+}
 
 // 从配置文件加载作品数据，并映射图标组件
 const portfolio = computed(() => {
+  if (Array.isArray(remoteProjects.value) && remoteProjects.value.length) {
+    return remoteProjects.value.map(work => ({
+      ...work,
+      desc: work.summary,
+      icon: getIcon('LayoutIcon')
+    }))
+  }
   return portfolioConfig.map(work => ({
     ...work,
     title: t(work.titleKey),
@@ -93,6 +112,9 @@ const portfolio = computed(() => {
     icon: getIcon(work.iconName)
   }))
 })
+
+onMounted(loadProjects)
+watch(contentLocale, loadProjects)
 
 /**
  * 处理标题hover进入

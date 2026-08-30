@@ -45,7 +45,7 @@ defineEmits(['toggle'])
 .terminal-launcher {
   position: fixed;
   right: 1.35rem;
-  bottom: calc(0.68rem + env(safe-area-inset-bottom, 0px));
+  bottom: calc(5.4rem + env(safe-area-inset-bottom, 0px));
   z-index: 90;
   display: inline-flex;
   align-items: center;
@@ -172,7 +172,7 @@ defineEmits(['toggle'])
 @media (max-width: 767px) {
   .terminal-launcher {
     right: 0.85rem;
-    bottom: calc(0.62rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
     min-width: 0;
     width: 2.65rem;
     min-height: 2.65rem;

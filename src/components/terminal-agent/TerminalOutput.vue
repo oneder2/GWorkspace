@@ -1,6 +1,6 @@
 <template>
   <div ref="scrollRef" class="terminal-output custom-scrollbar">
-    <div v-if="entries.length === 0" class="terminal-empty surface-card">
+    <div v-if="entries.length === 0" class="terminal-empty">
       <p class="terminal-empty-kicker">{{ prompt }}</p>
       <h4 class="terminal-empty-title">{{ emptyState.title }}</h4>
       <p class="terminal-empty-body">{{ emptyState.body }}</p>
@@ -21,6 +21,10 @@
             {{ block.content }}
           </p>
 
+          <h5 v-else-if="block.type === 'section-title'" class="terminal-section-title">
+            {{ block.content }}
+          </h5>
+
           <div v-else-if="block.type === 'lines'" class="terminal-lines" :class="resolveTextTone(block.tone)">
             <p v-for="line in block.items" :key="line">{{ line }}</p>
           </div>
@@ -36,6 +40,26 @@
             <div v-for="item in block.items" :key="item.name" class="terminal-command-card">
               <span class="terminal-command-name">{{ item.name }}</span>
               <span class="terminal-command-description">{{ item.description }}</span>
+            </div>
+          </div>
+
+          <div v-else-if="block.type === 'analysis'" class="terminal-analysis">
+            <div v-for="item in block.items" :key="item.key" class="terminal-analysis-row">
+              <span class="terminal-analysis-label">{{ item.label }}</span>
+              <p class="terminal-analysis-copy">{{ item.content }}</p>
+            </div>
+          </div>
+
+          <div v-else-if="block.type === 'timeline'" class="terminal-timeline">
+            <span class="terminal-timeline-heading">{{ block.label }}</span>
+            <div class="terminal-timeline-list">
+              <div v-for="item in block.items" :key="`${item.label}-${item.meta}`" class="terminal-timeline-item">
+                <span class="terminal-timeline-mark" :class="`is-${item.tone || 'activity'}`"></span>
+                <div class="terminal-timeline-copy">
+                  <span class="terminal-timeline-label">{{ item.label }}</span>
+                  <span v-if="item.meta" class="terminal-timeline-meta">{{ item.meta }}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -98,6 +122,7 @@ function resolveTextTone(tone) {
   return {
     'terminal-text-muted': tone === 'muted',
     'terminal-text-error': tone === 'error',
+    'terminal-text-success': tone === 'success',
     'terminal-text-boot': tone === 'boot'
   }
 }
@@ -120,7 +145,8 @@ watch(
 
 .terminal-empty {
   padding: 1rem;
-  border-radius: 24px;
+  border-left: 2px solid color-mix(in srgb, var(--agent-signal) 44%, var(--border-strong));
+  background: color-mix(in srgb, var(--surface-elevated) 54%, transparent);
 }
 
 .terminal-empty-kicker {
@@ -136,7 +162,7 @@ watch(
   color: var(--text-main);
   font-size: 1rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 .terminal-empty-body {
@@ -155,7 +181,7 @@ watch(
 
 .terminal-empty-hint {
   display: inline-flex;
-  border-radius: 999px;
+  border-radius: 4px;
   padding: 0.35rem 0.65rem;
   background: color-mix(in srgb, var(--agent-signal) 10%, transparent);
   color: var(--text-secondary);
@@ -214,9 +240,21 @@ watch(
   color: var(--accent-danger);
 }
 
+.terminal-text-success {
+  color: var(--accent-success, var(--agent-signal-deep));
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .terminal-text-boot {
   color: var(--agent-signal-deep);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.terminal-section-title {
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
 .terminal-status-grid,
@@ -238,11 +276,98 @@ watch(
   min-width: 0;
   flex-direction: column;
   gap: 0.25rem;
-  border-radius: 20px;
+  border-radius: 6px;
   border: 1px solid color-mix(in srgb, var(--agent-signal) 12%, var(--border-strong));
   background: color-mix(in srgb, var(--surface-elevated) 94%, transparent);
   padding: 0.85rem 0.9rem;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
+}
+
+.terminal-analysis {
+  display: grid;
+  border-top: 1px solid var(--border-base);
+}
+
+.terminal-analysis-row {
+  display: grid;
+  grid-template-columns: 5.2rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-base);
+}
+
+.terminal-analysis-label,
+.terminal-timeline-heading {
+  color: var(--agent-signal-deep);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.terminal-analysis-copy {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.terminal-timeline-heading {
+  display: block;
+  margin-bottom: 0.55rem;
+}
+
+.terminal-timeline-list {
+  display: grid;
+}
+
+.terminal-timeline-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 0.7rem minmax(0, 1fr);
+  gap: 0.6rem;
+  padding: 0.25rem 0 0.75rem;
+}
+
+.terminal-timeline-item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 0.8rem;
+  bottom: 0;
+  left: 0.28rem;
+  width: 1px;
+  background: var(--border-strong);
+}
+
+.terminal-timeline-mark {
+  position: relative;
+  z-index: 1;
+  width: 0.58rem;
+  height: 0.58rem;
+  margin-top: 0.3rem;
+  border: 2px solid var(--surface-elevated);
+  border-radius: 50%;
+  background: var(--text-muted);
+  box-shadow: 0 0 0 1px var(--border-strong);
+}
+
+.terminal-timeline-mark.is-analysis {
+  background: var(--agent-signal-deep);
+}
+
+.terminal-timeline-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.terminal-timeline-label {
+  color: var(--text-main);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.terminal-timeline-meta {
+  color: var(--text-muted);
+  font-size: 0.68rem;
 }
 
 .terminal-status-label,
@@ -276,6 +401,11 @@ watch(
   .terminal-status-grid,
   .terminal-command-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .terminal-analysis-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
   }
 }
 </style>

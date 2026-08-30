@@ -14,7 +14,9 @@ export const MIGRATION_FILES = [
   '005_admin_settings.sql',
   '006_user_favorites.sql',
   '007_ai_workflow.sql',
-  '008_homepage_content.sql'
+  '008_homepage_content.sql',
+  '009_public_world_content.sql',
+  '010_writing_studio.sql'
 ]
 
 const isIgnorableMigrationError = (message = '') => (

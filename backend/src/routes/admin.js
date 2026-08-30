@@ -94,7 +94,8 @@ router.get('/settings', optionalAuthenticate, (req, res) => {
     res.json({
       location: settings.location,
       timezone: settings.timezone,
-      homepage_content: settings.homepage_content
+      homepage_content: settings.homepage_content,
+      profile_content: settings.profile_content
     })
   } catch (error) {
     console.error('Error fetching admin settings:', error)
@@ -460,12 +461,17 @@ router.put('/settings', async (req, res) => {
   try {
     const { location, timezone, ip_address, forceRelocate } = req.body
     const homepageContent = req.body.homepage_content ?? req.body.homepageContent
+    const profileContent = req.body.profile_content ?? req.body.profileContent
     const userId = req.user.id
 
     const updatePayload = {}
 
     if (homepageContent !== undefined) {
       updatePayload.homepage_content = homepageContent
+    }
+
+    if (profileContent !== undefined) {
+      updatePayload.profile_content = profileContent
     }
 
     const hasLocationPayload = ip_address !== undefined || location !== undefined || timezone !== undefined || forceRelocate === true
@@ -558,7 +564,7 @@ router.put('/settings', async (req, res) => {
       }
     }
     // 情况5：参数不足，但允许仅更新首页内容
-    else if (!homepageContent && !hasLocationPayload) {
+    else if (!homepageContent && !profileContent && !hasLocationPayload) {
       return res.status(400).json({ 
         error: 'Missing required parameters',
         message: 'Please provide ip_address (from frontend), or location and timezone manually.'
@@ -574,7 +580,7 @@ router.put('/settings', async (req, res) => {
     if (Object.keys(updatePayload).length === 0) {
       return res.status(400).json({
         error: 'Missing required parameters',
-        message: 'Please provide homepage_content or location fields to update.'
+        message: 'Please provide homepage_content, profile_content or location fields to update.'
       })
     }
 

@@ -27,6 +27,7 @@ const AdminAiStudio = () => import('../pages/admin/AdminAiStudio.vue')
 const AdminComments = () => import('../pages/admin/AdminComments.vue')
 const AdminGuestbook = () => import('../pages/admin/AdminGuestbook.vue')
 const AdminSystem = () => import('../pages/admin/AdminSystem.vue')
+const AdminWorldContent = () => import('../pages/admin/AdminWorldContent.vue')
 
 /**
  * 路由配置
@@ -126,6 +127,12 @@ const routes = [
         name: 'admin-guestbook',
         component: AdminGuestbook,
         meta: { titleKey: 'admin.routeTitles.guestbook' }
+      },
+      {
+        path: 'world',
+        name: 'admin-world',
+        component: AdminWorldContent,
+        meta: { titleKey: 'admin.routeTitles.world' }
       },
       {
         path: 'system',

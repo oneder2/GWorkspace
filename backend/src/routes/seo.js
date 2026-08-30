@@ -42,6 +42,7 @@ router.get('/sitemap.xml', async (req, res) => {
     // 3. 定义静态页面
     const staticPages = [
       { url: '/', changefreq: 'daily', priority: '1.0' },
+      { url: '/archive', changefreq: 'monthly', priority: '0.8' },
       { url: '/blog', changefreq: 'daily', priority: '0.9' },
       { url: '/workspace', changefreq: 'weekly', priority: '0.8' },
       { url: '/portfolio', changefreq: 'monthly', priority: '0.7' },
@@ -67,7 +68,7 @@ router.get('/sitemap.xml', async (req, res) => {
       const date = new Date(lastMod).toISOString().split('T')[0]
       xml += `
   <url>
-    <loc>${escapeXml(`${siteUrl}/blog/${blog.id}`)}</loc>
+    <loc>${escapeXml(`${siteUrl}/blog/${blog.slug || blog.id}`)}</loc>
     <lastmod>${date}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

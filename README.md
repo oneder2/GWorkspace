@@ -1,6 +1,6 @@
 # GWorkspace
 
-一个基于 Vue.js 的个人工作空间静态网站，采用 Glassmorphism（玻璃态）设计风格，支持暗色模式和中英双语切换。
+GWorkspace 是个人内容、工具与站点运营的核心系统。Vue 前端承载工作区和管理后台，Express/SQLite 为 Gellaria 的三维公共前台提供统一内容数据。
 
 当前版本：`v3.1.0`
 
@@ -56,9 +56,14 @@
 - 模块化设计，易于扩展
 
 #### 作品集 (Portfolio)
-- 项目展示卡片
-- 标签分类
-- 模块化设计，便于添加新作品
+- 项目记录、双语摘要、标签和发布状态由数据库统一管理
+- `/api/public/projects` 同时供 Vue 与 Gellaria 使用
+- `/admin/world` 管理个人资料、项目和三维世界展品摆放
+
+#### Gellaria 内容接口
+- `/api/public/world` 聚合公共身份、项目、博客与留言回声
+- `world_exhibits` 只保存空间摆放信息，通过类型和 Slug/ID 引用真实内容
+- Gellaria 负责 `/`、`/archive`、`/blog`、`/portfolio`；GWorkspace 保留 `/workspace` 与 `/admin`
 
 ## 技术栈
 

@@ -26,6 +26,9 @@ import guestbookRoutes from './routes/guestbook.js'
 import uploadRoutes from './routes/upload.js'
 import seoRoutes from './routes/seo.js'
 import spotifyRoutes from './routes/spotify.js'
+import publicContentRoutes from './routes/publicContent.js'
+import contentAdminRoutes from './routes/contentAdmin.js'
+import writingAdminRoutes from './routes/writingAdmin.js'
 import { startAiDailyCapsuleScheduler } from './services/aiScheduler.js'
 
 // 加载环境变量
@@ -117,12 +120,15 @@ app.use('/api/blogs', blogRoutes)
 app.use('/api/blogs', commentsRoutes)
 app.use('/api/comments', commentsRoutes)
 app.use('/api/analytics', analyticsRoutes)
+app.use('/api/admin/content', contentAdminRoutes)
+app.use('/api/admin/writing', writingAdminRoutes)
 app.use('/api/admin/ai', adminAiRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/guestbook', guestbookRoutes)
 app.use('/api/upload', uploadRoutes)
 app.use('/api/seo', seoRoutes)
 app.use('/api/spotify', spotifyRoutes)
+app.use('/api/public', publicContentRoutes)
 
 // 健康检查
 app.get('/health', (req, res) => {

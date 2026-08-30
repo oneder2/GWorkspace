@@ -7,10 +7,41 @@
     <section class="home-dashboard-shell">
       <div class="home-main-grid">
         <header class="home-outline-card home-solid-card home-intro-card">
-          <div class="space-y-3">
+          <div class="home-intro-copy space-y-3">
             <h1 class="section-title home-title">{{ $t('home.title') }}</h1>
             <p class="section-copy home-copy">{{ $t('home.subtitle') }}</p>
           </div>
+
+          <section class="home-traces" :aria-label="traceCopy.title">
+            <div class="home-traces-head">
+              <div>
+                <span class="home-traces-kicker">{{ traceCopy.kicker }}</span>
+                <h2 class="home-traces-title">{{ traceCopy.title }}</h2>
+              </div>
+              <span class="home-traces-count">{{ todayEntries.length }}</span>
+            </div>
+
+            <div v-if="todayEntries.length" class="home-traces-list">
+              <button
+                v-for="entry in todayEntries.slice(0, 3)"
+                :key="entry.id"
+                type="button"
+                class="home-trace-item"
+                @click="openTerminal()"
+              >
+                <component :is="entry.type === 'analysis' ? BrainIcon : FileTextIcon" class="home-trace-icon" />
+                <span class="home-trace-copy">
+                  <span class="home-trace-summary">{{ entry.summary }}</span>
+                  <span class="home-trace-meta">{{ formatTraceTime(entry.createdAt) }} · {{ entry.type === 'analysis' ? traceCopy.analysis : traceCopy.note }}</span>
+                </span>
+              </button>
+            </div>
+
+            <button v-else type="button" class="home-traces-empty" @click="openTerminal('capture')">
+              <FileTextIcon class="home-trace-icon" />
+              <span>{{ traceCopy.empty }}</span>
+            </button>
+          </section>
         </header>
 
         <article class="home-outline-card home-status-card">
@@ -24,10 +55,6 @@
           <p class="home-highlight-copy">
             {{ profileStatus }}
           </p>
-          <div class="home-outline-subcard">
-            <div class="text-[11px] uppercase tracking-[0.22em] text-muted">{{ $t('home.sloganTitle') }}</div>
-            <p class="home-slogan-copy mt-1 text-[13px] sm:text-sm leading-5">{{ profileSlogan }}</p>
-          </div>
         </article>
 
         <article class="home-spotify-card">
@@ -108,172 +135,88 @@
           <p v-else class="text-sm text-secondary leading-6">{{ $t('home.tasksEmpty') }}</p>
         </article>
 
-        <section class="home-outline-card home-solid-card home-links-card">
-          <div class="home-card-head">
+        <section class="home-outline-card home-solid-card home-owner-card">
+          <div class="home-owner-head">
             <div>
-              <div class="section-kicker">{{ $t('home.launchPad') }}</div>
-              <h2 class="text-lg sm:text-xl font-bold text-main tracking-tight">{{ $t('home.quickAccess') }}</h2>
-              <p class="section-copy mt-1 text-sm">{{ $t('home.quickAccessCopy') }}</p>
+              <div class="section-kicker">{{ $t('home.owner.kicker') }}</div>
+              <h2 class="home-owner-section-title">{{ $t('home.owner.title') }}</h2>
             </div>
-            <button
-              @click="showEditor = true"
-              class="action-btn action-btn-secondary text-xs py-2.5 px-3.5 shrink-0"
-              :title="$t('home.edit')"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-              {{ $t('home.edit') }}
-            </button>
+            <span class="home-owner-active">
+              <span class="home-owner-active-dot"></span>
+              {{ $t('home.owner.active') }}
+            </span>
           </div>
 
-          <div class="home-links-search" :class="{ 'home-links-search-active': showEngineMenu }">
-            <div class="home-search-row">
-              <div class="home-search-engine">
-                <button
-                  ref="engineButtonRef"
-                  :aria-expanded="showEngineMenu ? 'true' : 'false'"
-                  aria-haspopup="listbox"
-                  :aria-label="getEngineName(searchEngine)"
-                  :title="getEngineName(searchEngine)"
-                  class="home-control-btn"
-                  @click="toggleSearchEngineMenu"
-                >
-                  <component :is="getEngineIcon(searchEngine)" class="home-engine-current-icon" />
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="home-engine-chevron"
-                    :class="{ 'is-open': showEngineMenu }"
-                  >
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </button>
-                <transition name="engine-menu">
-                  <div
-                    v-if="showEngineMenu"
-                    ref="engineMenuRef"
-                    class="home-engine-menu surface-float"
-                    @click.stop
-                    role="listbox"
-                  >
-                    <button
-                      v-for="engine in searchEngines"
-                      :key="engine.id"
-                      type="button"
-                      class="home-engine-option"
-                      :class="{ 'is-active': searchEngine === engine.id }"
-                      @click="selectSearchEngine(engine.id)"
-                    >
-                      <component :is="engine.icon" class="home-engine-option-icon" />
-                      <span class="truncate">{{ $t(engine.labelKey) }}</span>
-                      <svg
-                        v-if="searchEngine === engine.id"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.4"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="home-engine-check"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </button>
-                  </div>
-                </transition>
+          <div class="home-owner-layout">
+            <div class="home-owner-identity">
+              <div class="home-owner-person">
+                <div class="home-owner-mark" aria-hidden="true">
+                  <GWorkspaceIcon :size="62" variant="monochrome" />
+                </div>
+                <div class="home-owner-name-block">
+                  <p class="home-owner-role">{{ ownerProfile.role }}</p>
+                  <h3 class="home-owner-name">{{ ownerProfile.name }}</h3>
+                </div>
               </div>
 
-              <div class="home-search-input-shell">
-                <label for="search-input" class="sr-only">{{ $t('home.searchPlaceholder') }}</label>
-                <input
-                  id="search-input"
-                  name="search-input"
-                  v-model="searchQuery"
-                  @keyup.enter="performSearch"
-                  @keydown.esc="showEngineMenu = false"
-                  type="text"
-                  class="glass-input home-search-input"
-                  :placeholder="$t('home.searchPlaceholder')"
-                  autofocus
+              <p class="home-owner-bio">{{ ownerProfile.bio }}</p>
+
+              <nav class="home-owner-contacts" :aria-label="$t('home.owner.contact')">
+                <a
+                  v-for="contact in ownerProfile.contacts"
+                  :key="contact.id"
+                  :href="contact.href"
+                  :target="contact.id === 'github' ? '_blank' : undefined"
+                  :rel="contact.id === 'github' ? 'noopener noreferrer' : undefined"
+                  class="home-owner-contact"
                 >
-                <button
-                  @click="performSearch"
-                  class="home-search-submit"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.35-4.35"/>
+                  <GitHubIcon v-if="contact.id === 'github'" class="home-owner-contact-icon is-filled" />
+                  <svg v-else viewBox="0 0 24 24" class="home-owner-contact-icon" aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                    <path d="m3 7 9 6 9-6" />
                   </svg>
-                </button>
-              </div>
+                  <span>{{ contact.label }}</span>
+                </a>
+              </nav>
             </div>
-          </div>
 
-          <div class="home-links-grid">
-            <a
-              v-for="site in displayLinks"
-              :key="site.id || site.name"
-              :href="site.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="home-outline-link group"
-            >
-              <div class="home-link-icon">
-                <img
-                  v-if="site.url && !failedFaviconUrls.has(site.url) && getCachedFaviconInfo(site.url).url"
-                  :src="getCachedFaviconInfo(site.url).url"
-                  @load="handleIconLoad(site.url)"
-                  @error="handleIconError($event, site)"
-                  class="w-5 h-5 sm:w-6 sm:h-6 rounded-md transition-transform group-hover:scale-110"
-                  :alt="site.name"
-                >
-                <component v-else-if="site.icon" :is="site.icon" class="w-4.5 h-4.5 text-secondary" />
-                <span v-else class="text-secondary text-sm font-bold">{{ site.name?.[0] || '?' }}</span>
+            <div class="home-owner-details">
+              <div class="home-owner-responsibilities">
+                <p class="home-owner-detail-label">{{ $t('home.owner.responsibilities') }}</p>
+                <ol class="home-owner-list">
+                  <li v-for="(item, index) in ownerProfile.responsibilities" :key="item">
+                    <span>{{ String(index + 1).padStart(2, '0') }}</span>
+                    <p>{{ item }}</p>
+                  </li>
+                </ol>
               </div>
-              <div class="min-w-0">
-                <div class="text-sm font-bold text-main truncate">{{ site.name }}</div>
-                <div class="text-[11px] text-muted truncate">{{ site.url }}</div>
-              </div>
-            </a>
+
+              <blockquote class="home-owner-quote">
+                <span>{{ $t('home.owner.quote') }}</span>
+                <p>{{ profileSlogan }}</p>
+              </blockquote>
+            </div>
           </div>
         </section>
       </div>
     </section>
-
-    <QuickLinkEditor
-      v-if="showEditor"
-      :links="displayLinks"
-      @close="showEditor = false"
-      @save="handleSaveLinks"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, markRaw, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { quickLinksConfig, homeProfileConfig } from '../config/home'
-import { useLocalStorage } from '../composables/useStorage'
+import { homeProfileConfig } from '../config/home'
 import { useSpotifyNowPlaying } from '../composables/useSpotifyNowPlaying'
+import { useWorkspaceJournal } from '../composables/useWorkspaceJournal'
 import { adminSettingsApi } from '../utils/api'
-import { getIcon } from '../utils/iconMapper'
-import { getCachedFaviconUrl, markFaviconSuccess, markFaviconError } from '../utils/faviconCache'
-import { ensureAbsoluteUrl } from '../utils/urlHelper'
-import GoogleIcon from '../components/icons/GoogleIcon.vue'
-import DuckIcon from '../components/icons/DuckIcon.vue'
-import BaiduIcon from '../components/icons/BaiduIcon.vue'
-import BingIcon from '../components/icons/BingIcon.vue'
-import QuickLinkEditor from '../components/QuickLinkEditor.vue'
+import BrainIcon from '../components/icons/BrainIcon.vue'
+import FileTextIcon from '../components/icons/FileTextIcon.vue'
+import GitHubIcon from '../components/icons/GitHubIcon.vue'
+import GWorkspaceIcon from '../components/icons/GWorkspaceIcon.vue'
 
 const { t, locale } = useI18n()
+const { todayEntries } = useWorkspaceJournal()
 
 const profileLocale = computed(() => {
   const current = String(locale.value || 'zh').toLowerCase()
@@ -293,75 +236,50 @@ const resolveLocalizedList = (value) => {
   return Array.isArray(resolved) ? resolved.filter(item => typeof item === 'string' && item.trim()) : []
 }
 
-const searchEngine = ref('google')
-const searchQuery = ref('')
-const showEngineMenu = ref(false)
-const engineButtonRef = ref(null)
-const engineMenuRef = ref(null)
 const homepageContent = ref(null)
-
-const searchEngines = [
-  {
-    id: 'google',
-    labelKey: 'home.searchEngines.google',
-    icon: markRaw(GoogleIcon),
-    buildUrl: (query) => `https://www.google.com/search?q=${encodeURIComponent(query)}`
-  },
-  {
-    id: 'duckduckgo',
-    labelKey: 'home.searchEngines.duckduckgo',
-    icon: markRaw(DuckIcon),
-    buildUrl: (query) => `https://duckduckgo.com/?q=${encodeURIComponent(query)}`
-  },
-  {
-    id: 'baidu',
-    labelKey: 'home.searchEngines.baidu',
-    icon: markRaw(BaiduIcon),
-    buildUrl: (query) => `https://www.baidu.com/s?wd=${encodeURIComponent(query)}`
-  },
-  {
-    id: 'bing',
-    labelKey: 'home.searchEngines.bing',
-    icon: markRaw(BingIcon),
-    buildUrl: (query) => `https://www.bing.com/search?q=${encodeURIComponent(query)}`
-  }
-]
-
-const searchEngineLookup = Object.fromEntries(searchEngines.map(engine => [engine.id, engine]))
-
-const showEditor = ref(false)
-const failedFaviconUrls = reactive(new Set())
-
-const customLinksStorage = useLocalStorage('customQuickLinks', [])
-const customLinks = customLinksStorage.value
+const profileContent = ref(null)
 const spotifyNowPlaying = useSpotifyNowPlaying()
 
 const homepageContentSource = computed(() => homepageContent.value || homeProfileConfig)
 const profileStatus = computed(() => resolveLocalizedValue(homepageContentSource.value.status))
 const profileSlogan = computed(() => resolveLocalizedValue(homepageContentSource.value.slogan))
 const profileTasks = computed(() => resolveLocalizedList(homepageContentSource.value.tasks))
+const ownerProfile = computed(() => ({
+  name: profileContent.value?.owner?.name || homeProfileConfig.owner.name,
+  role: resolveLocalizedValue(profileContent.value?.owner?.role || homeProfileConfig.owner.role),
+  bio: resolveLocalizedValue(profileContent.value?.owner?.bio || homeProfileConfig.owner.bio),
+  responsibilities: resolveLocalizedList(profileContent.value?.owner?.responsibilities || homeProfileConfig.owner.responsibilities),
+  contacts: profileContent.value?.owner?.contacts || homeProfileConfig.owner.contacts
+}))
 
-const defaultLinks = computed(() => quickLinksConfig.map(link => ({
-  ...link,
-  name: t(link.nameKey),
-  url: ensureAbsoluteUrl(link.url),
-  icon: getIcon(link.iconName)
-})))
-
-const displayLinks = computed(() => {
-  const customLinksArray = Array.isArray(customLinks.value) ? customLinks.value : []
-  if (customLinksArray.length > 0) {
-    return customLinksArray.map(link => {
-      const icon = link.iconName ? getIcon(link.iconName) : null
-      return {
-        ...link,
-        url: ensureAbsoluteUrl(link.url),
-        icon: icon ? markRaw(icon) : null
-      }
+const traceCopy = computed(() => profileLocale.value === 'zh'
+  ? {
+      kicker: 'WORK LOG',
+      title: '今日痕迹',
+      note: '记录',
+      analysis: 'AI 拆解',
+      empty: '还没有记录。写下第一条需要继续推进的线索。'
+    }
+  : {
+      kicker: 'WORK LOG',
+      title: 'Today\'s traces',
+      note: 'Record',
+      analysis: 'AI analysis',
+      empty: 'No records yet. Capture the first thread you want to continue.'
     })
-  }
-  return defaultLinks.value
-})
+
+const formatTraceTime = (value) => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return new Intl.DateTimeFormat(profileLocale.value === 'zh' ? 'zh-CN' : 'en-US', {
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date)
+}
+
+const openTerminal = (action) => {
+  window.dispatchEvent(new CustomEvent('gworkspace:terminal-open', { detail: { action } }))
+}
 
 const displayTasks = computed(() => {
   return profileTasks.value.map((text, index) => ({
@@ -406,83 +324,20 @@ const formatDuration = (milliseconds) => {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
 
-const handleSaveLinks = (links) => {
-  const linksToSave = links.map(link => ({
-    id: link.id || `link-${Date.now()}-${Math.random()}`,
-    name: link.name,
-    url: ensureAbsoluteUrl(link.url),
-    iconName: link.iconName || 'HomeIcon',
-    color: link.color || 'bg-slate-500'
-  }))
-  customLinksStorage.update(linksToSave)
-  showEditor.value = false
-}
-
-const toggleSearchEngineMenu = () => {
-  showEngineMenu.value = !showEngineMenu.value
-}
-
-const selectSearchEngine = (engine) => {
-  searchEngine.value = engine
-  showEngineMenu.value = false
-}
-
-const handleDocumentPointerDown = (event) => {
-  if (!showEngineMenu.value) return
-  const target = event?.target
-  if (engineButtonRef.value?.contains(target) || engineMenuRef.value?.contains(target)) return
-  showEngineMenu.value = false
-}
-
-const getSearchEngine = (engine) => searchEngineLookup[engine] || searchEngineLookup.google
-
-const getEngineIcon = (engine) => getSearchEngine(engine).icon
-
-const getEngineName = (engine) => t(getSearchEngine(engine).labelKey)
-
-const performSearch = () => {
-  const query = searchQuery.value.trim()
-  if (!query) return
-
-  const url = getSearchEngine(searchEngine.value).buildUrl(query)
-  showEngineMenu.value = false
-  openExternalUrl(url)
-}
-
-const openExternalUrl = (url) => {
-  const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
-  if (newWindow) newWindow.opener = null
-}
-
-const getCachedFaviconInfo = (url) => getCachedFaviconUrl(url, 64)
-
-const handleIconLoad = (url) => {
-  failedFaviconUrls.delete(url)
-  markFaviconSuccess(url, 64)
-}
-
-const handleIconError = (event, site) => {
-  if (site.url) markFaviconError(site.url)
-  if (site?.url) failedFaviconUrls.add(site.url)
-}
-
 const loadHomepageContent = async () => {
   try {
     const settings = await adminSettingsApi.get()
     homepageContent.value = settings?.homepage_content || null
+    profileContent.value = settings?.profile_content || null
   } catch (error) {
     console.debug('Failed to load homepage content:', error)
     homepageContent.value = null
+    profileContent.value = null
   }
 }
 
 onMounted(() => {
   loadHomepageContent()
-  document.addEventListener('pointerdown', handleDocumentPointerDown)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('pointerdown', handleDocumentPointerDown)
 })
 </script>
 
@@ -511,8 +366,8 @@ onUnmounted(() => {
   grid-template-rows: auto minmax(0, 0.84fr) minmax(0, 1.16fr);
   grid-template-areas:
     "intro intro intro intro intro intro intro intro status status status status"
-    "links links links links links links links links spotify spotify spotify spotify"
-    "links links links links links links links links tasks tasks tasks tasks";
+    "owner owner owner owner owner owner owner owner spotify spotify spotify spotify"
+    "owner owner owner owner owner owner owner owner tasks tasks tasks tasks";
   max-width: 1600px;
   width: 100%;
   margin: 0 auto;
@@ -627,8 +482,120 @@ onUnmounted(() => {
 
 .home-intro-card { 
   grid-area: intro; 
-  justify-content: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.72fr);
+  align-items: center;
+  gap: clamp(1.25rem, 2.4vw, 2.5rem);
   background: linear-gradient(135deg, color-mix(in srgb, var(--theme-primary) 8%, var(--surface-panel) 26%), color-mix(in srgb, var(--surface-panel) 24%, transparent));
+}
+
+.home-intro-copy {
+  min-width: 0;
+}
+
+.home-traces {
+  min-width: 0;
+  padding-left: clamp(1rem, 2vw, 1.75rem);
+  border-left: 1px solid color-mix(in srgb, var(--theme-primary) 15%, var(--border-strong));
+}
+
+.home-traces-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+}
+
+.home-traces-kicker {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.home-traces-title {
+  margin-top: 0.12rem;
+  color: var(--text-main);
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.home-traces-count {
+  display: inline-flex;
+  width: 1.7rem;
+  height: 1.7rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--theme-primary) 20%, var(--border-strong));
+  border-radius: 50%;
+  color: var(--theme-primary-darker);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.home-traces-list {
+  display: grid;
+}
+
+.home-trace-item,
+.home-traces-empty {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1.2rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.6rem;
+  padding: 0.42rem 0;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.home-trace-item + .home-trace-item {
+  border-top: 1px solid color-mix(in srgb, var(--border-strong) 72%, transparent);
+}
+
+.home-trace-item:hover .home-trace-summary,
+.home-traces-empty:hover {
+  color: var(--theme-primary-darker);
+}
+
+.home-trace-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-top: 0.15rem;
+  color: var(--theme-primary-darker);
+}
+
+.home-trace-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.08rem;
+}
+
+.home-trace-summary {
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.home-trace-meta {
+  color: var(--text-muted);
+  font-size: 0.64rem;
+}
+
+.home-traces-empty {
+  border-top: 1px solid color-mix(in srgb, var(--border-strong) 72%, transparent);
+  font-size: 0.74rem;
+  line-height: 1.45;
+  transition: color 0.2s ease;
 }
 
 .home-solid-card.home-intro-card {
@@ -659,18 +626,17 @@ onUnmounted(() => {
   min-height: 0;
 }
 
-.home-links-card { 
-  grid-area: links;
-  background: linear-gradient(155deg, color-mix(in srgb, var(--surface-panel) 22%, transparent), color-mix(in srgb, var(--theme-primary) 4%, transparent));
-  min-height: 0; /* 关键：允许内容在内部滚动 */
-  overflow: visible;
+.home-owner-card {
+  grid-area: owner;
+  min-height: 0;
+  justify-content: space-between;
 }
 
-.home-solid-card.home-links-card {
+.home-solid-card.home-owner-card {
   background: linear-gradient(
-    180deg,
+    145deg,
     color-mix(in srgb, var(--surface-admin-panel) 97%, transparent),
-    color-mix(in srgb, var(--surface-panel) 99%, transparent)
+    color-mix(in srgb, var(--theme-primary) 5%, var(--surface-panel) 95%)
   );
 }
 
@@ -720,228 +686,210 @@ onUnmounted(() => {
   margin-bottom: 0.75rem;
 }
 
-.home-tag-row {
+.home-owner-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--theme-primary) 12%, var(--border-strong));
+}
+
+.home-owner-section-title {
+  margin-top: 0.15rem;
+  color: var(--text-main);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.home-owner-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--accent-success) 24%, var(--border-strong));
+  border-radius: 5px;
+  padding: 0.35rem 0.55rem;
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.home-owner-active-dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: var(--accent-success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-success) 12%, transparent);
+}
+
+.home-owner-layout {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(15rem, 0.86fr) minmax(0, 1.14fr);
+  gap: clamp(1.25rem, 2vw, 2.25rem);
+  padding-top: 1rem;
+}
+
+.home-owner-identity {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding-right: clamp(1rem, 2vw, 2rem);
+  border-right: 1px solid color-mix(in srgb, var(--theme-primary) 12%, var(--border-strong));
+}
+
+.home-owner-person {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.home-owner-mark {
+  display: flex;
+  width: 4.8rem;
+  height: 4.8rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--theme-primary) 18%, var(--border-strong));
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--theme-primary) 7%, var(--surface-base));
+  color: var(--text-main);
+}
+
+.home-owner-name-block {
+  min-width: 0;
+}
+
+.home-owner-role {
+  color: var(--theme-primary-darker);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.dark .home-owner-role,
+.dark .home-owner-list li > span {
+  color: color-mix(in srgb, var(--theme-primary) 58%, white);
+}
+
+.home-owner-name {
+  margin-top: 0.18rem;
+  color: var(--text-main);
+  font-size: 1.6rem;
+  font-weight: 850;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.home-owner-bio {
+  margin-top: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.home-owner-contacts {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.home-owner-contact {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 2.45rem;
+  align-items: center;
   gap: 0.5rem;
-}
-
-.home-search-row {
-  display: flex;
-  align-items: stretch;
-  gap: 0.65rem;
-  min-width: 0;
-}
-
-.home-links-search {
-  position: relative;
-  z-index: 6;
-  margin-bottom: 0.8rem;
-  padding: 0.7rem;
-  border-radius: 1.1rem;
-  border: 1px solid color-mix(in srgb, var(--theme-primary) 8%, var(--border-strong));
-  background: color-mix(in srgb, var(--surface-elevated) 24%, transparent);
-  backdrop-filter: blur(calc(var(--glass-blur) + 2px));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px));
-  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.home-solid-card .home-links-search {
-  background: color-mix(in srgb, var(--surface-base) 98%, transparent);
-  border-color: color-mix(in srgb, var(--theme-primary) 12%, var(--border-strong));
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.home-links-search-active {
-  z-index: 30;
-}
-
-.home-search-engine {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.home-control-btn {
-  width: 4rem;
-  min-width: 4rem;
-  height: 3.15rem;
-  padding: 0 0.8rem;
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--surface-elevated) 56%, transparent);
-  backdrop-filter: blur(calc(var(--glass-blur) + 3px));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 3px));
-  font-weight: 700;
-  transition: all 0.3s ease;
-  border: 1px solid color-mix(in srgb, var(--theme-primary) 10%, var(--border-strong));
-  color: var(--text-main);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.14);
-}
-
-.home-control-btn:hover {
-  border-color: color-mix(in srgb, var(--theme-primary) 26%, var(--border-strong));
-  background: color-mix(in srgb, var(--bg-input) 74%, transparent);
-  transform: translateY(-1px);
-}
-
-.home-solid-card .home-control-btn {
-  background: color-mix(in srgb, var(--surface-panel) 98%, transparent);
-  border-color: color-mix(in srgb, var(--theme-primary) 12%, var(--border-strong));
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.home-solid-card .home-control-btn:hover {
-  background: color-mix(in srgb, var(--surface-elevated) 100%, transparent);
-}
-
-.home-control-btn:focus-visible {
-  outline: none;
-  border-color: var(--theme-primary-light);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-primary) 12%, transparent);
-}
-
-.home-engine-current-icon {
-  width: 1.55rem;
-  height: 1.55rem;
-  flex-shrink: 0;
-}
-
-.home-engine-chevron {
-  width: 0.8rem;
-  height: 0.8rem;
-  opacity: 0.55;
-  flex-shrink: 0;
-  transition: transform 0.25s ease, opacity 0.25s ease;
-}
-
-.home-engine-chevron.is-open {
-  transform: rotate(180deg);
-  opacity: 0.85;
-}
-
-.home-engine-menu {
-  position: absolute;
-  top: calc(100% + 0.6rem);
-  left: 0;
-  width: min(17rem, calc(100vw - 2.5rem));
-  padding: 0.5rem;
-  border-radius: 1.4rem;
-  border: 1px solid var(--border-strong);
-  background: color-mix(in srgb, var(--surface-elevated) 92%, transparent);
-  backdrop-filter: blur(calc(var(--glass-blur) + 8px));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 8px));
-  box-shadow: var(--shadow-strong);
-  overflow: hidden;
-  z-index: 12;
-}
-
-.home-solid-card .home-engine-menu {
-  background: color-mix(in srgb, var(--surface-panel) 99%, transparent);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-.home-engine-option {
-  width: 100%;
-  min-height: 2.8rem;
-  padding: 0.75rem 0.9rem;
-  border-radius: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  text-align: left;
-  font-size: 0.95rem;
-  font-weight: 700;
+  border: 1px solid color-mix(in srgb, var(--theme-primary) 14%, var(--border-strong));
+  border-radius: 6px;
+  padding: 0.55rem 0.7rem;
   color: var(--text-secondary);
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
-.home-engine-option:hover {
-  background: color-mix(in srgb, var(--theme-primary) 7%, transparent);
+.home-owner-contact:hover,
+.home-owner-contact:focus-visible {
+  border-color: color-mix(in srgb, var(--theme-primary) 38%, var(--border-strong));
+  background: color-mix(in srgb, var(--theme-primary) 7%, var(--surface-panel));
   color: var(--text-main);
-}
-
-.home-engine-option.is-active {
-  background: color-mix(in srgb, var(--theme-primary) 11%, var(--surface-panel));
-  color: var(--text-main);
-}
-
-.home-engine-option-icon {
-  width: 1.45rem;
-  height: 1.45rem;
-  flex-shrink: 0;
-}
-
-.home-engine-check {
-  width: 0.95rem;
-  height: 0.95rem;
-  margin-left: auto;
-  color: var(--theme-primary);
-}
-
-.home-search-input-shell {
-  position: relative;
-  flex: 1;
-  min-width: 0;
-}
-
-.home-search-input {
-  width: 100%;
-  height: 3.15rem;
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--surface-elevated) 42%, transparent);
-  backdrop-filter: blur(calc(var(--glass-blur) + 3px));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 3px));
-  padding-left: 1rem;
-  padding-right: 3.7rem;
-  font-size: 0.95rem;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-
-.home-solid-card .home-search-input {
-  background: color-mix(in srgb, var(--surface-panel) 100%, transparent);
-  border-color: color-mix(in srgb, var(--theme-primary) 12%, var(--border-strong));
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.home-search-input::placeholder {
-  color: color-mix(in srgb, var(--text-muted) 70%, transparent);
-}
-
-.home-search-submit {
-  position: absolute;
-  top: 0.325rem;
-  right: 0.325rem;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.9rem;
-  background: var(--theme-primary);
-  color: white;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 14px 28px color-mix(in srgb, var(--theme-primary) 24%, transparent);
-}
-
-.home-search-submit:hover {
-  background: var(--theme-primary-dark);
-  transform: translateY(-1px);
-}
-
-.home-search-submit:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-primary) 14%, transparent);
+}
+
+.home-owner-contact-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.home-owner-contact-icon.is-filled {
+  fill: currentColor;
+  stroke: none;
+}
+
+.home-owner-details {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: 1fr auto;
+  gap: 1rem;
+}
+
+.home-owner-detail-label,
+.home-owner-quote > span {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.home-owner-list {
+  display: grid;
+  margin-top: 0.5rem;
+}
+
+.home-owner-list li {
+  display: grid;
+  grid-template-columns: 1.7rem minmax(0, 1fr);
+  gap: 0.7rem;
+  padding: 0.62rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--border-strong) 72%, transparent);
+}
+
+.home-owner-list li > span {
+  color: var(--theme-primary-darker);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.home-owner-list li > p {
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.home-owner-quote {
+  padding: 0.8rem 0 0.1rem 0.9rem;
+  border-left: 2px solid color-mix(in srgb, var(--theme-primary) 48%, var(--border-strong));
+}
+
+.home-owner-quote p {
+  margin-top: 0.25rem;
+  color: var(--text-main);
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.55;
 }
 
 .home-card-head {
@@ -970,92 +918,6 @@ onUnmounted(() => {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.home-links-grid {
-  flex: 1;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 0.7rem;
-  padding-right: 0.5rem;
-  margin-right: -0.5rem; /* 抵消内边距以让滚动条靠边 */
-}
-
-/* 自定义内部滚动条 */
-.home-links-grid::-webkit-scrollbar {
-  width: 4px;
-}
-.home-links-grid::-webkit-scrollbar-track {
-  background: transparent;
-}
-.home-links-grid::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--text-muted) 20%, transparent);
-  border-radius: 10px;
-}
-.home-links-grid::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--text-muted) 40%, transparent);
-}
-
-.home-outline-link {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 0.68rem 0.9rem;
-  border: 1px solid color-mix(in srgb, var(--theme-primary) 8%, var(--border-strong));
-  background: color-mix(in srgb, var(--surface-elevated) 34%, transparent);
-  backdrop-filter: blur(calc(var(--glass-blur) + 2px));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px));
-  border-radius: 1.1rem;
-  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.home-solid-card .home-outline-link {
-  background: color-mix(in srgb, var(--surface-panel) 99%, transparent);
-  border-color: color-mix(in srgb, var(--theme-primary) 12%, var(--border-strong));
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: 0 8px 18px -14px rgba(15, 23, 42, 0.2);
-}
-
-.home-outline-link:hover {
-  border-color: color-mix(in srgb, var(--theme-primary) 24%, var(--border-strong));
-  background: color-mix(in srgb, var(--surface-elevated) 48%, transparent);
-  box-shadow: var(--shadow-medium), inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  transform: translateY(-1px);
-}
-
-.home-solid-card .home-outline-link:hover {
-  background: color-mix(in srgb, var(--surface-elevated) 100%, transparent);
-  box-shadow: 0 14px 30px -18px rgba(15, 23, 42, 0.24);
-}
-
-.home-link-icon {
-  width: 2.35rem;
-  height: 2.35rem;
-  border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--surface-elevated) 84%, transparent);
-  border: 1px solid color-mix(in srgb, var(--theme-primary) 10%, var(--border-strong));
-  backdrop-filter: blur(calc(var(--glass-blur) + 1px));
-  -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 1px));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.18);
-}
-
-.home-solid-card .home-link-icon {
-  background: color-mix(in srgb, var(--surface-base) 98%, transparent);
-  border-color: color-mix(in srgb, var(--theme-primary) 12%, var(--border-strong));
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
-}
-
-.dark .home-link-icon {
-  background: color-mix(in srgb, var(--surface-panel) 72%, black);
-}
-
 .home-outline-subcard {
   margin-top: 0.45rem;
   padding: 0.62rem 0.75rem;
@@ -1065,16 +927,6 @@ onUnmounted(() => {
   backdrop-filter: blur(calc(var(--glass-blur) + 2px));
   -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px));
   box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.home-slogan-copy {
-  color: color-mix(in srgb, var(--text-main) 94%, var(--theme-primary-dark) 6%);
-  font-weight: 600;
-  line-height: 1.55;
-}
-
-.dark .home-slogan-copy {
-  color: color-mix(in srgb, var(--text-main) 94%, white 6%);
 }
 
 .home-task-copy {
@@ -1228,10 +1080,6 @@ a.home-spotify-panel:focus-visible {
   margin-bottom: 0.45rem;
 }
 
-.home-status-card .home-outline-subcard {
-  margin-top: 0.4rem;
-}
-
 @media (max-width: 1200px) {
   .home-main-grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -1239,7 +1087,7 @@ a.home-spotify-panel:focus-visible {
     grid-template-areas:
       "intro intro intro intro intro intro intro intro intro intro intro intro"
       "status status status status status status spotify spotify spotify spotify spotify spotify"
-      "links links links links links links links links links links links links"
+      "owner owner owner owner owner owner owner owner owner owner owner owner"
       "tasks tasks tasks tasks tasks tasks tasks tasks tasks tasks tasks tasks";
   }
 }
@@ -1269,14 +1117,6 @@ a.home-spotify-panel:focus-visible {
     height: auto;
   }
 
-  .home-links-grid {
-    overflow: visible;
-    height: auto;
-    padding-right: 0;
-    margin-right: 0;
-  }
-
-  .home-links-grid::-webkit-scrollbar,
   .home-tasks-list::-webkit-scrollbar {
     display: none;
   }
@@ -1293,11 +1133,23 @@ a.home-spotify-panel:focus-visible {
     min-height: auto;
   }
 
+  .home-intro-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .home-traces {
+    padding-top: 0.85rem;
+    padding-left: 0;
+    border-top: 1px solid color-mix(in srgb, var(--theme-primary) 15%, var(--border-strong));
+    border-left: 0;
+  }
+
   .home-intro-card,
   .home-status-card,
   .home-spotify-card,
   .home-tasks-card,
-  .home-links-card {
+  .home-owner-card {
     order: initial;
   }
 
@@ -1319,7 +1171,7 @@ a.home-spotify-panel:focus-visible {
     order: 1;
   }
 
-  .home-links-card {
+  .home-owner-card {
     order: 2;
   }
 
@@ -1335,14 +1187,6 @@ a.home-spotify-panel:focus-visible {
     order: 5;
   }
 
-  .home-search-row {
-    flex-wrap: nowrap;
-  }
-
-  .home-links-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .home-tasks-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1351,16 +1195,6 @@ a.home-spotify-panel:focus-visible {
 
   .home-tasks-list > .home-outline-subcard {
     margin-top: 0;
-  }
-}
-
-@media (max-width: 900px) and (min-width: 641px) {
-  .home-search-row {
-    flex-wrap: wrap;
-  }
-
-  .home-search-input-shell {
-    width: 100%;
   }
 }
 
@@ -1381,47 +1215,53 @@ a.home-spotify-panel:focus-visible {
     order: 1;
   }
 
-  .home-status-card {
+  .home-trace-summary {
+    white-space: normal;
+  }
+
+  .home-owner-card {
     order: 2;
   }
 
-  .home-spotify-card {
+  .home-status-card {
     order: 3;
   }
 
-  .home-tasks-card {
+  .home-spotify-card {
     order: 4;
   }
 
-  .home-links-card {
+  .home-tasks-card {
     order: 5;
   }
 
-  .home-search-row {
-    gap: 0.625rem;
-    flex-wrap: wrap;
+  .home-owner-head {
+    align-items: center;
   }
 
-  .home-control-btn {
-    width: 3.7rem;
-    min-width: 3.7rem;
-  }
-
-  .home-search-input-shell {
-    width: 100%;
-  }
-
-  .home-search-input {
-    font-size: 0.95rem;
-    padding-right: 3.95rem;
-  }
-
-  .home-engine-menu {
-    width: min(15rem, calc(100vw - 2rem));
-  }
-
-  .home-links-grid {
+  .home-owner-layout {
     grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .home-owner-identity {
+    padding-right: 0;
+    padding-bottom: 1rem;
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--theme-primary) 12%, var(--border-strong));
+  }
+
+  .home-owner-mark {
+    width: 4.2rem;
+    height: 4.2rem;
+  }
+
+  .home-owner-name {
+    font-size: 1.35rem;
+  }
+
+  .home-owner-contacts {
+    margin-top: 0;
   }
 
   .home-tasks-list {

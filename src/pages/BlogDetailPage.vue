@@ -465,7 +465,7 @@ const loadPost = async () => {
     const article = await blogApi.getById(postIdVal)
     post.value = article
     if (article) {
-      const apiBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://workspace.gellaronline.cc/api' : 'http://localhost:3001/api')
+      const apiBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api')
       applySEO({
         title: `${article.title} - GWorkspace`,
         description: article.excerpt || article.title,
@@ -542,7 +542,7 @@ const articleUrl = computed(() => {
 
 const posterUrl = computed(() => {
   if (!post.value) return ''
-  const apiBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://workspace.gellaronline.cc/api' : 'http://localhost:3001/api')
+  const apiBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api')
   const version = encodeURIComponent(post.value.updated_at || getBlogDateValue(post.value) || post.value.id)
   return `${apiBaseUrl}/blogs/${post.value.id}/og-image?type=poster&v=${version}`
 })

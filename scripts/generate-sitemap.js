@@ -13,7 +13,7 @@ const __dirname = dirname(__filename)
 
 const SITE_URL = normalizeBaseUrl(process.env.SITE_URL || 'https://www.gellaronline.cc')
 const SOURCE = process.env.SITEMAP_SOURCE || 'api'
-const BLOG_API_URL = process.env.SITEMAP_BLOG_API_URL || 'https://workspace.gellaronline.cc/api/blogs?limit=500'
+const BLOG_API_URL = process.env.SITEMAP_BLOG_API_URL || 'https://www.gellaronline.cc/api/blogs?limit=500'
 
 const staticRoutes = [
   { path: '/', priority: '1.0', changefreq: 'daily' },

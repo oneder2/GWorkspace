@@ -1,36 +1,39 @@
-/**
- * 首页配置文件
- * 包含快捷链接配置
- */
-
-export const quickLinksConfig = [
-  { 
-    nameKey: 'home.quickLinks.github',
-    url: 'https://github.com', 
-    iconName: 'GitHubIcon', 
-    color: 'bg-slate-900' 
-  },
-  { 
-    nameKey: 'home.quickLinks.youtube',
-    url: 'https://youtube.com', 
-    iconName: 'YouTubeIcon', 
-    color: 'bg-red-600' 
-  },
-  { 
-    nameKey: 'home.quickLinks.gmail',
-    url: 'https://gmail.com', 
-    iconName: 'GmailIcon', 
-    color: 'bg-green-600' 
-  },
-  { 
-    nameKey: 'home.quickLinks.gemini',
-    url: 'https://gemini.google.com', 
-    iconName: 'GeminiIcon', 
-    color: 'bg-blue-600' 
-  },
-]
-
 export const homeProfileConfig = {
+  owner: {
+    name: 'Eclospy732',
+    role: {
+      zh: 'GWorkspace 站长与维护者',
+      en: 'Owner and maintainer of GWorkspace'
+    },
+    bio: {
+      zh: '我在这里整理写作、作品和日常工具，也持续调整这个站点本身。GWorkspace 既是公开档案，也是我真正使用的个人工作空间。',
+      en: 'I use this place to organize writing, projects, and everyday tools while continuously shaping the site itself. GWorkspace is both a public archive and a personal workspace I actually use.'
+    },
+    responsibilities: {
+      zh: [
+        '设计并维护 GWorkspace 的页面与交互',
+        '整理写作、独立项目与公开档案',
+        '把个人工作流沉淀为站内工具'
+      ],
+      en: [
+        'Design and maintain GWorkspace pages and interactions',
+        'Organize writing, independent projects, and public archives',
+        'Turn personal workflows into tools within the site'
+      ]
+    },
+    contacts: [
+      {
+        id: 'github',
+        label: 'GitHub',
+        href: 'https://github.com/oneder2/GWorkspace'
+      },
+      {
+        id: 'email',
+        label: 'eclospy@duck.com',
+        href: 'mailto:eclospy@duck.com'
+      }
+    ]
+  },
   status: {
     zh: '最近在整理这个角落的光线与秩序，让它更接近一处可以久留的个人空间。',
     en: 'Lately I have been adjusting the light and order of this corner so it feels more like a personal place worth lingering in.'
