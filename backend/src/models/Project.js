@@ -69,6 +69,7 @@ const inferImageMimeType = (url) => {
   if (normalized.includes('.png')) return 'image/png'
   if (normalized.includes('.webp')) return 'image/webp'
   if (normalized.includes('.gif')) return 'image/gif'
+  if (normalized.includes('.avif')) return 'image/avif'
   return 'image/jpeg'
 }
 

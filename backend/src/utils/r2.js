@@ -126,9 +126,16 @@ const getS3Client = () => {
   return s3Client
 }
 
-export const uploadToR2 = async (fileBuffer, fileName, contentType) => {
+const uploadPrefixes = new Set(['blog', 'projects'])
+
+export const uploadToR2 = async (fileBuffer, fileName, contentType, { prefix = 'blog' } = {}) => {
+  if (!uploadPrefixes.has(prefix)) {
+    throw new Error(`Unsupported upload prefix: ${prefix}`)
+  }
+
   const timestamp = Date.now()
-  const key = `blog/${timestamp}-${fileName}`
+  const safeFileName = String(fileName || 'image').replace(/[\\/]/g, '-')
+  const key = `${prefix}/${timestamp}-${safeFileName}`
   const encodedFileName = encodeURIComponent(fileName)
   const command = new PutObjectCommand({
     Bucket: getBucketName(),

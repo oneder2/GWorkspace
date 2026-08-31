@@ -8,7 +8,7 @@ process.env.DATABASE_PATH = join(temporaryDirectory, 'world-content.db')
 
 try {
   const { runMigrations } = await import('../src/config/migrations.js')
-  const { closeDatabase } = await import('../src/config/database.js')
+  const { closeDatabase, getDatabase } = await import('../src/config/database.js')
   const { Blog } = await import('../src/models/Blog.js')
   const { Guestbook } = await import('../src/models/Guestbook.js')
   const { AdminSettings } = await import('../src/models/AdminSettings.js')
@@ -24,9 +24,12 @@ try {
     title: { zh: '契约测试项目', en: 'Contract test project' },
     summary: { zh: '验证项目管理模型。', en: 'Verifies the project model.' },
     url: 'https://example.com/world-check',
+    image_url: 'https://example.com/world-check-cover.avif',
     tags: ['Test'],
     status: 'draft'
   })
+  const projectCover = getDatabase().prepare('SELECT mime_type FROM public_media WHERE public_id = ?').get(project.public_media_id)
+  assert.equal(projectCover.mime_type, 'image/avif')
   assert.equal(Project.update(project.id, { status: 'published', sortOrder: 40 }).status, 'published')
   const placement = WorldExhibit.create({
     regionId: 'workshop',

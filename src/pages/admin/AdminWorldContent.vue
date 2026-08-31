@@ -94,11 +94,13 @@
       <PublishFields v-model:status="timelineForm.status" v-model:surfaces="timelineForm.surfaces" :sort-order="timelineForm.sort_order" hide-sort />
     </EditorShell>
 
-    <EditorShell v-if="projectEditorOpen" :title="projectForm.id ? $t('admin.editProject') : $t('admin.addProject')" eyebrow="PROJECT" wide @close="projectEditorOpen = false" @submit="saveProject">
+    <EditorShell v-if="projectEditorOpen" :title="projectForm.id ? $t('admin.editProject') : $t('admin.addProject')" eyebrow="PROJECT" wide :submit-disabled="projectCoverUploading" @close="projectEditorOpen = false" @submit="saveProject">
       <div class="field-grid three"><label><span>Slug</span><input v-model="projectForm.slug" required /></label><label><span>{{ $t('admin.startDate') }}</span><input v-model="projectForm.start_date" placeholder="2026-01" required /></label><label><span>{{ $t('admin.endDate') }}</span><input v-model="projectForm.end_date" placeholder="2026-12" /></label></div>
       <div class="field-grid two"><label><span>{{ $t('admin.nameZh') }}</span><input v-model="projectForm.title.zh" required /></label><label><span>{{ $t('admin.nameEn') }}</span><input v-model="projectForm.title.en" required /></label><label><span>{{ $t('admin.summaryZh') }}</span><textarea v-model="projectForm.summary.zh" rows="4" required /></label><label><span>{{ $t('admin.summaryEn') }}</span><textarea v-model="projectForm.summary.en" rows="4" required /></label><label><span>{{ $t('admin.roleZh') }}</span><input v-model="projectForm.role.zh" /></label><label><span>{{ $t('admin.roleEn') }}</span><input v-model="projectForm.role.en" /></label><label><span>{{ $t('admin.highlightsZh') }}</span><textarea v-model="projectHighlights.zh" rows="5" /></label><label><span>{{ $t('admin.highlightsEn') }}</span><textarea v-model="projectHighlights.en" rows="5" /></label></div>
       <div class="field-grid three"><label><span>{{ $t('admin.involvement') }}</span><select v-model="projectForm.involvement"><option value="creator">creator</option><option value="contributor">contributor</option><option value="collaborator">collaborator</option></select></label><label><span>{{ $t('admin.technologiesComma') }}</span><input v-model="projectTechnologies" /></label><label><span>{{ $t('admin.tagsComma') }}</span><input v-model="projectTags" /></label></div>
-      <div class="field-grid two"><label><span>{{ $t('admin.sourceUrl') }}</span><input v-model="projectLinks.source" /></label><label><span>{{ $t('admin.demoUrl') }}</span><input v-model="projectLinks.demo" /></label><label><span>{{ $t('admin.caseStudyUrl') }}</span><input v-model="projectLinks.case_study" /></label><label><span>{{ $t('admin.canonicalUrl') }}</span><input v-model="projectForm.url" required /></label><label><span>{{ $t('admin.coverUrl') }}</span><input v-model="projectForm.image_url" /></label><label><span>{{ $t('admin.galleryLines') }}</span><textarea v-model="projectGallery" rows="4" /></label></div>
+      <div class="field-grid two"><label><span>{{ $t('admin.sourceUrl') }}</span><input v-model="projectLinks.source" /></label><label><span>{{ $t('admin.demoUrl') }}</span><input v-model="projectLinks.demo" /></label><label><span>{{ $t('admin.caseStudyUrl') }}</span><input v-model="projectLinks.case_study" /></label><label><span>{{ $t('admin.canonicalUrl') }}</span><input v-model="projectForm.url" required /></label></div>
+      <ProjectCoverPicker v-model="projectForm.image_url" :media="projectMediaOptions" :alt="projectForm.title.zh || projectForm.title.en" @uploading="projectCoverUploading = $event" />
+      <label><span>{{ $t('admin.galleryLines') }}</span><textarea v-model="projectGallery" rows="4" /></label>
       <div class="featured-row"><label><input v-model="projectForm.featured" type="checkbox" />{{ $t('admin.featured') }}</label></div>
       <PublishFields v-model:status="projectForm.status" v-model:surfaces="projectForm.surfaces" v-model:sort-order="projectForm.sort_order" />
     </EditorShell>
@@ -115,6 +117,7 @@
 import { computed, defineComponent, h, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { contentAdminApi } from '../../utils/api'
+import ProjectCoverPicker from '../../components/admin/ProjectCoverPicker.vue'
 import SurfacePicker from '../../components/admin/SurfacePicker.vue'
 
 const { t } = useI18n()
@@ -128,6 +131,15 @@ const projects = ref([])
 const exhibits = ref([])
 const status = reactive({ tone: 'neutral', message: '' })
 const timelineRecords = computed(() => [...experience.value, ...education.value].sort((a, b) => a.sort_order - b.sort_order))
+const projectMediaOptions = computed(() => projects.value.flatMap(record => {
+  const title = record.title?.zh || record.title?.en || record.slug
+  const cover = record.image_url ? [{ url: record.image_url, label: `${title} · ${t('admin.projectCover')}` }] : []
+  const gallery = (record.gallery || []).map((media, index) => ({
+    ...media,
+    label: media.alt?.zh || media.alt?.en || `${title} · ${t('admin.galleryImage')} ${index + 1}`
+  }))
+  return [...cover, ...gallery]
+}))
 const tabs = computed(() => [
   { id: 'profile', label: t('admin.publicProfile') },
   { id: 'contacts', label: t('admin.contacts') },
@@ -168,6 +180,7 @@ const projectGallery = ref('')
 const projectHighlights = reactive({ zh: '', en: '' })
 const projectLinks = reactive({ source: '', demo: '', case_study: '' })
 const projectEditorOpen = ref(false)
+const projectCoverUploading = ref(false)
 const emptyExhibit = () => ({ id: null, region_id: 'workshop', source_type: 'project', source_key: '', label: { zh: '', en: '' }, href: '', status: 'published', sort_order: 0 })
 const exhibitForm = reactive(emptyExhibit())
 const exhibitEditorOpen = ref(false)
@@ -210,6 +223,7 @@ function editProject(record = null) {
   projectHighlights.zh = (record?.highlights?.zh || []).join('\n')
   projectHighlights.en = (record?.highlights?.en || []).join('\n')
   Object.assign(projectLinks, { source: '', demo: '', case_study: '' }, Object.fromEntries((record?.links || []).map(link => [link.kind, link.url])))
+  projectCoverUploading.value = false
   projectEditorOpen.value = true
 }
 const saveProject = () => withSave(() => {
@@ -226,7 +240,7 @@ const surfaceColors = { portfolio: '#0f766e', resume_web: '#2563eb', resume_pdf:
 const SectionHeading = defineComponent({ props: { eyebrow: String, title: String }, setup(props, { slots }) { return () => h('div', { class: 'section-heading' }, [h('div', [h('span', props.eyebrow), h('h3', props.title)]), slots.default?.()]) } })
 const RecordSection = defineComponent({ props: { eyebrow: String, title: String, empty: Boolean, emptyLabel: String, addLabel: String }, emits: ['add'], setup(props, { slots, emit }) { return () => h('section', { class: 'admin-panel record-section' }, [h('div', { class: 'section-heading section-pad' }, [h('div', [h('span', props.eyebrow), h('h3', props.title)]), h('button', { class: 'action-btn action-btn-primary', type: 'button', onClick: () => emit('add') }, props.addLabel)]), props.empty ? h('div', { class: 'empty-state' }, props.emptyLabel) : h('div', { class: 'record-list' }, slots.default?.())]) } })
 const RecordRow = defineComponent({ props: { record: Object, title: String, meta: String, summary: String }, emits: ['edit', 'remove'], setup(props, { emit }) { return () => h('article', { class: 'record-row' }, [h('div', { class: 'surface-rail', 'aria-label': 'Surfaces' }, (props.record.surfaces || []).map(surface => h('span', { title: surface, style: { background: surfaceColors[surface] } }))), h('div', { class: 'record-copy' }, [h('small', `${props.meta} · ${props.record.status}`), h('h4', props.title), props.summary ? h('p', props.summary) : null]), h('div', { class: 'record-actions' }, [h('button', { type: 'button', onClick: () => emit('edit') }, t('admin.edit')), h('button', { type: 'button', class: 'danger', onClick: () => emit('remove') }, t('admin.delete'))])]) } })
-const EditorShell = defineComponent({ props: { title: String, eyebrow: String, wide: Boolean }, emits: ['close', 'submit'], setup(props, { slots, emit }) { return () => h('div', { class: 'editor-overlay', onClick: event => { if (event.target === event.currentTarget) emit('close') } }, [h('form', { class: ['editor-sheet', { wide: props.wide }], onSubmit: event => { event.preventDefault(); emit('submit') } }, [h('div', { class: 'editor-heading' }, [h('div', [h('span', props.eyebrow), h('h3', props.title)]), h('button', { type: 'button', 'aria-label': t('common.close'), onClick: () => emit('close') }, '×')]), ...(slots.default?.() || []), h('button', { class: 'action-btn action-btn-primary save-editor', type: 'submit', disabled: isSaving.value }, t('common.save'))])]) } })
+const EditorShell = defineComponent({ props: { title: String, eyebrow: String, wide: Boolean, submitDisabled: Boolean }, emits: ['close', 'submit'], setup(props, { slots, emit }) { return () => h('div', { class: 'editor-overlay', onClick: event => { if (event.target === event.currentTarget) emit('close') } }, [h('form', { class: ['editor-sheet', { wide: props.wide }], onSubmit: event => { event.preventDefault(); if (!isSaving.value && !props.submitDisabled) emit('submit') } }, [h('div', { class: 'editor-heading' }, [h('div', [h('span', props.eyebrow), h('h3', props.title)]), h('button', { type: 'button', 'aria-label': t('common.close'), onClick: () => emit('close') }, '×')]), ...(slots.default?.() || []), h('button', { class: 'action-btn action-btn-primary save-editor', type: 'submit', disabled: isSaving.value || props.submitDisabled }, t('common.save'))])]) } })
 const PublishFields = defineComponent({ props: { status: String, surfaces: Array, sortOrder: Number, hideSort: Boolean }, emits: ['update:status', 'update:surfaces', 'update:sortOrder'], setup(props, { emit }) { return () => h('div', { class: 'publish-fields' }, [h('label', [h('span', t('admin.status')), h('select', { value: props.status, onChange: event => emit('update:status', event.target.value) }, [h('option', { value: 'published' }, t('admin.published')), h('option', { value: 'draft' }, t('admin.draft'))])]), props.hideSort ? null : h('label', [h('span', t('admin.sortOrder')), h('input', { type: 'number', value: props.sortOrder, onInput: event => emit('update:sortOrder', Number(event.target.value)) })]), h(SurfacePicker, { modelValue: props.surfaces, label: t('admin.surfaces'), 'onUpdate:modelValue': value => emit('update:surfaces', value) })]) } })
 
 onMounted(loadContent)
@@ -246,7 +260,7 @@ onMounted(loadContent)
 label { display: grid; gap: .4rem; color: var(--text-secondary); font-size: .72rem; }input, textarea, select { width: 100%; min-height: 40px; padding: .62rem .7rem; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--bg-input); color: var(--text-main); font: inherit; }textarea { line-height: 1.55; resize: vertical; }
 .record-list { display: grid; }.record-row { min-height: 96px; padding: 1rem 1.25rem; display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; align-items: start; gap: 1rem; border-bottom: 1px solid var(--border-strong); }.record-row:last-child { border-bottom: 0; }.surface-rail { min-height: 54px; display: flex; gap: 2px; }.surface-rail span { width: 3px; min-height: 34px; }.region-mark { width: 8px; height: 52px; background: #94a3b8; }.region-workshop { background: #e56f45; }.region-observatory { background: #4a89ba; }.region-memory-grove { background: #6d973c; }
 .record-copy { min-width: 0; }.record-copy h4 { margin: .35rem 0; color: var(--text-main); font-size: .92rem; }.record-copy p { margin: 0; max-width: 78ch; color: var(--text-secondary); font-size: .77rem; line-height: 1.55; }.record-actions { display: flex; gap: .45rem; }.record-actions button { min-height: 34px; padding: 0 .65rem; border: 1px solid var(--border-strong); background: transparent; color: var(--text-secondary); cursor: pointer; }.record-actions button.danger { color: #c62f3f; }.empty-state { padding: 3rem 1rem; color: var(--text-secondary); text-align: center; font-size: .82rem; }
-.editor-overlay { position: fixed; z-index: 90; inset: 0; padding: 1.25rem; display: grid; place-items: center; background: rgba(10, 18, 30, .72); backdrop-filter: blur(7px); }.editor-sheet { width: min(680px, 100%); max-height: 92dvh; overflow-y: auto; padding: 1.35rem; display: grid; gap: 1rem; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-card); box-shadow: 0 24px 72px rgba(0, 0, 0, .28); }.editor-sheet.wide { width: min(980px, 100%); }.editor-heading { padding-bottom: .9rem; border-bottom: 1px solid var(--border-strong); }.editor-heading button { width: 36px; height: 36px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-main); font-size: 1.3rem; cursor: pointer; }.save-editor { justify-self: end; min-width: 112px; }.publish-fields { padding-top: 1rem; display: grid; grid-template-columns: 160px 120px minmax(0, 1fr); gap: 1rem; align-items: end; border-top: 1px solid var(--border-strong); }.featured-row label { display: inline-flex; grid-auto-flow: column; justify-content: start; align-items: center; gap: .5rem; }.featured-row input { width: 18px; min-height: 18px; }
+.editor-overlay { position: fixed; z-index: 90; inset: 0; padding: 1.25rem; display: grid; place-items: center; background: rgba(10, 18, 30, .72); backdrop-filter: blur(7px); }.editor-sheet { width: min(680px, 100%); max-height: 92dvh; overflow-y: auto; padding: 1.35rem; display: grid; grid-auto-rows: max-content; gap: 1rem; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-card); box-shadow: 0 24px 72px rgba(0, 0, 0, .28); }.editor-sheet.wide { width: min(980px, 100%); }.editor-heading { padding-bottom: .9rem; border-bottom: 1px solid var(--border-strong); }.editor-heading button { width: 36px; height: 36px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-main); font-size: 1.3rem; cursor: pointer; }.save-editor { justify-self: end; min-width: 112px; }.publish-fields { padding-top: 1rem; display: grid; grid-template-columns: 160px 120px minmax(0, 1fr); gap: 1rem; align-items: end; border-top: 1px solid var(--border-strong); }.featured-row label { display: inline-flex; grid-auto-flow: column; justify-content: start; align-items: center; gap: .5rem; }.featured-row input { width: 18px; min-height: 18px; }
 
 /* Locally defined render components do not inherit this SFC's scope attribute. */
 .content-admin :deep(.section-heading), .content-admin :deep(.editor-heading) { display: flex; align-items: end; justify-content: space-between; gap: 1rem; }
@@ -267,14 +281,14 @@ label { display: grid; gap: .4rem; color: var(--text-secondary); font-size: .72r
 .content-admin :deep(.record-actions button.danger) { color: #c62f3f; }
 .content-admin :deep(.empty-state) { padding: 3rem 1rem; color: var(--text-secondary); text-align: center; font-size: .82rem; }
 .content-admin :deep(.editor-overlay) { position: fixed; z-index: 90; inset: 0; padding: 1.25rem; display: grid; place-items: center; background: rgba(10, 18, 30, .72); backdrop-filter: blur(7px); }
-.content-admin :deep(.editor-sheet) { width: min(680px, 100%); max-height: 92dvh; overflow-y: auto; padding: 1.35rem; display: grid; gap: 1rem; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-card); box-shadow: 0 24px 72px rgba(0, 0, 0, .28); }
+.content-admin :deep(.editor-sheet) { width: min(680px, 100%); max-height: 92dvh; overflow-y: auto; padding: 1.35rem; display: grid; grid-auto-rows: max-content; gap: 1rem; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-card); box-shadow: 0 24px 72px rgba(0, 0, 0, .28); }
 .content-admin :deep(.editor-sheet.wide) { width: min(980px, 100%); }
 .content-admin :deep(.editor-heading) { padding-bottom: .9rem; border-bottom: 1px solid var(--border-strong); }
 .content-admin :deep(.editor-heading button) { width: 36px; height: 36px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-main); font-size: 1.3rem; cursor: pointer; }
 .content-admin :deep(.save-editor) { justify-self: end; min-width: 112px; }
 .content-admin :deep(.publish-fields) { padding-top: 1rem; display: grid; grid-template-columns: 160px 120px minmax(0, 1fr); gap: 1rem; align-items: end; border-top: 1px solid var(--border-strong); }
 :global(.editor-overlay) { position: fixed; z-index: 90; inset: 0; padding: 1.25rem; display: grid; place-items: center; background: rgba(10, 18, 30, .72); backdrop-filter: blur(7px); }
-:global(.editor-sheet) { width: min(680px, 100%); max-height: 92dvh; overflow-y: auto; padding: 1.35rem; display: grid; gap: 1rem; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-card); box-shadow: 0 24px 72px rgba(0, 0, 0, .28); }
+:global(.editor-sheet) { width: min(680px, 100%); max-height: 92dvh; overflow-y: auto; padding: 1.35rem; display: grid; grid-auto-rows: max-content; gap: 1rem; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-card); box-shadow: 0 24px 72px rgba(0, 0, 0, .28); }
 :global(.editor-sheet.wide) { width: min(980px, 100%); }
 :global(.editor-heading) { padding-bottom: .9rem; display: flex; align-items: end; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--border-strong); }
 :global(.editor-heading span) { color: var(--text-muted); font: .64rem ui-monospace, monospace; letter-spacing: .08em; }

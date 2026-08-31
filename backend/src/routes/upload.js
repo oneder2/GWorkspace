@@ -7,6 +7,13 @@ const router = express.Router();
 
 // 配置Multer内存存储
 const storage = multer.memoryStorage();
+const projectCoverMimeTypes = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/avif'
+]);
 const upload = multer({ 
   storage,
   limits: {
@@ -52,6 +59,53 @@ router.post('/blog-image', authenticate, requireAdmin, upload.single('image'), a
       error: 'Failed to upload image', 
       details: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+/**
+ * Upload a project cover to its own storage namespace so blog asset cleanup
+ * cannot treat it as an unreferenced article image.
+ * POST /api/upload/project-cover
+ */
+router.post('/project-cover', authenticate, requireAdmin, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+
+    if (!projectCoverMimeTypes.has(req.file.mimetype)) {
+      return res.status(415).json({ error: 'Unsupported project cover format' });
+    }
+
+    const originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+    const missingKeys = getMissingR2Fields();
+
+    if (missingKeys.length > 0) {
+      return res.status(500).json({
+        error: 'Cloudflare R2 is not fully configured',
+        missingFields: missingKeys
+      });
+    }
+
+    const result = await uploadToR2(
+      req.file.buffer,
+      originalName,
+      req.file.mimetype,
+      { prefix: 'projects' }
+    );
+
+    res.json({
+      url: result.url,
+      key: result.key,
+      name: originalName,
+      cacheControl: result.cache_control
+    });
+  } catch (error) {
+    console.error('[Project cover upload] Server error:', error);
+    res.status(500).json({
+      error: 'Failed to upload project cover',
+      details: error.message
     });
   }
 });

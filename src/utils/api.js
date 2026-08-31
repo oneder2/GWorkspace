@@ -157,27 +157,30 @@ export const authApi = {
  * 上传API
  */
 export const uploadApi = {
-  uploadBlogImage: (file) => {
-    const formData = new FormData()
-    formData.append('image', file)
-    const token = localStorage.getItem('token')
-    const headers = {}
-    if (token) headers['Authorization'] = `Bearer ${token}`
-    
-    return fetch(`${API_BASE_URL}/upload/blog-image`, {
-      method: 'POST',
-      headers,
-      body: formData
-    }).then(async res => {
-      const payload = await res.json().catch(() => ({ error: 'Upload failed' }))
-      if (!res.ok) {
-        const uploadError = new Error(payload.message || payload.error || 'Upload failed')
-        Object.assign(uploadError, payload, { status: res.status })
-        throw uploadError
-      }
-      return payload
-    })
-  }
+  uploadBlogImage: (file) => uploadImage(file, '/upload/blog-image'),
+  uploadProjectCover: (file) => uploadImage(file, '/upload/project-cover')
+}
+
+function uploadImage(file, endpoint) {
+  const formData = new FormData()
+  formData.append('image', file)
+  const token = localStorage.getItem('token')
+  const headers = {}
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  return fetch(`${API_BASE_URL}${endpoint}`, {
+    method: 'POST',
+    headers,
+    body: formData
+  }).then(async res => {
+    const payload = await res.json().catch(() => ({ error: 'Upload failed' }))
+    if (!res.ok) {
+      const uploadError = new Error(payload.message || payload.error || 'Upload failed')
+      Object.assign(uploadError, payload, { status: res.status })
+      throw uploadError
+    }
+    return payload
+  })
 }
 
 /**
