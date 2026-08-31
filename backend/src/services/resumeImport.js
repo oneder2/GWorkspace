@@ -52,7 +52,7 @@ export const loadResumeSource = ({ yamlPath, schemaPath }) => {
 const avatarDetails = ({ resume, yamlPath, copyAssets }) => {
   const avatarRelativePath = resume.profile.avatar
   const sourcePath = resolve(dirname(yamlPath), '..', avatarRelativePath)
-  if (!existsSync(sourcePath)) throw new Error(`Resume avatar does not exist: ${sourcePath}`)
+  if (copyAssets && !existsSync(sourcePath)) throw new Error(`Resume avatar does not exist: ${sourcePath}`)
   const extension = extname(sourcePath).toLowerCase() || '.jpg'
   const destinationDirectory = join(workspaceRoot, 'public/images/profile')
   const destinationPath = join(destinationDirectory, `resume-avatar${extension}`)

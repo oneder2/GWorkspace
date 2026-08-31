@@ -219,6 +219,10 @@ jobs:
 
             # 显式执行迁移和数据库健康检查，避免把问题带到启动之后
             npm run db:prepare
+            npm run import:resume -- \
+              --source database/imports/legacy-resume-v1.yaml \
+              --schema fixtures/resume-import/v1/schema/resume.schema.json \
+              --no-copy-assets
             npm run db:check
             
             # 启动服务

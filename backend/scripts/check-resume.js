@@ -130,6 +130,21 @@ try {
 
   Resume.deleteContact(draftContact.id)
   Resume.deleteSkill(webOnlySkill.id)
+
+  const productionSeed = importResumeSource({
+    yamlPath: join(backendRoot, 'database/imports/legacy-resume-v1.yaml'),
+    schemaPath: join(importRoot, 'schema/resume.schema.json'),
+    copyAssets: false
+  })
+  assert.equal(productionSeed.contacts, 3, 'production migration input must remain importable')
+  assert.equal(productionSeed.skills, 3)
+  assert.equal(productionSeed.projects, 6)
+  assert.equal(productionSeed.avatar_copied, false)
+  assert.equal(importResumeSource({
+    yamlPath: join(backendRoot, 'database/imports/legacy-resume-v1.yaml'),
+    schemaPath: join(importRoot, 'schema/resume.schema.json'),
+    copyAssets: false
+  }).skipped, true, 'production migration input must remain idempotent')
   console.log('resume authority, import, API, and compatibility checks passed')
 } finally {
   if (closeDatabase) closeDatabase()

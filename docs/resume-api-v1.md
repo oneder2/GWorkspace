@@ -151,3 +151,8 @@ and records the hash in `resume_imports`. Repeating the same import is a no-op.
 `web` and `pdf` map to `resume_web` and `resume_pdf`; legacy `api` is ignored.
 Imported projects additionally receive `portfolio` and `gellaria` so existing
 public projections remain available.
+
+Production deployment uses the immutable migration snapshot at
+`backend/database/imports/legacy-resume-v1.yaml`. It is an auditable one-time
+input, not a second editable authority: after its source hash is recorded,
+subsequent deployments skip it and all ongoing edits happen in GWorkspace.
