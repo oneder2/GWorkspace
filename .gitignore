@@ -35,6 +35,7 @@ backend/public/cache/og-images/
 backend/node_modules_corrupt_backup/
 backend/node_modules_node22_incompatible/
 backend/node_modules_partial_failed/
+backend/backups/
 
 # Editor directories and files
 .vscode/*

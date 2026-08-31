@@ -1,0 +1,61 @@
+schema_version: 1.0.0
+updated_at: "2026-08-31"
+profile:
+  name: { en: Example Owner, zh: 示例站长 }
+  full_name: { en: Example Person, zh: 示例人物 }
+  headline: { en: Software builder, zh: 软件开发者 }
+  location: { en: "New York, US", zh: 美国纽约 }
+  summary: { en: Builds public software., zh: 构建公开软件。 }
+  avatar: assets/profile.jpg
+  contacts:
+    - type: email
+      label: Email
+      value: owner@example.test
+      url: mailto:owner@example.test
+skills:
+  - id: web
+    name: { en: Web, zh: Web 开发 }
+    items: [JavaScript, SQLite]
+experience:
+  - id: sample-studio
+    organization: { en: Sample Studio, zh: 示例工作室 }
+    title: { en: Developer, zh: 开发者 }
+    location: { en: Remote, zh: 远程 }
+    start: "2025-01"
+    end: "2025-12"
+    summary: { en: Built maintainable tools., zh: 构建可维护的工具。 }
+    highlights:
+      en: [Published a versioned API.]
+      zh: [发布版本化 API。]
+    visibility: [web, pdf, api]
+education:
+  - id: sample-university
+    organization: { en: Sample University, zh: 示例大学 }
+    title: { en: Computer Science, zh: 计算机科学 }
+    start: "2021"
+    end: "2025"
+    summary: { en: Studied software systems., zh: 学习软件系统。 }
+    highlights: { en: [], zh: [] }
+    visibility: [web, api]
+projects:
+  - id: sample-project
+    name: { en: Sample Project, zh: 示例项目 }
+    summary: { en: A synthetic project., zh: 一个合成项目。 }
+    role: { en: Designer and developer, zh: 设计与开发 }
+    start: "2026-01"
+    end: null
+    involvement: creator
+    technologies: [Vue, SQLite]
+    highlights:
+      en: [Shipped a stable release.]
+      zh: [发布稳定版本。]
+    links:
+      source: https://example.test/source
+      demo: https://example.test/demo
+    featured: true
+    visibility: [web, pdf, api]
+settings:
+  default_language: en
+  pdf:
+    project_limit: 3
+    filename: { en: Example-Resume-EN.pdf, zh: Example-Resume-ZH.pdf }

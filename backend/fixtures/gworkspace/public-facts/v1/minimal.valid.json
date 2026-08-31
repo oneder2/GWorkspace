@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-31T12:00:00Z",
+  "source": {
+    "system": "GWorkspace",
+    "updated_at": "2026-08-31T11:55:00Z",
+    "canonical_url": "https://example.test/"
+  },
+  "profile": {
+    "id": "profile:owner",
+    "visibility": "public",
+    "name": { "en": "Example Owner", "zh": "示例所有者" },
+    "headline": { "en": "Independent builder", "zh": "独立开发者" },
+    "summary": { "en": "Builds useful software.", "zh": "构建实用的软件。" },
+    "location": null,
+    "contacts": [],
+    "skill_groups": [],
+    "avatar_media_id": null,
+    "canonical_url": "https://example.test/",
+    "updated_at": "2026-08-31T11:55:00Z"
+  },
+  "projects": [],
+  "experiences": [],
+  "articles": [],
+  "media": []
+}

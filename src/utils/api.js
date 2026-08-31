@@ -194,6 +194,17 @@ export const publicContentApi = {
 }
 
 export const contentAdminApi = {
+  getResume: () => request('/admin/content/resume'),
+  updateResumeProfile: (data) => request('/admin/content/resume/profile', { method: 'PUT', body: JSON.stringify(data) }),
+  createResumeContact: (data) => request('/admin/content/resume/contacts', { method: 'POST', body: JSON.stringify(data) }),
+  updateResumeContact: (id, data) => request(`/admin/content/resume/contacts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteResumeContact: (id) => request(`/admin/content/resume/contacts/${id}`, { method: 'DELETE' }),
+  createResumeSkill: (data) => request('/admin/content/resume/skills', { method: 'POST', body: JSON.stringify(data) }),
+  updateResumeSkill: (id, data) => request(`/admin/content/resume/skills/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteResumeSkill: (id) => request(`/admin/content/resume/skills/${id}`, { method: 'DELETE' }),
+  createResumeTimeline: (data) => request('/admin/content/resume/timeline', { method: 'POST', body: JSON.stringify(data) }),
+  updateResumeTimeline: (id, data) => request(`/admin/content/resume/timeline/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteResumeTimeline: (id) => request(`/admin/content/resume/timeline/${id}`, { method: 'DELETE' }),
   getProjects: () => request('/admin/content/projects'),
   createProject: (data) => request('/admin/content/projects', { method: 'POST', body: JSON.stringify(data) }),
   updateProject: (id, data) => request(`/admin/content/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) }),

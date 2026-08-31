@@ -27,6 +27,7 @@ import uploadRoutes from './routes/upload.js'
 import seoRoutes from './routes/seo.js'
 import spotifyRoutes from './routes/spotify.js'
 import publicContentRoutes from './routes/publicContent.js'
+import publicFactsRoutes from './routes/publicFacts.js'
 import contentAdminRoutes from './routes/contentAdmin.js'
 import writingAdminRoutes from './routes/writingAdmin.js'
 import { startAiDailyCapsuleScheduler } from './services/aiScheduler.js'
@@ -61,7 +62,8 @@ app.use(helmet({
 const allowedOrigins = [
   'https://www.gellaronline.cc',
   'https://gellaronline.cc',
-  'https://workspace.gellaronline.cc'
+  'https://workspace.gellaronline.cc',
+  'https://resume.gellaronline.cc'
 ];
 
 function isLocalDevelopmentOrigin(origin) {
@@ -128,6 +130,7 @@ app.use('/api/guestbook', guestbookRoutes)
 app.use('/api/upload', uploadRoutes)
 app.use('/api/seo', seoRoutes)
 app.use('/api/spotify', spotifyRoutes)
+app.use('/api/v1/public-facts', publicFactsRoutes)
 app.use('/api/public', publicContentRoutes)
 
 // 健康检查

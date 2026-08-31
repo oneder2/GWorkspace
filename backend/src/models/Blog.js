@@ -5,6 +5,7 @@
 
 import { getDatabase } from '../config/database.js'
 import { getTodayDateString, normalizePublishedAt } from '../utils/blogDate.js'
+import { randomUUID } from 'node:crypto'
 
 const UNTITLED_DRAFT_TITLE = '未命名文件'
 
@@ -253,9 +254,10 @@ export class Blog {
     const publishedAt = normalizedPublishedAt ?? (status === 'published' && shouldAutoFillPublishedAt ? getTodayDateString() : null)
 
     const result = db.prepare(`
-      INSERT INTO blogs (title, slug, genre, content, excerpt, tags, status, published_at, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO blogs (public_id, title, slug, genre, content, excerpt, tags, status, published_at, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
+      `article:${randomUUID()}`,
       title,
       slug,
       genre,

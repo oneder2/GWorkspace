@@ -55,6 +55,7 @@ function collectCorsMethods() {
 }
 
 function main() {
+  const serverSource = readText(serverPath)
   const routeMethods = collectRouteMethods()
   const corsMethods = collectCorsMethods()
   const requiredMethods = [...new Set([...routeMethods, 'OPTIONS'])].sort()
@@ -68,7 +69,12 @@ function main() {
     process.exit(1)
   }
 
-  console.log(`backend CORS methods ok: ${corsMethods.join(', ')}`)
+  if (!serverSource.includes("'https://resume.gellaronline.cc'")) {
+    console.error('CORS must explicitly allow the public resume origin.')
+    process.exit(1)
+  }
+
+  console.log(`backend CORS methods and resume origin ok: ${corsMethods.join(', ')}`)
 }
 
 main()

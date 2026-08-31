@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-31T12:00:00Z",
+  "source": {
+    "system": "GWorkspace",
+    "updated_at": "2026-08-31T11:55:00Z",
+    "canonical_url": "https://example.test/"
+  },
+  "profile": {
+    "id": "profile:owner",
+    "visibility": "public",
+    "name": { "en": "Example Owner", "zh": "示例所有者" },
+    "headline": { "en": "Independent product builder", "zh": "独立产品开发者" },
+    "summary": { "en": "Designs and ships small software products.", "zh": "设计并交付小型软件产品。" },
+    "location": { "en": "New York, US", "zh": "美国纽约" },
+    "contacts": [
+      {
+        "id": "contact:website",
+        "kind": "website",
+        "label": { "en": "Website", "zh": "网站" },
+        "value": "example.test",
+        "url": "https://example.test/"
+      }
+    ],
+    "skill_groups": [
+      {
+        "id": "skill:web",
+        "name": { "en": "Web", "zh": "Web 开发" },
+        "items": ["TypeScript", "SQLite"]
+      }
+    ],
+    "avatar_media_id": "media:avatar",
+    "canonical_url": "https://example.test/about",
+    "updated_at": "2026-08-31T11:55:00Z"
+  },
+  "projects": [
+    {
+      "id": "project:harbor-notes",
+      "visibility": "public",
+      "slug": "harbor-notes",
+      "name": { "en": "Harbor Notes", "zh": "港湾笔记" },
+      "summary": { "en": "A synthetic public writing project.", "zh": "一个合成的公开写作项目。" },
+      "role": { "en": "Designer and developer", "zh": "设计与开发" },
+      "start_date": "2026-01",
+      "end_date": null,
+      "technologies": ["TypeScript", "SQLite"],
+      "tags": ["Writing", "Web"],
+      "featured": true,
+      "links": [
+        { "kind": "canonical", "url": "https://example.test/projects/harbor-notes" }
+      ],
+      "media_ids": ["media:project-cover"],
+      "updated_at": "2026-08-30T20:00:00Z"
+    }
+  ],
+  "experiences": [
+    {
+      "id": "experience:sample-studio",
+      "visibility": "public",
+      "kind": "employment",
+      "organization": { "en": "Sample Studio", "zh": "示例工作室" },
+      "title": { "en": "Software developer", "zh": "软件开发者" },
+      "location": null,
+      "summary": { "en": "Built maintainable web tools.", "zh": "构建可维护的 Web 工具。" },
+      "highlights": {
+        "en": ["Published a versioned public API."],
+        "zh": ["发布版本化公共 API。"]
+      },
+      "start_date": "2025-01",
+      "end_date": "2025-12",
+      "canonical_url": "https://example.test/experience/sample-studio",
+      "media_ids": [],
+      "updated_at": "2026-08-29T10:00:00Z"
+    }
+  ],
+  "articles": [
+    {
+      "id": "article:contract-first",
+      "visibility": "public",
+      "slug": "contract-first",
+      "title": { "en": "Contract first", "zh": "契约优先" },
+      "summary": { "en": "A synthetic article about stable boundaries.", "zh": "一篇关于稳定边界的合成文章。" },
+      "body_markdown": { "en": "Public systems need explicit boundaries.", "zh": "公共系统需要明确边界。" },
+      "tags": ["Architecture"],
+      "canonical_url": "https://example.test/blog/contract-first",
+      "media_ids": ["media:article-cover"],
+      "published_at": "2026-08-28T14:00:00Z",
+      "updated_at": "2026-08-28T14:00:00Z"
+    }
+  ],
+  "media": [
+    {
+      "id": "media:avatar",
+      "visibility": "public",
+      "kind": "image",
+      "url": "https://example.test/media/avatar.png",
+      "mime_type": "image/png",
+      "alt": { "en": "Synthetic profile portrait", "zh": "合成个人头像" },
+      "width": 512,
+      "height": 512,
+      "duration_seconds": null,
+      "sha256": null,
+      "updated_at": "2026-08-20T10:00:00Z"
+    },
+    {
+      "id": "media:project-cover",
+      "visibility": "public",
+      "kind": "image",
+      "url": "https://example.test/media/project-cover.webp",
+      "mime_type": "image/webp",
+      "alt": { "en": "Synthetic project cover", "zh": "合成项目封面" },
+      "width": 1600,
+      "height": 900,
+      "duration_seconds": null,
+      "sha256": null,
+      "updated_at": "2026-08-20T10:00:00Z"
+    },
+    {
+      "id": "media:article-cover",
+      "visibility": "public",
+      "kind": "image",
+      "url": "https://example.test/media/article-cover.webp",
+      "mime_type": "image/webp",
+      "alt": { "en": "Synthetic article cover", "zh": "合成文章封面" },
+      "width": 1600,
+      "height": 900,
+      "duration_seconds": null,
+      "sha256": null,
+      "updated_at": "2026-08-20T10:00:00Z"
+    }
+  ]
+}

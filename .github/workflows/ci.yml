@@ -74,6 +74,16 @@ jobs:
           cd backend
           DATABASE_PATH="$RUNNER_TEMP/gworkspace-ci.db" npm run db:check
 
+      - name: Validate public facts contract
+        run: |
+          cd backend
+          npm run check:public-facts
+
+      - name: Validate resume authority and API
+        run: |
+          cd backend
+          npm run check:resume
+
       - name: Verify backend modules load
         run: npm run check:backend-routes
 

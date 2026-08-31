@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-31T12:00:00.000Z",
+  "source": {
+    "system": "GWorkspace",
+    "canonical_url": "https://www.gellaronline.cc/api/public/v1/resume",
+    "updated_at": "2026-08-31T11:55:00.000Z"
+  },
+  "locale": null,
+  "surface": "resume_web",
+  "profile": {
+    "id": "profile:owner",
+    "name": { "zh": "示例站长", "en": "Example Owner" },
+    "full_name": { "zh": "示例人物", "en": "Example Person" },
+    "headline": { "zh": "软件开发者", "en": "Software builder" },
+    "location": { "zh": "美国纽约", "en": "New York, US" },
+    "summary": { "zh": "构建公开软件。", "en": "Builds public software." },
+    "avatar": {
+      "id": "media:resume-avatar",
+      "url": "https://www.gellaronline.cc/images/profile/resume-avatar.jpg",
+      "mime_type": "image/jpeg",
+      "alt": { "zh": "示例站长的头像", "en": "Example Owner profile portrait" },
+      "width": null,
+      "height": null
+    },
+    "contacts": [
+      {
+        "id": "contact:0123456789abcdef0123456789abcdef",
+        "type": "email",
+        "label": "Email",
+        "value": "owner@example.test",
+        "url": "mailto:owner@example.test",
+        "status": "published",
+        "surfaces": ["resume_web", "resume_pdf"],
+        "updated_at": "2026-08-31T11:55:00.000Z"
+      }
+    ],
+    "status": "published",
+    "surfaces": ["portfolio", "resume_web", "resume_pdf", "gellaria"],
+    "updated_at": "2026-08-31T11:55:00.000Z"
+  },
+  "skills": [],
+  "experience": [],
+  "education": [],
+  "projects": [],
+  "settings": {
+    "default_language": "en",
+    "pdf": {
+      "project_limit": 3,
+      "filename": { "zh": "Example-Resume-ZH.pdf", "en": "Example-Resume-EN.pdf" }
+    }
+  }
+}

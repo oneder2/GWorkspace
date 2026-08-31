@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-08-31T12:00:00Z",
+  "source": {
+    "system": "GWorkspace",
+    "updated_at": "2026-08-31T12:00:00Z",
+    "canonical_url": null
+  },
+  "profile": {
+    "id": "profile:owner",
+    "visibility": "private",
+    "name": { "en": "Private Owner", "zh": "私密所有者" },
+    "headline": { "en": "Private", "zh": "私密" },
+    "summary": { "en": "This record must be rejected.", "zh": "此记录必须被拒绝。" },
+    "location": null,
+    "contacts": [],
+    "skill_groups": [],
+    "avatar_media_id": null,
+    "canonical_url": null,
+    "updated_at": "2026-08-31T12:00:00Z"
+  },
+  "projects": [],
+  "experiences": [],
+  "articles": [],
+  "media": []
+}

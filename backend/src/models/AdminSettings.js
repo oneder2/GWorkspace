@@ -24,10 +24,14 @@ const DEFAULT_HOMEPAGE_CONTENT = {
 const DEFAULT_PROFILE_CONTENT = {
   owner: {
     name: '',
+    name_localized: { zh: '', en: '' },
     role: { zh: '', en: '' },
     bio: { zh: '', en: '' },
     responsibilities: { zh: [], en: [] },
-    contacts: []
+    contacts: [],
+    skill_groups: [],
+    avatar_media_id: null,
+    canonical_url: null
   }
 }
 
@@ -99,24 +103,42 @@ const parseHomepageContent = (value) => {
 const parseProfileContent = (value) => {
   const source = parsePossibleJson(value)
   const owner = isPlainObject(source.owner) ? source.owner : {}
+  const nameFallback = {
+    zh: normalizeText(owner.name, DEFAULT_PROFILE_CONTENT.owner.name),
+    en: normalizeText(owner.name, DEFAULT_PROFILE_CONTENT.owner.name)
+  }
   const contacts = Array.isArray(owner.contacts)
     ? owner.contacts
         .filter(contact => isPlainObject(contact))
         .map(contact => ({
           id: normalizeText(contact.id),
-          label: normalizeText(contact.label),
-          href: normalizeText(contact.href)
+          label: normalizeText(contact.label, normalizeText(contact.label?.zh ?? contact.label?.en)),
+          href: normalizeText(contact.href ?? contact.url)
         }))
         .filter(contact => contact.label && contact.href)
     : DEFAULT_PROFILE_CONTENT.owner.contacts
+  const skillGroups = Array.isArray(owner.skill_groups ?? owner.skillGroups)
+    ? (owner.skill_groups ?? owner.skillGroups)
+        .filter(group => isPlainObject(group))
+        .map(group => ({
+          id: normalizeText(group.id),
+          name: readLocalizedText(group, 'name', { zh: '', en: '' }),
+          items: normalizeList(group.items)
+        }))
+        .filter(group => group.id && group.name.zh && group.name.en && group.items.length > 0)
+    : DEFAULT_PROFILE_CONTENT.owner.skill_groups
 
   return {
     owner: {
       name: normalizeText(owner.name, DEFAULT_PROFILE_CONTENT.owner.name),
+      name_localized: readLocalizedText(owner, 'name_localized', nameFallback),
       role: readLocalizedText(owner, 'role', DEFAULT_PROFILE_CONTENT.owner.role),
       bio: readLocalizedText(owner, 'bio', DEFAULT_PROFILE_CONTENT.owner.bio),
       responsibilities: readLocalizedList(owner, 'responsibilities', DEFAULT_PROFILE_CONTENT.owner.responsibilities),
-      contacts
+      contacts,
+      skill_groups: skillGroups,
+      avatar_media_id: normalizeText(owner.avatar_media_id ?? owner.avatarMediaId) || null,
+      canonical_url: normalizeText(owner.canonical_url ?? owner.canonicalUrl) || null
     }
   }
 }
@@ -147,12 +169,22 @@ const mergeProfileContent = (currentValue, nextValue) => {
   return {
     owner: {
       name: normalizeText(nextOwner.name, owner.name),
+      name_localized: readLocalizedText(nextOwner, 'name_localized', owner.name_localized),
       role: readLocalizedText(nextOwner, 'role', owner.role),
       bio: readLocalizedText(nextOwner, 'bio', owner.bio),
       responsibilities: readLocalizedList(nextOwner, 'responsibilities', owner.responsibilities),
       contacts: Array.isArray(nextOwner.contacts)
         ? parseProfileContent({ owner: { ...owner, contacts: nextOwner.contacts } }).owner.contacts
-        : owner.contacts
+        : owner.contacts,
+      skill_groups: Array.isArray(nextOwner.skill_groups ?? nextOwner.skillGroups)
+        ? parseProfileContent({ owner: { ...owner, skill_groups: nextOwner.skill_groups ?? nextOwner.skillGroups } }).owner.skill_groups
+        : owner.skill_groups,
+      avatar_media_id: nextOwner.avatar_media_id !== undefined || nextOwner.avatarMediaId !== undefined
+        ? normalizeText(nextOwner.avatar_media_id ?? nextOwner.avatarMediaId) || null
+        : owner.avatar_media_id,
+      canonical_url: nextOwner.canonical_url !== undefined || nextOwner.canonicalUrl !== undefined
+        ? normalizeText(nextOwner.canonical_url ?? nextOwner.canonicalUrl) || null
+        : owner.canonical_url
     }
   }
 }
@@ -192,6 +224,7 @@ export class AdminSettings {
     const db = getDatabase()
     const { location, timezone, ip_address, homepage_content, homepageContent, profile_content, profileContent } = data
     const currentSettings = this.get()
+    let mergedProfileContent = null
     
     const updateFields = []
     const updateValues = []
@@ -222,7 +255,7 @@ export class AdminSettings {
     }
 
     if (profile_content !== undefined || profileContent !== undefined) {
-      const mergedProfileContent = mergeProfileContent(
+      mergedProfileContent = mergeProfileContent(
         currentSettings?.profile_content,
         profile_content !== undefined ? profile_content : profileContent
       )
@@ -244,6 +277,29 @@ export class AdminSettings {
     if (updateFields.length > 1) { // 至少包含updated_at
       const query = `UPDATE admin_settings SET ${updateFields.join(', ')} WHERE id = 1`
       db.prepare(query).run(...updateValues)
+    }
+
+    // The legacy settings endpoint remains a compatibility writer. Once the
+    // structured resume tables exist, mirror its profile edits into the
+    // authoritative profile record so old admin clients cannot fork identity.
+    if (mergedProfileContent && db.prepare(`
+      SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'resume_profile'
+    `).get()) {
+      const owner = mergedProfileContent.owner
+      db.prepare(`
+        UPDATE resume_profile SET
+          name_zh = ?, name_en = ?, headline_zh = ?, headline_en = ?,
+          summary_zh = ?, summary_en = ?, updated_at = ?
+        WHERE id = 1
+      `).run(
+        owner.name_localized.zh || owner.name,
+        owner.name_localized.en || owner.name,
+        owner.role.zh,
+        owner.role.en,
+        owner.bio.zh,
+        owner.bio.en,
+        new Date().toISOString()
+      )
     }
 
     return this.get()

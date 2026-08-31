@@ -85,7 +85,7 @@ function selectProfile(settings, locale) {
 export function buildPublicWorld({ locale = 'zh' } = {}) {
   const language = locale === 'en' ? 'en' : 'zh'
   const settings = AdminSettings.get()
-  const projects = Project.getAll({ status: 'published' })
+  const projects = Project.getAll({ status: 'published', surface: 'gellaria' })
   const blogs = Blog.getAll({ status: 'published', limit: MAX_EXHIBITS_PER_REGION, sortBy: 'published_at', sortOrder: 'desc' })
   const guestbook = Guestbook.getAll({ status: 'approved', limit: MAX_EXHIBITS_PER_REGION, sortOrder: 'desc' })
   const placements = WorldExhibit.getAll({ status: 'published' })
@@ -139,7 +139,7 @@ export function buildPublicWorld({ locale = 'zh' } = {}) {
 
 export function listPublicProjects({ locale = 'zh' } = {}) {
   const language = locale === 'en' ? 'en' : 'zh'
-  return Project.getAll({ status: 'published' }).map(project => ({
+  return Project.getAll({ status: 'published', surface: 'portfolio' }).map(project => ({
     id: project.id,
     slug: project.slug,
     title: localized(project.title, language),
