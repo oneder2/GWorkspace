@@ -968,10 +968,10 @@
     "analyticsCopy": "更聚焦的流量数据与文章热度变化，优先服务快速扫描。",
     "commentsCopy": "在不离开队列的情况下审核、批准或移除评论。",
     "guestbookCopy": "管理留言板可见性，保持公开留言整洁有序。",
-    "worldContent": "公开资料",
+    "worldContent": "个人档案",
     "worldContentCopy": "维护 GWorkspace 的公共身份、履历、项目和 Gellaria 空间摆放。",
     "worldContentSaved": "世界内容已保存",
-    "publicContent": "公开资料",
+    "publicContent": "个人档案",
     "publicContentCopy": "统一维护个人履历与作品，并按展示端控制发布范围。",
     "publicContentSaved": "公开资料已保存",
     "publicProfile": "公共身份",
@@ -1216,7 +1216,7 @@
       "ai": "AI 工作流",
       "comments": "评论管理",
       "guestbook": "留言板管理",
-      "world": "世界内容",
+      "world": "个人档案",
       "system": "系统管理"
     }
   },

@@ -965,10 +965,10 @@
     "analyticsCopy": "High-signal traffic numbers and popular post movement, framed for scanning instead of decoration.",
     "commentsCopy": "Review, approve, or remove discussion without leaving the queue.",
     "guestbookCopy": "Handle guestbook visibility and keep public notes tidy.",
-    "worldContent": "Public records",
+    "worldContent": "Profile & resume",
     "worldContentCopy": "Maintain GWorkspace identity, resume records, projects, and Gellaria placement.",
     "worldContentSaved": "World content saved",
-    "publicContent": "Public records",
+    "publicContent": "Profile & resume",
     "publicContentCopy": "Maintain one public resume and distribute each record to the intended surfaces.",
     "publicContentSaved": "Public records saved",
     "publicProfile": "Public identity",
@@ -1213,7 +1213,7 @@
       "ai": "AI Workflow",
       "comments": "Comments",
       "guestbook": "Guestbook Management",
-      "world": "World Content",
+      "world": "Profile & resume",
       "system": "System"
     }
   },

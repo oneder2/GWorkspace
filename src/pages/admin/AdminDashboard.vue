@@ -65,11 +65,11 @@
               <span class="text-xs font-bold">{{ $t('admin.ai') }}</span>
             </button>
             <button
-              @click="$router.push('/admin/system')"
+              @click="$router.push('/admin/world')"
               class="admin-quick-action"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 mb-2 group-hover:scale-110 transition-transform"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 20h10"/><path d="M9 16v4"/><path d="M15 16v4"/></svg>
-              <span class="text-xs font-bold">{{ $t('admin.system') }}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mb-2 group-hover:scale-110 transition-transform"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+              <span class="text-xs font-bold">{{ $t('admin.worldContent') }}</span>
             </button>
           </div>
         </div>
@@ -93,9 +93,11 @@
       </div>
 
       <div class="lg:col-span-2 space-y-6">
-        <div class="admin-panel p-5 sm:p-6 rounded-[24px] min-h-[260px] sm:min-h-[300px] lg:min-h-[320px]">
+        <div class="admin-panel p-5 sm:p-6 rounded-[24px]">
           <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">{{ $t('admin.visitTrends') }}</h3>
-          <canvas ref="chartCanvas"></canvas>
+          <div class="dashboard-chart-frame">
+            <canvas ref="chartCanvas"></canvas>
+          </div>
         </div>
 
         <div class="admin-panel p-6 rounded-[24px]">
@@ -353,6 +355,7 @@ onMounted(() => {
 onUnmounted(() => {
   if (visitChart) {
     visitChart.destroy()
+    visitChart = null
   }
 })
 </script>
@@ -377,5 +380,32 @@ onUnmounted(() => {
   background: var(--theme-primary);
   color: white;
   border-color: color-mix(in srgb, var(--theme-primary) 48%, transparent);
+}
+
+.dashboard-chart-frame {
+  position: relative;
+  width: 100%;
+  height: 13rem;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dashboard-chart-frame canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100%;
+}
+
+@media (min-width: 640px) {
+  .dashboard-chart-frame {
+    height: 15rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-chart-frame {
+    height: 16rem;
+  }
 }
 </style>
