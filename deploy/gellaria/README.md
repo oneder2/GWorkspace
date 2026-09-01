@@ -16,7 +16,8 @@ For a release, upload the monorepo root to a new directory under `releases`, run
 restart `gellaria.service`. The SQLite directory is shared between releases and
 must not be deleted during cleanup.
 
-The repository workflow also publishes `ghcr.io/oneder2/gellaria:latest` after all quality checks pass.
+The repository workflow also publishes
+`ghcr.io/oneder2/gworkspace-gellaria:latest` after all quality checks pass.
 
 The target shared-domain topology is documented in
 `docs/gellaria/GWORKSPACE_INTEGRATION.md`. The current nip.io server block remains useful

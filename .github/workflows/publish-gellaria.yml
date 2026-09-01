@@ -36,6 +36,6 @@ jobs:
           context: .
           file: apps/gellaria/Dockerfile
           push: true
-          tags: ghcr.io/oneder2/gellaria:latest
+          tags: ghcr.io/oneder2/gworkspace-gellaria:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
