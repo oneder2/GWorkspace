@@ -5,13 +5,13 @@ import { createHash, randomUUID } from "node:crypto";
 import { clientMessageSchema, type PublicPlayer, type ServerMessage } from "./lib/protocol";
 import { addSignal, addTag, getSignals, getTags } from "./lib/world-store";
 import { landmarks } from "./lib/content";
+import { spiritIdentityFromSearchParams, spiritPalette } from "./lib/spirit-identity";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOSTNAME ?? "0.0.0.0";
 const port = Number(process.env.PORT ?? 3000);
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
-const colors = ["#f2a66f", "#9ec5e8", "#b7d58b", "#e8c87d", "#d3a6cf"];
 const landmarkIds = new Set(landmarks.map((landmark) => landmark.id));
 const landmarkTags = new Map(landmarks.map((landmark) => [landmark.id, new Set(landmark.tagOptions)]));
 const maximumClients = Number(process.env.GELLARIA_MAX_CLIENTS ?? 120);
@@ -71,9 +71,13 @@ socketServer.on("connection", (socket, request) => {
   socket.on("pong", () => { worldSocket.isAlive = true; });
   let messageWindowStartedAt = Date.now();
   let messageCount = 0;
+  const requestUrl = new URL(request.url ?? "/ws/gellaria", "http://gellaria.local");
+  const spiritIdentity = spiritIdentityFromSearchParams(requestUrl.searchParams, visitorKey);
+  const appearance = { palette: spiritIdentity.palette, form: spiritIdentity.form };
   const player: PublicPlayer = {
     id: randomUUID().slice(0, 8),
-    color: colors[Math.floor(Math.random() * colors.length)],
+    color: spiritPalette(appearance).glow,
+    appearance,
     position: [0, 0.7, 5],
     rotation: 0,
   };

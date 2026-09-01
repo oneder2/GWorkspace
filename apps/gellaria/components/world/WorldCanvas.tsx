@@ -10,6 +10,7 @@ import { getLandmarkInfluence, type LandmarkInfluence } from "@/lib/influence";
 import { getCameraRelativeMovement } from "@/lib/movement";
 import { isWithinInteractionRange } from "@/lib/proximity";
 import { useWorldStore } from "./store";
+import { SpiritTraveler, type SpiritMotion } from "./SpiritTraveler";
 import { CentralCamp } from "./WorldLandmarks";
 import { IslandTerrain, terrainHeightAt, WorldEcology } from "./WorldEcology";
 import type { MoveIntent } from "./WorldExperience";
@@ -340,28 +341,125 @@ function LandmarkObject({ landmark, signalCount, tagCounts, nearby, surveyed, co
 }
 
 function HallExterior({ landmark, nearby, responseColor, influence }: { landmark: Landmark; nearby: boolean; responseColor: string; influence: LandmarkInfluence }) {
-  const isObservatory = landmark.id === "observatory";
-  const isGrove = landmark.id === "memory-grove";
-  const wall = isObservatory ? "#334b57" : isGrove ? "#3f5147" : "#57483e";
-  const frame = isObservatory ? "#7792a0" : isGrove ? "#718270" : "#89725f";
+  const rotation = landmark.id === "workshop" ? -0.18 : landmark.id === "observatory" ? 0.18 : -0.08;
   return (
-    <group scale={0.78} rotation-y={landmark.id === "workshop" ? -0.18 : landmark.id === "observatory" ? 0.18 : -0.08}>
-      <mesh receiveShadow position-y={0.2}><cylinderGeometry args={[4.4, 4.7, 0.4, 8]} /><meshStandardMaterial color="#3c4741" roughness={0.96} /></mesh>
-      <mesh castShadow receiveShadow position={[0, 2.25, -0.35]}><boxGeometry args={[7.3, 4.2, 5.6]} /><meshStandardMaterial color={wall} roughness={0.86} /></mesh>
-      <mesh position={[-2.45, 2.15, 2.5]}><boxGeometry args={[2.25, 3.6, 0.3]} /><meshStandardMaterial color={wall} roughness={0.86} /></mesh>
-      <mesh position={[2.45, 2.15, 2.5]}><boxGeometry args={[2.25, 3.6, 0.3]} /><meshStandardMaterial color={wall} roughness={0.86} /></mesh>
-      <mesh position={[0, 3.65, 2.5]}><boxGeometry args={[2.7, 0.62, 0.3]} /><meshStandardMaterial color={frame} metalness={0.25} roughness={0.62} /></mesh>
-      <mesh position={[0, 1.55, 2.52]}><boxGeometry args={[2.35, 3.35, 0.18]} /><meshStandardMaterial color="#142023" emissive={responseColor} emissiveIntensity={nearby ? 0.42 : 0.12} /></mesh>
-      <mesh position={[0, 1.55, 2.65]}><planeGeometry args={[1.35, 2.55]} /><meshBasicMaterial color={responseColor} transparent opacity={nearby ? 0.32 : 0.11} /></mesh>
-      {[-3.35, 3.35].map((x) => <group key={x} position-x={x}><mesh position-y={2.2}><boxGeometry args={[0.28, 4.4, 0.4]} /><meshStandardMaterial color={frame} metalness={0.32} /></mesh><mesh position={[x < 0 ? -0.34 : 0.34, 1.25, 0]}><boxGeometry args={[0.55, 2.2, 3.8]} /><meshStandardMaterial color="#2b3835" roughness={0.9} /></mesh></group>)}
-      {isObservatory ? (
-        <group position-y={4.25}><mesh rotation-x={Math.PI / 2}><sphereGeometry args={[3.1, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2]} /><meshStandardMaterial color="#29424f" metalness={0.35} roughness={0.5} side={THREE.DoubleSide} /></mesh><mesh position-y={2.75} rotation={[0.35, 0, -0.3]}><cylinderGeometry args={[0.48, 0.72, 2.8, 14]} /><meshStandardMaterial color={frame} metalness={0.55} roughness={0.3} /></mesh></group>
-      ) : isGrove ? (
-        <group position-y={4.5}>{[-2.2, 0, 2.2].map((x, index) => <group key={x} position-x={x}><mesh rotation-z={index === 1 ? 0 : x < 0 ? -0.35 : 0.35}><cylinderGeometry args={[0.09, 0.16, 3.6, 7]} /><meshStandardMaterial color={frame} /></mesh><mesh position-y={1.55}><icosahedronGeometry args={[0.85, 1]} /><meshStandardMaterial color={responseColor} emissive={responseColor} emissiveIntensity={0.18 + influence.strength * 0.6} wireframe /></mesh></group>)}</group>
+    <group scale={0.78} rotation-y={rotation}>
+      {landmark.id === "observatory" ? (
+        <ObservatoryExterior responseColor={responseColor} influence={influence} />
+      ) : landmark.id === "memory-grove" ? (
+        <GroveExterior responseColor={responseColor} influence={influence} />
       ) : (
-        <group position-y={4.5}>{[-2.45, 0, 2.45].map((x, index) => <mesh key={x} position-x={x} rotation-z={index === 1 ? 0 : x < 0 ? 0.32 : -0.32}><boxGeometry args={[2.8, 0.32, 5.8]} /><meshStandardMaterial color={index === 1 ? "#443b35" : "#39413e"} metalness={0.2} roughness={0.7} /></mesh>)}</group>
+        <WorkshopExterior responseColor={responseColor} influence={influence} />
       )}
+      <EntrancePortal responseColor={responseColor} nearby={nearby} />
       <pointLight position={[0, 2.1, 3]} color={responseColor} intensity={(nearby ? 4 : 1.2) + influence.strength * 3} distance={9} decay={2} />
+    </group>
+  );
+}
+
+function EntrancePortal({ responseColor, nearby }: { responseColor: string; nearby: boolean }) {
+  return (
+    <group position={[0, 0, 2.72]}>
+      <mesh position={[-1.42, 1.65, 0]}><boxGeometry args={[0.24, 3.3, 0.36]} /><meshStandardMaterial color="#869084" metalness={0.34} roughness={0.5} /></mesh>
+      <mesh position={[1.42, 1.65, 0]}><boxGeometry args={[0.24, 3.3, 0.36]} /><meshStandardMaterial color="#869084" metalness={0.34} roughness={0.5} /></mesh>
+      <mesh position={[0, 3.2, 0]}><boxGeometry args={[3.05, 0.25, 0.36]} /><meshStandardMaterial color="#869084" metalness={0.34} roughness={0.5} /></mesh>
+      <mesh position={[0, 1.55, 0.02]}><boxGeometry args={[2.55, 3.05, 0.18]} /><meshStandardMaterial color="#101d20" emissive={responseColor} emissiveIntensity={nearby ? 0.48 : 0.12} /></mesh>
+      <mesh position={[0, 1.55, 0.15]}><planeGeometry args={[1.45, 2.48]} /><meshBasicMaterial color={responseColor} transparent opacity={nearby ? 0.34 : 0.1} depthWrite={false} /></mesh>
+    </group>
+  );
+}
+
+function WorkshopExterior({ responseColor, influence }: { responseColor: string; influence: LandmarkInfluence }) {
+  return (
+    <group>
+      <mesh receiveShadow position-y={0.2}><cylinderGeometry args={[4.65, 4.9, 0.4, 8]} /><meshStandardMaterial color="#45423b" roughness={0.96} /></mesh>
+      <mesh castShadow receiveShadow position={[0, 2.1, -0.25]}><boxGeometry args={[7.5, 3.85, 5.5]} /><meshStandardMaterial color="#62493d" roughness={0.88} /></mesh>
+      {[-2.45, 0, 2.45].map((x, index) => (
+        <mesh key={x} castShadow position={[x, 4.32 + (index % 2) * 0.28, -0.2]} rotation-z={index === 1 ? -0.04 : x < 0 ? 0.27 : -0.27}>
+          <boxGeometry args={[2.85, 0.32, 5.85]} />
+          <meshStandardMaterial color={index === 1 ? "#45372f" : "#303b39"} metalness={0.22} roughness={0.68} />
+        </mesh>
+      ))}
+      <group position={[-2.65, 5.05, -1.25]}>
+        <mesh castShadow position-y={0.75}><cylinderGeometry args={[0.28, 0.42, 2.6, 8]} /><meshStandardMaterial color="#493c35" roughness={0.78} /></mesh>
+        <mesh position-y={2.05}><cylinderGeometry args={[0.48, 0.48, 0.18, 8]} /><meshStandardMaterial color="#232a29" metalness={0.3} /></mesh>
+      </group>
+      <group position={[2.72, 3.15, 2.56]}>
+        <WorkshopFacadeGear color={responseColor} speed={0.12 + influence.strength * 0.48} />
+      </group>
+      {[-3.55, 3.55].map((x) => <mesh key={x} position={[x, 2.05, 0]}><boxGeometry args={[0.26, 4.1, 5.85]} /><meshStandardMaterial color="#94745e" metalness={0.28} roughness={0.56} /></mesh>)}
+      <mesh position={[0, 3.65, -3.05]}><boxGeometry args={[5.8, 0.18, 0.26]} /><meshStandardMaterial color={responseColor} emissive={responseColor} emissiveIntensity={0.24 + influence.strength * 0.7} /></mesh>
+    </group>
+  );
+}
+
+function WorkshopFacadeGear({ color, speed }: { color: string; speed: number }) {
+  const gear = useRef<THREE.Group>(null);
+  useFrame((_, delta) => { if (gear.current) gear.current.rotation.z += delta * speed; });
+  return (
+    <group ref={gear}>
+      <mesh><torusGeometry args={[0.68, 0.13, 7, 28]} /><meshStandardMaterial color="#ad7958" emissive={color} emissiveIntensity={0.3} metalness={0.58} roughness={0.34} /></mesh>
+      {Array.from({ length: 10 }, (_, index) => { const angle = index * Math.PI / 5; return <mesh key={index} position={[Math.cos(angle) * 0.84, Math.sin(angle) * 0.84, 0]} rotation-z={angle}><boxGeometry args={[0.25, 0.15, 0.18]} /><meshStandardMaterial color="#bd8661" metalness={0.5} /></mesh>; })}
+    </group>
+  );
+}
+
+function ObservatoryExterior({ responseColor, influence }: { responseColor: string; influence: LandmarkInfluence }) {
+  return (
+    <group>
+      <mesh receiveShadow position-y={0.2}><cylinderGeometry args={[4.35, 4.7, 0.42, 16]} /><meshStandardMaterial color="#374a52" roughness={0.94} /></mesh>
+      <mesh castShadow receiveShadow position-y={1.75}><cylinderGeometry args={[3.55, 3.8, 3.2, 16]} /><meshStandardMaterial color="#405b67" metalness={0.18} roughness={0.66} /></mesh>
+      <mesh castShadow position-y={3.34}><sphereGeometry args={[3.55, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2]} /><meshStandardMaterial color="#29444f" metalness={0.38} roughness={0.45} side={THREE.DoubleSide} /></mesh>
+      {[0, Math.PI / 3, Math.PI * 2 / 3].map((rotation) => <mesh key={rotation} position-y={3.34} rotation-y={rotation}><torusGeometry args={[3.56, 0.045, 5, 64, Math.PI]} /><meshStandardMaterial color="#88a2ab" metalness={0.52} /></mesh>)}
+      <mesh position={[0, 4.7, 2.85]} rotation-x={-0.12}><boxGeometry args={[0.72, 2.8, 0.16]} /><meshStandardMaterial color="#122a34" emissive={responseColor} emissiveIntensity={0.34 + influence.strength * 0.85} /></mesh>
+      <ExteriorOrrery color={responseColor} strength={influence.strength} />
+      {[-2.5, 2.5].map((x) => <mesh key={x} position={[x, 1.55, 3.22]}><boxGeometry args={[0.68, 1.2, 0.14]} /><meshStandardMaterial color="#8ebbc7" emissive="#689bab" emissiveIntensity={0.45} /></mesh>)}
+    </group>
+  );
+}
+
+function ExteriorOrrery({ color, strength }: { color: string; strength: number }) {
+  const orrery = useRef<THREE.Group>(null);
+  useFrame((_, delta) => { if (orrery.current) orrery.current.rotation.y += delta * (0.07 + strength * 0.16); });
+  return (
+    <group ref={orrery} position={[0, 6.05, -0.3]}>
+      <mesh rotation-x={Math.PI / 2}><torusGeometry args={[1.35, 0.04, 5, 58]} /><meshBasicMaterial color={color} transparent opacity={0.68} /></mesh>
+      <mesh rotation={[0.65, 0.3, 0]}><torusGeometry args={[0.92, 0.025, 5, 48]} /><meshBasicMaterial color="#d2e1e4" transparent opacity={0.55} /></mesh>
+      <mesh><icosahedronGeometry args={[0.2, 1]} /><meshStandardMaterial color={color} emissive={color} emissiveIntensity={1.8} /></mesh>
+    </group>
+  );
+}
+
+function GroveExterior({ responseColor, influence }: { responseColor: string; influence: LandmarkInfluence }) {
+  return (
+    <group>
+      <mesh receiveShadow position-y={0.2}><cylinderGeometry args={[4.55, 4.9, 0.42, 12]} /><meshStandardMaterial color="#354b3e" roughness={1} /></mesh>
+      <mesh receiveShadow position-y={0.44} rotation-x={-Math.PI / 2}><ringGeometry args={[2.1, 4.25, 18]} /><meshStandardMaterial color="#435746" roughness={0.94} /></mesh>
+      <mesh position-y={0.46} rotation-x={-Math.PI / 2}><circleGeometry args={[2.05, 32]} /><meshStandardMaterial color="#213f3c" emissive={responseColor} emissiveIntensity={0.18 + influence.strength * 0.65} roughness={0.4} /></mesh>
+      {[-3.15, -1.55, 1.55, 3.15].map((x, index) => (
+        <group key={x} position={[x, 0, index % 2 ? -0.55 : -0.9]} rotation-z={x * -0.035}>
+          <mesh castShadow position-y={2.65}><cylinderGeometry args={[0.18, 0.42, 5.3, 7]} /><meshStandardMaterial color="#594b3b" roughness={1} /></mesh>
+          <mesh castShadow position={[x < 0 ? 0.25 : -0.25, 5.1, 0]} scale={[1.25, 0.86, 1.05]}><icosahedronGeometry args={[1.25, 1]} /><meshStandardMaterial color={index % 2 ? "#567258" : "#66805f"} roughness={0.96} /></mesh>
+        </group>
+      ))}
+      {[-2.4, 0, 2.4].map((x) => <mesh key={x} position={[x, 3.35, -1.9]} rotation-z={x * -0.1}><torusGeometry args={[2.7, 0.09, 7, 42, Math.PI]} /><meshStandardMaterial color="#7d8972" metalness={0.18} roughness={0.65} /></mesh>)}
+      <mesh position={[0, 2.5, -2.65]}><planeGeometry args={[5.8, 4.4]} /><meshStandardMaterial color="#52706b" transparent opacity={0.18} roughness={0.25} side={THREE.DoubleSide} /></mesh>
+      <GroveEchoCrown color={responseColor} strength={influence.strength} />
+    </group>
+  );
+}
+
+function GroveEchoCrown({ color, strength }: { color: string; strength: number }) {
+  const rings = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (!rings.current) return;
+    rings.current.rotation.y = Math.sin(clock.elapsedTime * 0.24) * 0.28;
+    rings.current.position.y = 4.65 + Math.sin(clock.elapsedTime * 0.8) * 0.08;
+  });
+  return (
+    <group ref={rings}>
+      {[0.62, 1.05, 1.48].map((radius, index) => <mesh key={radius} rotation-x={Math.PI / 2}><torusGeometry args={[radius, 0.025, 5, 48]} /><meshBasicMaterial color={color} transparent opacity={0.25 + strength * 0.18 - index * 0.04} /></mesh>)}
+      <mesh><octahedronGeometry args={[0.18, 0]} /><meshStandardMaterial color="#e0e5c5" emissive={color} emissiveIntensity={1.3 + strength} /></mesh>
     </group>
   );
 }
@@ -387,7 +485,7 @@ function Beacon({ color, influence, selected }: { color: string; influence: Land
 function Player({ active, moveIntent, initialPlayerPosition, landmarks, onNearby, onStudyNearby }: Pick<CanvasProps, "active" | "moveIntent" | "initialPlayerPosition" | "landmarks" | "onNearby" | "onStudyNearby">) {
   const group = useRef<THREE.Group>(null);
   const avatar = useRef<THREE.Group>(null);
-  const travelerMotion = useRef({ speed: 0, stride: 0 });
+  const travelerMotion = useRef<SpiritMotion>({ speed: 0, stride: 0 });
   const position = useRef(new THREE.Vector3(...initialPlayerPosition));
   const velocity = useRef(new THREE.Vector3());
   const cameraDirection = useRef(new THREE.Vector3());
@@ -398,7 +496,7 @@ function Player({ active, moveIntent, initialPlayerPosition, landmarks, onNearby
   const studyNearby = useRef(false);
   const { camera } = useThree();
   const sendMove = useWorldStore((state) => state.sendMove);
-  const playerColor = useWorldStore((state) => state.playerColor);
+  const playerAppearance = useWorldStore((state) => state.playerAppearance);
 
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
@@ -430,7 +528,6 @@ function Player({ active, moveIntent, initialPlayerPosition, landmarks, onNearby
     if (avatar.current) {
       const speed = Math.min(1, velocity.current.length() / 5);
       const stride = clock.elapsedTime * 10.5;
-      avatar.current.position.y = Math.sin(stride) * 0.055 * speed;
       avatar.current.rotation.z = THREE.MathUtils.lerp(avatar.current.rotation.z, -inputX * 0.07, Math.min(1, delta * 8));
       avatar.current.rotation.x = THREE.MathUtils.lerp(avatar.current.rotation.x, Math.sin(stride * 0.5) * 0.025 * speed, Math.min(1, delta * 8));
       travelerMotion.current.speed = speed;
@@ -468,7 +565,7 @@ function Player({ active, moveIntent, initialPlayerPosition, landmarks, onNearby
   return (
     <group ref={group}>
       <group ref={avatar}>
-        <TravelerFigure color={playerColor} motion={travelerMotion} />
+        <SpiritTraveler appearance={playerAppearance} motion={travelerMotion} />
       </group>
     </group>
   );
@@ -481,7 +578,7 @@ function OtherPlayers() {
 
 function RemotePlayer({ player }: { player: ReturnType<typeof Object.values<import("@/lib/protocol").PublicPlayer>>[number] }) {
   const group = useRef<THREE.Group>(null);
-  const travelerMotion = useRef({ speed: 0, stride: 0 });
+  const travelerMotion = useRef<SpiritMotion>({ speed: 0, stride: 0 });
   const target = useRef(new THREE.Vector3(player.position[0], terrainHeightAt(player.position[0], player.position[2]) + 0.05, player.position[2]));
   useFrame(({ clock }, delta) => {
     if (!group.current) return;
@@ -494,85 +591,10 @@ function RemotePlayer({ player }: { player: ReturnType<typeof Object.values<impo
   });
   return (
     <group ref={group} position={[player.position[0], terrainHeightAt(player.position[0], player.position[2]) + 0.05, player.position[2]]}>
-      <TravelerFigure color={player.color} motion={travelerMotion} opacity={0.78} remote />
+      <SpiritTraveler appearance={player.appearance ?? { palette: 0, form: 0 }} motion={travelerMotion} opacity={0.82} remote />
       <Html position={[0, 2.05, 0]} center distanceFactor={13} zIndexRange={[4, 0]} className="traveler-label">
         旅人 {player.id.slice(0, 4).toUpperCase()}
       </Html>
-    </group>
-  );
-}
-
-type TravelerMotion = { speed: number; stride: number };
-
-function TravelerFigure({ color, motion, opacity = 1, remote = false }: { color: string; motion: React.RefObject<TravelerMotion>; opacity?: number; remote?: boolean }) {
-  const leftArm = useRef<THREE.Group>(null);
-  const rightArm = useRef<THREE.Group>(null);
-  const leftLeg = useRef<THREE.Group>(null);
-  const rightLeg = useRef<THREE.Group>(null);
-  const scarf = useRef<THREE.Group>(null);
-  const lantern = useRef<THREE.Group>(null);
-  const translucent = opacity < 1;
-  const materialProps = { transparent: translucent, opacity };
-  useFrame(() => {
-    const { speed, stride } = motion.current;
-    const swing = Math.sin(stride) * 0.62 * speed;
-    if (leftLeg.current) leftLeg.current.rotation.x = swing;
-    if (rightLeg.current) rightLeg.current.rotation.x = -swing;
-    if (leftArm.current) leftArm.current.rotation.x = -swing * 0.72;
-    if (rightArm.current) rightArm.current.rotation.x = swing * 0.72;
-    if (scarf.current) scarf.current.rotation.x = -0.18 - speed * 0.24 + Math.sin(stride * 0.45) * 0.05;
-    if (lantern.current) lantern.current.rotation.z = Math.sin(stride * 0.55) * 0.12 * speed;
-  });
-  return (
-    <group scale={remote ? 0.86 : 0.92}>
-      <group ref={leftLeg} position={[-0.17, 0.64, 0]}>
-        <mesh castShadow position-y={-0.26}><capsuleGeometry args={[0.105, 0.38, 4, 7]} /><meshStandardMaterial color="#46505a" roughness={0.9} {...materialProps} /></mesh>
-        <mesh castShadow position={[-0.01, -0.55, 0.08]} scale={[1, 0.78, 1.32]}><dodecahedronGeometry args={[0.15, 0]} /><meshStandardMaterial color="#272d31" roughness={0.96} {...materialProps} /></mesh>
-      </group>
-      <group ref={rightLeg} position={[0.17, 0.64, 0]}>
-        <mesh castShadow position-y={-0.26}><capsuleGeometry args={[0.105, 0.38, 4, 7]} /><meshStandardMaterial color="#46505a" roughness={0.9} {...materialProps} /></mesh>
-        <mesh castShadow position={[0.01, -0.55, 0.08]} scale={[1, 0.78, 1.32]}><dodecahedronGeometry args={[0.15, 0]} /><meshStandardMaterial color="#272d31" roughness={0.96} {...materialProps} /></mesh>
-      </group>
-
-      <mesh castShadow position-y={1.03} scale={[0.92, 1.08, 0.72]}>
-        <capsuleGeometry args={[0.32, 0.55, 5, 9]} />
-        <meshStandardMaterial color="#d1d1bd" roughness={0.88} {...materialProps} />
-      </mesh>
-      <mesh castShadow position={[0, 1.07, -0.28]} scale={[0.8, 1, 0.45]}>
-        <boxGeometry args={[0.55, 0.58, 0.3]} />
-        <meshStandardMaterial color="#384747" roughness={0.92} {...materialProps} />
-      </mesh>
-      <mesh position={[0, 1.04, -0.46]}><boxGeometry args={[0.34, 0.06, 0.08]} /><meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.25} {...materialProps} /></mesh>
-
-      <group ref={leftArm} position={[-0.37, 1.25, 0]} rotation-z={-0.08}>
-        <mesh castShadow position-y={-0.25}><capsuleGeometry args={[0.09, 0.39, 4, 7]} /><meshStandardMaterial color="#b7b9ab" roughness={0.9} {...materialProps} /></mesh>
-        <mesh position-y={-0.5}><sphereGeometry args={[0.1, 8, 6]} /><meshStandardMaterial color="#bd9178" roughness={0.85} {...materialProps} /></mesh>
-      </group>
-      <group ref={rightArm} position={[0.37, 1.25, 0]} rotation-z={0.08}>
-        <mesh castShadow position-y={-0.25}><capsuleGeometry args={[0.09, 0.39, 4, 7]} /><meshStandardMaterial color="#b7b9ab" roughness={0.9} {...materialProps} /></mesh>
-        <mesh position-y={-0.5}><sphereGeometry args={[0.1, 8, 6]} /><meshStandardMaterial color="#bd9178" roughness={0.85} {...materialProps} /></mesh>
-      </group>
-
-      <mesh castShadow position-y={1.69}><sphereGeometry args={[0.31, 14, 10]} /><meshStandardMaterial color="#c99a7d" roughness={0.88} {...materialProps} /></mesh>
-      <mesh castShadow position={[0, 1.76, -0.04]} scale={[1.05, 0.78, 1.04]}>
-        <sphereGeometry args={[0.315, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.58]} />
-        <meshStandardMaterial color="#29353a" roughness={0.93} {...materialProps} />
-      </mesh>
-      <mesh position={[-0.115, 1.72, 0.285]}><sphereGeometry args={[0.025, 6, 5]} /><meshBasicMaterial color="#182126" {...materialProps} /></mesh>
-      <mesh position={[0.115, 1.72, 0.285]}><sphereGeometry args={[0.025, 6, 5]} /><meshBasicMaterial color="#182126" {...materialProps} /></mesh>
-      <mesh position={[0, 1.64, 0.315]} rotation-x={Math.PI / 2}><coneGeometry args={[0.045, 0.13, 5]} /><meshStandardMaterial color="#a96f5e" {...materialProps} /></mesh>
-
-      <mesh position-y={1.43} rotation-x={Math.PI / 2}><torusGeometry args={[0.275, 0.065, 6, 18]} /><meshStandardMaterial color={color} roughness={0.8} emissive={color} emissiveIntensity={0.18} {...materialProps} /></mesh>
-      <group ref={scarf} position={[0.16, 1.42, -0.25]} rotation-x={-0.18}>
-        <mesh position-z={-0.26}><boxGeometry args={[0.16, 0.07, 0.55]} /><meshStandardMaterial color={color} roughness={0.82} {...materialProps} /></mesh>
-      </group>
-
-      <group ref={lantern} position={[-0.48, 0.72, 0.02]}>
-        <mesh position-y={0.18}><torusGeometry args={[0.11, 0.022, 5, 12]} /><meshStandardMaterial color="#80684d" metalness={0.5} roughness={0.45} {...materialProps} /></mesh>
-        <mesh><cylinderGeometry args={[0.11, 0.13, 0.25, 6]} /><meshStandardMaterial color="#f0cc83" emissive="#eaa35f" emissiveIntensity={2.1} transparent opacity={opacity * 0.82} /></mesh>
-        <pointLight color="#f3b86e" intensity={remote ? 0.65 : 1.2} distance={3.2} />
-      </group>
-      <pointLight position={[0, 1.52, 0.2]} color={color} intensity={remote ? 0.55 : 0.9} distance={3.4} />
     </group>
   );
 }

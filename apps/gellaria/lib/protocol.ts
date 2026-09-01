@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { SpiritAppearance } from "./spirit-identity";
 
 export const clientMessageSchema = z.discriminatedUnion("type", [
   z.object({
@@ -22,6 +23,7 @@ export type ClientMessage = z.infer<typeof clientMessageSchema>;
 export type PublicPlayer = {
   id: string;
   color: string;
+  appearance?: SpiritAppearance;
   position: [number, number, number];
   rotation: number;
 };

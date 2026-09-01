@@ -48,16 +48,43 @@ export const hallConfigs: Record<string, HallConfig> = {
   },
 };
 
-const slotPositions: Array<{ position: [number, number, number]; rotation: number }> = [
-  { position: [-1.7, 0, 1.65], rotation: Math.PI - 0.06 },
-  { position: [1.7, 0, 1.65], rotation: Math.PI + 0.06 },
-  { position: [-5.1, 0, 1.25], rotation: Math.PI - 0.18 },
-  { position: [5.1, 0, 1.25], rotation: Math.PI + 0.18 },
-  { position: [-5.1, 0, -3.25], rotation: 0.18 },
-  { position: [-1.7, 0, -3.65], rotation: 0.06 },
-  { position: [1.7, 0, -3.65], rotation: -0.06 },
-  { position: [5.1, 0, -3.25], rotation: -0.18 },
+type SlotLayout = Array<{ position: [number, number, number]; rotation: number }>;
+
+const workshopSlots: SlotLayout = [
+  { position: [-5.45, 0, 2.15], rotation: Math.PI / 2 },
+  { position: [-2, 0, 2.25], rotation: Math.PI },
+  { position: [2, 0, 2.25], rotation: Math.PI },
+  { position: [5.45, 0, 2.15], rotation: -Math.PI / 2 },
+  { position: [-5.45, 0, -3.15], rotation: Math.PI / 2 },
+  { position: [-2, 0, -3.45], rotation: 0 },
+  { position: [2, 0, -3.45], rotation: 0 },
+  { position: [5.45, 0, -3.15], rotation: -Math.PI / 2 },
 ];
+
+const observatorySlots: SlotLayout = Array.from({ length: 8 }, (_, index) => {
+  const angle = index * Math.PI / 4;
+  return {
+    position: [Math.sin(angle) * 5.35, 0, -0.75 + Math.cos(angle) * 4.45],
+    rotation: angle + Math.PI,
+  };
+});
+
+const groveSlots: SlotLayout = [
+  { position: [-5.2, 0, 2.25], rotation: 2.5 },
+  { position: [-2.15, 0, 1.35], rotation: 2.9 },
+  { position: [1.05, 0, 2.35], rotation: 3.25 },
+  { position: [4.8, 0, 1.15], rotation: 3.62 },
+  { position: [-4.6, 0, -3.25], rotation: 0.55 },
+  { position: [-1.35, 0, -3.75], rotation: 0.15 },
+  { position: [2.1, 0, -2.8], rotation: -0.18 },
+  { position: [5.15, 0, -3.65], rotation: -0.55 },
+];
+
+const hallSlotLayouts: Record<string, SlotLayout> = {
+  workshop: workshopSlots,
+  observatory: observatorySlots,
+  "memory-grove": groveSlots,
+};
 
 export function getHallConfig(landmarkId: string): HallConfig {
   return hallConfigs[landmarkId] ?? hallConfigs.workshop;
@@ -76,7 +103,8 @@ export function getExhibitKind(landmarkId: string, exhibit?: Exhibit | null): Ex
 
 export function buildExhibitSlots(landmark: Landmark): ExhibitSlot[] {
   const config = getHallConfig(landmark.id);
-  return slotPositions.slice(0, config.capacity).map((layout, index) => {
+  const layouts = hallSlotLayouts[landmark.id] ?? workshopSlots;
+  return layouts.slice(0, config.capacity).map((layout, index) => {
     const exhibit = landmark.exhibits[index] ?? null;
     return {
       id: exhibit?.id ?? `${landmark.id}:reserved:${index + 1}`,

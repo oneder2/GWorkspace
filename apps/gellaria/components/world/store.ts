@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import type { PublicPlayer, ServerMessage } from "@/lib/protocol";
+import { loadSpiritIdentity, spiritPalette, type SpiritAppearance, type SpiritIdentity } from "@/lib/spirit-identity";
 
 type ConnectionState = "connecting" | "online" | "offline";
 
@@ -9,6 +10,7 @@ type WorldStore = {
   socket: WebSocket | null;
   playerId: string | null;
   playerColor: string;
+  playerAppearance: SpiritAppearance;
   players: Record<string, PublicPlayer>;
   signals: Record<string, number>;
   tags: Record<string, Record<string, number>>;
@@ -22,11 +24,13 @@ type WorldStore = {
 };
 
 let lastMoveSent = 0;
+let sessionIdentity: SpiritIdentity | null = null;
 
 export const useWorldStore = create<WorldStore>((set, get) => ({
   socket: null,
   playerId: null,
   playerColor: "#f2a66f",
+  playerAppearance: { palette: 0, form: 0 },
   players: {},
   signals: {},
   tags: {},
@@ -39,10 +43,21 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
 
     const openSocket = () => {
       if (disposed) return;
+      if (!sessionIdentity) {
+        let storage: Storage | null = null;
+        try { storage = window.localStorage; } catch { storage = null; }
+        sessionIdentity = loadSpiritIdentity(storage, () => crypto.randomUUID());
+      }
+      const appearance = { palette: sessionIdentity.palette, form: sessionIdentity.form };
+      const query = new URLSearchParams({
+        visitor: sessionIdentity.visitorId,
+        palette: String(appearance.palette),
+        form: String(appearance.form),
+      });
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const socket = new WebSocket(`${protocol}//${window.location.host}/ws/gellaria`);
+      const socket = new WebSocket(`${protocol}//${window.location.host}/ws/gellaria?${query}`);
       activeSocket = socket;
-      set({ socket, connection: "connecting" });
+      set({ socket, connection: "connecting", playerAppearance: appearance, playerColor: spiritPalette(appearance).glow });
 
       socket.addEventListener("open", () => {
         if (!disposed && activeSocket === socket) set({ socket, connection: "online" });
@@ -64,7 +79,8 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
       if (message.type === "welcome") {
         set({
           playerId: message.id,
-          playerColor: message.color,
+          playerColor: spiritPalette(appearance).glow,
+          playerAppearance: appearance,
           players: Object.fromEntries(message.players.map((player) => [player.id, player])),
           signals: message.world.signals,
           tags: message.world.tags,

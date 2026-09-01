@@ -17,4 +17,16 @@ describe("exhibition planning", () => {
     expect(getExhibitKind("observatory", { ...landmarks[1].exhibits[0], sourceType: "external" })).toBe("signal");
     expect(getExhibitAction("prototype").destination).toContain("GWorkspace");
   });
+
+  it("gives each hall its own spatial layout", () => {
+    const workshop = buildExhibitSlots(landmarks.find((item) => item.id === "workshop")!);
+    const observatory = buildExhibitSlots(landmarks.find((item) => item.id === "observatory")!);
+    const grove = buildExhibitSlots(landmarks.find((item) => item.id === "memory-grove")!);
+    expect(observatory.map((slot) => slot.position)).not.toEqual(workshop.map((slot) => slot.position));
+    expect(grove.map((slot) => slot.position)).not.toEqual(workshop.map((slot) => slot.position));
+    for (const slot of observatory) {
+      const orbit = (slot.position[0] / 5.35) ** 2 + ((slot.position[2] + 0.75) / 4.45) ** 2;
+      expect(orbit).toBeCloseTo(1, 5);
+    }
+  });
 });
