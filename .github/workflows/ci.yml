@@ -52,7 +52,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: 'backend/.nvmrc'
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
@@ -98,3 +98,30 @@ jobs:
 
       - name: Check backend SEO sitemap
         run: npm run check:backend-seo
+  gellaria-quality:
+    name: Gellaria Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install monorepo dependencies
+        run: npm ci
+
+      - name: Typecheck Gellaria
+        run: npm run typecheck:gellaria
+
+      - name: Lint Gellaria
+        run: npm run lint:gellaria
+
+      - name: Test Gellaria
+        run: npm run test:gellaria
+
+      - name: Build Gellaria
+        run: npm run build:gellaria

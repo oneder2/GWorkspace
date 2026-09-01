@@ -1,0 +1,10 @@
+node_modules
+.next
+.playwright-cli
+data/*.db
+data/*.db-*
+.env*
+!.env.example
+output/playwright
+npm-debug.log*
+*.tsbuildinfo

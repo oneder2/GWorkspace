@@ -1,0 +1,30 @@
+[Unit]
+Description=Gellaria multiplayer personal world
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/apps/gellaria/current
+Environment=NODE_ENV=production
+Environment=PORT=4420
+Environment=DATABASE_PATH=/home/deploy/apps/gellaria/shared/data/gellaria.db
+Environment=NEXT_PUBLIC_SITE_URL=https://gellaria.64-83-15-226.nip.io
+Environment=GWORKSPACE_API_URL=http://127.0.0.1:3001
+Environment=GWORKSPACE_PUBLIC_URL=https://www.gellaronline.cc
+Environment=NEXT_PUBLIC_GWORKSPACE_URL=https://www.gellaronline.cc
+Environment=GELLARIA_ALLOWED_ORIGINS=https://gellaria.64-83-15-226.nip.io,https://www.gellaronline.cc
+Environment=GELLARIA_MAX_CLIENTS=120
+Environment=GELLARIA_MAX_CLIENTS_PER_ADDRESS=6
+ExecStart=/usr/bin/npm run start --workspace @gworkspace/gellaria
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+KillSignal=SIGINT
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

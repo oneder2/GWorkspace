@@ -63,7 +63,8 @@ GWorkspace 是个人内容、工具与站点运营的核心系统。Vue 前端�
 #### Gellaria 内容接口
 - `/api/public/world` 聚合公共身份、项目、博客与留言回声
 - `world_exhibits` 只保存空间摆放信息，通过类型和 Slug/ID 引用真实内容
-- Gellaria 负责 `/`、`/archive`、`/blog`、`/portfolio`；GWorkspace 保留 `/workspace` 与 `/admin`
+- GWorkspace 保留全部正式页面；Gellaria 仅通过 `/explore` 提供空间展览模式
+- 展品的完整阅读和操作仍返回 GWorkspace，Gellaria 只拥有光迹、标签与探索状态
 
 ## 技术栈
 
@@ -81,70 +82,31 @@ GWorkspace 是个人内容、工具与站点运营的核心系统。Vue 前端�
 - **API**：RESTful API
 - **认证**：JWT Token 认证
 - **安全**：bcrypt 6 密码加密、Helmet 安全头、CORS 配置、前台安全响应头
-- **运行时**：Node.js 20（通过 `.nvmrc` 与 CI 统一）
+- **运行时**：Vue 与 Gellaria 使用 Node.js 22；后端兼容边界继续使用 Node.js 20
 - **发布保障**：GitHub Actions 构建、后端 smoke check、SEO/CORS 回归检查、后端部署后 live gate
+
+### Monorepo 工具链
+
+- **根工作区与 Gellaria**：Node.js 22、npm workspaces、统一 `package-lock.json`
+- **后端兼容边界**：`backend/.nvmrc` 独立固定 Node.js 20，根脚本会自动切换
 
 ## 项目结构
 
 ```
 GWorkspace/
-├── src/                    # 前端源码
-│   ├── components/        # 组件目录
-│   │   ├── icons/         # SVG 图标组件
-│   │   ├── tools/         # 工具箱子组件
-│   │   ├── Header.vue      # 顶部状态栏
-│   │   ├── Sidebar.vue    # 侧边栏导航
-│   │   ├── AuthModal.vue  # 登录/注册弹窗
-│   │   └── BlogEditor.vue # 博客编辑器
-│   ├── pages/             # 页面组件
-│   │   ├── HomePage.vue
-│   │   ├── SitesPage.vue
-│   │   ├── ToolsPage.vue
-│   │   ├── BlogPage.vue
-│   │   ├── BlogDetailPage.vue
-│   │   └── admin/         # 管理后台页面
-│   │       ├── AdminLayout.vue
-│   │       ├── AdminDashboard.vue
-│   │       ├── AdminBlogList.vue
-│   │       ├── AdminBlogEditor.vue
-│   │       ├── AdminAnalytics.vue
-│   │       └── AdminComments.vue
-│   ├── composables/       # 组合式函数
-│   │   └── useAuth.js     # 用户认证组合式函数
-│   ├── i18n/              # 国际化配置
-│   ├── utils/             # 工具函数
-│   │   └── api.js         # API客户端
-│   ├── App.vue            # 根组件
-│   └── main.js            # 入口文件
-├── backend/                # 后端源码
-│   ├── src/
-│   │   ├── config/        # 配置文件
-│   │   │   └── database.js # 数据库配置
-│   │   ├── models/         # 数据模型
-│   │   │   ├── Blog.js
-│   │   │   ├── Comment.js
-│   │   │   ├── Like.js
-│   │   │   ├── Visit.js
-│   │   │   └── User.js
-│   │   ├── routes/         # API路由
-│   │   │   ├── blog.js
-│   │   │   ├── comments.js
-│   │   │   ├── likes.js
-│   │   │   ├── analytics.js
-│   │   │   ├── auth.js
-│   │   │   └── admin.js
-│   │   ├── middleware/      # 中间件
-│   │   │   └── auth.js      # 认证中间件
-│   │   └── server.js       # 服务器入口
-│   ├── database/
-│   │   ├── migrations/     # 数据库迁移
-│   │   └── gworkspace.db   # SQLite数据库
-│   └── scripts/
-│       └── migrate-from-files.js  # 数据迁移脚本
-├── index.html             # HTML 模板
-├── package.json           # 前端项目配置
-├── vite.config.js         # Vite 配置
-└── README.md              # 项目文档
+├── src/                    # Vue 工作区与管理后台
+├── public/                 # Vue 静态资源
+├── backend/                # Express API 与 SQLite（独立安装边界）
+├── apps/
+│   └── gellaria/           # Next.js、Three.js 与多人世界服务
+├── packages/
+│   └── contracts/          # 后端与前台共享的版本化公开契约
+├── deploy/
+│   └── gellaria/           # Gellaria systemd 与 Nginx 配置
+├── docs/
+│   └── gellaria/           # 空间前台的映射与接入说明
+├── package.json            # npm workspace 入口
+└── vite.config.js          # Vue 构建配置
 ```
 
 ## 快速开始
@@ -155,35 +117,39 @@ GWorkspace/
 # 使用项目指定 Node 版本
 nvm use
 
-# 安装前端依赖
+# 安装 Vue、Gellaria 与共享包依赖
 npm install
 
 # 安装后端依赖
 cd backend
+nvm use
 npm install
 cd ..
+nvm use
 ```
 
 ### 启动开发服务器
 
-#### 方式一：分别启动前后端
+#### 方式一：分别启动三个运行时
 
 ```bash
-# 终端1：启动前端（端口3000）
-npm run dev
+# 终端1：启动 Vue 工作区（默认端口5173）
+npm run dev:workspace
 
 # 终端2：启动后端（端口3001）
 npm run dev:backend
+
+# 终端3：启动 Gellaria（端口3000）
+npm run dev:gellaria
 ```
 
-#### 方式二：同时启动前后端（需要安装 concurrently）
+#### 方式二：同时启动全部运行时
 
 ```bash
-npm install -D concurrently
 npm run dev:all
 ```
 
-前端开发服务器将在 `http://localhost:3000` 启动，后端API服务器将在 `http://localhost:3001` 启动。
+Vue 工作区、Express API 与 Gellaria 仍是独立进程；monorepo 统一的是源码、契约、依赖锁和发布入口。
 
 ### 初始化数据库
 
@@ -193,14 +159,20 @@ npm run migrate
 
 # 创建管理员账户
 cd backend
+nvm use
 npm run create-admin
 cd ..
+nvm use
 ```
 
 ### 构建生产版本
 
 ```bash
 npm run build
+npm run build:gellaria
+npm run typecheck:gellaria
+npm run lint:gellaria
+npm run test:gellaria
 npm run check:seo
 npm run check:cors
 npm run check:backend-seo
@@ -214,7 +186,7 @@ npm run audit:frontend
 npm run audit:backend
 ```
 
-构建产物将输出到 `dist/` 目录。
+Vue 构建产物输出到 `dist/`，Gellaria 构建产物输出到 `apps/gellaria/.next/`。
 
 ## 文档
 
@@ -223,6 +195,8 @@ npm run audit:backend
 - [部署文档](./docs/DEPLOYMENT.md) - 生产环境部署指南
 - [样式系统](./docs/STYLE_SYSTEM.md) - 设计系统、样式规范
 - [服务器配置](./docs/SERVER_CONFIG.md) - 环境变量、服务器配置
+- [Gellaria 接入说明](./docs/gellaria/GWORKSPACE_INTEGRATION.md) - 路由归属、发布顺序与验收
+- [Gellaria 功能映射](./docs/gellaria/GWORKSPACE_FEATURE_MAPPING.md) - GWorkspace 内容到三维世界的映射
 - [更新日志](./CHANGELOG.md) - 版本更新记录
 
 ## 许可证

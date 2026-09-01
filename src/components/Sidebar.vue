@@ -142,6 +142,7 @@ import HomeIcon from './icons/HomeIcon.vue'
 import WrenchIcon from './icons/WrenchIcon.vue'
 import ArticleIcon from './icons/ArticleIcon.vue'
 import BriefcaseIcon from './icons/BriefcaseIcon.vue'
+import ExploreIcon from './icons/ExploreIcon.vue'
 import GWorkspaceIcon from './icons/GWorkspaceIcon.vue'
 import FileTextIcon from './icons/FileTextIcon.vue'
 
@@ -189,6 +190,15 @@ const navItems = computed(() => [
   { id: 'workspace', name: t('nav.workspace'), icon: WrenchIcon, route: '/workspace' },
   { id: 'blog', name: t('nav.blog'), icon: ArticleIcon, route: '/blog' },
   { id: 'portfolio', name: t('nav.portfolio'), icon: BriefcaseIcon, route: '/portfolio' },
+  {
+    id: 'explore',
+    name: t('nav.explore'),
+    icon: ExploreIcon,
+    route: import.meta.env.VITE_GELLARIA_URL || (import.meta.env.PROD
+      ? 'https://gellaria.64-83-15-226.nip.io/explore'
+      : 'http://localhost:3000/explore'),
+    external: true
+  },
 ])
 
 /**
@@ -219,7 +229,11 @@ const getNavItemStyle = (id) => {
 
 const handleNavClick = (item) => {
   hoveredId.value = null // 点击即刻清除所有 hover 状态
-  router.push(item.route)
+  if (item.external) {
+    window.location.assign(item.route)
+  } else {
+    router.push(item.route)
+  }
   if (props.isMobileDrawer) {
     emit('close-mobile-sidebar')
   } else {

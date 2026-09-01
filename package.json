@@ -1,33 +1,46 @@
 {
   "name": "gworkspace",
   "version": "3.1.0",
+  "private": true,
   "description": "Personal workspace website with Vue.js",
   "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "engines": {
-    "node": ">=20 <21"
+    "node": ">=22 <23"
   },
   "scripts": {
     "dev": "vite",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:all": "concurrently \"npm run dev\" \"npm run dev:backend\"",
+    "dev:workspace": "vite",
+    "dev:backend": "bash scripts/run-with-backend-node.sh npm --prefix backend run dev",
+    "dev:gellaria": "npm run dev --workspace @gworkspace/gellaria",
+    "dev:all": "concurrently --names workspace,backend,gellaria \"npm run dev:workspace\" \"npm run dev:backend\" \"npm run dev:gellaria\"",
     "build": "vite build",
+    "build:workspace": "vite build",
+    "build:gellaria": "npm run build --workspace @gworkspace/gellaria",
+    "build:all": "npm run build:workspace && npm run build:gellaria",
+    "test:gellaria": "npm run test --workspace @gworkspace/gellaria",
+    "lint:gellaria": "npm run lint --workspace @gworkspace/gellaria",
+    "typecheck:gellaria": "npm run typecheck --workspace @gworkspace/gellaria",
     "preview": "vite preview",
-    "migrate": "cd backend && npm run migrate",
+    "migrate": "bash scripts/run-with-backend-node.sh npm --prefix backend run migrate",
     "generate-sitemap": "node scripts/generate-sitemap.js",
     "check:seo": "node scripts/check-public-seo.js",
-    "check:cors": "node scripts/check-backend-cors.js",
-    "check:backend-seo": "node scripts/check-backend-seo.js",
-    "check:backend-routes": "node scripts/check-backend-routes.js",
-    "check:backend-logs": "node scripts/check-backend-logs.js",
-    "check:backend-security": "node scripts/check-backend-security.js",
-    "check:world-content": "node backend/scripts/check-world-content.js",
-    "check:public-facts": "cd backend && npm run check:public-facts",
-    "check:resume": "cd backend && npm run check:resume",
+    "check:cors": "bash scripts/run-with-backend-node.sh node scripts/check-backend-cors.js",
+    "check:backend-seo": "bash scripts/run-with-backend-node.sh node scripts/check-backend-seo.js",
+    "check:backend-routes": "bash scripts/run-with-backend-node.sh node scripts/check-backend-routes.js",
+    "check:backend-logs": "bash scripts/run-with-backend-node.sh node scripts/check-backend-logs.js",
+    "check:backend-security": "bash scripts/run-with-backend-node.sh node scripts/check-backend-security.js",
+    "check:world-content": "bash scripts/run-with-backend-node.sh node backend/scripts/check-world-content.js",
+    "check:public-facts": "bash scripts/run-with-backend-node.sh npm --prefix backend run check:public-facts",
+    "check:resume": "bash scripts/run-with-backend-node.sh npm --prefix backend run check:resume",
     "check:env": "node scripts/check-env-examples.js",
     "check:frontend-budget": "node scripts/check-frontend-budget.js",
     "check:frontend-debug": "node scripts/check-frontend-debug-logs.js",
     "audit:frontend": "npm audit --audit-level=moderate",
-    "audit:backend": "node scripts/check-backend-audit.js"
+    "audit:backend": "bash scripts/run-with-backend-node.sh node scripts/check-backend-audit.js"
   },
   "dependencies": {
     "chart.js": "^4.5.1",
@@ -43,6 +56,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.7",
     "autoprefixer": "^10.4.18",
+    "concurrently": "^9.2.1",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "vite": "^8.0.16",

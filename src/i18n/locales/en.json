@@ -3,7 +3,8 @@
     "home": "Desk",
     "workspace": "Studio",
     "blog": "Writing",
-    "portfolio": "Archive"
+    "portfolio": "Archive",
+    "explore": "Explore"
   },
   "writingStudio": {
     "guest": {

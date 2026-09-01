@@ -6,6 +6,7 @@ node_modules/
 # Testing
 coverage/
 /output/
+*.tsbuildinfo
 
 # Production
 dist/
@@ -31,11 +32,14 @@ lerna-debug.log*
 
 # Local tooling and generated assets
 .codex
+.playwright-cli/
 backend/public/cache/og-images/
 backend/node_modules_corrupt_backup/
 backend/node_modules_node22_incompatible/
 backend/node_modules_partial_failed/
 backend/backups/
+apps/gellaria/data/
+apps/gellaria/.playwright-cli/
 
 # Editor directories and files
 .vscode/*

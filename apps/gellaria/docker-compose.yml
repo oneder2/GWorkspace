@@ -1,0 +1,18 @@
+services:
+  gellaria:
+    build:
+      context: ../..
+      dockerfile: apps/gellaria/Dockerfile
+    ports:
+      - "3010:3000"
+    environment:
+      PORT: 3000
+      DATABASE_PATH: /data/gellaria.db
+      NEXT_PUBLIC_SITE_URL: http://localhost:3010
+      NEXT_PUBLIC_GWORKSPACE_URL: http://localhost:4173
+    volumes:
+      - gellaria-data:/data
+    restart: unless-stopped
+
+volumes:
+  gellaria-data:
