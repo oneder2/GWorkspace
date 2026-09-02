@@ -133,6 +133,7 @@ export class WritingStudio {
 
     if (data.title !== undefined) set('title', String(data.title).trim() || '未命名项目')
     if (data.description !== undefined) set('description', String(data.description).trim())
+    if (data.outline !== undefined) set('outline', String(data.outline))
     if (data.status !== undefined && PROJECT_STATUSES.has(data.status)) set('status', data.status)
     if (data.target_words !== undefined || data.targetWords !== undefined) set('target_words', Math.max(0, Number.parseInt(data.target_words ?? data.targetWords, 10) || 0))
     if (data.genre !== undefined) set('genre', String(data.genre).trim())
@@ -193,9 +194,51 @@ export class WritingStudio {
 
   static deleteDocument(documentId, ownerId) {
     const current = assertOwnedDocument(documentId, ownerId)
-    const count = getDatabase().prepare('SELECT COUNT(*) AS value FROM writing_documents WHERE project_id = ?').get(current.project_id).value
+    const db = getDatabase()
+    const count = db.prepare('SELECT COUNT(*) AS value FROM writing_documents WHERE project_id = ?').get(current.project_id).value
     if (count <= 1) throw Object.assign(new Error('A writing project must keep at least one document'), { status: 400 })
-    return getDatabase().prepare('DELETE FROM writing_documents WHERE id = ?').run(documentId).changes > 0
+    return db.transaction(() => {
+      const deleted = db.prepare('DELETE FROM writing_documents WHERE id = ?').run(documentId).changes > 0
+      const siblings = db.prepare(`
+        SELECT id FROM writing_documents
+        WHERE project_id = ? AND parent_id IS ?
+        ORDER BY position ASC, id ASC
+      `).all(current.project_id, current.parent_id)
+      const updatePosition = db.prepare('UPDATE writing_documents SET position = ? WHERE id = ?')
+      siblings.forEach((document, position) => updatePosition.run(position, document.id))
+      db.prepare('UPDATE writing_projects SET updated_at = ? WHERE id = ?').run(new Date().toISOString(), current.project_id)
+      return deleted
+    })()
+  }
+
+  static reorderChapters(projectId, ownerId, documentIds = []) {
+    const project = assertOwnedProject(projectId, ownerId)
+    if (project.type !== 'novel') throw Object.assign(new Error('Only novel chapters can be reordered'), { status: 400 })
+
+    const ids = Array.isArray(documentIds) ? documentIds.map(Number) : []
+    if (ids.some((id) => !Number.isInteger(id)) || new Set(ids).size !== ids.length) {
+      throw Object.assign(new Error('Chapter order contains invalid document IDs'), { status: 400 })
+    }
+
+    const db = getDatabase()
+    const chapters = db.prepare(`
+      SELECT id FROM writing_documents
+      WHERE project_id = ? AND parent_id IS NULL AND kind = 'chapter'
+      ORDER BY position ASC, id ASC
+    `).all(projectId)
+    const expectedIds = chapters.map((chapter) => chapter.id)
+    if (ids.length !== expectedIds.length || ids.some((id) => !expectedIds.includes(id))) {
+      throw Object.assign(new Error('Chapter order must include every top-level chapter exactly once'), { status: 400 })
+    }
+
+    db.transaction(() => {
+      const updatePosition = db.prepare('UPDATE writing_documents SET position = ?, updated_at = ? WHERE id = ?')
+      const now = new Date().toISOString()
+      ids.forEach((id, position) => updatePosition.run(position, now, id))
+      db.prepare('UPDATE writing_projects SET updated_at = ? WHERE id = ?').run(now, projectId)
+    })()
+
+    return db.prepare('SELECT * FROM writing_documents WHERE project_id = ? ORDER BY position ASC, id ASC').all(projectId)
   }
 
   static createRevision(documentId, ownerId, reason = 'manual') {

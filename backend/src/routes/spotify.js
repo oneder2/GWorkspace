@@ -85,6 +85,7 @@ const renderCallbackHtml = ({
     'SPOTIFY_CLIENT_SECRET=YOUR_CLIENT_SECRET',
     `SPOTIFY_REDIRECT_URI=${config.redirectUri}`,
     `SPOTIFY_REFRESH_TOKEN=${refreshToken || 'PASTE_REFRESH_TOKEN_HERE'}`,
+    `SPOTIFY_SCOPES=${config.scopes.join(' ')}`,
     `VITE_SPOTIFY_NOW_PLAYING_URL=${buildSpotifyNowPlayingUrl(req)}`,
     'VITE_SPOTIFY_NOW_PLAYING_REFRESH_MS=60000'
   ].join('\n')
@@ -259,9 +260,13 @@ router.get('/now-playing', async (req, res) => {
     const payload = await response.json().catch(() => ({}))
 
     if (!response.ok) {
+      const scopeHint = response.status === 403
+        ? ` Reauthorize at ${buildSpotifyLoginUrl(req)}?show_dialog=true to grant: ${config.scopes.join(' ')}`
+        : ''
       return res.status(response.status).json({
         error: 'Spotify currently playing request failed.',
-        message: payload.error?.message || payload.error_description || `Spotify returned ${response.status}`
+        message: `${payload.error?.message || payload.error_description || `Spotify returned ${response.status}`}${scopeHint}`,
+        reauthorize_url: response.status === 403 ? `${buildSpotifyLoginUrl(req)}?show_dialog=true` : null
       })
     }
 

@@ -1,5 +1,5 @@
 const TOKEN_URL = 'https://accounts.spotify.com/api/token'
-const DEFAULT_SPOTIFY_SCOPE = 'user-read-currently-playing'
+const DEFAULT_SPOTIFY_SCOPE = 'user-read-currently-playing user-read-playback-state'
 
 let runtimeRefreshToken = ''
 let accessTokenCache = {

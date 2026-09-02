@@ -18,7 +18,8 @@ export const MIGRATION_FILES = [
   '009_public_world_content.sql',
   '010_writing_studio.sql',
   '011_public_facts_v1.sql',
-  '012_resume_authority.sql'
+  '012_resume_authority.sql',
+  '015_writing_outline.sql'
 ]
 
 const isIgnorableMigrationError = (message = '') => (

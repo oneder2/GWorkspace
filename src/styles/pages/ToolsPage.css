@@ -567,6 +567,57 @@
   text-align: left;
 }
 
+.writing-document-select {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+}
+
+.writing-document-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.2rem;
+}
+
+.writing-document-actions button {
+  width: 1.65rem;
+  height: 1.65rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--theme-primary) 18%, transparent);
+  border-radius: 0.35rem;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+}
+
+.writing-document-actions button:hover:not(:disabled) {
+  color: var(--theme-primary);
+  background: color-mix(in srgb, var(--theme-primary) 9%, transparent);
+}
+
+.writing-document-actions button.is-danger:hover:not(:disabled) {
+  color: #dc2626;
+  border-color: rgb(220 38 38 / 35%);
+  background: rgb(220 38 38 / 8%);
+}
+
+.writing-document-actions button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.writing-outline-input {
+  min-height: 12rem;
+  resize: vertical;
+}
+
 .writing-document-row.is-active {
   border-left-color: var(--theme-primary);
   background: color-mix(in srgb, var(--theme-primary) 8%, rgba(255, 255, 255, 0.48));

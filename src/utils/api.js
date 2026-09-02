@@ -225,6 +225,7 @@ export const writingAdminApi = {
   updateProject: (id, data) => request(`/admin/writing/projects/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteProject: (id) => request(`/admin/writing/projects/${id}`, { method: 'DELETE' }),
   createDocument: (projectId, data) => request(`/admin/writing/projects/${projectId}/documents`, { method: 'POST', body: JSON.stringify(data) }),
+  reorderChapters: (projectId, documentIds) => request(`/admin/writing/projects/${projectId}/chapters/order`, { method: 'PUT', body: JSON.stringify({ document_ids: documentIds }) }),
   updateDocument: (id, data) => request(`/admin/writing/documents/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteDocument: (id) => request(`/admin/writing/documents/${id}`, { method: 'DELETE' }),
   getRevisions: (id) => request(`/admin/writing/documents/${id}/revisions`),

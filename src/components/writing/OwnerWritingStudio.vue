@@ -88,17 +88,22 @@
               {{ $t('writingStudio.owner.newChapter') }}
             </button>
           </div>
-          <button
-            v-for="document in activeProject.documents"
+          <div
+            v-for="(document, index) in activeProject.documents"
             :key="document.id"
-            type="button"
             class="writing-document-row"
             :class="{ 'is-active': activeDocument?.id === document.id }"
-            @click="selectDocument(document.id)"
           >
-            <span>{{ document.title }}</span>
-            <small>{{ document.word_count }} {{ $t('writingStudio.owner.words') }}</small>
-          </button>
+            <button type="button" class="writing-document-select" @click="selectDocument(document.id)">
+              <span>{{ document.title }}</span>
+              <small>{{ document.word_count }} {{ $t('writingStudio.owner.words') }}</small>
+            </button>
+            <div v-if="activeProject.type === 'novel' && document.kind === 'chapter'" class="writing-document-actions">
+              <button type="button" :title="$t('writingStudio.owner.moveChapterUp')" :disabled="reordering || index === 0" @click="moveChapter(document.id, -1)">↑</button>
+              <button type="button" :title="$t('writingStudio.owner.moveChapterDown')" :disabled="reordering || index === activeProject.documents.length - 1" @click="moveChapter(document.id, 1)">↓</button>
+              <button type="button" class="is-danger" :title="$t('writingStudio.owner.deleteChapter')" :disabled="deletingDocument" @click="deleteDocument(document)">×</button>
+            </div>
+          </div>
         </aside>
 
         <main v-if="activeDocument" class="writing-editor-pane">
@@ -152,6 +157,10 @@
           </div>
 
           <section v-if="contextTab === 'project'" class="writing-context-content">
+            <label v-if="activeProject.type === 'novel'">
+              <span>{{ $t('writingStudio.owner.globalOutline') }}</span>
+              <textarea v-model="activeProject.outline" class="writing-outline-input" rows="9" :placeholder="$t('writingStudio.owner.globalOutlinePlaceholder')"></textarea>
+            </label>
             <label>
               <span>{{ $t('writingStudio.owner.projectDescription') }}</span>
               <textarea v-model="activeProject.description" rows="5" :placeholder="$t('writingStudio.owner.projectDescriptionPlaceholder')"></textarea>
@@ -274,6 +283,8 @@ const contextTab = ref('project')
 const saveState = ref('idle')
 const projectSaving = ref(false)
 const revisionSaving = ref(false)
+const reordering = ref(false)
+const deletingDocument = ref(false)
 const aiLoading = ref(false)
 const aiError = ref('')
 const aiResult = ref(null)
@@ -406,6 +417,50 @@ async function createDocument() {
   }
 }
 
+async function moveChapter(documentId, offset) {
+  if (reordering.value) return
+  const documents = activeProject.value.documents
+  const currentIndex = documents.findIndex((document) => document.id === documentId)
+  const targetIndex = currentIndex + offset
+  if (currentIndex < 0 || targetIndex < 0 || targetIndex >= documents.length) return
+
+  await flushDocumentSave()
+  const reordered = [...documents]
+  const [chapter] = reordered.splice(currentIndex, 1)
+  reordered.splice(targetIndex, 0, chapter)
+  reordering.value = true
+  try {
+    activeProject.value.documents = await writingAdminApi.reorderChapters(
+      activeProject.value.id,
+      reordered.filter((document) => document.kind === 'chapter' && document.parent_id == null).map((document) => document.id)
+    )
+    activeDocument.value = activeProject.value.documents.find((document) => document.id === documentId) || activeDocument.value
+  } catch (error) {
+    loadError.value = error.message
+  } finally {
+    reordering.value = false
+  }
+}
+
+async function deleteDocument(document) {
+  if (deletingDocument.value) return
+  if (!window.confirm(t('writingStudio.owner.deleteChapterConfirm', { title: document.title }))) return
+
+  await flushDocumentSave()
+  deletingDocument.value = true
+  try {
+    await writingAdminApi.deleteDocument(document.id)
+    activeProject.value.documents = activeProject.value.documents.filter((item) => item.id !== document.id)
+    if (activeDocument.value?.id === document.id) {
+      await selectDocument(activeProject.value.documents[0]?.id)
+    }
+  } catch (error) {
+    loadError.value = error.message
+  } finally {
+    deletingDocument.value = false
+  }
+}
+
 function saveDocument() {
   clearTimeout(saveTimer)
   if (!activeDocument.value) return Promise.resolve(true)
@@ -474,6 +529,7 @@ async function saveProjectSettings() {
     const updated = await writingAdminApi.updateProject(activeProject.value.id, {
       title: activeProject.value.title,
       description: activeProject.value.description,
+      outline: activeProject.value.outline,
       status: activeProject.value.status,
       target_words: activeProject.value.target_words,
       genre: activeProject.value.genre,

@@ -21,6 +21,7 @@ router.patch('/projects/:id', (req, res) => handle(res, () => WritingStudio.upda
 router.delete('/projects/:id', (req, res) => handle(res, () => ({ deleted: WritingStudio.deleteProject(Number(req.params.id), req.user.id) })))
 
 router.post('/projects/:id/documents', (req, res) => handle(res, () => WritingStudio.createDocument(Number(req.params.id), req.user.id, req.body || {}), 201))
+router.put('/projects/:id/chapters/order', (req, res) => handle(res, () => WritingStudio.reorderChapters(Number(req.params.id), req.user.id, req.body?.document_ids)))
 router.patch('/documents/:id', (req, res) => handle(res, () => WritingStudio.updateDocument(Number(req.params.id), req.user.id, req.body || {})))
 router.delete('/documents/:id', (req, res) => handle(res, () => ({ deleted: WritingStudio.deleteDocument(Number(req.params.id), req.user.id) })))
 router.get('/documents/:id/revisions', (req, res) => handle(res, () => WritingStudio.getRevisions(Number(req.params.id), req.user.id)))
