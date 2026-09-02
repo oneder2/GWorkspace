@@ -1,3 +1,5 @@
+import { getDatabase } from '../config/database.js'
+
 const TOKEN_URL = 'https://accounts.spotify.com/api/token'
 const DEFAULT_SPOTIFY_SCOPE = 'user-read-currently-playing user-read-playback-state'
 
@@ -20,11 +22,28 @@ const createBasicAuthHeader = (clientId, clientSecret) =>
 
 const trimEnv = (key) => (process.env[key] || '').trim()
 
+const getPersistedRefreshToken = () => {
+  try {
+    return String(getDatabase().prepare('SELECT spotify_refresh_token FROM admin_settings WHERE id = 1').get()?.spotify_refresh_token || '').trim()
+  } catch {
+    return ''
+  }
+}
+
+const persistRefreshToken = (token) => {
+  try {
+    getDatabase().prepare('UPDATE admin_settings SET spotify_refresh_token = ?, updated_at = ? WHERE id = 1')
+      .run(token, new Date().toISOString())
+  } catch (error) {
+    console.error('Unable to persist Spotify refresh token:', error.message)
+  }
+}
+
 export const getSpotifyConfig = () => ({
   clientId: trimEnv('SPOTIFY_CLIENT_ID'),
   clientSecret: trimEnv('SPOTIFY_CLIENT_SECRET'),
   redirectUri: trimEnv('SPOTIFY_REDIRECT_URI'),
-  refreshToken: runtimeRefreshToken || trimEnv('SPOTIFY_REFRESH_TOKEN'),
+  refreshToken: runtimeRefreshToken || getPersistedRefreshToken() || trimEnv('SPOTIFY_REFRESH_TOKEN'),
   scopes: (trimEnv('SPOTIFY_SCOPES') || DEFAULT_SPOTIFY_SCOPE)
     .split(/\s+/)
     .map(scope => scope.trim())
@@ -56,6 +75,7 @@ export const buildSpotifyLoginUrl = (req) => {
 
 export const setSpotifyRuntimeRefreshToken = (token) => {
   runtimeRefreshToken = typeof token === 'string' ? token.trim() : ''
+  if (runtimeRefreshToken) persistRefreshToken(runtimeRefreshToken)
 }
 
 export const setSpotifyAccessTokenCache = ({
@@ -155,6 +175,7 @@ export const getSpotifyStatus = (req) => {
   const now = Date.now()
   const cache = getSpotifyAccessTokenCacheSnapshot()
   const hasRuntimeRefreshToken = Boolean(runtimeRefreshToken)
+  const hasPersistedRefreshToken = Boolean(getPersistedRefreshToken())
   const hasEnvRefreshToken = Boolean(trimEnv('SPOTIFY_REFRESH_TOKEN'))
   const grantedScopes = cache.scope
     ? cache.scope.split(/\s+/).map(scope => scope.trim()).filter(Boolean)
@@ -174,7 +195,7 @@ export const getSpotifyStatus = (req) => {
     scopes: config.scopes,
     granted_scopes: grantedScopes,
     refresh_token_present: Boolean(config.refreshToken),
-    refresh_token_source: hasRuntimeRefreshToken ? 'runtime' : (hasEnvRefreshToken ? 'env' : null),
+    refresh_token_source: hasRuntimeRefreshToken ? 'runtime' : (hasPersistedRefreshToken ? 'database' : (hasEnvRefreshToken ? 'env' : null)),
     access_token_cached: Boolean(cache.token && cache.expiresAt > now),
     access_token_expires_at: cache.expiresAt > 0 ? new Date(cache.expiresAt).toISOString() : null
   }

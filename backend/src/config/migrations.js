@@ -19,7 +19,8 @@ export const MIGRATION_FILES = [
   '010_writing_studio.sql',
   '011_public_facts_v1.sql',
   '012_resume_authority.sql',
-  '015_writing_outline.sql'
+  '015_writing_outline.sql',
+  '016_spotify_credentials.sql'
 ]
 
 const isIgnorableMigrationError = (message = '') => (
