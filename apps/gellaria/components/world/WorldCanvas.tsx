@@ -40,8 +40,8 @@ export function WorldCanvas(props: CanvasProps) {
       camera={{ position: [9, 12, 15], fov: 44, near: 0.1, far: 120 }}
       gl={{ antialias: true, powerPreference: "high-performance", alpha: false }}
     >
-      <color attach="background" args={["#101d24"]} />
-      <fog attach="fog" args={["#172830", 28, 66]} />
+      <color attach="background" args={["#071219"]} />
+      <fog attach="fog" args={["#14262d", 30, 70]} />
       <Suspense fallback={null}>
         <WorldScene {...props} />
       </Suspense>
@@ -99,22 +99,42 @@ function WorldScene(props: CanvasProps) {
 
 function Starscape() {
   const points = useMemo(() => {
-    const positions = new Float32Array(180 * 3);
-    for (let index = 0; index < 180; index += 1) {
-      const radius = 38 + seededValue(index * 3) * 34;
-      const angle = seededValue(index * 3 + 1) * Math.PI * 2;
-      positions[index * 3] = Math.cos(angle) * radius;
-      positions[index * 3 + 1] = 12 + seededValue(index * 3 + 2) * 30;
-      positions[index * 3 + 2] = Math.sin(angle) * radius;
+    const positions = new Float32Array(760 * 3);
+    for (let index = 0; index < 760; index += 1) {
+      const radius = 52 + seededValue(index * 4) * 30;
+      const angle = seededValue(index * 4 + 1) * Math.PI * 2;
+      const elevation = 0.08 + seededValue(index * 4 + 2) * 1.34;
+      positions[index * 3] = Math.cos(angle) * Math.cos(elevation) * radius;
+      positions[index * 3 + 1] = 5 + Math.sin(elevation) * radius;
+      positions[index * 3 + 2] = Math.sin(angle) * Math.cos(elevation) * radius;
+    }
+    return positions;
+  }, []);
+  const brightPoints = useMemo(() => {
+    const positions = new Float32Array(110 * 3);
+    for (let index = 0; index < 110; index += 1) {
+      const radius = 45 + seededValue(index * 5 + 900) * 22;
+      const angle = seededValue(index * 5 + 901) * Math.PI * 2;
+      const elevation = 0.15 + seededValue(index * 5 + 902) * 1.24;
+      positions[index * 3] = Math.cos(angle) * Math.cos(elevation) * radius;
+      positions[index * 3 + 1] = 6 + Math.sin(elevation) * radius;
+      positions[index * 3 + 2] = Math.sin(angle) * Math.cos(elevation) * radius;
     }
     return positions;
   }, []);
 
   return (
-    <points>
-      <bufferGeometry><bufferAttribute attach="attributes-position" args={[points, 3]} /></bufferGeometry>
-      <pointsMaterial color="#d9e5df" size={0.13} transparent opacity={0.58} sizeAttenuation />
-    </points>
+    <group>
+      <mesh><sphereGeometry args={[88, 32, 18]} /><meshBasicMaterial color="#071219" side={THREE.BackSide} fog={false} /></mesh>
+      <points>
+        <bufferGeometry><bufferAttribute attach="attributes-position" args={[points, 3]} /></bufferGeometry>
+        <pointsMaterial color="#c7d9dc" size={0.16} transparent opacity={0.72} sizeAttenuation fog={false} depthWrite={false} />
+      </points>
+      <points>
+        <bufferGeometry><bufferAttribute attach="attributes-position" args={[brightPoints, 3]} /></bufferGeometry>
+        <pointsMaterial color="#f2dfb2" size={0.29} transparent opacity={0.88} sizeAttenuation fog={false} depthWrite={false} />
+      </points>
+    </group>
   );
 }
 
@@ -221,6 +241,9 @@ function StudyLodge({ nearby, onEnter }: { nearby: boolean; onEnter: () => void 
           <boxGeometry args={[3.25, 0.24, 4.55]} />
           <meshStandardMaterial color="#223238" roughness={0.72} />
         </mesh>
+        <mesh castShadow position={[0, 4.18, 0]}><boxGeometry args={[.16, .18, 4.75]} /><meshStandardMaterial color="#718078" metalness={.38} roughness={.52} /></mesh>
+        {[-1.55, 0, 1.55].map((x) => <mesh key={x} position={[x, 2.78, 2.08]}><boxGeometry args={[.1, 2.55, .12]} /><meshStandardMaterial color="#443932" roughness={.8} /></mesh>)}
+        <group position={[-1.45, 3.18, 2.48]}><mesh rotation-z={-.16}><boxGeometry args={[2.35, .16, 1.15]} /><meshStandardMaterial color="#28383a" metalness={.18} roughness={.66} /></mesh>{[-.92,.92].map((x)=><mesh key={x} position={[x,-.42,.18]}><cylinderGeometry args={[.05,.05,.85,6]} /><meshStandardMaterial color="#7c6b55" metalness={.35} /></mesh>)}</group>
 
         <group position={[1.48, 3.95, -0.72]} rotation-z={-0.08}>
           <mesh castShadow position-y={0.25}>
@@ -387,6 +410,9 @@ function WorkshopExterior({ responseColor, influence }: { responseColor: string;
       <group position={[2.72, 3.15, 2.56]}>
         <WorkshopFacadeGear color={responseColor} speed={0.12 + influence.strength * 0.48} />
       </group>
+      {[-2.35, 2.35].map((x) => [1.35, 2.65].map((y) => <group key={`${x}:${y}`} position={[x, y, 2.57]}><mesh><boxGeometry args={[1.25, .78, .12]} /><meshStandardMaterial color="#263c3e" emissive={responseColor} emissiveIntensity={.2 + influence.strength * .32} metalness={.22} roughness={.38} /></mesh><mesh><boxGeometry args={[.08, .88, .16]} /><meshStandardMaterial color="#a2785b" metalness={.42} /></mesh><mesh><boxGeometry args={[1.35, .08, .16]} /><meshStandardMaterial color="#a2785b" metalness={.42} /></mesh></group>))}
+      {[-2.75, -1.38, 0, 1.38, 2.75].map((x) => <mesh key={x} position={[x, .8, 2.64]}><cylinderGeometry args={[.055,.055,.12,8]} /><meshStandardMaterial color="#d29a70" metalness={.72} roughness={.25} /></mesh>)}
+      <group position={[-3.45, 2.4, -1.4]} rotation-z={Math.PI / 2}><mesh><cylinderGeometry args={[.27,.27,4.8,10]} /><meshStandardMaterial color="#3d4a47" metalness={.48} roughness={.42} /></mesh>{[-1.75,0,1.75].map((y)=><mesh key={y} position-y={y}><torusGeometry args={[.3,.055,6,18]} /><meshStandardMaterial color="#ad7658" metalness={.62} /></mesh>)}</group>
       {[-3.55, 3.55].map((x) => <mesh key={x} position={[x, 2.05, 0]}><boxGeometry args={[0.26, 4.1, 5.85]} /><meshStandardMaterial color="#94745e" metalness={0.28} roughness={0.56} /></mesh>)}
       <mesh position={[0, 3.65, -3.05]}><boxGeometry args={[5.8, 0.18, 0.26]} /><meshStandardMaterial color={responseColor} emissive={responseColor} emissiveIntensity={0.24 + influence.strength * 0.7} /></mesh>
     </group>
@@ -411,8 +437,10 @@ function ObservatoryExterior({ responseColor, influence }: { responseColor: stri
       <mesh castShadow receiveShadow position-y={1.75}><cylinderGeometry args={[3.55, 3.8, 3.2, 16]} /><meshStandardMaterial color="#405b67" metalness={0.18} roughness={0.66} /></mesh>
       <mesh castShadow position-y={3.34}><sphereGeometry args={[3.55, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2]} /><meshStandardMaterial color="#29444f" metalness={0.38} roughness={0.45} side={THREE.DoubleSide} /></mesh>
       {[0, Math.PI / 3, Math.PI * 2 / 3].map((rotation) => <mesh key={rotation} position-y={3.34} rotation-y={rotation}><torusGeometry args={[3.56, 0.045, 5, 64, Math.PI]} /><meshStandardMaterial color="#88a2ab" metalness={0.52} /></mesh>)}
+      {Array.from({ length: 8 }, (_, index) => { const angle = index * Math.PI / 4; return <group key={index} position={[Math.sin(angle) * 3.72, 1.45, Math.cos(angle) * 3.72]} rotation-y={angle}><mesh rotation-x={-.14}><boxGeometry args={[.38, 3.05, .7]} /><meshStandardMaterial color="#6f8790" metalness={.34} roughness={.48} /></mesh><mesh position={[0,-1.25,.42]}><boxGeometry args={[.76,.28,1.15]} /><meshStandardMaterial color="#334b55" roughness={.75} /></mesh></group>; })}
       <mesh position={[0, 4.7, 2.85]} rotation-x={-0.12}><boxGeometry args={[0.72, 2.8, 0.16]} /><meshStandardMaterial color="#122a34" emissive={responseColor} emissiveIntensity={0.34 + influence.strength * 0.85} /></mesh>
       <ExteriorOrrery color={responseColor} strength={influence.strength} />
+      <group position={[0, 5.7, .2]} rotation={[.22,0,-.28]}><mesh><cylinderGeometry args={[.28,.42,2.5,12]} /><meshStandardMaterial color="#253b45" metalness={.5} roughness={.3} /></mesh><mesh position-y={1.25}><cylinderGeometry args={[.55,.34,.3,12]} /><meshStandardMaterial color="#a1bbc2" metalness={.56} /></mesh><mesh position={[0,-1.2,0]}><sphereGeometry args={[.38,12,8]} /><meshStandardMaterial color="#657f88" metalness={.42} /></mesh></group>
       {[-2.5, 2.5].map((x) => <mesh key={x} position={[x, 1.55, 3.22]}><boxGeometry args={[0.68, 1.2, 0.14]} /><meshStandardMaterial color="#8ebbc7" emissive="#689bab" emissiveIntensity={0.45} /></mesh>)}
     </group>
   );
@@ -436,6 +464,7 @@ function GroveExterior({ responseColor, influence }: { responseColor: string; in
       <mesh receiveShadow position-y={0.2}><cylinderGeometry args={[4.55, 4.9, 0.42, 12]} /><meshStandardMaterial color="#354b3e" roughness={1} /></mesh>
       <mesh receiveShadow position-y={0.44} rotation-x={-Math.PI / 2}><ringGeometry args={[2.1, 4.25, 18]} /><meshStandardMaterial color="#435746" roughness={0.94} /></mesh>
       <mesh position-y={0.46} rotation-x={-Math.PI / 2}><circleGeometry args={[2.05, 32]} /><meshStandardMaterial color="#213f3c" emissive={responseColor} emissiveIntensity={0.18 + influence.strength * 0.65} roughness={0.4} /></mesh>
+      <mesh castShadow position={[0, 2.65, -.8]} scale={[1, .72, .78]}><sphereGeometry args={[4.2, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2]} /><meshStandardMaterial color="#78948a" transparent opacity={.13} metalness={.12} roughness={.22} side={THREE.DoubleSide} depthWrite={false} /></mesh>
       {[-3.15, -1.55, 1.55, 3.15].map((x, index) => (
         <group key={x} position={[x, 0, index % 2 ? -0.55 : -0.9]} rotation-z={x * -0.035}>
           <mesh castShadow position-y={2.65}><cylinderGeometry args={[0.18, 0.42, 5.3, 7]} /><meshStandardMaterial color="#594b3b" roughness={1} /></mesh>
@@ -443,6 +472,8 @@ function GroveExterior({ responseColor, influence }: { responseColor: string; in
         </group>
       ))}
       {[-2.4, 0, 2.4].map((x) => <mesh key={x} position={[x, 3.35, -1.9]} rotation-z={x * -0.1}><torusGeometry args={[2.7, 0.09, 7, 42, Math.PI]} /><meshStandardMaterial color="#7d8972" metalness={0.18} roughness={0.65} /></mesh>)}
+      {[-3.2,-1.6,0,1.6,3.2].map((x, index) => <group key={x} position={[x,.32,2.2]} rotation-z={x*.05}><mesh rotation-z={index%2 ? .72 : -.72}><cylinderGeometry args={[.09,.18,2.6,6]} /><meshStandardMaterial color="#68543d" roughness={1} /></mesh><mesh position={[index%2 ? .72 : -.72,.25,0]} rotation-z={index%2 ? -.5 : .5}><cylinderGeometry args={[.06,.12,1.85,6]} /><meshStandardMaterial color="#4f4335" roughness={1} /></mesh></group>)}
+      {[-2.7,-.9,.9,2.7].map((x,index)=><group key={x} position={[x,3.65,2.05]}><mesh><cylinderGeometry args={[.025,.025,.7,5]} /><meshStandardMaterial color="#a8b29a" metalness={.35} /></mesh><mesh position-y={-.43}><coneGeometry args={[.16,.3,7]} /><meshStandardMaterial color={index%2 ? responseColor : "#d8c990"} emissive={responseColor} emissiveIntensity={.25 + influence.strength*.45} metalness={.25} /></mesh></group>)}
       <mesh position={[0, 2.5, -2.65]}><planeGeometry args={[5.8, 4.4]} /><meshStandardMaterial color="#52706b" transparent opacity={0.18} roughness={0.25} side={THREE.DoubleSide} /></mesh>
       <GroveEchoCrown color={responseColor} strength={influence.strength} />
     </group>

@@ -16,6 +16,7 @@ const ToolsPage = () => import('../pages/ToolsPage.vue')
 const BlogPage = () => import('../pages/BlogPage.vue')
 const BlogDetailPage = () => import('../pages/BlogDetailPage.vue')
 const PortfolioPage = () => import('../pages/PortfolioPage.vue')
+const GellariaConnectPage = () => import('../pages/GellariaConnectPage.vue')
 
 // 管理后台路由 - 按需加载，减少初始包大小
 const AdminLayout = () => import('../pages/admin/AdminLayout.vue')
@@ -72,6 +73,11 @@ const routes = [
     name: 'portfolio',
     component: PortfolioPage,
     meta: { titleKey: 'routes.portfolio' }
+  },
+  {
+    path: '/gellaria-connect',
+    name: 'gellaria-connect',
+    component: GellariaConnectPage
   },
   // 管理后台路由
   {

@@ -51,34 +51,25 @@ export const hallConfigs: Record<string, HallConfig> = {
 type SlotLayout = Array<{ position: [number, number, number]; rotation: number }>;
 
 const workshopSlots: SlotLayout = [
-  { position: [-5.45, 0, 2.15], rotation: Math.PI / 2 },
-  { position: [-2, 0, 2.25], rotation: Math.PI },
-  { position: [2, 0, 2.25], rotation: Math.PI },
-  { position: [5.45, 0, 2.15], rotation: -Math.PI / 2 },
-  { position: [-5.45, 0, -3.15], rotation: Math.PI / 2 },
-  { position: [-2, 0, -3.45], rotation: 0 },
-  { position: [2, 0, -3.45], rotation: 0 },
-  { position: [5.45, 0, -3.15], rotation: -Math.PI / 2 },
+  { position: [-5.35, 0, 4.2], rotation: Math.PI / 2 },
+  { position: [5.35, 0, 4.2], rotation: -Math.PI / 2 },
+  { position: [-5.35, 0, 1.15], rotation: Math.PI / 2 },
+  { position: [5.35, 0, 1.15], rotation: -Math.PI / 2 },
+  { position: [-5.35, 0, -1.9], rotation: Math.PI / 2 },
+  { position: [5.35, 0, -1.9], rotation: -Math.PI / 2 },
+  { position: [-5.35, 0, -4.95], rotation: Math.PI / 2 },
+  { position: [5.35, 0, -4.95], rotation: -Math.PI / 2 },
 ];
 
-const observatorySlots: SlotLayout = Array.from({ length: 8 }, (_, index) => {
-  const angle = index * Math.PI / 4;
-  return {
-    position: [Math.sin(angle) * 5.35, 0, -0.75 + Math.cos(angle) * 4.45],
-    rotation: angle + Math.PI,
-  };
-});
+const observatorySlots: SlotLayout = [-4.7, -1.75, 1.2, 4.15].flatMap((z) => [
+  { position: [-5.05, 0, z] as [number, number, number], rotation: Math.PI / 2 },
+  { position: [5.05, 0, z] as [number, number, number], rotation: -Math.PI / 2 },
+]);
 
-const groveSlots: SlotLayout = [
-  { position: [-5.2, 0, 2.25], rotation: 2.5 },
-  { position: [-2.15, 0, 1.35], rotation: 2.9 },
-  { position: [1.05, 0, 2.35], rotation: 3.25 },
-  { position: [4.8, 0, 1.15], rotation: 3.62 },
-  { position: [-4.6, 0, -3.25], rotation: 0.55 },
-  { position: [-1.35, 0, -3.75], rotation: 0.15 },
-  { position: [2.1, 0, -2.8], rotation: -0.18 },
-  { position: [5.15, 0, -3.65], rotation: -0.55 },
-];
+const groveSlots: SlotLayout = [4.35, 1.35, -1.65, -4.65].flatMap((z, index) => [
+  { position: [-4.85 - (index % 2) * 0.18, 0, z] as [number, number, number], rotation: Math.PI / 2 - 0.06 },
+  { position: [4.85 + (index % 2) * 0.18, 0, z - 0.18] as [number, number, number], rotation: -Math.PI / 2 + 0.06 },
+]);
 
 const hallSlotLayouts: Record<string, SlotLayout> = {
   workshop: workshopSlots,

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Compass, DoorOpen, House, Map, MapPin, Sparkles, Volume2, VolumeX, X } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Compass, DoorOpen, House, Map, Palette, Sparkles, Volume2, VolumeX, X } from "lucide-react";
 import { role, studyArea, type Landmark } from "@/lib/content";
 import type { SiteProfile } from "@/lib/gworkspace-content";
 import { isJourneyComplete } from "@/lib/journey";
@@ -11,8 +11,10 @@ import { workspaceUrl } from "@/lib/workspace-url";
 import { CompletionMoment, JourneyJournal } from "./JourneyJournal";
 import { ExhibitionHall } from "./ExhibitionHall";
 import { StudyArea } from "./StudyArea";
+import { SpiritCustomizer } from "./SpiritCustomizer";
 import { useJourneyStore } from "./journey-store";
 import { useWorldStore } from "./store";
+import { useGWorkspaceAvatar } from "@/lib/use-gworkspace-avatar";
 
 const WorldCanvas = dynamic(() => import("./WorldCanvas").then((module) => module.WorldCanvas), {
   ssr: false,
@@ -22,7 +24,8 @@ const WorldCanvas = dynamic(() => import("./WorldCanvas").then((module) => modul
 export type MoveIntent = { x: number; z: number };
 
 export function WorldExperience({ initialDestination, landmarks, profile }: { initialDestination?: string; landmarks: Landmark[]; profile: SiteProfile }) {
-  const initialHall = landmarks.find((item) => item.id === initialDestination) ?? null;
+  const destination = initialDestination ?? (typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("destination"));
+  const initialHall = landmarks.find((item) => item.id === destination) ?? null;
   const [entered, setEntered] = useState(Boolean(initialHall));
   const [nearby, setNearby] = useState<Landmark | null>(null);
   const [activeHall, setActiveHall] = useState<Landmark | null>(initialHall);
@@ -35,6 +38,7 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
   const [showCompletion, setShowCompletion] = useState(false);
   const [studyNearby, setStudyNearby] = useState(false);
   const [inStudy, setInStudy] = useState(false);
+  const [customizerOpen, setCustomizerOpen] = useState(false);
   const [worldSpawn, setWorldSpawn] = useState<[number, number, number]>([0, 0.7, 5]);
   const connect = useWorldStore((state) => state.connect);
   const connection = useWorldStore((state) => state.connection);
@@ -49,6 +53,7 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
   const onlineCount = Object.keys(players).length + 1;
   const landmarkIds = useMemo(() => landmarks.map((landmark) => landmark.id), [landmarks]);
   const journeyComplete = isJourneyComplete(collected, landmarkIds);
+  const avatar = useGWorkspaceAvatar();
 
   useEffect(() => connect(), [connect]);
   useAmbientSound(!muted && !inStudy);
@@ -67,6 +72,11 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
     const timeout = window.setTimeout(() => setJourneyNotice(null), 3600);
     return () => window.clearTimeout(timeout);
   }, [journeyNotice]);
+  useEffect(() => {
+    if (!avatar.message) return;
+    const timeout = window.setTimeout(avatar.clearMessage, 3800);
+    return () => window.clearTimeout(timeout);
+  }, [avatar.message, avatar.clearMessage]);
 
   const totalSignals = useMemo(() => Object.values(signals).reduce((sum, count) => sum + count, 0), [signals]);
   const setDirection = (axis: "x" | "z", value: number) => setMoveIntent((current) => ({ ...current, [axis]: value }));
@@ -98,7 +108,7 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
   }, [studyNearby]);
 
   useEffect(() => {
-    if (!entered || activeHall || inStudy || mapOpen || journalOpen || showCompletion) return;
+    if (!entered || activeHall || inStudy || mapOpen || journalOpen || showCompletion || customizerOpen) return;
     const handleEntryKey = (event: KeyboardEvent) => {
       if (event.code !== "KeyE" || event.repeat) return;
       const target = event.target;
@@ -110,15 +120,15 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
     };
     window.addEventListener("keydown", handleEntryKey);
     return () => window.removeEventListener("keydown", handleEntryKey);
-  }, [activeHall, enterHall, entered, enterStudy, inStudy, journalOpen, mapOpen, nearby, showCompletion, studyNearby]);
+  }, [activeHall, customizerOpen, enterHall, entered, enterStudy, inStudy, journalOpen, mapOpen, nearby, showCompletion, studyNearby]);
 
   return (
     <main className="world-shell">
       <div className="world-layer" aria-hidden={inStudy} inert={inStudy ? true : undefined}>
         {!inStudy && (activeHall ? (
-          <ExhibitionHall landmark={activeHall} moveIntent={moveIntent} onExit={() => setActiveHall(null)} />
+          <ExhibitionHall landmark={activeHall} moveIntent={moveIntent} paused={customizerOpen} onExit={() => setActiveHall(null)} />
         ) : (
-          <WorldCanvas landmarks={landmarks} active={entered} moveIntent={moveIntent} onNearby={handleNearby} onStudyNearby={(value) => { setStudyNearby(value); if (value) setNearby(null); }} nearbyId={nearby?.id ?? null} discoveredIds={discovered} collectedIds={collected} journeyComplete={journeyComplete} initialPlayerPosition={worldSpawn} studyNearby={studyNearby} onStudyEnter={enterStudy} onHallEnter={enterHall} />
+          <WorldCanvas landmarks={landmarks} active={entered && !customizerOpen} moveIntent={moveIntent} onNearby={handleNearby} onStudyNearby={(value) => { setStudyNearby(value); if (value) setNearby(null); }} nearbyId={nearby?.id ?? null} discoveredIds={discovered} collectedIds={collected} journeyComplete={journeyComplete} initialPlayerPosition={worldSpawn} studyNearby={studyNearby} onStudyEnter={enterStudy} onHallEnter={enterHall} />
         ))}
 
         {!activeHall && <div className="atmosphere" aria-hidden="true" />}
@@ -129,6 +139,7 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
             <div className="world-status" aria-live="polite"><span className={`status-dot ${connection}`} />{connection === "online" ? `${onlineCount} 位旅人正在途中` : connection === "connecting" ? "正在接入世界" : "离线参观"}</div>
             <div className="header-actions">
               <button className="icon-button" onClick={() => setMuted((value) => !value)} aria-label={muted ? "开启声音" : "关闭声音"} title={muted ? "开启声音" : "关闭声音"}>{muted ? <VolumeX size={18} /> : <Volume2 size={18} />}</button>
+              <button className="icon-button" onClick={() => setCustomizerOpen(true)} aria-label="编辑灵体形象" title="灵体形象"><Palette size={18} /></button>
               <button className="icon-button" onClick={() => setMapOpen(true)} aria-label="打开地图" title="展馆地图"><Map size={18} /></button>
               <button className="icon-button" onClick={() => setJournalOpen(true)} aria-label="打开参观记录" title="参观记录"><BookOpen size={18} /></button>
               <a className="icon-button" href={workspaceUrl("/")} aria-label="返回 GWorkspace" title="返回 GWorkspace"><House size={18} /></a>
@@ -136,7 +147,7 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
           </header>
         )}
 
-        {!activeHall && <button className="role-badge" aria-label="打开当前身份的参观记录" onClick={() => setJournalOpen(true)}><span className="role-glyph"><MapPin size={18} /></span><span><small>你的身份</small><strong>{role.name}</strong></span></button>}
+        {entered && !inStudy && <button className={`role-badge ${activeHall ? "in-hall" : ""}`} aria-label="编辑灵体形象" onClick={() => setCustomizerOpen(true)}><span className="role-glyph"><Palette size={18} /></span><span><small>{avatar.user ? "GWorkspace 已连接" : "访客形态"}</small><strong>{avatar.user?.username ?? role.name}</strong></span></button>}
 
         <AnimatePresence>
           {!entered && !activeHall && (
@@ -191,9 +202,10 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
         <AnimatePresence>{journalOpen && <JourneyJournal discovered={discovered} collected={collected} onClose={() => setJournalOpen(false)} />}</AnimatePresence>
         <AnimatePresence>{showCompletion && <CompletionMoment onClose={() => setShowCompletion(false)} />}</AnimatePresence>
         <AnimatePresence>{newDiscovery && !activeHall && <motion.div className="discovery-banner" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} style={{ "--accent": newDiscovery.accent } as CSSProperties}><span>发现新展馆</span><strong>{newDiscovery.name}</strong><small>靠近入口按 E 进入</small></motion.div>}</AnimatePresence>
-        <AnimatePresence>{(journeyNotice ?? notice) && <motion.div className="world-toast" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{journeyNotice ?? notice}</motion.div>}</AnimatePresence>
+        <AnimatePresence>{(avatar.message ?? journeyNotice ?? notice) && <motion.div className="world-toast" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{avatar.message ?? journeyNotice ?? notice}</motion.div>}</AnimatePresence>
       </div>
       <AnimatePresence>{inStudy && <StudyArea onExit={() => setInStudy(false)} />}</AnimatePresence>
+      <SpiritCustomizer open={customizerOpen} user={avatar.user} syncState={avatar.syncState} connectHref={avatar.connectHref} onSave={avatar.save} onDisconnect={avatar.disconnect} onClose={() => setCustomizerOpen(false)} />
     </main>
   );
 }

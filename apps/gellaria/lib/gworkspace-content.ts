@@ -2,7 +2,7 @@ import { z } from "zod";
 import { landmarks as fallbackLandmarks, landmarkExhibitSchema, type Landmark } from "./content";
 import { fetchGWorkspace } from "./gworkspace-api";
 import { getWorkspacePulse, type WorkspacePulse } from "./gworkspace-pulse";
-import { getGWorkspaceResume, type GWorkspaceResume } from "./gworkspace-resume";
+import { getGWorkspaceResume, gworkspaceMediaUrl, primaryProjectUrl, type GWorkspaceResume } from "./gworkspace-resume";
 
 const profileSchema = z.object({
   name: z.string(),
@@ -53,6 +53,21 @@ export const fallbackProfile: SiteProfile = {
   timezone: null,
 };
 
+export function resumeProjectExhibits(resume: Pick<GWorkspaceResume, "projects"> | null) {
+  if (!resume) return null;
+  return resume.projects.slice(0, 8).map((project) => ({
+    id: project.id,
+    sourceType: "project" as const,
+    label: project.featured ? "精选项目" : project.role || "项目档案",
+    title: project.name,
+    summary: project.summary,
+    href: primaryProjectUrl(project),
+    image: project.cover ? gworkspaceMediaUrl(project.cover.url) : null,
+    tags: project.technologies,
+    publishedAt: project.start,
+  }));
+}
+
 function adaptExhibitHref(exhibit: z.infer<typeof landmarkExhibitSchema>) {
   if (exhibit.sourceType !== "project" || !exhibit.href) return exhibit;
   const match = /^\/portfolio\/([^/?#]+)\/?$/.exec(exhibit.href);
@@ -66,8 +81,10 @@ export function mergePublicWorld(payload: unknown, resume: GWorkspaceResume | nu
   );
   return {
     landmarks: fallbackLandmarks.map((landmark) => {
-      const exhibits = exhibitsByRegion.get(landmark.id);
-      return exhibits?.length ? { ...landmark, exhibits } : landmark;
+      const exhibits = landmark.id === "workshop"
+        ? (resumeProjectExhibits(resume) ?? exhibitsByRegion.get(landmark.id) ?? [])
+        : (exhibitsByRegion.get(landmark.id) ?? []);
+      return { ...landmark, exhibits };
     }),
     profile: resume ? {
       ...parsed.profile,
@@ -86,7 +103,7 @@ export function mergePublicWorld(payload: unknown, resume: GWorkspaceResume | nu
 function prependExhibit(landmark: Landmark, exhibit: z.infer<typeof landmarkExhibitSchema>): Landmark {
   return {
     ...landmark,
-    exhibits: [exhibit, ...landmark.exhibits.filter((item) => item.id !== exhibit.id)].slice(0, 6),
+    exhibits: [exhibit, ...landmark.exhibits.filter((item) => item.id !== exhibit.id)].slice(0, 8),
   };
 }
 
@@ -135,8 +152,11 @@ export async function getWorldContent(): Promise<WorldContent> {
     getWorkspacePulse(),
     getGWorkspaceResume(),
   ]);
+  const resumeExhibits = resumeProjectExhibits(resume);
   const fallback: WorldContent = {
-    landmarks: fallbackLandmarks,
+    landmarks: fallbackLandmarks.map((landmark) => landmark.id === "workshop" && resumeExhibits
+      ? { ...landmark, exhibits: resumeExhibits }
+      : landmark),
     profile: resume ? {
       ...fallbackProfile,
       name: resume.profile.name,

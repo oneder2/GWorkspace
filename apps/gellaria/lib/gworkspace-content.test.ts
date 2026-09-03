@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { applyWorkspacePulse, fallbackProfile, mergePublicWorld } from "./gworkspace-content";
+import { applyWorkspacePulse, fallbackProfile, mergePublicWorld, resumeProjectExhibits } from "./gworkspace-content";
 
 describe("GWorkspace public world adapter", () => {
-  it("replaces populated region exhibits while retaining empty-region fallbacks", () => {
+  it("uses successful empty regions as reserved capacity instead of stale fallbacks", () => {
     const content = mergePublicWorld({
       version: 1,
       locale: "zh",
@@ -31,7 +31,7 @@ describe("GWorkspace public world adapter", () => {
     expect(content.source).toBe("gworkspace");
     expect(content.resume).toBeNull();
     expect(content.landmarks[0].exhibits[0].id).toBe("project:gworkspace");
-    expect(content.landmarks[1].exhibits.length).toBeGreaterThan(0);
+    expect(content.landmarks[1].exhibits).toEqual([]);
   });
 
   it("rejects unknown region contracts", () => {
@@ -94,6 +94,27 @@ describe("GWorkspace public world adapter", () => {
       label: "正在听",
       title: "Night Signal",
     });
-    expect(enriched.landmarks.every((item) => item.exhibits.length <= 6)).toBe(true);
+    expect(enriched.landmarks.every((item) => item.exhibits.length <= 8)).toBe(true);
+  });
+
+  it("maps resume projects into workshop exhibits with media and link priority", () => {
+    const projects = resumeProjectExhibits({
+      projects: [{
+        id: "project:gworkspace", slug: "gworkspace", name: "GWorkspace", summary: "个人工作空间",
+        role: "创建者", involvement: "creator", start: "2025-01", end: null,
+        technologies: ["Vue", "Three.js"], highlights: [],
+        links: { source: "https://github.com/oneder2/GWorkspace", demo: "https://www.gellaronline.cc" },
+        cover: { id: "cover", url: "https://www.gellaronline.cc/images/projects/gworkspace.webp", mime_type: "image/webp", alt: null, width: null, height: null },
+        gallery: [], featured: true, status: "published", surfaces: ["gellaria"], updated_at: "2026-09-02T00:00:00.000Z",
+      }],
+    });
+
+    expect(projects?.[0]).toMatchObject({
+      id: "project:gworkspace",
+      label: "精选项目",
+      href: "https://www.gellaronline.cc",
+      image: "/api/gworkspace-media?path=%2Fimages%2Fprojects%2Fgworkspace.webp",
+      tags: ["Vue", "Three.js"],
+    });
   });
 });

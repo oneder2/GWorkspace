@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SPIRIT_STORAGE_KEY, loadSpiritIdentity, spiritIdentityFromSearchParams } from "./spirit-identity";
+import { SPIRIT_STORAGE_KEY, loadSpiritIdentity, saveSpiritAppearance, spiritIdentityFromSearchParams } from "./spirit-identity";
 
 function memoryStorage(initial?: string) {
   const values = new Map<string, string>();
@@ -31,5 +31,13 @@ describe("spirit identity", () => {
     expect(valid).toMatchObject({ visitorId: "visitor-0003", palette: 2, form: 1 });
     const fallback = spiritIdentityFromSearchParams(new URLSearchParams("visitor=x&palette=20&form=9"), "stable-fallback");
     expect(fallback).toEqual(spiritIdentityFromSearchParams(new URLSearchParams(), "stable-fallback"));
+  });
+
+  it("updates appearance without replacing the visitor identity", () => {
+    const storage = memoryStorage();
+    const identity = loadSpiritIdentity(storage, () => "visitor-0004");
+    const updated = saveSpiritAppearance(identity, { palette: 4, form: 2 }, storage);
+    expect(updated).toMatchObject({ visitorId: "visitor-0004", palette: 4, form: 2 });
+    expect(loadSpiritIdentity(storage, () => "visitor-9999")).toEqual(updated);
   });
 });

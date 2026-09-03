@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import type { PublicPlayer, ServerMessage } from "@/lib/protocol";
-import { loadSpiritIdentity, spiritPalette, type SpiritAppearance, type SpiritIdentity } from "@/lib/spirit-identity";
+import { loadSpiritIdentity, saveSpiritAppearance, spiritPalette, type SpiritAppearance, type SpiritIdentity } from "@/lib/spirit-identity";
 
 type ConnectionState = "connecting" | "online" | "offline";
 
@@ -20,6 +20,7 @@ type WorldStore = {
   sendMove: (position: [number, number, number], rotation: number) => void;
   sendSignal: (landmarkId: string) => void;
   sendTag: (landmarkId: string, value: string) => void;
+  setPlayerAppearance: (appearance: SpiritAppearance) => void;
   clearNotice: () => void;
 };
 
@@ -60,7 +61,10 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
       set({ socket, connection: "connecting", playerAppearance: appearance, playerColor: spiritPalette(appearance).glow });
 
       socket.addEventListener("open", () => {
-        if (!disposed && activeSocket === socket) set({ socket, connection: "online" });
+        if (!disposed && activeSocket === socket) {
+          set({ socket, connection: "online" });
+          socket.send(JSON.stringify({ type: "appearance", appearance: get().playerAppearance }));
+        }
       });
       socket.addEventListener("close", () => {
         if (activeSocket !== socket) return;
@@ -77,10 +81,11 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
       if (disposed || activeSocket !== socket) return;
       const message = JSON.parse(event.data) as ServerMessage;
       if (message.type === "welcome") {
+        const currentAppearance = get().playerAppearance;
         set({
           playerId: message.id,
-          playerColor: spiritPalette(appearance).glow,
-          playerAppearance: appearance,
+          playerColor: spiritPalette(currentAppearance).glow,
+          playerAppearance: currentAppearance,
           players: Object.fromEntries(message.players.map((player) => [player.id, player])),
           signals: message.world.signals,
           tags: message.world.tags,
@@ -97,6 +102,18 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
             players: {
               ...state.players,
               [message.id]: { ...existing, position: message.position, rotation: message.rotation },
+            },
+          };
+        });
+      }
+      if (message.type === "appearance") {
+        set((state) => {
+          const existing = state.players[message.id];
+          if (!existing) return state;
+          return {
+            players: {
+              ...state.players,
+              [message.id]: { ...existing, appearance: message.appearance, color: message.color },
             },
           };
         });
@@ -165,6 +182,17 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
       return;
     }
     socket.send(JSON.stringify({ type: "tag", landmarkId, value }));
+  },
+  setPlayerAppearance: (appearance) => {
+    let storage: Storage | null = null;
+    try { storage = window.localStorage; } catch { storage = null; }
+    if (!sessionIdentity) sessionIdentity = loadSpiritIdentity(storage, () => crypto.randomUUID());
+    sessionIdentity = saveSpiritAppearance(sessionIdentity, appearance, storage);
+    set({ playerAppearance: appearance, playerColor: spiritPalette(appearance).glow });
+    const socket = get().socket;
+    if (socket?.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "appearance", appearance }));
+    }
   },
   clearNotice: () => set({ notice: null }),
 }));

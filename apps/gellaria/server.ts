@@ -121,6 +121,13 @@ socketServer.on("connection", (socket, request) => {
       return;
     }
 
+    if (parsed.data.type === "appearance") {
+      player.appearance = parsed.data.appearance;
+      player.color = spiritPalette(parsed.data.appearance).glow;
+      broadcast({ type: "appearance", id: player.id, appearance: parsed.data.appearance, color: player.color });
+      return;
+    }
+
     if (!landmarkIds.has(parsed.data.landmarkId)) {
       send(socket, { type: "error", message: "这座地标并不存在" });
       return;

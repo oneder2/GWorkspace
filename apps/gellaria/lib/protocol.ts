@@ -16,6 +16,13 @@ export const clientMessageSchema = z.discriminatedUnion("type", [
     landmarkId: z.string().min(1).max(40),
     value: z.string().min(1).max(20),
   }),
+  z.object({
+    type: z.literal("appearance"),
+    appearance: z.object({
+      palette: z.number().int().min(0).max(4),
+      form: z.number().int().min(0).max(2),
+    }),
+  }),
 ]);
 
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
@@ -37,6 +44,7 @@ export type ServerMessage =
   | { type: "welcome"; id: string; color: string; players: PublicPlayer[]; world: WorldState }
   | { type: "joined"; player: PublicPlayer }
   | { type: "moved"; id: string; position: [number, number, number]; rotation: number }
+  | { type: "appearance"; id: string; appearance: SpiritAppearance; color: string }
   | { type: "left"; id: string }
   | { type: "signal"; landmarkId: string; count: number; actorId: string }
   | { type: "tag"; landmarkId: string; value: string; count: number; actorId: string }

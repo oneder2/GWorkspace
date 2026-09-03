@@ -75,6 +75,23 @@ export function loadSpiritIdentity(storage: StorageLike | null, createVisitorId:
   return identity;
 }
 
+export function saveSpiritAppearance(
+  identity: SpiritIdentity,
+  appearance: SpiritAppearance,
+  storage: StorageLike | null,
+): SpiritIdentity {
+  const updated: SpiritIdentity = { ...identity, palette: appearance.palette, form: appearance.form };
+  if (!isSpiritIdentity(updated)) return identity;
+  if (storage) {
+    try {
+      storage.setItem(SPIRIT_STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+      // Session memory remains authoritative when storage is unavailable.
+    }
+  }
+  return updated;
+}
+
 export function spiritIdentityFromSearchParams(params: URLSearchParams, fallbackKey: string): SpiritIdentity {
   const candidate = {
     version: 1,

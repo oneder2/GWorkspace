@@ -18,10 +18,11 @@ import { useWorldStore } from "./store";
 type ExhibitionHallProps = {
   landmark: Landmark;
   moveIntent: MoveIntent;
+  paused?: boolean;
   onExit: () => void;
 };
 
-export function ExhibitionHall({ landmark, moveIntent, onExit }: ExhibitionHallProps) {
+export function ExhibitionHall({ landmark, moveIntent, paused = false, onExit }: ExhibitionHallProps) {
   const config = getHallConfig(landmark.id);
   const slots = useMemo(() => buildExhibitSlots(landmark), [landmark]);
   const [nearbySlot, setNearbySlot] = useState<ExhibitSlot | null>(null);
@@ -67,6 +68,7 @@ export function ExhibitionHall({ landmark, moveIntent, onExit }: ExhibitionHallP
         landmark={landmark}
         slots={slots}
         moveIntent={moveIntent}
+        paused={paused}
         activeSlotId={activeSlot?.id ?? null}
         responseColor={responseColor}
         responseStrength={influence.strength}
@@ -144,6 +146,7 @@ type HallCanvasProps = {
   landmark: Landmark;
   slots: ExhibitSlot[];
   moveIntent: MoveIntent;
+  paused: boolean;
   activeSlotId: string | null;
   responseColor: string;
   responseStrength: number;
@@ -153,7 +156,7 @@ type HallCanvasProps = {
 
 function HallCanvas(props: HallCanvasProps) {
   return (
-    <Canvas className="hall-canvas" shadows="basic" dpr={[1, 1.5]} camera={{ position: [8, 8, 12], fov: 43, near: 0.1, far: 80 }} gl={{ antialias: true, powerPreference: "high-performance", alpha: false }}>
+    <Canvas className="hall-canvas" shadows="basic" dpr={[1, 1.5]} camera={{ position: [0, 7.2, 14.8], fov: 50, near: 0.1, far: 80 }} gl={{ antialias: true, powerPreference: "high-performance", alpha: false }}>
       <color attach="background" args={[hallPalette(props.landmark.id).background]} />
       <fog attach="fog" args={[hallPalette(props.landmark.id).fog, 17, 38]} />
       <HallScene {...props} />
@@ -165,8 +168,9 @@ function HallScene(props: HallCanvasProps) {
   const palette = hallPalette(props.landmark.id);
   return (
     <>
-      <ambientLight intensity={0.85} color={palette.ambient} />
-      <directionalLight castShadow position={[2, 11, 7]} intensity={2.1} color={palette.key} shadow-mapSize={[1024, 1024]} />
+      <ambientLight intensity={1.35} color={palette.ambient} />
+      <hemisphereLight args={[palette.key, palette.floor, 1.1]} />
+      <directionalLight castShadow position={[2, 11, 7]} intensity={3.1} color={palette.key} shadow-mapSize={[1024, 1024]} />
       <pointLight position={[0, 5.2, -1]} color={props.responseColor} intensity={3 + props.responseStrength * 7} distance={19} decay={2} />
       <HallArchitecture landmarkId={props.landmark.id} accent={props.landmark.accent} responseColor={props.responseColor} />
       {props.slots.map((slot) => (
@@ -202,9 +206,12 @@ function WorkshopInterior({ accent, responseColor }: { accent: string; responseC
   return (
     <group>
       <mesh receiveShadow rotation-x={-Math.PI / 2}><planeGeometry args={[18, 18]} /><meshStandardMaterial color="#28231f" roughness={0.9} /></mesh>
+      <mesh receiveShadow position={[0, 0.055, -0.45]}><boxGeometry args={[3.45, 0.08, 14.7]} /><meshStandardMaterial color="#34302b" metalness={0.18} roughness={0.72} /></mesh>
+      {[-4.8,-2.4,0,2.4,4.8].map((z) => <mesh key={z} position={[0,.11,z]}><boxGeometry args={[3.35,.025,.07]} /><meshStandardMaterial color="#7b6654" metalness={.5} roughness={.4} /></mesh>)}
       <mesh receiveShadow position={[0, 3.5, -7.8]}><boxGeometry args={[18, 7, 0.35]} /><meshStandardMaterial color="#352a25" roughness={0.9} /></mesh>
       {[-8.8, 8.8].map((x) => <mesh key={x} receiveShadow position={[x, 3.5, 0]}><boxGeometry args={[0.35, 7, 16]} /><meshStandardMaterial color="#352a25" roughness={0.9} /></mesh>)}
-      {[-5.9, -2.95, 2.95, 5.9].map((x) => <mesh key={x} position={[x, 0.045, -0.6]}><boxGeometry args={[0.1, 0.07, 14.3]} /><meshStandardMaterial color="#7a6555" metalness={0.55} roughness={0.38} /></mesh>)}
+      {[-1.72, 1.72].map((x) => <mesh key={x} position={[x, 0.105, -0.45]}><boxGeometry args={[0.08, 0.04, 14.7]} /><meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.35} metalness={0.55} roughness={0.38} /></mesh>)}
+      {[-6.85, 6.85].map((x) => [-4.6, -1.55, 1.5, 4.55].map((z) => <group key={`${x}:${z}`} position={[x, 1.55, z]}><mesh><boxGeometry args={[1.15, 3.1, 2.5]} /><meshStandardMaterial color="#302823" roughness={0.88} /></mesh><mesh position={[x < 0 ? .6 : -.6, 0, 0]}><boxGeometry args={[.08, 2.25, 2.05]} /><meshStandardMaterial color="#8a6b54" metalness={.42} roughness={.46} /></mesh></group>))}
       {[-7.4, 7.4].map((x) => <group key={x} position-x={x}><mesh castShadow position-y={3.35}><boxGeometry args={[0.34, 6.7, 0.52]} /><meshStandardMaterial color="#675a50" metalness={0.35} /></mesh><mesh castShadow position={[0, 6.52, -0.6]}><boxGeometry args={[0.45, 0.3, 14.2]} /><meshStandardMaterial color="#675a50" metalness={0.38} /></mesh></group>)}
       <mesh castShadow position={[0, 6.35, -1.3]}><boxGeometry args={[15.2, 0.34, 0.42]} /><meshStandardMaterial color="#756252" metalness={0.45} /></mesh>
       <group position={[0, 5.7, -1.3]}>
@@ -223,9 +230,10 @@ function ObservatoryInterior({ accent, responseColor }: { accent: string; respon
   return (
     <group>
       <mesh receiveShadow rotation-x={-Math.PI / 2}><circleGeometry args={[9, 64]} /><meshStandardMaterial color="#15252d" roughness={0.72} metalness={0.15} /></mesh>
-      <mesh position-y={0.03} rotation-x={-Math.PI / 2}><ringGeometry args={[2.2, 2.28, 64]} /><meshBasicMaterial color={responseColor} transparent opacity={0.44} /></mesh>
-      <mesh position-y={0.035} rotation-x={-Math.PI / 2}><ringGeometry args={[5.15, 5.23, 64]} /><meshBasicMaterial color="#7697a6" transparent opacity={0.28} /></mesh>
-      {Array.from({ length: 8 }, (_, index) => { const angle = index * Math.PI / 4; return <mesh key={index} position={[Math.sin(angle) * 3.65, 0.045, -0.75 + Math.cos(angle) * 3.15]} rotation-y={angle}><boxGeometry args={[0.035, 0.06, 6.1]} /><meshBasicMaterial color="#5d7b89" transparent opacity={0.28} /></mesh>; })}
+      <mesh receiveShadow position={[0, 0.055, -0.45]}><boxGeometry args={[3.55, 0.08, 14.7]} /><meshStandardMaterial color="#1d3038" metalness={0.24} roughness={0.54} /></mesh>
+      {[-4.8,-2.4,0,2.4,4.8].map((z) => <mesh key={z} position={[0,.11,z]}><boxGeometry args={[3.4,.025,.055]} /><meshBasicMaterial color={responseColor} transparent opacity={.28} /></mesh>)}
+      {[-1.78, 1.78].map((x) => <mesh key={x} position={[x, .105, -.45]}><boxGeometry args={[.055, .035, 14.7]} /><meshBasicMaterial color={responseColor} transparent opacity={.55} /></mesh>)}
+      {[-6.75, 6.75].map((x) => [-4.55, -1.55, 1.45, 4.45].map((z) => <group key={`${x}:${z}`} position={[x, 2.1, z]}><mesh><boxGeometry args={[1.35, 4.2, 2.4]} /><meshStandardMaterial color="#172a33" roughness={.78} /></mesh><mesh position={[x < 0 ? .7 : -.7, 0, 0]} rotation-y={Math.PI / 2}><ringGeometry args={[.55, .7, 24]} /><meshBasicMaterial color={accent} transparent opacity={.28} /></mesh></group>))}
       <mesh receiveShadow position={[0, 3.5, -8.15]}><boxGeometry args={[18, 7, 0.35]} /><meshStandardMaterial color="#172b35" roughness={0.82} /></mesh>
       {[-8.8, 8.8].map((x) => <mesh key={x} position={[x, 3.5, 0]}><boxGeometry args={[0.35, 7, 16]} /><meshStandardMaterial color="#172b35" roughness={0.82} /></mesh>)}
       <group position={[0, 4.4, -7.75]}>
@@ -244,8 +252,10 @@ function GroveInterior({ accent, responseColor }: { accent: string; responseColo
   return (
     <group>
       <mesh receiveShadow rotation-x={-Math.PI / 2}><planeGeometry args={[18, 18]} /><meshStandardMaterial color="#17271f" roughness={1} /></mesh>
-      <mesh position={[0, 0.035, -0.5]} rotation-x={-Math.PI / 2}><ringGeometry args={[2.1, 7.7, 48]} /><meshStandardMaterial color="#26382b" roughness={0.92} /></mesh>
-      <mesh position={[0, 0.045, -0.7]} rotation-x={-Math.PI / 2}><circleGeometry args={[1.75, 36]} /><meshStandardMaterial color="#173b3a" emissive={responseColor} emissiveIntensity={0.3} roughness={0.42} /></mesh>
+      <mesh receiveShadow position={[0, 0.055, -0.45]}><boxGeometry args={[3.6, 0.08, 14.7]} /><meshStandardMaterial color="#29392d" roughness={0.95} /></mesh>
+      {[-4.8,-2.4,0,2.4,4.8].map((z) => <group key={z} position={[0,.1,z]}>{[-1.15,-.38,.38,1.15].map((x)=><mesh key={x} position-x={x} rotation-x={-Math.PI/2}><circleGeometry args={[.07,7]} /><meshBasicMaterial color={responseColor} transparent opacity={.45} /></mesh>)}</group>)}
+      {[-1.82, 1.82].map((x) => <mesh key={x} position={[x, .105, -.45]}><boxGeometry args={[.06, .035, 14.7]} /><meshBasicMaterial color={responseColor} transparent opacity={.48} /></mesh>)}
+      {[-6.7, 6.7].map((x) => [-4.5, -1.5, 1.5, 4.5].map((z, index) => <group key={`${x}:${z}`} position={[x, 0, z]}><mesh castShadow position-y={1.45}><cylinderGeometry args={[.18, .34, 2.9, 7]} /><meshStandardMaterial color="#554737" roughness={1} /></mesh><mesh position={[x < 0 ? .55 : -.55, 1.7, 0]} scale={[.8, .55, .75]}><icosahedronGeometry args={[.85, 1]} /><meshStandardMaterial color={index % 2 ? "#587052" : "#496650"} roughness={1} /></mesh></group>))}
       {[-8.8, 8.8].map((x) => <mesh key={x} position={[x, 3.5, 0]}><boxGeometry args={[0.25, 7, 16]} /><meshStandardMaterial color="#1d3228" transparent opacity={0.72} /></mesh>)}
       {[
         [-7.2, -5.8, 5.8], [-5.4, -7, 6.6], [5.7, -6.8, 6.2], [7.25, -4.2, 5.5],
@@ -363,7 +373,7 @@ function ReservedExhibit({ accent }: { accent: string }) {
   return <group position-y={1.05}><mesh rotation-y={Math.PI / 4}><boxGeometry args={[0.75, 0.75, 0.75]} /><meshStandardMaterial color="#25302d" wireframe transparent opacity={0.42} /></mesh><mesh><sphereGeometry args={[0.08, 8, 6]} /><meshBasicMaterial color={accent} transparent opacity={0.28} /></mesh></group>;
 }
 
-function HallPlayer({ moveIntent, slots, onNearbySlot, onExitNearby }: HallCanvasProps) {
+function HallPlayer({ moveIntent, paused, slots, onNearbySlot, onExitNearby }: HallCanvasProps) {
   const group = useRef<THREE.Group>(null);
   const avatar = useRef<THREE.Group>(null);
   const position = useRef(new THREE.Vector3(0, 0, 5.8));
@@ -380,18 +390,20 @@ function HallPlayer({ moveIntent, slots, onNearbySlot, onExitNearby }: HallCanva
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
       if (["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.code)) event.preventDefault();
-      keys.current.add(event.code);
+      if (!paused) keys.current.add(event.code);
     };
     const up = (event: KeyboardEvent) => keys.current.delete(event.code);
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
     return () => { window.removeEventListener("keydown", down); window.removeEventListener("keyup", up); };
-  }, []);
+  }, [paused]);
+
+  useEffect(() => { if (paused) keys.current.clear(); }, [paused]);
 
   useFrame(({ clock }, delta) => {
     if (!group.current) return;
-    const inputX = Number(keys.current.has("KeyD") || keys.current.has("ArrowRight")) - Number(keys.current.has("KeyA") || keys.current.has("ArrowLeft")) + moveIntent.x;
-    const inputZ = Number(keys.current.has("KeyS") || keys.current.has("ArrowDown")) - Number(keys.current.has("KeyW") || keys.current.has("ArrowUp")) + moveIntent.z;
+    const inputX = paused ? 0 : Number(keys.current.has("KeyD") || keys.current.has("ArrowRight")) - Number(keys.current.has("KeyA") || keys.current.has("ArrowLeft")) + moveIntent.x;
+    const inputZ = paused ? 0 : Number(keys.current.has("KeyS") || keys.current.has("ArrowDown")) - Number(keys.current.has("KeyW") || keys.current.has("ArrowUp")) + moveIntent.z;
     const direction = camera.getWorldDirection(cameraDirection.current);
     if (inputX || inputZ) {
       const [x, z] = getCameraRelativeMovement(inputX, inputZ, direction.x, direction.z);
@@ -408,9 +420,9 @@ function HallPlayer({ moveIntent, slots, onNearbySlot, onExitNearby }: HallCanva
       spiritMotion.current.stride = clock.elapsedTime * 9.5;
       avatar.current.rotation.z = THREE.MathUtils.lerp(avatar.current.rotation.z, -inputX * 0.06, Math.min(1, delta * 8));
     }
-    cameraTarget.current.set(position.current.x + 6.8, 7.2, position.current.z + 9.2);
+    cameraTarget.current.set(position.current.x, 7.2, position.current.z + 9.6);
     camera.position.lerp(cameraTarget.current, 1 - Math.pow(0.002, delta));
-    camera.lookAt(position.current.x, 0.9, position.current.z - 0.5);
+    camera.lookAt(position.current.x, 0.9, position.current.z - 1.1);
 
     let nearest: ExhibitSlot | null = null;
     let nearestDistance = 2.25;

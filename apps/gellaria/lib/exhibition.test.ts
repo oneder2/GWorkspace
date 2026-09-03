@@ -24,9 +24,10 @@ describe("exhibition planning", () => {
     const grove = buildExhibitSlots(landmarks.find((item) => item.id === "memory-grove")!);
     expect(observatory.map((slot) => slot.position)).not.toEqual(workshop.map((slot) => slot.position));
     expect(grove.map((slot) => slot.position)).not.toEqual(workshop.map((slot) => slot.position));
-    for (const slot of observatory) {
-      const orbit = (slot.position[0] / 5.35) ** 2 + ((slot.position[2] + 0.75) / 4.45) ** 2;
-      expect(orbit).toBeCloseTo(1, 5);
+    for (const slots of [workshop, observatory, grove]) {
+      expect(slots.every((slot) => Math.abs(slot.position[0]) >= 4.8)).toBe(true);
+      expect(slots.some((slot) => slot.position[0] < 0)).toBe(true);
+      expect(slots.some((slot) => slot.position[0] > 0)).toBe(true);
     }
   });
 });

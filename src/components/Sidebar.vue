@@ -145,6 +145,7 @@ import BriefcaseIcon from './icons/BriefcaseIcon.vue'
 import ExploreIcon from './icons/ExploreIcon.vue'
 import GWorkspaceIcon from './icons/GWorkspaceIcon.vue'
 import FileTextIcon from './icons/FileTextIcon.vue'
+import { gellariaApi } from '../utils/api'
 
 const props = defineProps({
   collapsed: {
@@ -227,10 +228,21 @@ const getNavItemStyle = (id) => {
   return {}
 }
 
-const handleNavClick = (item) => {
+const handleNavClick = async (item) => {
   hoveredId.value = null // 点击即刻清除所有 hover 状态
   if (item.external) {
-    window.location.assign(item.route)
+    let destination = item.route
+    if (item.id === 'explore' && localStorage.getItem('token')) {
+      try {
+        const handoff = await gellariaApi.createHandoff()
+        const url = new URL(destination)
+        url.searchParams.set('handoff', handoff.code)
+        destination = url.toString()
+      } catch {
+        // Gellaria remains available as a guest if account handoff is unavailable.
+      }
+    }
+    window.location.assign(destination)
   } else {
     router.push(item.route)
   }

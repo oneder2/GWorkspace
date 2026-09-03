@@ -30,6 +30,7 @@ import publicContentRoutes from './routes/publicContent.js'
 import publicFactsRoutes from './routes/publicFacts.js'
 import contentAdminRoutes from './routes/contentAdmin.js'
 import writingAdminRoutes from './routes/writingAdmin.js'
+import gellariaRoutes from './routes/gellaria.js'
 import { startAiDailyCapsuleScheduler } from './services/aiScheduler.js'
 
 // 加载环境变量
@@ -63,7 +64,8 @@ const allowedOrigins = [
   'https://www.gellaronline.cc',
   'https://gellaronline.cc',
   'https://workspace.gellaronline.cc',
-  'https://resume.gellaronline.cc'
+  'https://resume.gellaronline.cc',
+  'https://gellaria.64-83-15-226.nip.io'
 ];
 
 function isLocalDevelopmentOrigin(origin) {
@@ -116,6 +118,7 @@ try {
 
 // API 路由
 app.use('/api/auth', authRoutes)
+app.use('/api/gellaria', gellariaRoutes)
 app.use('/api/ai', aiRoutes)
 app.use('/api/blogs', likesRoutes)
 app.use('/api/blogs', blogRoutes)

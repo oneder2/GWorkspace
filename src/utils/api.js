@@ -153,6 +153,10 @@ export const authApi = {
   refresh: () => request('/auth/refresh', { method: 'POST' })
 }
 
+export const gellariaApi = {
+  createHandoff: () => request('/gellaria/handoff', { method: 'POST' })
+}
+
 /**
  * 上传API
  */

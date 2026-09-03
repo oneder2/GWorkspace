@@ -74,7 +74,12 @@ function main() {
     process.exit(1)
   }
 
-  console.log(`backend CORS methods and resume origin ok: ${corsMethods.join(', ')}`)
+  if (!serverSource.includes("'https://gellaria.64-83-15-226.nip.io'")) {
+    console.error('CORS must explicitly allow the Gellaria production origin.')
+    process.exit(1)
+  }
+
+  console.log(`backend CORS methods, resume origin, and Gellaria origin ok: ${corsMethods.join(', ')}`)
 }
 
 main()

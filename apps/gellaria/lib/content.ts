@@ -24,7 +24,7 @@ export const landmarkSchema = z.object({
   artifact: z.string(),
   tagOptions: z.tuple([z.string(), z.string(), z.string()]),
   collectionLabel: z.string(),
-  exhibits: z.array(landmarkExhibitSchema).min(1).max(6),
+  exhibits: z.array(landmarkExhibitSchema).max(8),
   influenceColors: z.tuple([z.string(), z.string(), z.string()]),
   influenceDescription: z.string(),
 });
