@@ -134,7 +134,7 @@ export const studyArea = {
   id: "night-study",
   name: "夜航自习室",
   kicker: "FOCUS ROOM / 临时停泊",
-  position: [5, 0, 11] as [number, number, number],
+  position: [7.5, 0, 10.5] as [number, number, number],
   interactionRadius: 6.2,
   interactionReleaseRadius: 6.8,
   exitPosition: [-0.6, 0.7, 6.8] as [number, number, number],

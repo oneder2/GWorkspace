@@ -9,7 +9,7 @@ const clearings = [
   [11, 3, 4.6],
   [-3, -12, 4.3],
   [-12, 4, 4.4],
-  [5, 11, 4.3],
+  [7.5, 10.5, 3.9],
 ] as const;
 
 function seededValue(seed: number) {
@@ -28,10 +28,10 @@ export function terrainHeightAt(x: number, z: number) {
   const easternRidge = Math.exp(-(((x - 7) ** 2) / 34 + ((z + 4) ** 2) / 125)) * 0.52;
   const westernShoulder = Math.exp(-(((x + 9) ** 2) / 52 + ((z - 1) ** 2) / 90)) * 0.34;
   const northernFold = Math.exp(-(((x + 1) ** 2) / 90 + ((z + 12) ** 2) / 26)) * 0.42;
-  const clearingWeight = Math.min(0.84, clearings.reduce((sum, [cx, cz, size]) => {
+  const clearingWeight = Math.max(...clearings.map(([cx, cz, size]) => {
     const distance = Math.hypot(x - cx, z - cz);
-    return sum + Math.exp(-(distance * distance) / (size * size));
-  }, 0));
+    return 1 - smoothstep(size * 0.9, size * 1.15, distance);
+  }));
   return (rolling + easternRidge + westernShoulder + northernFold) * smoothstep(1.5, 8, radius) * (1 - clearingWeight);
 }
 

@@ -9,6 +9,7 @@ import { studyArea, type Landmark } from "@/lib/content";
 import { getLandmarkInfluence, type LandmarkInfluence } from "@/lib/influence";
 import { getCameraRelativeMovement } from "@/lib/movement";
 import { isWithinInteractionRange } from "@/lib/proximity";
+import { groundPointToward, yawToward } from "@/lib/world-layout";
 import { useWorldStore } from "./store";
 import { SpiritTraveler, type SpiritMotion } from "./SpiritTraveler";
 import { CentralCamp } from "./WorldLandmarks";
@@ -98,41 +99,52 @@ function WorldScene(props: CanvasProps) {
 }
 
 function Starscape() {
+  const field = useRef<THREE.Group>(null);
+  const dimStars = useRef<THREE.PointsMaterial>(null);
+  const brightStars = useRef<THREE.PointsMaterial>(null);
   const points = useMemo(() => {
-    const positions = new Float32Array(760 * 3);
-    for (let index = 0; index < 760; index += 1) {
-      const radius = 52 + seededValue(index * 4) * 30;
+    const positions = new Float32Array(1400 * 3);
+    for (let index = 0; index < 1400; index += 1) {
+      const radius = 70 + seededValue(index * 4) * 14;
       const angle = seededValue(index * 4 + 1) * Math.PI * 2;
-      const elevation = 0.08 + seededValue(index * 4 + 2) * 1.34;
-      positions[index * 3] = Math.cos(angle) * Math.cos(elevation) * radius;
-      positions[index * 3 + 1] = 5 + Math.sin(elevation) * radius;
-      positions[index * 3 + 2] = Math.sin(angle) * Math.cos(elevation) * radius;
+      const vertical = seededValue(index * 4 + 2) * 2 - 1;
+      const horizontal = Math.sqrt(1 - vertical * vertical);
+      positions[index * 3] = Math.cos(angle) * horizontal * radius;
+      positions[index * 3 + 1] = vertical * radius;
+      positions[index * 3 + 2] = Math.sin(angle) * horizontal * radius;
     }
     return positions;
   }, []);
   const brightPoints = useMemo(() => {
-    const positions = new Float32Array(110 * 3);
-    for (let index = 0; index < 110; index += 1) {
-      const radius = 45 + seededValue(index * 5 + 900) * 22;
+    const positions = new Float32Array(220 * 3);
+    for (let index = 0; index < 220; index += 1) {
+      const radius = 66 + seededValue(index * 5 + 900) * 12;
       const angle = seededValue(index * 5 + 901) * Math.PI * 2;
-      const elevation = 0.15 + seededValue(index * 5 + 902) * 1.24;
-      positions[index * 3] = Math.cos(angle) * Math.cos(elevation) * radius;
-      positions[index * 3 + 1] = 6 + Math.sin(elevation) * radius;
-      positions[index * 3 + 2] = Math.sin(angle) * Math.cos(elevation) * radius;
+      const vertical = seededValue(index * 5 + 902) * 2 - 1;
+      const horizontal = Math.sqrt(1 - vertical * vertical);
+      positions[index * 3] = Math.cos(angle) * horizontal * radius;
+      positions[index * 3 + 1] = vertical * radius;
+      positions[index * 3 + 2] = Math.sin(angle) * horizontal * radius;
     }
     return positions;
   }, []);
 
+  useFrame(({ clock }, delta) => {
+    if (field.current) field.current.rotation.y += delta * 0.0025;
+    if (dimStars.current) dimStars.current.opacity = 0.72 + Math.sin(clock.elapsedTime * 0.18) * 0.05;
+    if (brightStars.current) brightStars.current.opacity = 0.88 + Math.sin(clock.elapsedTime * 0.31 + 1.4) * 0.07;
+  });
+
   return (
-    <group>
-      <mesh><sphereGeometry args={[88, 32, 18]} /><meshBasicMaterial color="#071219" side={THREE.BackSide} fog={false} /></mesh>
+    <group ref={field} position-y={3}>
+      <mesh><sphereGeometry args={[92, 40, 24]} /><meshBasicMaterial color="#050b12" side={THREE.BackSide} fog={false} /></mesh>
       <points>
         <bufferGeometry><bufferAttribute attach="attributes-position" args={[points, 3]} /></bufferGeometry>
-        <pointsMaterial color="#c7d9dc" size={0.16} transparent opacity={0.72} sizeAttenuation fog={false} depthWrite={false} />
+        <pointsMaterial ref={dimStars} color="#c7d9dc" size={1.55} transparent opacity={0.72} sizeAttenuation={false} fog={false} depthWrite={false} />
       </points>
       <points>
         <bufferGeometry><bufferAttribute attach="attributes-position" args={[brightPoints, 3]} /></bufferGeometry>
-        <pointsMaterial color="#f2dfb2" size={0.29} transparent opacity={0.88} sizeAttenuation fog={false} depthWrite={false} />
+        <pointsMaterial ref={brightStars} color="#f2dfb2" size={2.5} transparent opacity={0.88} sizeAttenuation={false} fog={false} depthWrite={false} />
       </points>
     </group>
   );
@@ -150,7 +162,7 @@ function Ocean() {
   });
   return (
     <mesh rotation-x={-Math.PI / 2} position-y={-0.82} receiveShadow>
-      <circleGeometry args={[72, 96]} />
+      <circleGeometry args={[24, 96]} />
       <meshStandardMaterial ref={material} color="#1c3b43" emissive="#31555b" roughness={0.56} metalness={0.1} />
     </mesh>
   );
@@ -175,19 +187,20 @@ function Island() {
 }
 
 function Paths({ landmarks }: { landmarks: Landmark[] }) {
-  return <>{landmarks.map((landmark) => <Path key={landmark.id} destination={landmark.position} color={landmark.accent} />)}</>;
+  return <>{landmarks.map((landmark) => <Path key={landmark.id} landmark={landmark} />)}</>;
 }
 
-function Path({ destination, color }: { destination: [number, number, number]; color: string }) {
+function Path({ landmark }: { landmark: Landmark }) {
+  const { position: destination, accent: color } = landmark;
   const curve = useMemo(() => {
-    const endX = destination[0] * 0.9;
-    const endZ = destination[2] * 0.9;
+    const approachDistance = hallPortalZ(landmark.id) * 0.78 + 0.4;
+    const [endX, endZ] = groundPointToward(destination, approachDistance);
     const end = new THREE.Vector3(endX, terrainHeightAt(endX, endZ) + 0.08, endZ);
     const middle = end.clone().multiplyScalar(0.48);
     middle.x += destination[2] * 0.06;
     middle.y = terrainHeightAt(middle.x, middle.z) + 0.08;
     return new THREE.CatmullRomCurve3([new THREE.Vector3(0, terrainHeightAt(0, 1.5) + 0.08, 1.5), middle, end]);
-  }, [destination]);
+  }, [destination, landmark.id]);
   const geometry = useMemo(() => new THREE.TubeGeometry(curve, 26, 0.16, 5, false), [curve]);
   return <mesh geometry={geometry} receiveShadow><meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.16} roughness={1} /></mesh>;
 }
@@ -208,8 +221,8 @@ function StudyLodge({ nearby, onEnter }: { nearby: boolean; onEnter: () => void 
   });
 
   return (
-    <group position={[studyArea.position[0], terrainHeightAt(studyArea.position[0], studyArea.position[2]), studyArea.position[2]]} rotation-y={-0.42}>
-      <group scale={0.76}>
+    <group position={[studyArea.position[0], terrainHeightAt(studyArea.position[0], studyArea.position[2]), studyArea.position[2]]} rotation-y={yawToward(studyArea.position)}>
+      <group scale={0.68}>
         <mesh receiveShadow position-y={0.18}>
           <cylinderGeometry args={[3.25, 3.55, 0.36, 8]} />
           <meshStandardMaterial color="#46514a" roughness={1} />
@@ -335,18 +348,14 @@ function StudyLodge({ nearby, onEnter }: { nearby: boolean; onEnter: () => void 
 }
 
 function LandmarkObject({ landmark, signalCount, tagCounts, nearby, surveyed, collected, onEnter }: { landmark: Landmark; signalCount: number; tagCounts?: Record<string, number>; nearby: boolean; surveyed: boolean; collected: boolean; onEnter: (landmark: Landmark) => void }) {
-  const group = useRef<THREE.Group>(null);
   const influence = useMemo(
     () => getLandmarkInfluence(signalCount, tagCounts, landmark.tagOptions),
     [landmark.tagOptions, signalCount, tagCounts],
   );
   const responseColor = landmark.influenceColors[Math.max(0, influence.dominantTagIndex)] ?? landmark.accent;
-  useFrame(({ clock }) => {
-    if (group.current) group.current.position.y = Math.sin(clock.elapsedTime * 0.7 + landmark.position[0]) * 0.035;
-  });
   return (
     <group position={[landmark.position[0], terrainHeightAt(landmark.position[0], landmark.position[2]), landmark.position[2]]}>
-      <group ref={group}>
+      <group>
         <HallExterior landmark={landmark} nearby={nearby} responseColor={responseColor} influence={influence} />
       </group>
       <Beacon color={responseColor} influence={influence} selected={nearby} />
@@ -364,7 +373,8 @@ function LandmarkObject({ landmark, signalCount, tagCounts, nearby, surveyed, co
 }
 
 function HallExterior({ landmark, nearby, responseColor, influence }: { landmark: Landmark; nearby: boolean; responseColor: string; influence: LandmarkInfluence }) {
-  const rotation = landmark.id === "workshop" ? -0.18 : landmark.id === "observatory" ? 0.18 : -0.08;
+  const rotation = yawToward(landmark.position);
+  const portalZ = hallPortalZ(landmark.id);
   return (
     <group scale={0.78} rotation-y={rotation}>
       {landmark.id === "observatory" ? (
@@ -374,15 +384,21 @@ function HallExterior({ landmark, nearby, responseColor, influence }: { landmark
       ) : (
         <WorkshopExterior responseColor={responseColor} influence={influence} />
       )}
-      <EntrancePortal responseColor={responseColor} nearby={nearby} />
-      <pointLight position={[0, 2.1, 3]} color={responseColor} intensity={(nearby ? 4 : 1.2) + influence.strength * 3} distance={9} decay={2} />
+      <EntrancePortal responseColor={responseColor} nearby={nearby} positionZ={portalZ} />
+      <pointLight position={[0, 2.1, portalZ + 0.28]} color={responseColor} intensity={(nearby ? 4 : 1.2) + influence.strength * 3} distance={9} decay={2} />
     </group>
   );
 }
 
-function EntrancePortal({ responseColor, nearby }: { responseColor: string; nearby: boolean }) {
+function hallPortalZ(landmarkId: string) {
+  if (landmarkId === "observatory") return 3.66;
+  if (landmarkId === "memory-grove") return 3.52;
+  return 2.72;
+}
+
+function EntrancePortal({ responseColor, nearby, positionZ }: { responseColor: string; nearby: boolean; positionZ: number }) {
   return (
-    <group position={[0, 0, 2.72]}>
+    <group position={[0, 0, positionZ]}>
       <mesh position={[-1.42, 1.65, 0]}><boxGeometry args={[0.24, 3.3, 0.36]} /><meshStandardMaterial color="#869084" metalness={0.34} roughness={0.5} /></mesh>
       <mesh position={[1.42, 1.65, 0]}><boxGeometry args={[0.24, 3.3, 0.36]} /><meshStandardMaterial color="#869084" metalness={0.34} roughness={0.5} /></mesh>
       <mesh position={[0, 3.2, 0]}><boxGeometry args={[3.05, 0.25, 0.36]} /><meshStandardMaterial color="#869084" metalness={0.34} roughness={0.5} /></mesh>
