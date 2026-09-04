@@ -6,7 +6,7 @@ import addFormats from 'ajv-formats'
 
 export const RESUME_SCHEMA_VERSION = '1.0.0'
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const schema = JSON.parse(readFileSync(join(__dirname, '../../contracts/resume/v1/schema.json'), 'utf8'))
+const schema = JSON.parse(readFileSync(join(__dirname, '../../../packages/contracts/resume/v1/schema.json'), 'utf8'))
 const ajv = new Ajv2020({ allErrors: true, strict: true })
 addFormats(ajv)
 const validate = ajv.compile(schema)

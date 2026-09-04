@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proposals.gellar.local/oceanseo-gworkspace/project-update/v1/schema.json",
+  "title": "Oceanseo reviewed GWorkspace project update draft v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "update_id",
+    "source",
+    "target_project_id",
+    "approved_at",
+    "highlight",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "update_id": { "type": "string", "format": "uuid" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "scan_id", "observed_at"],
+      "properties": {
+        "system": { "const": "Oceanseo" },
+        "scan_id": { "type": "string", "format": "uuid" },
+        "observed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "target_project_id": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^project:[A-Za-z0-9._:-]+$"
+    },
+    "approved_at": { "type": "string", "format": "date-time" },
+    "highlight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["zh", "en"],
+      "properties": {
+        "zh": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "en": { "type": "string", "minLength": 1, "maxLength": 240 }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "type": "string", "minLength": 1, "maxLength": 160 }
+    }
+  }
+}

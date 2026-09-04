@@ -718,21 +718,92 @@
     "savePosterHintMobile": "Long press the image to save it"
   },
   "portfolio": {
-    "title": "Selected Works",
-    "subtitle": "Design & Development Portfolio",
-    "eyebrow": "Selected Work",
+    "title": "From product challenges to working systems",
+    "subtitle": "An engineering record of commercial AI SaaS and independent products, focused on cross-stack delivery, local-first architecture, and verifiable implementation.",
+    "eyebrow": "Engineering work archive",
+    "indexLabel": "Portfolio overview",
+    "projectCount": "Projects",
+    "focusLabel": "Engineering range",
+    "focusValue": "Web · Desktop · Mobile",
+    "projectListLabel": "Project case studies",
+    "featured": "Core case",
+    "selectedTitle": "Selected case studies",
+    "selectedIntro": "Three projects that best demonstrate cross-platform delivery, product judgment, and engineering depth.",
+    "archiveTitle": "Project index",
+    "archiveIntro": "More shipped products, experiments, and earlier work.",
+    "viewProject": "View project",
+    "defaultRole": "Project developer",
+    "present": "Present",
+    "dateUnavailable": "Date not published",
     "items": {
       "glassDashboard": {
-        "title": "Glass Dashboard",
-        "desc": "A personal dashboard template centered on heavy glassmorphism and vivid gradients."
+        "title": "GWorkspace - Personal Workspace",
+        "desc": "An evolving full-stack workspace that unifies productivity tools, writing, public records, administration, and an interactive 3D world in one deployable system.",
+        "role": "Creator & Full-Stack Maintainer",
+        "highlight1": "A versioned Resume API keeps the portfolio, PDF client, and 3D exhibition on one authoritative data source.",
+        "highlight2": "Vue, Express, SQLite, Next.js, and Three.js form a monorepo spanning content, tools, and immersive presentation."
       },
       "citeAI": {
-        "title": "CiteAI",
-        "desc": "An AI-assisted citation and research tool for academic writing workflows."
+        "title": "CiteAI - AI Citation Platform",
+        "desc": "A commercial academic-writing SaaS that detects claims, retrieves and verifies scholarly and web evidence, and produces multi-style citations.",
+        "role": "Full-Stack Software Engineer",
+        "highlight1": "Connected NLP, OpenAlex/Tavily retrieval, BM25 ranking, model verification, and the document editor.",
+        "highlight2": "Delivered domain data migration, Stripe billing and quota security, multi-format export, tests, and CI/CD."
       },
-      "portfolio": {
+      "oceannect": {
+        "title": "Oceannect - Private Space for Couples",
+        "desc": "A cross-platform private space combining a Flutter client and FastAPI backend for daily updates, media timelines, interactions, anniversary reminders, and AI memories.",
+        "role": "Independent Full-Stack & Mobile Engineer",
+        "highlight1": "Built partner pairing, multimedia updates, comments, reactions, timelines, shared goals, and tiered AI daily, weekly, yearly, and memory-book summaries.",
+        "highlight2": "Hardened production with revocable sessions, idempotent posting, constrained uploads, notification deduplication, Docker/Alembic, verified backups, and health monitoring."
+      },
+      "vana": {
+        "title": "Vana - Local-First Document Vault",
+        "desc": "A cross-platform document app that stores writing in SQLite, adds automatic incremental sync through Supabase, and exports multiple formats.",
+        "role": "Independent Product Engineer",
+        "highlight1": "Offline writing remains independently usable alongside Magic Link accounts and automatic incremental sync.",
+        "highlight2": "Includes a document library, tags, archive, trash, and PDF, DOCX, and Markdown export."
+      },
+      "farivy": {
+        "title": "Farivy - Offline Training Log",
+        "desc": "A local-first Flutter fitness app spanning recurring plans, recoverable workout sessions, progressive overload, history, and analytics.",
+        "role": "Independent Mobile Developer",
+        "highlight1": "SQLite v13 persists workout prescriptions and exercise snapshots for consistent session recovery.",
+        "highlight2": "Implements RPE, 1RM estimates, rest notifications, weight conversion, and multi-scale training trends."
+      },
+      "oceanseo": {
+        "title": "Tideplan - Desktop Planning Assistant",
+        "desc": "A Linux-focused Tauri assistant combining multi-horizon tasks, reminders, AI meal plans, shopping lists, and project reviews.",
+        "role": "Independent Desktop Developer",
+        "highlight1": "Implements tray residence, autostart, daily reminders, native SQLite persistence, and protected local API credentials.",
+        "highlight2": "Turns Git metadata into AI reviews, then publishes approved highlights through schema validation and idempotent receipts."
+      },
+      "moblify": {
+        "title": "Moblify - Automated Short-Video Pipeline",
+        "desc": "An AI production pipeline connecting physics simulation, proxy scoring, Canvas preview, and vertical video composition.",
+        "role": "Independent Full-Stack Developer",
+        "highlight1": "Uses reversal index, Shannon entropy, and duration efficiency to select more dramatic simulation runs.",
+        "highlight2": "Delivers 9:16 OpenCV rendering, FFmpeg audio mixing, and lightweight Canvas replay."
+      },
+      "personalResume": {
+        "title": "Structured Resume Website",
+        "desc": "A bilingual resume system built around one structured content source, publishing a responsive website, a versioned JSON API, and LaTeX documents.",
+        "role": "Project Developer"
+      },
+      "surfsmart": {
+        "title": "SurfSmart - AI Website Research",
+        "desc": "A 2025 UMD Bitcamp project applying AI techniques to website research, with frontend and full-stack reconstruction work.",
+        "role": "Project Developer"
+      },
+      "twilightZone": {
+        "title": "Twilight Zone - 2D Horror Game",
+        "desc": "A Unity-based 2D narrative horror game centered on exploration, puzzle solving, and saving the protagonist's friends.",
+        "role": "Project Developer"
+      },
+      "portfolioSite": {
         "title": "Portfolio",
-        "desc": "A personal portfolio site for projects and visual work."
+        "desc": "A personal portfolio site for projects and visual work.",
+        "role": "Project Developer"
       }
     }
   },
