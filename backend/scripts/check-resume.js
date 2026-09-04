@@ -31,7 +31,18 @@ try {
   runMigrations({ logger: null })
   runMigrations({ logger: null })
   const db = getDatabase()
-  assert.equal(db.prepare(`SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name LIKE 'resume_%'`).get().count, 4)
+  assert.equal(db.prepare(`SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name LIKE 'resume_%'`).get().count, 5)
+  assert.equal(db.prepare(`SELECT COUNT(*) AS count FROM resume_content_revisions WHERE revision_id = '2026-09-project-portfolio'`).get().count, 1)
+  assert.equal(db.prepare(`SELECT COUNT(*) AS count FROM projects WHERE surfaces LIKE '%resume_pdf%'`).get().count, 3)
+  assert.equal(db.prepare(`SELECT COUNT(*) AS count FROM public_experiences WHERE public_id = 'experience:citeai-commercial'`).get().count, 1)
+
+  // Isolate the synthetic import below from the production portfolio seed.
+  db.exec(`
+    DELETE FROM resume_contacts;
+    DELETE FROM resume_skills;
+    DELETE FROM public_experiences;
+    DELETE FROM projects;
+  `)
 
   const importOptions = {
     yamlPath: join(importRoot, 'data/resume.yaml'),
@@ -97,7 +108,10 @@ try {
   assert.equal(validatePublicFacts(publicFacts).valid, true, 'frozen public-facts projection must remain valid')
   assert.equal(publicFacts.profile.name.en, 'Example Owner', 'public facts must project the authoritative resume profile')
   const legacyProjects = listPublicProjects({ locale: 'en' })
-  assert.deepEqual(Object.keys(legacyProjects[0]), ['id', 'slug', 'title', 'summary', 'url', 'image', 'tags', 'updatedAt'])
+  assert.deepEqual(Object.keys(legacyProjects[0]), [
+    'id', 'slug', 'title', 'summary', 'url', 'image', 'tags', 'role',
+    'involvement', 'start', 'end', 'technologies', 'highlights', 'featured', 'updatedAt'
+  ])
   assert.deepEqual(Object.keys(buildPublicWorld({ locale: 'en' })), ['version', 'locale', 'updatedAt', 'profile', 'regions'])
 
   const example = JSON.parse(readFileSync(join(backendRoot, 'fixtures/resume/v1/response.bilingual.json'), 'utf8'))

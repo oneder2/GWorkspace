@@ -8,7 +8,7 @@ export const PUBLIC_FACTS_SCHEMA_VERSION = '1.0.0'
 export const PUBLIC_FACTS_MAJOR_VERSION = 1
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const schemaPath = join(__dirname, '../../contracts/gworkspace/public-facts/v1/schema.json')
+const schemaPath = join(__dirname, '../../../packages/contracts/gworkspace/public-facts/v1/schema.json')
 const schema = JSON.parse(readFileSync(schemaPath, 'utf8'))
 const ajv = new Ajv2020({ allErrors: true, strict: true })
 addFormats(ajv)

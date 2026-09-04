@@ -17,7 +17,7 @@ try {
   const { buildPublicWorld, listPublicProjects } = await import('../src/services/publicWorld.js')
 
   runMigrations({ logger: null })
-  assert.equal(listPublicProjects({ locale: 'zh' }).length, 3)
+  assert.equal(listPublicProjects({ locale: 'zh' }).length, 8)
 
   const project = Project.create({
     slug: 'world-check-project',
@@ -57,7 +57,7 @@ try {
   assert.equal(world.version, 1)
   assert.equal(world.profile.name, 'Eclospy732')
   assert.equal(world.profile.role, '世界维护者')
-  assert.equal(world.regions.find(region => region.id === 'workshop')?.exhibits.length, 4)
+  assert.equal(world.regions.find(region => region.id === 'workshop')?.exhibits.length, 6)
   assert.equal(world.regions.find(region => region.id === 'observatory')?.exhibits[0]?.sourceType, 'blog')
   assert.equal(world.regions.find(region => region.id === 'memory-grove')?.exhibits[0]?.sourceType, 'guestbook')
   assert.equal(buildPublicWorld({ locale: 'en' }).locale, 'en')

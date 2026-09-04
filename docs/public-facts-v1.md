@@ -16,7 +16,7 @@ major version.
 
 The provider schema and fixtures are mirrored under:
 
-- `backend/contracts/gworkspace/public-facts/v1/`
+- `packages/contracts/gworkspace/public-facts/v1/`
 - `backend/fixtures/gworkspace/public-facts/v1/`
 
 These files are byte-identical tested copies of the frozen ecosystem registry

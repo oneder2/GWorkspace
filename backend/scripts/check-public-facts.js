@@ -9,7 +9,7 @@ import express from 'express'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const backendRoot = join(__dirname, '..')
 const fixtureRoot = join(backendRoot, 'fixtures/gworkspace/public-facts/v1')
-const contractRoot = join(backendRoot, 'contracts/gworkspace/public-facts/v1')
+const contractRoot = join(backendRoot, '../packages/contracts/gworkspace/public-facts/v1')
 const temporaryDirectory = mkdtempSync(join(tmpdir(), 'gworkspace-public-facts-'))
 process.env.DATABASE_PATH = join(temporaryDirectory, 'public-facts.db')
 process.env.PUBLIC_SITE_URL = 'https://example.test'
@@ -76,8 +76,14 @@ try {
   assert.deepEqual(db.prepare('SELECT public_id FROM blogs ORDER BY id').all().map(row => row.public_id), idsBeforeSecondMigration.blogs)
 
   const legacyProjects = listPublicProjects({ locale: 'en' })
-  assert.equal(legacyProjects.length, 3)
-  assert.deepEqual(Object.keys(legacyProjects[0]), ['id', 'slug', 'title', 'summary', 'url', 'image', 'tags', 'updatedAt'])
+  assert.equal(legacyProjects.length, 8)
+  assert.deepEqual(Object.keys(legacyProjects[0]), [
+    'id', 'slug', 'title', 'summary', 'url', 'image', 'tags', 'role',
+    'involvement', 'start', 'end', 'technologies', 'highlights', 'featured', 'updatedAt'
+  ])
+  assert.equal(legacyProjects[0].slug, 'citeai')
+  assert.equal(legacyProjects[0].role, 'Full-Stack Software Engineer')
+  assert.ok(legacyProjects[0].highlights.length >= 2)
   const legacyWorld = buildPublicWorld({ locale: 'en' })
   assert.deepEqual(Object.keys(legacyWorld), ['version', 'locale', 'updatedAt', 'profile', 'regions'])
   assert.equal(legacyWorld.version, 1)
@@ -183,7 +189,8 @@ try {
   assert.equal(facts.articles.some(record => record.title.en === 'Private draft'), false)
   assert.equal(facts.articles.find(record => record.id === stableArticleId).published_at, '2026-08-30T00:00:00.000Z')
   assert.equal(facts.articles.find(record => record.id === stableArticleId).body_markdown.en, 'Only this authoritative text is available.')
-  assert.deepEqual(facts.experiences.map(record => record.id), ['experience:public'])
+  assert.deepEqual(facts.experiences.map(record => record.id), ['experience:public', 'experience:citeai-commercial'])
+  assert.equal(facts.experiences[1].title.en, 'Full-Stack Software Engineer (Commercial SaaS)')
   assert.deepEqual(facts.experiences[0].media_ids, ['media:experience'])
   assert.equal(facts.media.some(record => record.id === 'media:private'), false)
   assert(facts.media.every(record => record.url.startsWith('https://example.test/')))

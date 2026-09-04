@@ -3,6 +3,9 @@
   "version": "3.1.0",
   "description": "GWorkspace backend API server",
   "type": "module",
+  "engines": {
+    "node": ">=20 <21"
+  },
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",
@@ -14,6 +17,8 @@
     "check:world-content": "node scripts/check-world-content.js",
     "check:public-facts": "node scripts/check-public-facts.js",
     "check:resume": "node scripts/check-resume.js",
+    "check:oceanseo-sync": "node scripts/check-oceanseo-project-sync.js",
+    "sync:oceanseo": "node scripts/oceanseo-project-sync.js",
     "import:resume": "node scripts/import-resume.js",
     "create-admin": "node scripts/create-admin.js",
     "ai:build-catalog": "node scripts/build-ai-seed-catalog.js",

@@ -39,7 +39,7 @@ with `RESUME_NOT_PUBLISHED`. Child arrays are filtered independently.
 ## Response Contract
 
 The JSON Schema is
-`backend/contracts/resume/v1/schema.json`. A validated synthetic response is
+`packages/contracts/resume/v1/schema.json`. A validated synthetic response is
 `backend/fixtures/resume/v1/response.bilingual.json`.
 
 Top-level fields:

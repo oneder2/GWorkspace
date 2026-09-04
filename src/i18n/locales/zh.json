@@ -718,21 +718,92 @@
     "savePosterHintMobile": "长按图片保存到相册"
   },
   "portfolio": {
-    "title": "精选作品",
-    "subtitle": "设计与开发作品集",
-    "eyebrow": "精选作品",
+    "title": "从产品问题到可运行系统",
+    "subtitle": "商业 AI SaaS 与独立产品工程档案，聚焦跨栈交付、本地优先架构和可验证的实现结果。",
+    "eyebrow": "工程作品档案",
+    "indexLabel": "作品集概览",
+    "projectCount": "收录项目",
+    "focusLabel": "工程范围",
+    "focusValue": "Web · 桌面 · 移动端",
+    "projectListLabel": "项目案例",
+    "featured": "核心案例",
+    "selectedTitle": "重点案例",
+    "selectedIntro": "三项最能体现跨平台交付、产品判断与工程深度的工作。",
+    "archiveTitle": "项目索引",
+    "archiveIntro": "更多已交付产品、实验项目与早期作品。",
+    "viewProject": "查看项目",
+    "defaultRole": "项目开发者",
+    "present": "至今",
+    "dateUnavailable": "时间未公开",
     "items": {
       "glassDashboard": {
-        "title": "玻璃仪表盘",
-        "desc": "以毛玻璃和高饱和渐变为核心的个人控制台模板。"
+        "title": "GWorkspace - 个人工作空间",
+        "desc": "持续演进的全栈个人工作平台，将生产力工具、写作、公开档案、管理后台和 3D 交互世界统一在一个可部署系统中。",
+        "role": "创建者与全栈维护者",
+        "highlight1": "通过版本化 Resume API，让作品集、PDF 简历客户端与 3D 展厅共享同一权威数据源。",
+        "highlight2": "以 Vue、Express、SQLite、Next.js 与 Three.js 组成覆盖内容、工具和沉浸式展示的 monorepo。"
       },
       "citeAI": {
-        "title": "CiteAI",
-        "desc": "面向学术写作与资料整理的 AI 引用辅助工具。"
+        "title": "CiteAI - AI 学术引用平台",
+        "desc": "商业化学术写作 SaaS：识别需要引用的论断，检索并验证学术与 Web 证据，再生成多种格式的引用与参考文献。",
+        "role": "全栈软件工程师",
+        "highlight1": "连接 NLP、OpenAlex/Tavily 检索、BM25 排序、模型验证与文档编辑器。",
+        "highlight2": "交付领域化数据迁移、Stripe 支付与配额安全、多格式导出、测试和 CI/CD。"
       },
-      "portfolio": {
+      "oceannect": {
+        "title": "Oceannect - 伴侣共享空间",
+        "desc": "以 Flutter 客户端和 FastAPI 后端承载日常记录、媒体时间线、互动、纪念日提醒与 AI 回忆总结的跨平台私密空间。",
+        "role": "独立全栈与移动端工程师",
+        "highlight1": "实现伴侣绑定、多媒体动态、评论反应、时间线、共同目标和分层 AI 日、周、年度及回忆册总结。",
+        "highlight2": "通过可撤销会话、幂等发布、受限上传、通知去重、Docker/Alembic、备份验证和健康监控加固生产链路。"
+      },
+      "vana": {
+        "title": "Vana - 本地优先文档库",
+        "desc": "以 SQLite 保存写作数据、通过 Supabase 自动增量同步的跨平台文档应用，并支持多格式导出。",
+        "role": "独立产品工程师",
+        "highlight1": "离线写作独立可用，同时支持 Magic Link 账号和自动增量同步。",
+        "highlight2": "覆盖文档库、标签、归档、回收站及 PDF、DOCX、Markdown 导出。"
+      },
+      "farivy": {
+        "title": "Farivy - 离线训练记录",
+        "desc": "Flutter 本地优先健身应用，覆盖周期计划、训练会话恢复、渐进超负荷、历史回顾和数据分析。",
+        "role": "独立移动端开发者",
+        "highlight1": "SQLite v13 持久化训练处方与动作快照，保证会话中断恢复的一致性。",
+        "highlight2": "实现 RPE、1RM、休息通知、重量单位换算和多时间尺度训练趋势。"
+      },
+      "oceanseo": {
+        "title": "潮汐计划 - 桌面计划助手",
+        "desc": "面向 Linux 的 Tauri 桌面助手，整合多时间跨度任务、提醒、AI 食谱、采购清单与项目周报。",
+        "role": "独立桌面端开发者",
+        "highlight1": "实现系统托盘、开机自启、每日提醒和原生 SQLite 持久化，并保护本地 API 密钥。",
+        "highlight2": "基于 Git 元数据生成 AI 周报，经人工审核、Schema 校验和幂等回执后同步项目亮点。"
+      },
+      "moblify": {
+        "title": "Moblify - 自动化短视频流水线",
+        "desc": "连接物理模拟、代理评分、Canvas 预览与竖屏视频合成的 AI 自动化生产流水线。",
+        "role": "独立全栈开发者",
+        "highlight1": "使用反转指数、香农熵与时长效率自动筛选更具戏剧性的模拟结果。",
+        "highlight2": "完成 9:16 OpenCV 渲染、FFmpeg 音效混流和 Canvas 轻量回放。"
+      },
+      "personalResume": {
+        "title": "结构化个人简历网站",
+        "desc": "一个以单一结构化内容源为核心的双语简历系统，可发布响应式网站、版本化 JSON API 和 LaTeX 文档。",
+        "role": "项目开发者"
+      },
+      "surfsmart": {
+        "title": "SurfSmart - AI 网站研究工具",
+        "desc": "一个将 AI 技术应用于网站研究的 2025 UMD Bitcamp 项目，参与前端与全栈重构工作。",
+        "role": "项目开发者"
+      },
+      "twilightZone": {
+        "title": "Twilight Zone - 2D 恐怖游戏",
+        "desc": "一款基于 Unity 的 2D 叙事恐怖游戏，围绕探索、解谜和拯救主角的朋友展开。",
+        "role": "项目开发者"
+      },
+      "portfolioSite": {
         "title": "作品集站点",
-        "desc": "展示项目经历与视觉作品的个人作品集网站。"
+        "desc": "展示项目经历与视觉作品的个人作品集网站。",
+        "role": "项目开发者"
       }
     }
   },

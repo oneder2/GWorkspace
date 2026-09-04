@@ -147,6 +147,13 @@ export function listPublicProjects({ locale = 'zh' } = {}) {
     url: project.url,
     image: project.image_url || null,
     tags: project.tags,
+    role: localized(project.role, language),
+    involvement: project.involvement,
+    start: project.start_date,
+    end: project.end_date || null,
+    technologies: project.technologies,
+    highlights: project.highlights?.[language] || [],
+    featured: project.featured,
     updatedAt: project.updated_at
   }))
 }
