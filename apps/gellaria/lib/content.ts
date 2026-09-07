@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { projectModelSpecSchema } from "./project-model";
 
 export const landmarkExhibitSchema = z.object({
   id: z.string(),
@@ -6,10 +7,14 @@ export const landmarkExhibitSchema = z.object({
   title: z.string(),
   summary: z.string(),
   sourceType: z.enum(["project", "blog", "guestbook", "external"]).optional(),
+  sourceKey: z.string().optional(),
+  presentation: z.enum(["project-model", "blog-constellation", "daily-signal", "echo-fragment", "audio-echo", "signal"]).optional(),
   href: z.string().nullable().optional(),
   image: z.string().nullable().optional(),
   tags: z.array(z.string()).optional(),
   publishedAt: z.string().nullable().optional(),
+  modelSpec: projectModelSpecSchema.nullable().optional(),
+  modelRevision: z.number().int().positive().nullable().optional(),
 });
 
 export const landmarkSchema = z.object({
@@ -24,7 +29,7 @@ export const landmarkSchema = z.object({
   artifact: z.string(),
   tagOptions: z.tuple([z.string(), z.string(), z.string()]),
   collectionLabel: z.string(),
-  exhibits: z.array(landmarkExhibitSchema).max(8),
+  exhibits: z.array(landmarkExhibitSchema).max(12),
   influenceColors: z.tuple([z.string(), z.string(), z.string()]),
   influenceDescription: z.string(),
 });
@@ -48,12 +53,16 @@ export const landmarks: Landmark[] = z.array(landmarkSchema).parse([
     exhibits: [
       {
         id: "gellaria",
+        sourceType: "project",
+        sourceKey: "gellaria",
+        presentation: "project-model",
         label: "正在建造",
         title: "Gellaria",
         summary: "把个人网站从内容目录变成一座能被共同经历、持续留下痕迹的多人 3D 世界。",
       },
       {
         id: "place-not-index",
+        presentation: "project-model",
         label: "建造方法",
         title: "把目录变成地点",
         summary: "作品不只等待点击；它们成为可抵达的设施，并由路径、停留和信标获得新的状态。",
@@ -78,12 +87,14 @@ export const landmarks: Landmark[] = z.array(landmarkSchema).parse([
     exhibits: [
       {
         id: "people-and-tools",
+        presentation: "blog-constellation",
         label: "长期命题",
         title: "人与工具如何共同改变表达",
         summary: "技术不是陈列柜，而是一种组织经验、改变表达边界的材料。",
       },
       {
         id: "constellation-method",
+        presentation: "blog-constellation",
         label: "记录方法",
         title: "先成为星体，再形成星座",
         summary: "没有结论的念头先被保存；长期写作再让分散坐标逐渐显出关系。",
@@ -108,12 +119,14 @@ export const landmarks: Landmark[] = z.array(landmarkSchema).parse([
     exhibits: [
       {
         id: "unlisted-fragments",
+        presentation: "echo-fragment",
         label: "收藏方法",
         title: "不适合写进履历的片段",
         summary: "声音、图像、读过的句子与阶段性的偏爱，在这里以回声而不是成就被保存。",
       },
       {
         id: "seasonal-archive",
+        presentation: "echo-fragment",
         label: "开放方式",
         title: "依赖季节的私人档案",
         summary: "内容不会一次全部出现；访客走过的路径和世界所处的阶段共同决定显影顺序。",

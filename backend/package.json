@@ -20,6 +20,7 @@
     "check:oceanseo-sync": "node scripts/check-oceanseo-project-sync.js",
     "sync:oceanseo": "node scripts/oceanseo-project-sync.js",
     "import:resume": "node scripts/import-resume.js",
+    "gellaria:backfill-models": "node scripts/backfill-gellaria-models.js",
     "create-admin": "node scripts/create-admin.js",
     "ai:build-catalog": "node scripts/build-ai-seed-catalog.js",
     "ai:import-catalog": "node scripts/import-ai-seed-catalog.js"

@@ -84,6 +84,11 @@ jobs:
           cd backend
           npm run check:resume
 
+      - name: Validate Gellaria content modeling
+        run: |
+          cd backend
+          npm run check:world-content
+
       - name: Verify backend modules load
         run: npm run check:backend-routes
 

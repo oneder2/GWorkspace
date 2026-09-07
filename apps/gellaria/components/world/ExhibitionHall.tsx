@@ -13,6 +13,7 @@ import { getCameraRelativeMovement } from "@/lib/movement";
 import { workspaceUrl } from "@/lib/workspace-url";
 import type { MoveIntent } from "./WorldExperience";
 import { SpiritTraveler, type SpiritMotion } from "./SpiritTraveler";
+import { ReservedModel, SemanticExhibitModel } from "./exhibits/ExhibitModels";
 import { useWorldStore } from "./store";
 
 type ExhibitionHallProps = {
@@ -83,7 +84,7 @@ export function ExhibitionHall({ landmark, moveIntent, paused = false, onExit }:
           <p>{config.hallLabel}</p>
           <h1>{config.roomLabel}</h1>
         </div>
-        <span className="hall-occupancy">{landmark.exhibits.length} / {config.capacity} 展位启用</span>
+        <span className="hall-occupancy">{landmark.id === "memory-grove" ? `${landmark.exhibits.length} 段回声游移中` : `${landmark.exhibits.length} / ${slots.length} 展位启用`}</span>
       </header>
 
       <aside className="hall-ecology" style={{ "--hall-accent": responseColor } as CSSProperties}>
@@ -128,10 +129,10 @@ function ExhibitDossier({ slot, accent, onClose }: { slot: ExhibitSlot; accent: 
       exit={{ opacity: 0, x: 20 }}
       transition={{ duration: 0.24 }}
       style={{ "--exhibit-accent": accent } as CSSProperties}
-      aria-label={`${exhibit.title}展签`}
+      aria-label={`${exhibit.title}内容`}
     >
       <button className="exhibit-close" onClick={onClose} aria-label="关闭展签"><X size={17} /></button>
-      <p>{String(slot.index + 1).padStart(2, "0")} / {exhibit.label}</p>
+      <p>{slot.kind === "echo-fragment" || slot.kind === "audio-echo" ? exhibit.label : `${String(slot.index + 1).padStart(2, "0")} / ${exhibit.label}`}</p>
       <h2>{exhibit.title}</h2>
       <span className="exhibit-state"><i />{action.prompt}完成</span>
       <p className="exhibit-summary">{exhibit.summary}</p>
@@ -249,27 +250,24 @@ function ObservatoryInterior({ accent, responseColor }: { accent: string; respon
 }
 
 function GroveInterior({ accent, responseColor }: { accent: string; responseColor: string }) {
+  const trail = [
+    [0, 5.6, 0], [-0.7, 4.15, -0.12], [0.5, 2.75, 0.16], [-0.4, 1.3, -0.08],
+    [0.45, -0.15, 0.13], [-0.55, -1.65, -0.12], [0.25, -3.1, 0.08], [0, -4.75, 0],
+  ] as const;
+  const trunks = [
+    [-7.1, -5.2, 5.8, 0.46], [-5.9, 3.8, 5.1, -0.32], [-7.35, 0.2, 6.3, 0.18],
+    [6.85, -4.6, 5.5, -0.25], [5.95, 3.95, 6.1, 0.36], [7.3, 0.65, 5.4, -0.16],
+  ] as const;
   return (
     <group>
-      <mesh receiveShadow rotation-x={-Math.PI / 2}><planeGeometry args={[18, 18]} /><meshStandardMaterial color="#17271f" roughness={1} /></mesh>
-      <mesh receiveShadow position={[0, 0.055, -0.45]}><boxGeometry args={[3.6, 0.08, 14.7]} /><meshStandardMaterial color="#29392d" roughness={0.95} /></mesh>
-      {[-4.8,-2.4,0,2.4,4.8].map((z) => <group key={z} position={[0,.1,z]}>{[-1.15,-.38,.38,1.15].map((x)=><mesh key={x} position-x={x} rotation-x={-Math.PI/2}><circleGeometry args={[.07,7]} /><meshBasicMaterial color={responseColor} transparent opacity={.45} /></mesh>)}</group>)}
-      {[-1.82, 1.82].map((x) => <mesh key={x} position={[x, .105, -.45]}><boxGeometry args={[.06, .035, 14.7]} /><meshBasicMaterial color={responseColor} transparent opacity={.48} /></mesh>)}
-      {[-6.7, 6.7].map((x) => [-4.5, -1.5, 1.5, 4.5].map((z, index) => <group key={`${x}:${z}`} position={[x, 0, z]}><mesh castShadow position-y={1.45}><cylinderGeometry args={[.18, .34, 2.9, 7]} /><meshStandardMaterial color="#554737" roughness={1} /></mesh><mesh position={[x < 0 ? .55 : -.55, 1.7, 0]} scale={[.8, .55, .75]}><icosahedronGeometry args={[.85, 1]} /><meshStandardMaterial color={index % 2 ? "#587052" : "#496650"} roughness={1} /></mesh></group>))}
-      {[-8.8, 8.8].map((x) => <mesh key={x} position={[x, 3.5, 0]}><boxGeometry args={[0.25, 7, 16]} /><meshStandardMaterial color="#1d3228" transparent opacity={0.72} /></mesh>)}
-      {[
-        [-7.2, -5.8, 5.8], [-5.4, -7, 6.6], [5.7, -6.8, 6.2], [7.25, -4.2, 5.5],
-      ].map(([x, z, height], index) => (
-        <group key={index} position={[x, 0, z]}>
-          <mesh castShadow position-y={height / 2}><cylinderGeometry args={[0.18, 0.42, height, 7]} /><meshStandardMaterial color="#574a39" roughness={1} /></mesh>
-          <mesh castShadow position={[0, height, 0]} scale={[1.35, 0.82, 1.1]}><icosahedronGeometry args={[1.25, 1]} /><meshStandardMaterial color={index % 2 ? "#526e50" : "#60795a"} roughness={1} /></mesh>
-        </group>
-      ))}
-      {[-6.1, -3.05, 0, 3.05, 6.1].map((x, index) => <mesh key={x} position={[x, 5.25 + (index % 2) * 0.35, -1]} rotation-z={x * -0.025}><torusGeometry args={[3.6, 0.055, 6, 54, Math.PI]} /><meshStandardMaterial color="#657861" metalness={0.16} roughness={0.72} /></mesh>)}
-      {[0.82, 1.3, 1.78].map((radius, index) => <mesh key={radius} position={[0, 2.7 + index * 0.62, -7.7]} rotation-x={Math.PI / 2}><torusGeometry args={[radius, 0.03, 5, 54]} /><meshBasicMaterial color={responseColor} transparent opacity={0.58 - index * 0.12} /></mesh>)}
-      {[-4.2, 4.2].map((x) => <group key={x} position={[x, 0.45, -0.7]}><mesh><boxGeometry args={[2.5, 0.22, 0.72]} /><meshStandardMaterial color="#4b5442" roughness={0.95} /></mesh><mesh position-y={0.6}><octahedronGeometry args={[0.12, 0]} /><meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={1.1} /></mesh></group>)}
+      <mesh receiveShadow rotation-x={-Math.PI / 2}><circleGeometry args={[9, 56]} /><meshStandardMaterial color="#16271f" roughness={1} /></mesh>
+      {trail.map(([x, z, rotation], index) => <mesh key={index} receiveShadow position={[x, 0.04, z]} rotation={[0, rotation, 0]}><cylinderGeometry args={[1.12 - index * 0.035, 1.24 - index * 0.035, 0.09, 9]} /><meshStandardMaterial color={index % 2 ? "#354638" : "#3b493b"} roughness={0.98} /></mesh>)}
+      {trunks.map(([x, z, height, lean], index) => <group key={index} position={[x, 0, z]} rotation-z={lean * 0.16}><mesh castShadow position-y={height / 2}><cylinderGeometry args={[0.2, 0.48, height, 8]} /><meshStandardMaterial color={index % 2 ? "#574b3b" : "#4b4237"} roughness={1} /></mesh><mesh castShadow position={[lean, height, 0]} scale={[1.45, 0.82, 1.2]}><dodecahedronGeometry args={[1.18, 1]} /><meshStandardMaterial color={index % 2 ? "#516d53" : "#60785a"} roughness={0.96} /></mesh></group>)}
+      {[-5.9, -3.1, 2.7, 5.65].map((x, index) => <group key={x} position={[x, 5.25 + index % 2 * 0.38, -1.2 + index * 0.22]} rotation-z={x * -0.018}><mesh><torusGeometry args={[3.15, 0.045, 6, 54, Math.PI]} /><meshStandardMaterial color="#657861" metalness={0.14} roughness={0.75} /></mesh>{[-1.5, 0, 1.5].map((offset, ribbon) => <mesh key={offset} position={[offset, -1.55 - ribbon * 0.24, 0]} rotation-z={(ribbon - 1) * 0.08}><boxGeometry args={[0.045, 1.1 + ribbon * 0.22, 0.018]} /><meshBasicMaterial color={ribbon === index % 3 ? responseColor : "#b8c5a7"} transparent opacity={0.3 + ribbon * 0.08} /></mesh>)}</group>)}
+      <group position={[0, 0.08, -6.35]}><mesh rotation-x={-Math.PI / 2}><circleGeometry args={[2.15, 40]} /><meshStandardMaterial color="#173b39" emissive={responseColor} emissiveIntensity={0.22} roughness={0.32} /></mesh>{[1.35, 1.75, 2.18].map((radius, index) => <mesh key={radius} position-y={0.025 + index * 0.008} rotation-x={-Math.PI / 2}><ringGeometry args={[radius - 0.018, radius, 48]} /><meshBasicMaterial color={responseColor} transparent opacity={0.4 - index * 0.08} /></mesh>)}</group>
+      {[-4.8, -1.9, 1.1, 4.45].map((x, index) => <group key={x} position={[x, 0.2, -5.7 + (index % 2) * 1.5]}><mesh rotation={[0.15, index * 0.7, 0.2]}><dodecahedronGeometry args={[0.38 + index * 0.05, 0]} /><meshStandardMaterial color="#48564a" roughness={1} /></mesh><mesh position-y={0.42}><sphereGeometry args={[0.055, 8, 6]} /><meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={1.2} /></mesh></group>)}
       <mesh position={[0, 0.04, 6.85]} rotation-x={-Math.PI / 2}><ringGeometry args={[1.1, 1.8, 32]} /><meshBasicMaterial color={accent} transparent opacity={0.38} /></mesh>
-      <pointLight position={[0, 4.2, -0.7]} color={responseColor} intensity={4.2} distance={13} />
+      <pointLight position={[0, 4.4, -1.5]} color={responseColor} intensity={4.2} distance={14} />
     </group>
   );
 }
@@ -294,20 +292,21 @@ function ExhibitDisplay({ slot, landmarkId, accent, active }: { slot: ExhibitSlo
   });
   return (
     <group position={slot.position} rotation-y={slot.rotation}>
-      <ExhibitPlinth landmarkId={landmarkId} accent={accent} occupied={Boolean(slot.exhibit)} active={active} />
+      <ExhibitPlinth landmarkId={landmarkId} kind={slot.kind} accent={accent} occupied={Boolean(slot.exhibit)} active={active} />
       <group ref={display} position-y={0.35}>
-        {slot.exhibit ? <ExhibitModel kind={slot.kind} active={active} accent={accent} seed={slot.index} /> : <ReservedExhibit accent={accent} />}
+        {slot.exhibit ? <SemanticExhibitModel exhibit={slot.exhibit} kind={slot.kind} active={active} accent={accent} /> : <ReservedModel accent={accent} />}
       </group>
-      <Html position={[0, 2.45, 0]} center distanceFactor={10} zIndexRange={[3, 0]} className={`exhibit-world-label ${slot.exhibit ? "" : "reserved"}`}>
+      {landmarkId !== "memory-grove" && <Html position={[0, 2.45, 0]} center distanceFactor={8.2} zIndexRange={[3, 0]} className={`exhibit-world-label exhibit-label-${slot.kind} ${slot.exhibit ? "" : "reserved"}`}>
         <span>{slot.exhibit?.title ?? "预留展位"}</span>
         <small>{slot.exhibit ? getExhibitAction(slot.kind).prompt : "未来展品"}</small>
-      </Html>
+      </Html>}
     </group>
   );
 }
 
-function ExhibitPlinth({ landmarkId, accent, occupied, active }: { landmarkId: string; accent: string; occupied: boolean; active: boolean }) {
+function ExhibitPlinth({ landmarkId, kind, accent, occupied, active }: { landmarkId: string; kind: ExhibitKind; accent: string; occupied: boolean; active: boolean }) {
   const intensity = active ? 0.8 : occupied ? 0.2 : 0.025;
+  if (landmarkId === "memory-grove") return null;
   if (landmarkId === "workshop") {
     return (
       <group>
@@ -318,6 +317,9 @@ function ExhibitPlinth({ landmarkId, accent, occupied, active }: { landmarkId: s
     );
   }
   if (landmarkId === "observatory") {
+    if (kind === "daily-signal") {
+      return <group><mesh receiveShadow position-y={0.1}><cylinderGeometry args={[0.72, 0.9, 0.2, 12]} /><meshStandardMaterial color="#2b414a" roughness={0.68} metalness={0.24} /></mesh><mesh position-y={0.24} rotation-x={Math.PI / 2}><torusGeometry args={[0.82, 0.022, 5, 36]} /><meshBasicMaterial color="#e8d98d" transparent opacity={active ? 0.76 : 0.3} /></mesh></group>;
+    }
     return (
       <group>
         <mesh receiveShadow position-y={0.16}><cylinderGeometry args={[1.05, 1.18, 0.32, 16]} /><meshStandardMaterial color={occupied ? "#344852" : "#223139"} roughness={0.62} metalness={0.28} /></mesh>
@@ -336,41 +338,6 @@ function ExhibitPlinth({ landmarkId, accent, occupied, active }: { landmarkId: s
 
 function slotStoneRotation(occupied: boolean) {
   return occupied ? 0.22 : -0.18;
-}
-
-function ExhibitModel({ kind, active, accent, seed }: { kind: ExhibitKind; active: boolean; accent: string; seed: number }) {
-  if (kind === "constellation") return <ConstellationExhibit active={active} accent={accent} seed={seed} />;
-  if (kind === "echo") return <EchoExhibit active={active} accent={accent} seed={seed} />;
-  if (kind === "signal") return <SignalExhibit active={active} accent={accent} />;
-  return <PrototypeExhibit active={active} accent={accent} seed={seed} />;
-}
-
-function PrototypeExhibit({ active, accent, seed }: { active: boolean; accent: string; seed: number }) {
-  const mechanism = useRef<THREE.Group>(null);
-  useFrame((_, delta) => { if (mechanism.current) mechanism.current.rotation.y += delta * (active ? 1.15 : 0.18); });
-  return <group ref={mechanism} position-y={1.05}><mesh castShadow rotation-x={Math.PI / 2}><torusGeometry args={[0.58 + seed % 2 * 0.08, 0.12, 7, 18]} /><meshStandardMaterial color="#8d7968" metalness={0.72} roughness={0.28} /></mesh><mesh castShadow rotation={[0.4, 0.2, 0.6]}><octahedronGeometry args={[0.48, 0]} /><meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={active ? 1.2 : 0.28} metalness={0.5} roughness={0.3} /></mesh>{[0, 1, 2].map((index) => <mesh key={index} position={[Math.cos(index * Math.PI * 2 / 3) * 0.78, (index - 1) * 0.18, Math.sin(index * Math.PI * 2 / 3) * 0.78]}><boxGeometry args={[0.25, 0.25, 0.25]} /><meshStandardMaterial color="#b3a18c" metalness={0.6} /></mesh>)}</group>;
-}
-
-function ConstellationExhibit({ active, accent, seed }: { active: boolean; accent: string; seed: number }) {
-  const orbit = useRef<THREE.Group>(null);
-  useFrame((_, delta) => { if (orbit.current) { orbit.current.rotation.y += delta * (active ? 0.8 : 0.12); orbit.current.rotation.z += delta * 0.05; } });
-  return <group ref={orbit} position-y={1.1} rotation-x={0.35 + seed * 0.04}><mesh><sphereGeometry args={[0.24, 14, 10]} /><meshStandardMaterial color="#dce9ef" emissive={accent} emissiveIntensity={active ? 2 : 0.7} /></mesh>{[0.55, 0.82, 1.05].map((radius, index) => <mesh key={radius} rotation={[index * 0.7, index * 0.4, 0]}><torusGeometry args={[radius, 0.018, 5, 48]} /><meshBasicMaterial color={index === 1 ? accent : "#bad0dc"} transparent opacity={active ? 0.9 : 0.46} /></mesh>)}</group>;
-}
-
-function EchoExhibit({ active, accent, seed }: { active: boolean; accent: string; seed: number }) {
-  const rings = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => { if (rings.current) rings.current.scale.setScalar(0.9 + ((clock.elapsedTime * (active ? 0.42 : 0.12) + seed * 0.1) % 1) * 0.5); });
-  return <group position-y={0.8}><mesh castShadow position-y={0.45}><icosahedronGeometry args={[0.55, 1]} /><meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={active ? 1.4 : 0.35} roughness={0.6} /></mesh><group ref={rings} position-y={0.45}>{[0.72, 0.96].map((radius) => <mesh key={radius} rotation-x={Math.PI / 2}><torusGeometry args={[radius, 0.022, 5, 42]} /><meshBasicMaterial color="#d9ddbd" transparent opacity={active ? 0.65 : 0.2} /></mesh>)}</group><mesh castShadow position-y={-0.05}><cylinderGeometry args={[0.1, 0.18, 1.15, 7]} /><meshStandardMaterial color="#68705b" /></mesh></group>;
-}
-
-function SignalExhibit({ active, accent }: { active: boolean; accent: string }) {
-  const dish = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => { if (dish.current) dish.current.rotation.y = Math.sin(clock.elapsedTime * (active ? 1 : 0.25)) * 0.7; });
-  return <group ref={dish} position-y={1.05}><mesh rotation-x={-0.7}><cylinderGeometry args={[0.65, 0.12, 0.24, 18, 1, false]} /><meshStandardMaterial color="#8aa09b" metalness={0.45} roughness={0.35} /></mesh><mesh position-y={-0.62}><cylinderGeometry args={[0.08, 0.12, 1.2, 8]} /><meshStandardMaterial color="#5e6965" /></mesh><pointLight color={accent} intensity={active ? 3 : 0.7} distance={4} /></group>;
-}
-
-function ReservedExhibit({ accent }: { accent: string }) {
-  return <group position-y={1.05}><mesh rotation-y={Math.PI / 4}><boxGeometry args={[0.75, 0.75, 0.75]} /><meshStandardMaterial color="#25302d" wireframe transparent opacity={0.42} /></mesh><mesh><sphereGeometry args={[0.08, 8, 6]} /><meshBasicMaterial color={accent} transparent opacity={0.28} /></mesh></group>;
 }
 
 function HallPlayer({ moveIntent, paused, slots, onNearbySlot, onExitNearby }: HallCanvasProps) {
@@ -410,7 +377,7 @@ function HallPlayer({ moveIntent, paused, slots, onNearbySlot, onExitNearby }: H
       velocity.current.lerp(direction.set(x, 0, z).multiplyScalar(4.2), Math.min(1, delta * 8));
     } else velocity.current.multiplyScalar(Math.max(0, 1 - delta * 9));
     position.current.addScaledVector(velocity.current, delta);
-    position.current.x = THREE.MathUtils.clamp(position.current.x, -7.7, 7.7);
+    position.current.x = THREE.MathUtils.clamp(position.current.x, -3.55, 3.55);
     position.current.z = THREE.MathUtils.clamp(position.current.z, -6.6, 6.8);
     group.current.position.copy(position.current);
     if (velocity.current.lengthSq() > 0.06) group.current.rotation.y = Math.atan2(velocity.current.x, velocity.current.z);

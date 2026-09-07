@@ -3,9 +3,10 @@ import { Blog } from '../models/Blog.js'
 import { Guestbook } from '../models/Guestbook.js'
 import { Project } from '../models/Project.js'
 import { WorldExhibit } from '../models/WorldExhibit.js'
+import { GellariaProjectModel } from '../models/GellariaProjectModel.js'
 
 const REGION_IDS = ['workshop', 'observatory', 'memory-grove']
-const MAX_EXHIBITS_PER_REGION = 6
+const MAX_EXHIBITS_PER_REGION = 12
 
 const localized = (value, locale) => value?.[locale] || value?.zh || value?.en || ''
 const summarize = (value, limit = 180) => {
@@ -13,23 +14,27 @@ const summarize = (value, limit = 180) => {
   return plain.length > limit ? `${plain.slice(0, limit - 1).trim()}…` : plain
 }
 
-const projectExhibit = (project, placement, locale) => ({
+const projectExhibit = (project, placement, locale, model = null) => ({
   id: `project:${project.slug}`,
   sourceType: 'project',
   sourceKey: project.slug,
+  presentation: 'project-model',
   label: localized(placement?.label, locale) || (locale === 'en' ? 'Project' : '项目'),
   title: localized(placement?.title, locale) || localized(project.title, locale),
   summary: localized(placement?.summary, locale) || localized(project.summary, locale),
   href: placement?.href || project.url,
   image: project.image_url || null,
   tags: project.tags,
-  publishedAt: null
+  publishedAt: null,
+  modelSpec: model?.spec || null,
+  modelRevision: model?.revision || null
 })
 
 const blogExhibit = (blog, placement, locale) => ({
   id: `blog:${blog.slug || blog.id}`,
   sourceType: 'blog',
   sourceKey: blog.slug || String(blog.id),
+  presentation: 'blog-constellation',
   label: localized(placement?.label, locale) || (locale === 'en' ? 'Field note' : '观测札记'),
   title: localized(placement?.title, locale) || blog.title,
   summary: localized(placement?.summary, locale) || summarize(blog.excerpt || blog.content),
@@ -43,6 +48,7 @@ const guestbookExhibit = (entry, placement, locale) => ({
   id: `guestbook:${entry.id}`,
   sourceType: 'guestbook',
   sourceKey: String(entry.id),
+  presentation: 'echo-fragment',
   label: localized(placement?.label, locale) || (locale === 'en' ? 'Visitor echo' : '来访回声'),
   title: localized(placement?.title, locale) || entry.author_name || (locale === 'en' ? 'Anonymous visitor' : '匿名旅人'),
   summary: localized(placement?.summary, locale) || summarize(entry.content),
@@ -56,6 +62,7 @@ const externalExhibit = (placement, locale) => ({
   id: `external:${placement.source_key}`,
   sourceType: 'external',
   sourceKey: placement.source_key,
+  presentation: 'signal',
   label: localized(placement.label, locale) || (locale === 'en' ? 'External record' : '外部记录'),
   title: localized(placement.title, locale),
   summary: localized(placement.summary, locale),
@@ -90,6 +97,7 @@ export function buildPublicWorld({ locale = 'zh' } = {}) {
   const guestbook = Guestbook.getAll({ status: 'approved', limit: MAX_EXHIBITS_PER_REGION, sortOrder: 'desc' })
   const placements = WorldExhibit.getAll({ status: 'published' })
   const projectBySlug = new Map(projects.map(project => [project.slug, project]))
+  const projectModels = GellariaProjectModel.getMany(projects.map(project => project.id))
   const blogByKey = new Map(blogs.flatMap(blog => [[String(blog.id), blog], [blog.slug, blog]]).filter(([key]) => key))
   const guestbookById = new Map(guestbook.map(entry => [String(entry.id), entry]))
   const regions = Object.fromEntries(REGION_IDS.map(id => [id, []]))
@@ -100,7 +108,7 @@ export function buildPublicWorld({ locale = 'zh' } = {}) {
     const project = projectBySlug.get(placement.source_key)
     const blog = blogByKey.get(placement.source_key)
     const guestbookEntry = guestbookById.get(placement.source_key)
-    if (placement.source_type === 'project' && project) exhibit = projectExhibit(project, placement, language)
+    if (placement.source_type === 'project' && project) exhibit = projectExhibit(project, placement, language, projectModels.get(project.id))
     if (placement.source_type === 'blog' && blog) exhibit = blogExhibit(blog, placement, language)
     if (placement.source_type === 'guestbook' && guestbookEntry) exhibit = guestbookExhibit(guestbookEntry, placement, language)
     if (placement.source_type === 'external') exhibit = externalExhibit(placement, language)
@@ -111,7 +119,7 @@ export function buildPublicWorld({ locale = 'zh' } = {}) {
 
   for (const project of projects) {
     if (regions.workshop.length >= MAX_EXHIBITS_PER_REGION || placedSourceIds.has(`project:${project.slug}`)) continue
-    regions.workshop.push(projectExhibit(project, null, language))
+    regions.workshop.push(projectExhibit(project, null, language, projectModels.get(project.id)))
   }
   for (const blog of blogs) {
     const keys = [`blog:${blog.slug}`, `blog:${blog.id}`]

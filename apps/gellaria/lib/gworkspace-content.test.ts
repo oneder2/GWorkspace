@@ -89,12 +89,14 @@ describe("GWorkspace public world adapter", () => {
     expect(enriched.landmarks.find((item) => item.id === "observatory")?.exhibits[0]).toMatchObject({
       id: "daily-capsule:2026-08-31",
       title: "今日赠语",
+      presentation: "daily-signal",
     });
     expect(enriched.landmarks.find((item) => item.id === "memory-grove")?.exhibits[0]).toMatchObject({
       label: "正在听",
       title: "Night Signal",
+      presentation: "audio-echo",
     });
-    expect(enriched.landmarks.every((item) => item.exhibits.length <= 8)).toBe(true);
+    expect(enriched.landmarks.every((item) => item.exhibits.length <= 12)).toBe(true);
   });
 
   it("maps resume projects into workshop exhibits with media and link priority", () => {
@@ -115,6 +117,8 @@ describe("GWorkspace public world adapter", () => {
       href: "https://www.gellaronline.cc",
       image: "/api/gworkspace-media?path=%2Fimages%2Fprojects%2Fgworkspace.webp",
       tags: ["Vue", "Three.js"],
+      presentation: "project-model",
     });
+    expect(projects?.[0].modelSpec?.version).toBe(1);
   });
 });

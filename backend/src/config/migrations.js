@@ -25,7 +25,8 @@ export const MIGRATION_FILES = [
   '016_spotify_credentials.sql',
   '017_resume_portfolio_refresh.sql',
   '018_oceannect_resume_project.sql',
-  '019_portfolio_media_refresh.sql'
+  '019_portfolio_media_refresh.sql',
+  '020_gellaria_project_models.sql'
 ]
 
 const isIgnorableMigrationError = (message = '') => (
