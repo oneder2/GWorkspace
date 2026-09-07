@@ -2,7 +2,9 @@ import express from 'express'
 import { authenticate, requireAdmin } from '../middleware/auth.js'
 import { Project } from '../models/Project.js'
 import { WorldExhibit } from '../models/WorldExhibit.js'
+import { GellariaProjectModel } from '../models/GellariaProjectModel.js'
 import { Resume, RESUME_SURFACES } from '../models/Resume.js'
+import { projectWithWorldModel, refreshProjectWorldModel } from '../services/gellariaModeling.js'
 
 const router = express.Router()
 router.use(authenticate)
@@ -47,18 +49,34 @@ router.delete('/resume/timeline/:id', (req, res) => (
   Resume.deleteTimeline(Number(req.params.id)) ? res.json({ deleted: true }) : res.status(404).json({ error: 'Timeline entry not found' })
 ))
 
-router.get('/projects', (req, res) => res.json(Project.getAll({ status: null })))
-router.post('/projects', (req, res) => {
+router.get('/projects', (req, res) => res.json(Project.getAll({ status: null }).map(projectWithWorldModel)))
+router.get('/project-model-jobs', (req, res) => res.json(GellariaProjectModel.listJobs()))
+router.post('/projects', async (req, res) => {
   const { slug, url } = req.body || {}
   const title = req.body?.title?.zh ?? req.body?.title_zh
   const summary = req.body?.summary?.zh ?? req.body?.summary_zh
   if (!slug || !url || !title || !summary) return sendValidationError(res, 'slug, url, title.zh and summary.zh are required')
-  try { return res.status(201).json(Project.create(req.body)) } catch (error) { return sendValidationError(res, error.message) }
+  try {
+    const project = Project.create(req.body)
+    await refreshProjectWorldModel(project.id)
+    return res.status(201).json(projectWithWorldModel(Project.getById(project.id)))
+  } catch (error) { return sendValidationError(res, error.message) }
 })
-router.put('/projects/:id', (req, res) => {
+router.put('/projects/:id', async (req, res) => {
   try {
     const project = Project.update(Number(req.params.id), req.body || {})
-    return project ? res.json(project) : res.status(404).json({ error: 'Project not found' })
+    if (!project) return res.status(404).json({ error: 'Project not found' })
+    await refreshProjectWorldModel(project.id)
+    return res.json(projectWithWorldModel(Project.getById(project.id)))
+  } catch (error) { return sendValidationError(res, error.message) }
+})
+router.post('/projects/:id/world-model', async (req, res) => {
+  try {
+    const project = Project.getById(Number(req.params.id))
+    if (!project) return res.status(404).json({ error: 'Project not found' })
+    const model = await refreshProjectWorldModel(project.id, { force: true })
+    if (!model) return sendValidationError(res, 'Project must be published on the gellaria surface')
+    return res.json(projectWithWorldModel(Project.getById(project.id)))
   } catch (error) { return sendValidationError(res, error.message) }
 })
 router.delete('/projects/:id', (req, res) => (

@@ -64,10 +64,31 @@
     </RecordSection>
 
     <RecordSection v-else-if="activeTab === 'projects'" eyebrow="PROJECT REGISTER" :title="$t('admin.projects')" :empty="!projects.length" :empty-label="$t('admin.noProjects')" :add-label="$t('admin.addProject')" @add="editProject()">
-      <RecordRow v-for="record in projects" :key="record.id" :record="record" :title="record.title.zh" :meta="`${record.slug} · ${record.start_date || '—'} · ${record.involvement}`" :summary="record.summary.zh" @edit="editProject(record)" @remove="removeProject(record)" />
+      <RecordRow v-for="record in projects" :key="record.id" :record="record" :title="record.title.zh" :meta="`${record.slug} · ${record.start_date || '—'} · ${record.involvement} · 3D ${record.world_model ? `r${record.world_model.revision}` : 'pending'}`" :summary="record.summary.zh" @edit="editProject(record)" @remove="removeProject(record)" />
     </RecordSection>
 
-    <RecordSection v-else eyebrow="SPATIAL PLACEMENT" :title="$t('admin.worldExhibits')" :empty="!exhibits.length" :empty-label="$t('admin.noExhibits')" :add-label="$t('admin.addExhibit')" @add="editExhibit()">
+    <section v-else-if="activeTab === 'models'" class="admin-panel record-section">
+      <div class="section-heading section-pad"><div><span>AGENT MODEL PIPELINE</span><h3>{{ $t('admin.gellariaModels') }}</h3></div><small class="model-contract">MODEL SPEC v1</small></div>
+      <div v-if="!projects.length" class="empty-state">{{ $t('admin.noProjects') }}</div>
+      <div v-else class="model-register">
+        <article v-for="record in projects" :key="record.id" class="model-row">
+          <div class="model-status" :class="`is-${record.world_model_job?.status || 'idle'}`"><i /><span>{{ record.world_model_job?.status || 'idle' }}</span></div>
+          <div class="record-copy">
+            <small>{{ record.slug }} · {{ record.world_model?.provider_mode || $t('admin.modelAwaiting') }}</small>
+            <h4>{{ record.title.zh }}</h4>
+            <p>{{ record.world_model?.spec?.narrative || $t('admin.modelPublishHint') }}</p>
+          </div>
+          <div class="model-meta"><span>{{ record.world_model ? `r${record.world_model.revision}` : '—' }}</span><small>{{ formatModelTime(record.world_model?.updated_at) }}</small></div>
+          <button class="action-btn" type="button" :disabled="modelingProjectId === record.id || record.status !== 'published' || !record.surfaces.includes('gellaria')" @click="regenerateModel(record)">{{ modelingProjectId === record.id ? $t('admin.modeling') : $t('admin.regenerateModel') }}</button>
+        </article>
+        <div v-if="modelJobs.length" class="model-job-log">
+          <span>{{ $t('admin.recentModelJobs') }}</span>
+          <p v-for="job in modelJobs.slice(0, 8)" :key="job.id"><b>#{{ job.id }}</b>{{ job.slug }}<i :class="`is-${job.status}`">{{ job.status }}</i><time>{{ formatModelTime(job.updated_at) }}</time></p>
+        </div>
+      </div>
+    </section>
+
+    <RecordSection v-else-if="activeTab === 'exhibits'" eyebrow="SPATIAL PLACEMENT" :title="$t('admin.worldExhibits')" :empty="!exhibits.length" :empty-label="$t('admin.noExhibits')" :add-label="$t('admin.addExhibit')" @add="editExhibit()">
       <article v-for="record in exhibits" :key="record.id" class="record-row">
         <span class="region-mark" :class="`region-${record.region_id}`" />
         <div class="record-copy"><small>{{ regionLabel(record.region_id) }} · {{ record.source_type }}</small><h4>{{ record.label.zh || record.source_key }}</h4><p>{{ record.source_key }}</p></div>
@@ -129,6 +150,8 @@ const experience = ref([])
 const education = ref([])
 const projects = ref([])
 const exhibits = ref([])
+const modelJobs = ref([])
+const modelingProjectId = ref(null)
 const status = reactive({ tone: 'neutral', message: '' })
 const timelineRecords = computed(() => [...experience.value, ...education.value].sort((a, b) => a.sort_order - b.sort_order))
 const projectMediaOptions = computed(() => projects.value.flatMap(record => {
@@ -146,6 +169,7 @@ const tabs = computed(() => [
   { id: 'skills', label: t('admin.skills') },
   { id: 'timeline', label: t('admin.timeline') },
   { id: 'projects', label: t('admin.projects') },
+  { id: 'models', label: t('admin.gellariaModels') },
   { id: 'exhibits', label: t('admin.worldExhibits') }
 ])
 const allSurfaces = ['portfolio', 'resume_web', 'resume_pdf', 'gellaria']
@@ -187,7 +211,7 @@ const exhibitEditorOpen = ref(false)
 
 async function loadContent() {
   try {
-    const [resume, projectRecords, exhibitRecords] = await Promise.all([contentAdminApi.getResume(), contentAdminApi.getProjects(), contentAdminApi.getWorldExhibits()])
+    const [resume, projectRecords, exhibitRecords, jobs] = await Promise.all([contentAdminApi.getResume(), contentAdminApi.getProjects(), contentAdminApi.getWorldExhibits(), contentAdminApi.getProjectModelJobs()])
     replaceForm(profileForm, resume.profile || emptyProfile())
     contacts.value = resume.contacts || []
     skills.value = resume.skills || []
@@ -195,6 +219,7 @@ async function loadContent() {
     education.value = resume.education || []
     projects.value = projectRecords
     exhibits.value = exhibitRecords
+    modelJobs.value = jobs
   } catch (error) { setStatus('danger', error.message || t('admin.loadFailed')) }
 }
 
@@ -232,6 +257,13 @@ const saveProject = () => withSave(() => {
   return projectForm.id ? contentAdminApi.updateProject(projectForm.id, payload) : contentAdminApi.createProject(payload)
 }, projectEditorOpen)
 async function removeProject(record) { if (confirm(t('admin.confirmDelete'))) { await contentAdminApi.deleteProject(record.id); await loadContent() } }
+const formatModelTime = value => value ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '—'
+async function regenerateModel(record) {
+  modelingProjectId.value = record.id
+  try { await contentAdminApi.regenerateProjectModel(record.id); await loadContent(); setStatus('success', t('admin.modelReady')) }
+  catch (error) { setStatus('danger', error.message) }
+  finally { modelingProjectId.value = null }
+}
 function editExhibit(record = null) { replaceForm(exhibitForm, record || emptyExhibit()); exhibitEditorOpen.value = true }
 const saveExhibit = () => withSave(() => exhibitForm.id ? contentAdminApi.updateWorldExhibit(exhibitForm.id, exhibitForm) : contentAdminApi.createWorldExhibit(exhibitForm), exhibitEditorOpen)
 async function removeExhibit(record) { if (confirm(t('admin.confirmDelete'))) { await contentAdminApi.deleteWorldExhibit(record.id); await loadContent() } }
@@ -259,6 +291,7 @@ onMounted(loadContent)
 .field-grid { display: grid; gap: .9rem; }.field-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }.field-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }.compact-grid { padding-top: 1rem; border-top: 1px solid var(--border-strong); }
 label { display: grid; gap: .4rem; color: var(--text-secondary); font-size: .72rem; }input, textarea, select { width: 100%; min-height: 40px; padding: .62rem .7rem; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--bg-input); color: var(--text-main); font: inherit; }textarea { line-height: 1.55; resize: vertical; }
 .record-list { display: grid; }.record-row { min-height: 96px; padding: 1rem 1.25rem; display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; align-items: start; gap: 1rem; border-bottom: 1px solid var(--border-strong); }.record-row:last-child { border-bottom: 0; }.surface-rail { min-height: 54px; display: flex; gap: 2px; }.surface-rail span { width: 3px; min-height: 34px; }.region-mark { width: 8px; height: 52px; background: #94a3b8; }.region-workshop { background: #e56f45; }.region-observatory { background: #4a89ba; }.region-memory-grove { background: #6d973c; }
+.model-contract { color: var(--text-muted); font: .65rem ui-monospace, monospace; }.model-register { display: grid; }.model-row { min-height: 112px; padding: 1rem 1.25rem; display: grid; grid-template-columns: 110px minmax(0, 1fr) 105px auto; align-items: center; gap: 1rem; border-bottom: 1px solid var(--border-strong); }.model-status { display: flex; align-items: center; gap: .45rem; color: var(--text-muted); font: .65rem ui-monospace, monospace; text-transform: uppercase; }.model-status i { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; }.model-status.is-completed i { background: #16803c; box-shadow: 0 0 0 4px color-mix(in srgb, #16803c 16%, transparent); }.model-status.is-running i, .model-status.is-queued i { background: #d97706; }.model-status.is-failed i { background: #c62f3f; }.model-meta { display: grid; justify-items: end; gap: .25rem; color: var(--text-secondary); }.model-meta span { font: 600 .86rem ui-monospace, monospace; }.model-meta small { color: var(--text-muted); font-size: .63rem; }.model-job-log { padding: 1rem 1.25rem; display: grid; gap: .45rem; background: color-mix(in srgb, var(--bg-input) 58%, transparent); }.model-job-log > span { color: var(--text-muted); font: .65rem ui-monospace, monospace; }.model-job-log p { margin: 0; display: grid; grid-template-columns: 50px minmax(0, 1fr) 90px 150px; gap: .75rem; color: var(--text-secondary); font: .68rem ui-monospace, monospace; }.model-job-log p b { color: var(--text-muted); }.model-job-log p i { font-style: normal; text-transform: uppercase; }.model-job-log p i.is-completed { color: #16803c; }.model-job-log p i.is-failed { color: #c62f3f; }.model-job-log time { text-align: right; color: var(--text-muted); }
 .record-copy { min-width: 0; }.record-copy h4 { margin: .35rem 0; color: var(--text-main); font-size: .92rem; }.record-copy p { margin: 0; max-width: 78ch; color: var(--text-secondary); font-size: .77rem; line-height: 1.55; }.record-actions { display: flex; gap: .45rem; }.record-actions button { min-height: 34px; padding: 0 .65rem; border: 1px solid var(--border-strong); background: transparent; color: var(--text-secondary); cursor: pointer; }.record-actions button.danger { color: #c62f3f; }.empty-state { padding: 3rem 1rem; color: var(--text-secondary); text-align: center; font-size: .82rem; }
 .editor-overlay { position: fixed; z-index: 90; inset: 0; padding: 1.25rem; display: grid; place-items: center; background: rgba(10, 18, 30, .72); backdrop-filter: blur(7px); }.editor-sheet { width: min(680px, 100%); max-height: 92dvh; overflow-y: auto; padding: 1.35rem; display: grid; grid-auto-rows: max-content; gap: 1rem; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-card); box-shadow: 0 24px 72px rgba(0, 0, 0, .28); }.editor-sheet.wide { width: min(980px, 100%); }.editor-heading { padding-bottom: .9rem; border-bottom: 1px solid var(--border-strong); }.editor-heading button { width: 36px; height: 36px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-main); font-size: 1.3rem; cursor: pointer; }.save-editor { justify-self: end; min-width: 112px; }.publish-fields { padding-top: 1rem; display: grid; grid-template-columns: 160px 120px minmax(0, 1fr); gap: 1rem; align-items: end; border-top: 1px solid var(--border-strong); }.featured-row label { display: inline-flex; grid-auto-flow: column; justify-content: start; align-items: center; gap: .5rem; }.featured-row input { width: 18px; min-height: 18px; }
 
@@ -302,9 +335,11 @@ label { display: grid; gap: .4rem; color: var(--text-secondary); font-size: .72r
 :global(.save-editor) { justify-self: end; min-width: 112px; }
 :global(.publish-fields) { padding-top: 1rem; display: grid; grid-template-columns: 160px 120px minmax(0, 1fr); gap: 1rem; align-items: end; border-top: 1px solid var(--border-strong); }
 @media (max-width: 860px) { .content-header { align-items: start; flex-direction: column; }.dataset-counts { width: 100%; }.field-grid.three { grid-template-columns: 1fr 1fr; }.publish-fields { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 860px) { .model-row { grid-template-columns: 90px minmax(0, 1fr) auto; }.model-meta { display: none; }.model-job-log p { grid-template-columns: 44px minmax(0, 1fr) 80px; }.model-job-log time { display: none; } }
 @media (max-width: 860px) { .content-admin :deep(.publish-fields) { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 860px) { :global(.publish-fields) { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 620px) { .content-header { padding: 1rem; }.dataset-counts { grid-template-columns: 1fr 1fr; }.dataset-counts span:nth-child(2) { border-right: 0; }.dataset-counts span:nth-child(-n+2) { border-bottom: 1px solid var(--border-strong); }.content-tabs button { min-width: 100px; }.field-grid.two, .field-grid.three, .publish-fields { grid-template-columns: 1fr; }.record-row { grid-template-columns: 10px minmax(0, 1fr); }.record-actions { grid-column: 2; }.editor-overlay { padding: 0; }.editor-sheet, .editor-sheet.wide { width: 100%; min-height: 100dvh; max-height: 100dvh; border-radius: 0; }.save-editor { width: 100%; }.surface-rail { min-height: 44px; }.content-admin :deep(.record-row) { grid-template-columns: 10px minmax(0, 1fr); }.content-admin :deep(.record-actions) { grid-column: 2; }.content-admin :deep(.editor-overlay) { padding: 0; }.content-admin :deep(.editor-sheet), .content-admin :deep(.editor-sheet.wide) { width: 100%; min-height: 100dvh; max-height: 100dvh; border-radius: 0; }.content-admin :deep(.save-editor) { width: 100%; }.content-admin :deep(.surface-rail) { min-height: 44px; }.content-admin :deep(.publish-fields) { grid-template-columns: 1fr; } }
+@media (max-width: 620px) { .model-row { grid-template-columns: 1fr auto; }.model-status { grid-column: 1 / -1; }.model-row .action-btn { grid-column: 2; grid-row: 2; }.model-job-log p { grid-template-columns: 42px minmax(0, 1fr); }.model-job-log p i { text-align: right; } }
 @media (max-width: 620px) { :global(.editor-overlay) { padding: 0; }:global(.editor-overlay .editor-sheet) { width: 100%; min-height: 100dvh; max-height: 100dvh; border-radius: 0; }:global(.editor-overlay .save-editor) { width: 100%; }:global(.editor-overlay .publish-fields) { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>

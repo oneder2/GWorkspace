@@ -197,6 +197,7 @@ Vue 构建产物输出到 `dist/`，Gellaria 构建产物输出到 `apps/gellari
 - [服务器配置](./docs/SERVER_CONFIG.md) - 环境变量、服务器配置
 - [Gellaria 接入说明](./docs/gellaria/GWORKSPACE_INTEGRATION.md) - 路由归属、发布顺序与验收
 - [Gellaria 功能映射](./docs/gellaria/GWORKSPACE_FEATURE_MAPPING.md) - GWorkspace 内容到三维世界的映射
+- [Gellaria 语义建模](./docs/gellaria/PROJECT_MODELING.md) - 项目 Agent 建模流程、模型规范与展厅视觉语义
 - [更新日志](./CHANGELOG.md) - 版本更新记录
 
 ## 许可证

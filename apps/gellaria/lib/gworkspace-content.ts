@@ -3,6 +3,7 @@ import { landmarks as fallbackLandmarks, landmarkExhibitSchema, type Landmark } 
 import { fetchGWorkspace } from "./gworkspace-api";
 import { getWorkspacePulse, type WorkspacePulse } from "./gworkspace-pulse";
 import { getGWorkspaceResume, gworkspaceMediaUrl, primaryProjectUrl, type GWorkspaceResume } from "./gworkspace-resume";
+import { deriveProjectModelSpec } from "./project-model";
 
 const profileSchema = z.object({
   name: z.string(),
@@ -24,7 +25,7 @@ const publicWorldSchema = z.object({
   profile: profileSchema,
   regions: z.array(z.object({
     id: z.enum(["workshop", "observatory", "memory-grove"]),
-    exhibits: z.array(landmarkExhibitSchema).max(6),
+    exhibits: z.array(landmarkExhibitSchema).max(12),
   })),
 });
 
@@ -55,9 +56,11 @@ export const fallbackProfile: SiteProfile = {
 
 export function resumeProjectExhibits(resume: Pick<GWorkspaceResume, "projects"> | null) {
   if (!resume) return null;
-  return resume.projects.slice(0, 8).map((project) => ({
+  return resume.projects.slice(0, 12).map((project) => ({
     id: project.id,
+    sourceKey: project.slug,
     sourceType: "project" as const,
+    presentation: "project-model" as const,
     label: project.featured ? "精选项目" : project.role || "项目档案",
     title: project.name,
     summary: project.summary,
@@ -65,6 +68,12 @@ export function resumeProjectExhibits(resume: Pick<GWorkspaceResume, "projects">
     image: project.cover ? gworkspaceMediaUrl(project.cover.url) : null,
     tags: project.technologies,
     publishedAt: project.start,
+    modelSpec: deriveProjectModelSpec({
+      slug: project.slug,
+      title: project.name,
+      summary: project.summary,
+      technologies: project.technologies,
+    }),
   }));
 }
 
@@ -81,9 +90,17 @@ export function mergePublicWorld(payload: unknown, resume: GWorkspaceResume | nu
   );
   return {
     landmarks: fallbackLandmarks.map((landmark) => {
+      const publicExhibits = exhibitsByRegion.get(landmark.id) ?? [];
       const exhibits = landmark.id === "workshop"
-        ? (resumeProjectExhibits(resume) ?? exhibitsByRegion.get(landmark.id) ?? [])
-        : (exhibitsByRegion.get(landmark.id) ?? []);
+        ? (resumeProjectExhibits(resume)?.map((project) => {
+            const worldProject = publicExhibits.find((item) => item.sourceKey === project.sourceKey || item.id === `project:${project.sourceKey}`);
+            return worldProject?.modelSpec ? {
+              ...project,
+              modelSpec: worldProject.modelSpec,
+              modelRevision: worldProject.modelRevision,
+            } : project;
+          }) ?? publicExhibits)
+        : publicExhibits;
       return { ...landmark, exhibits };
     }),
     profile: resume ? {
@@ -103,7 +120,7 @@ export function mergePublicWorld(payload: unknown, resume: GWorkspaceResume | nu
 function prependExhibit(landmark: Landmark, exhibit: z.infer<typeof landmarkExhibitSchema>): Landmark {
   return {
     ...landmark,
-    exhibits: [exhibit, ...landmark.exhibits.filter((item) => item.id !== exhibit.id)].slice(0, 8),
+    exhibits: [exhibit, ...landmark.exhibits.filter((item) => item.id !== exhibit.id)].slice(0, 12),
   };
 }
 
@@ -115,6 +132,7 @@ export function applyWorkspacePulse(content: WorldContent, pulse: WorkspacePulse
       ? prependExhibit(landmark, {
           id: `daily-capsule:${capsule.capsule_date}`,
           sourceType: "external",
+          presentation: "daily-signal",
           label: "今日赠语",
           title: capsule.greeting || capsule.source_text,
           summary: capsule.thesis || capsule.takeaway || capsule.source_text,
@@ -132,6 +150,7 @@ export function applyWorkspacePulse(content: WorldContent, pulse: WorkspacePulse
       ? prependExhibit(landmark, {
           id: `now-playing:${track.title}:${track.artist}`,
           sourceType: "external",
+          presentation: "audio-echo",
           label: track.isPlaying ? "正在听" : "最近听见",
           title: track.title,
           summary: trackContext || "一段从 GWorkspace 传来的声音。",

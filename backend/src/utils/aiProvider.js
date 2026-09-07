@@ -170,6 +170,10 @@ async function runWithFallback({ task, payload, schema, fallbackFactory }) {
   }
 }
 
+export function generateStructuredTask({ task, payload, schema, fallbackFactory }) {
+  return runWithFallback({ task, payload, schema, fallbackFactory })
+}
+
 function normalizeDailyCapsulePayload(data = {}, seed = {}) {
   const fallback = createLocalDailyCapsule(seed)
   const normalizedSeed = normalizeDailyCapsuleSeed({

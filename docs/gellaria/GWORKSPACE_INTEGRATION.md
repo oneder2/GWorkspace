@@ -30,13 +30,14 @@ In the current public deployment, `GWORKSPACE_API_URL` points to
 `https://www.gellaronline.cc` for public image fallback. The two origins are
 intentionally separate.
 
-1. Deploy the GWorkspace backend and run migrations through `010_writing_studio.sql`.
+1. Deploy the GWorkspace backend and run all registered migrations.
 2. Verify `GET /api/public/world?locale=zh` and `GET /api/public/projects`.
 3. Verify `GET /api/public/v1/resume?locale=zh&surface=gellaria`; this versioned response is the authority for archive identity, skills, timeline, and enhanced project facts.
 4. Build and publish the Vue app through Vercel.
 5. Build Gellaria with `NEXT_PUBLIC_SITE_URL=https://gellaria.64-83-15-226.nip.io` and `NEXT_PUBLIC_GWORKSPACE_URL=https://www.gellaronline.cc`.
-6. Run Gellaria with `GWORKSPACE_API_URL=http://127.0.0.1:3001`.
-7. Install `deploy/gellaria/nginx-gellaria.conf`, validate with `nginx -t`, then reload.
+6. Run `npm --prefix backend run gellaria:backfill-models` after migration 020 so existing projects receive persisted model recipes. Future published projects on the `gellaria` surface trigger this workflow automatically; see `PROJECT_MODELING.md`.
+7. Run Gellaria with `GWORKSPACE_API_URL=http://127.0.0.1:3001`.
+8. Install `deploy/gellaria/nginx-gellaria.conf`, validate with `nginx -t`, then reload.
 
 During local development, open Gellaria at `http://127.0.0.1:3000/explore`.
 The Vue app can point its Explore navigation item there with
