@@ -160,9 +160,12 @@ function ForestInstances() {
   const deciduous = useMemo(() => makePlacements(15, 610, 8.4, 17, 0.3), []);
   const coniferTrunks = useRef<THREE.InstancedMesh>(null);
   const coniferLower = useRef<THREE.InstancedMesh>(null);
+  const coniferMiddle = useRef<THREE.InstancedMesh>(null);
   const coniferUpper = useRef<THREE.InstancedMesh>(null);
   const leafTrunks = useRef<THREE.InstancedMesh>(null);
-  const leafCrowns = useRef<THREE.InstancedMesh>(null);
+  const leafCrownsA = useRef<THREE.InstancedMesh>(null);
+  const leafCrownsB = useRef<THREE.InstancedMesh>(null);
+  const leafCrownsC = useRef<THREE.InstancedMesh>(null);
 
   useInstances(coniferTrunks, conifers, (item, dummy) => {
     dummy.position.set(item.x, terrainHeightAt(item.x, item.z) + item.scale * 0.68, item.z);
@@ -170,24 +173,43 @@ function ForestInstances() {
     dummy.scale.set(item.scale * 0.16, item.scale * 1.35, item.scale * 0.16);
   });
   useInstances(coniferLower, conifers, (item, dummy) => {
-    dummy.position.set(item.x, terrainHeightAt(item.x, item.z) + item.scale * 1.48, item.z);
+    dummy.position.set(item.x, terrainHeightAt(item.x, item.z) + item.scale * 1.28, item.z);
     dummy.rotation.set(0, item.rotation, 0);
-    dummy.scale.set(item.scale * 0.86, item.scale * 1.25, item.scale * 0.86);
+    dummy.scale.set(item.scale * 0.94, item.scale * 1.12, item.scale * 0.94);
+  });
+  useInstances(coniferMiddle, conifers, (item, dummy) => {
+    dummy.position.set(item.x, terrainHeightAt(item.x, item.z) + item.scale * 1.82, item.z);
+    dummy.rotation.set(0, -item.rotation * 0.35, 0);
+    dummy.scale.set(item.scale * 0.76, item.scale * 1.04, item.scale * 0.76);
   });
   useInstances(coniferUpper, conifers, (item, dummy) => {
-    dummy.position.set(item.x, terrainHeightAt(item.x, item.z) + item.scale * 2.16, item.z);
+    dummy.position.set(item.x, terrainHeightAt(item.x, item.z) + item.scale * 2.32, item.z);
     dummy.rotation.set(0, -item.rotation * 0.6, 0);
-    dummy.scale.set(item.scale * 0.62, item.scale, item.scale * 0.62);
+    dummy.scale.set(item.scale * 0.57, item.scale * 0.92, item.scale * 0.57);
   });
   useInstances(leafTrunks, deciduous, (item, dummy) => {
     dummy.position.set(item.x, terrainHeightAt(item.x, item.z) + item.scale * 0.72, item.z);
     dummy.rotation.set(0.04, item.rotation, -0.04);
     dummy.scale.set(item.scale * 0.19, item.scale * 1.45, item.scale * 0.19);
   });
-  useInstances(leafCrowns, deciduous, (item, dummy) => {
-    dummy.position.set(item.x, terrainHeightAt(item.x, item.z) + item.scale * 1.78, item.z);
+  useInstances(leafCrownsA, deciduous, (item, dummy) => {
+    dummy.position.set(item.x, terrainHeightAt(item.x, item.z) + item.scale * 1.86, item.z);
     dummy.rotation.set(item.rotation * 0.08, item.rotation, -item.rotation * 0.04);
-    dummy.scale.set(item.scale * 0.95, item.scale * 0.88, item.scale * 0.95);
+    dummy.scale.set(item.scale * 0.82, item.scale * 0.78, item.scale * 0.84);
+  });
+  useInstances(leafCrownsB, deciduous, (item, dummy) => {
+    const offsetX = Math.cos(item.rotation) * item.scale * .55;
+    const offsetZ = Math.sin(item.rotation) * item.scale * .55;
+    dummy.position.set(item.x + offsetX, terrainHeightAt(item.x, item.z) + item.scale * 1.72, item.z + offsetZ);
+    dummy.rotation.set(-.08, item.rotation * .8, .12);
+    dummy.scale.set(item.scale * .64, item.scale * .6, item.scale * .68);
+  });
+  useInstances(leafCrownsC, deciduous, (item, dummy) => {
+    const offsetX = Math.cos(item.rotation + Math.PI) * item.scale * .48;
+    const offsetZ = Math.sin(item.rotation + Math.PI) * item.scale * .48;
+    dummy.position.set(item.x + offsetX, terrainHeightAt(item.x, item.z) + item.scale * 1.95, item.z + offsetZ);
+    dummy.rotation.set(.1, -item.rotation * .5, -.08);
+    dummy.scale.set(item.scale * .58, item.scale * .64, item.scale * .6);
   });
 
   return (
@@ -196,26 +218,40 @@ function ForestInstances() {
         <cylinderGeometry args={[0.72, 1, 1, 6]} /><meshStandardMaterial color="#4a3b31" roughness={1} />
       </instancedMesh>
       <instancedMesh ref={coniferLower} args={[undefined, undefined, conifers.length]} castShadow>
-        <coneGeometry args={[1, 1, 7]} /><meshStandardMaterial color="#29483d" roughness={0.96} />
+        <coneGeometry args={[1, 1, 9]} /><meshStandardMaterial color="#28463b" roughness={0.98} />
+      </instancedMesh>
+      <instancedMesh ref={coniferMiddle} args={[undefined, undefined, conifers.length]} castShadow>
+        <coneGeometry args={[1, 1, 9]} /><meshStandardMaterial color="#355342" roughness={0.96} />
       </instancedMesh>
       <instancedMesh ref={coniferUpper} args={[undefined, undefined, conifers.length]} castShadow>
-        <coneGeometry args={[1, 1, 7]} /><meshStandardMaterial color="#3d5b45" roughness={0.94} />
+        <coneGeometry args={[1, 1, 9]} /><meshStandardMaterial color="#49664b" roughness={0.94} />
       </instancedMesh>
       <instancedMesh ref={leafTrunks} args={[undefined, undefined, deciduous.length]} castShadow>
         <cylinderGeometry args={[0.75, 1, 1, 6]} /><meshStandardMaterial color="#554437" roughness={1} />
       </instancedMesh>
-      <instancedMesh ref={leafCrowns} args={[undefined, undefined, deciduous.length]} castShadow>
-        <dodecahedronGeometry args={[1, 0]} /><meshStandardMaterial color="#5b714d" roughness={0.98} />
+      <instancedMesh ref={leafCrownsA} args={[undefined, undefined, deciduous.length]} castShadow>
+        <icosahedronGeometry args={[1, 1]} /><meshStandardMaterial color="#58704d" roughness={0.98} />
+      </instancedMesh>
+      <instancedMesh ref={leafCrownsB} args={[undefined, undefined, deciduous.length]} castShadow>
+        <dodecahedronGeometry args={[1, 0]} /><meshStandardMaterial color="#6b8055" roughness={0.98} />
+      </instancedMesh>
+      <instancedMesh ref={leafCrownsC} args={[undefined, undefined, deciduous.length]} castShadow>
+        <icosahedronGeometry args={[1, 0]} /><meshStandardMaterial color="#496645" roughness={1} />
       </instancedMesh>
     </group>
   );
 }
 
 function GroundDetails() {
-  const grasses = useMemo(() => makePlacements(64, 1200, 5.8, 18.1, -0.55), []);
+  const grasses = useMemo(() => makePlacements(92, 1200, 5.8, 18.1, -0.55), []);
   const rocks = useMemo(() => makePlacements(18, 2200, 5.2, 18.2, -0.35), []);
+  const flowers = useMemo(() => makePlacements(20, 3900, 6.4, 17.2, -0.45), []);
+  const ferns = useMemo(() => makePlacements(16, 4300, 7.2, 17.5, -0.25), []);
+  const shrubs = useMemo(() => makePlacements(14, 5100, 8, 17.1, .05), []);
   const grassA = useRef<THREE.InstancedMesh>(null);
   const grassB = useRef<THREE.InstancedMesh>(null);
+  const grassC = useRef<THREE.InstancedMesh>(null);
+  const grassD = useRef<THREE.InstancedMesh>(null);
   const rockRef = useRef<THREE.InstancedMesh>(null);
   useInstances(grassA, grasses, (item, dummy) => {
     dummy.position.set(item.x, terrainHeightAt(item.x, item.z) + 0.18 * item.scale, item.z);
@@ -226,6 +262,16 @@ function GroundDetails() {
     dummy.position.set(item.x + 0.11, terrainHeightAt(item.x, item.z) + 0.15 * item.scale, item.z - 0.08);
     dummy.rotation.set(-0.24, item.rotation + 1.4, -0.22);
     dummy.scale.set(0.06 * item.scale, 0.32 * item.scale, 0.06 * item.scale);
+  });
+  useInstances(grassC, grasses, (item, dummy) => {
+    dummy.position.set(item.x - .1, terrainHeightAt(item.x, item.z) + .17 * item.scale, item.z - .06);
+    dummy.rotation.set(.28, item.rotation - 1.1, .25);
+    dummy.scale.set(.055 * item.scale, .35 * item.scale, .055 * item.scale);
+  });
+  useInstances(grassD, grasses, (item, dummy) => {
+    dummy.position.set(item.x + .03, terrainHeightAt(item.x, item.z) + .13 * item.scale, item.z + .12);
+    dummy.rotation.set(-.2, item.rotation + 2.4, -.3);
+    dummy.scale.set(.045 * item.scale, .28 * item.scale, .045 * item.scale);
   });
   useInstances(rockRef, rocks, (item, dummy) => {
     dummy.position.set(item.x, terrainHeightAt(item.x, item.z) + 0.11 * item.scale, item.z);
@@ -242,6 +288,12 @@ function GroundDetails() {
       <instancedMesh ref={grassB} args={[undefined, undefined, grasses.length]}>
         <coneGeometry args={[1, 1, 4]} /><meshStandardMaterial color="#596f4d" roughness={1} />
       </instancedMesh>
+      <instancedMesh ref={grassC} args={[undefined, undefined, grasses.length]}>
+        <coneGeometry args={[1, 1, 5]} /><meshStandardMaterial color="#91a36b" roughness={1} />
+      </instancedMesh>
+      <instancedMesh ref={grassD} args={[undefined, undefined, grasses.length]}>
+        <coneGeometry args={[1, 1, 5]} /><meshStandardMaterial color="#3f6148" roughness={1} />
+      </instancedMesh>
       <instancedMesh ref={rockRef} args={[undefined, undefined, rocks.length]} castShadow receiveShadow>
         <dodecahedronGeometry args={[1, 0]} /><meshStandardMaterial color="#53615a" roughness={1} />
       </instancedMesh>
@@ -251,6 +303,9 @@ function GroundDetails() {
           <mesh position-y={0.26} scale-y={0.5}><sphereGeometry args={[0.14, 8, 5]} /><meshStandardMaterial color={index % 3 === 0 ? "#c97a58" : "#a69d72"} roughness={0.95} /></mesh>
         </group>
       ))}
+      {flowers.map((item,index)=><group key={`flower-${index}`} position={[item.x,terrainHeightAt(item.x,item.z),item.z]} rotation-y={item.rotation} scale={item.scale}><mesh position-y={.19}><cylinderGeometry args={[.018,.024,.38,5]} /><meshStandardMaterial color="#668057" /></mesh><group position-y={.4}>{Array.from({length:5},(_,petal)=>{const angle=petal*Math.PI*2/5; return <mesh key={petal} position={[Math.cos(angle)*.07,Math.sin(angle)*.07,0]} scale={[1,.55,.5]}><sphereGeometry args={[.055,7,5]} /><meshStandardMaterial color={index%3===0 ? "#d3ad75" : index%3===1 ? "#a9c2b5" : "#c49a91"} emissive="#8dad7e" emissiveIntensity={.12} /></mesh>;})}<mesh position-z={.025}><sphereGeometry args={[.034,7,5]} /><meshStandardMaterial color="#e0c16d" /></mesh></group></group>)}
+      {ferns.map((item,index)=><group key={`fern-${index}`} position={[item.x,terrainHeightAt(item.x,item.z)+.05,item.z]} rotation-y={item.rotation} scale={item.scale}>{[-.42,-.2,0,.2,.42].map((angle,leaf)=><mesh key={angle} position-y={.18} rotation-z={angle} scale={[.18,.62,.1]}><sphereGeometry args={[.34,7,5]} /><meshStandardMaterial color={leaf%2 ? "#4e714e" : "#64805a"} roughness={1} /></mesh>)}</group>)}
+      {shrubs.map((item,index)=><group key={`shrub-${index}`} position={[item.x,terrainHeightAt(item.x,item.z)+.24*item.scale,item.z]} rotation-y={item.rotation} scale={item.scale}>{[[-.24,0,.02],[.22,.04,-.06],[0,.22,.06]].map(([x,y,z],part)=><mesh key={part} position={[x,y,z]} scale={[.48,.36,.44]}><icosahedronGeometry args={[.52,0]} /><meshStandardMaterial color={part===1 ? "#587653" : "#476548"} roughness={1} /></mesh>)}</group>)}
     </group>
   );
 }

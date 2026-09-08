@@ -14,6 +14,7 @@ import { useWorldStore } from "./store";
 import { SpiritTraveler, type SpiritMotion } from "./SpiritTraveler";
 import { CentralCamp } from "./WorldLandmarks";
 import { IslandTerrain, terrainHeightAt, WorldEcology } from "./WorldEcology";
+import { WorldSky } from "./WorldSky";
 import type { MoveIntent } from "./WorldExperience";
 
 type CanvasProps = {
@@ -70,7 +71,7 @@ function WorldScene(props: CanvasProps) {
         shadow-camera-bottom={-24}
       />
       <hemisphereLight args={["#688c9d", "#182a22", 1.3]} />
-      <Starscape />
+      <WorldSky />
       <Ocean />
       <Physics gravity={[0, -20, 0]}>
         <Island />
@@ -96,63 +97,6 @@ function WorldScene(props: CanvasProps) {
       <Sparkles count={48} scale={[34, 7, 34]} size={1.5} speed={0.16} opacity={0.28} color="#d9dfbc" position={[0, 4, 0]} />
     </>
   );
-}
-
-function Starscape() {
-  const field = useRef<THREE.Group>(null);
-  const dimStars = useRef<THREE.PointsMaterial>(null);
-  const brightStars = useRef<THREE.PointsMaterial>(null);
-  const points = useMemo(() => {
-    const positions = new Float32Array(1400 * 3);
-    for (let index = 0; index < 1400; index += 1) {
-      const radius = 70 + seededValue(index * 4) * 14;
-      const angle = seededValue(index * 4 + 1) * Math.PI * 2;
-      const vertical = seededValue(index * 4 + 2) * 2 - 1;
-      const horizontal = Math.sqrt(1 - vertical * vertical);
-      positions[index * 3] = Math.cos(angle) * horizontal * radius;
-      positions[index * 3 + 1] = vertical * radius;
-      positions[index * 3 + 2] = Math.sin(angle) * horizontal * radius;
-    }
-    return positions;
-  }, []);
-  const brightPoints = useMemo(() => {
-    const positions = new Float32Array(220 * 3);
-    for (let index = 0; index < 220; index += 1) {
-      const radius = 66 + seededValue(index * 5 + 900) * 12;
-      const angle = seededValue(index * 5 + 901) * Math.PI * 2;
-      const vertical = seededValue(index * 5 + 902) * 2 - 1;
-      const horizontal = Math.sqrt(1 - vertical * vertical);
-      positions[index * 3] = Math.cos(angle) * horizontal * radius;
-      positions[index * 3 + 1] = vertical * radius;
-      positions[index * 3 + 2] = Math.sin(angle) * horizontal * radius;
-    }
-    return positions;
-  }, []);
-
-  useFrame(({ clock }, delta) => {
-    if (field.current) field.current.rotation.y += delta * 0.0025;
-    if (dimStars.current) dimStars.current.opacity = 0.72 + Math.sin(clock.elapsedTime * 0.18) * 0.05;
-    if (brightStars.current) brightStars.current.opacity = 0.88 + Math.sin(clock.elapsedTime * 0.31 + 1.4) * 0.07;
-  });
-
-  return (
-    <group ref={field} position-y={3}>
-      <mesh><sphereGeometry args={[92, 40, 24]} /><meshBasicMaterial color="#050b12" side={THREE.BackSide} fog={false} /></mesh>
-      <points>
-        <bufferGeometry><bufferAttribute attach="attributes-position" args={[points, 3]} /></bufferGeometry>
-        <pointsMaterial ref={dimStars} color="#c7d9dc" size={1.55} transparent opacity={0.72} sizeAttenuation={false} fog={false} depthWrite={false} />
-      </points>
-      <points>
-        <bufferGeometry><bufferAttribute attach="attributes-position" args={[brightPoints, 3]} /></bufferGeometry>
-        <pointsMaterial ref={brightStars} color="#f2dfb2" size={2.5} transparent opacity={0.88} sizeAttenuation={false} fog={false} depthWrite={false} />
-      </points>
-    </group>
-  );
-}
-
-function seededValue(seed: number) {
-  const value = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
-  return value - Math.floor(value);
 }
 
 function Ocean() {
@@ -412,6 +356,7 @@ function WorkshopExterior({ responseColor, influence }: { responseColor: string;
   return (
     <group>
       <mesh receiveShadow position-y={0.2}><cylinderGeometry args={[4.65, 4.9, 0.4, 8]} /><meshStandardMaterial color="#45423b" roughness={0.96} /></mesh>
+      <mesh receiveShadow position-y={0.46}><cylinderGeometry args={[4.22, 4.5, 0.18, 8]} /><meshStandardMaterial color="#62574a" metalness={0.12} roughness={0.84} /></mesh>
       <mesh castShadow receiveShadow position={[0, 2.1, -0.25]}><boxGeometry args={[7.5, 3.85, 5.5]} /><meshStandardMaterial color="#62493d" roughness={0.88} /></mesh>
       {[-2.45, 0, 2.45].map((x, index) => (
         <mesh key={x} castShadow position={[x, 4.32 + (index % 2) * 0.28, -0.2]} rotation-z={index === 1 ? -0.04 : x < 0 ? 0.27 : -0.27}>
@@ -427,9 +372,13 @@ function WorkshopExterior({ responseColor, influence }: { responseColor: string;
         <WorkshopFacadeGear color={responseColor} speed={0.12 + influence.strength * 0.48} />
       </group>
       {[-2.35, 2.35].map((x) => [1.35, 2.65].map((y) => <group key={`${x}:${y}`} position={[x, y, 2.57]}><mesh><boxGeometry args={[1.25, .78, .12]} /><meshStandardMaterial color="#263c3e" emissive={responseColor} emissiveIntensity={.2 + influence.strength * .32} metalness={.22} roughness={.38} /></mesh><mesh><boxGeometry args={[.08, .88, .16]} /><meshStandardMaterial color="#a2785b" metalness={.42} /></mesh><mesh><boxGeometry args={[1.35, .08, .16]} /><meshStandardMaterial color="#a2785b" metalness={.42} /></mesh></group>))}
+      {[-1.18, 1.18].map((x) => <group key={x} position={[x, 3.73, 2.62]}><mesh rotation-z={Math.PI / 4}><boxGeometry args={[.82,.82,.16]} /><meshStandardMaterial color="#3b312c" metalness={.3} roughness={.5} /></mesh><mesh position-z={.1}><cylinderGeometry args={[.11,.11,.12,8]} /><meshStandardMaterial color="#d19a69" metalness={.76} roughness={.22} /></mesh></group>)}
       {[-2.75, -1.38, 0, 1.38, 2.75].map((x) => <mesh key={x} position={[x, .8, 2.64]}><cylinderGeometry args={[.055,.055,.12,8]} /><meshStandardMaterial color="#d29a70" metalness={.72} roughness={.25} /></mesh>)}
       <group position={[-3.45, 2.4, -1.4]} rotation-z={Math.PI / 2}><mesh><cylinderGeometry args={[.27,.27,4.8,10]} /><meshStandardMaterial color="#3d4a47" metalness={.48} roughness={.42} /></mesh>{[-1.75,0,1.75].map((y)=><mesh key={y} position-y={y}><torusGeometry args={[.3,.055,6,18]} /><meshStandardMaterial color="#ad7658" metalness={.62} /></mesh>)}</group>
       {[-3.55, 3.55].map((x) => <mesh key={x} position={[x, 2.05, 0]}><boxGeometry args={[0.26, 4.1, 5.85]} /><meshStandardMaterial color="#94745e" metalness={0.28} roughness={0.56} /></mesh>)}
+      {[[-3.78,1.12], [3.78,1.12], [-3.78,3.18], [3.78,3.18]].map(([x,y], index) => <group key={index} position={[x,y,.25]}><mesh><boxGeometry args={[.14,.18,4.9]} /><meshStandardMaterial color="#b18261" metalness={.52} roughness={.38} /></mesh>{[-1.85,0,1.85].map((z)=><mesh key={z} position-z={z} rotation-z={Math.PI/2}><cylinderGeometry args={[.06,.06,.2,8]} /><meshStandardMaterial color="#d2a06f" metalness={.78} /></mesh>)}</group>)}
+      <group position={[0,4.54,-.25]}><mesh><boxGeometry args={[2.05,.13,4.25]} /><meshStandardMaterial color="#26383a" emissive={responseColor} emissiveIntensity={.08 + influence.strength*.18} metalness={.38} roughness={.32} /></mesh>{[-.72,0,.72].map((x)=><mesh key={x} position-x={x}><boxGeometry args={[.07,.18,4.4]} /><meshStandardMaterial color="#a77756" metalness={.58} /></mesh>)}</group>
+      <group position={[2.65,5.2,-1.55]}><mesh position-y={.55}><cylinderGeometry args={[.13,.18,1.1,8]} /><meshStandardMaterial color="#704f3d" metalness={.35} /></mesh><mesh position={[.38,1.02,0]} rotation-z={Math.PI/2}><cylinderGeometry args={[.13,.13,.76,8]} /><meshStandardMaterial color="#a46d4e" metalness={.5} /></mesh><mesh position={[.76,.78,0]}><torusGeometry args={[.24,.07,7,18,Math.PI]} /><meshStandardMaterial color="#c0825b" metalness={.58} /></mesh></group>
       <mesh position={[0, 3.65, -3.05]}><boxGeometry args={[5.8, 0.18, 0.26]} /><meshStandardMaterial color={responseColor} emissive={responseColor} emissiveIntensity={0.24 + influence.strength * 0.7} /></mesh>
     </group>
   );
@@ -450,14 +399,18 @@ function ObservatoryExterior({ responseColor, influence }: { responseColor: stri
   return (
     <group>
       <mesh receiveShadow position-y={0.2}><cylinderGeometry args={[4.35, 4.7, 0.42, 16]} /><meshStandardMaterial color="#374a52" roughness={0.94} /></mesh>
+      <mesh receiveShadow position-y={0.5}><cylinderGeometry args={[3.95,4.28,.22,16]} /><meshStandardMaterial color="#536973" metalness={.2} roughness={.62} /></mesh>
       <mesh castShadow receiveShadow position-y={1.75}><cylinderGeometry args={[3.55, 3.8, 3.2, 16]} /><meshStandardMaterial color="#405b67" metalness={0.18} roughness={0.66} /></mesh>
+      {[0, Math.PI / 4, Math.PI / 2, Math.PI * .75].map((rotation) => <mesh key={`band-${rotation}`} position-y={1.82} rotation-y={rotation}><torusGeometry args={[3.72,.045,6,72]} /><meshStandardMaterial color="#7f9ba5" metalness={.58} roughness={.32} /></mesh>)}
       <mesh castShadow position-y={3.34}><sphereGeometry args={[3.55, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2]} /><meshStandardMaterial color="#29444f" metalness={0.38} roughness={0.45} side={THREE.DoubleSide} /></mesh>
       {[0, Math.PI / 3, Math.PI * 2 / 3].map((rotation) => <mesh key={rotation} position-y={3.34} rotation-y={rotation}><torusGeometry args={[3.56, 0.045, 5, 64, Math.PI]} /><meshStandardMaterial color="#88a2ab" metalness={0.52} /></mesh>)}
       {Array.from({ length: 8 }, (_, index) => { const angle = index * Math.PI / 4; return <group key={index} position={[Math.sin(angle) * 3.72, 1.45, Math.cos(angle) * 3.72]} rotation-y={angle}><mesh rotation-x={-.14}><boxGeometry args={[.38, 3.05, .7]} /><meshStandardMaterial color="#6f8790" metalness={.34} roughness={.48} /></mesh><mesh position={[0,-1.25,.42]}><boxGeometry args={[.76,.28,1.15]} /><meshStandardMaterial color="#334b55" roughness={.75} /></mesh></group>; })}
       <mesh position={[0, 4.7, 2.85]} rotation-x={-0.12}><boxGeometry args={[0.72, 2.8, 0.16]} /><meshStandardMaterial color="#122a34" emissive={responseColor} emissiveIntensity={0.34 + influence.strength * 0.85} /></mesh>
+      {Array.from({ length: 12 }, (_, index) => { const angle=index*Math.PI/6; return <group key={`window-${index}`} position={[Math.sin(angle)*3.61,2.05,Math.cos(angle)*3.61]} rotation-y={angle}><mesh><boxGeometry args={[.52,.72,.1]} /><meshStandardMaterial color="#132b35" emissive={responseColor} emissiveIntensity={.12 + influence.strength*.28} /></mesh><mesh position-z={.06}><boxGeometry args={[.06,.78,.05]} /><meshStandardMaterial color="#9eb5bb" metalness={.55} /></mesh></group>; })}
       <ExteriorOrrery color={responseColor} strength={influence.strength} />
       <group position={[0, 5.7, .2]} rotation={[.22,0,-.28]}><mesh><cylinderGeometry args={[.28,.42,2.5,12]} /><meshStandardMaterial color="#253b45" metalness={.5} roughness={.3} /></mesh><mesh position-y={1.25}><cylinderGeometry args={[.55,.34,.3,12]} /><meshStandardMaterial color="#a1bbc2" metalness={.56} /></mesh><mesh position={[0,-1.2,0]}><sphereGeometry args={[.38,12,8]} /><meshStandardMaterial color="#657f88" metalness={.42} /></mesh></group>
       {[-2.5, 2.5].map((x) => <mesh key={x} position={[x, 1.55, 3.22]}><boxGeometry args={[0.68, 1.2, 0.14]} /><meshStandardMaterial color="#8ebbc7" emissive="#689bab" emissiveIntensity={0.45} /></mesh>)}
+      {[[-2.35,3.32],[2.35,3.32]].map(([x,z], index)=><group key={index} position={[x,.38,z]}><mesh position-y={.26}><boxGeometry args={[1.2,.18,.72]} /><meshStandardMaterial color="#607680" roughness={.74} /></mesh><mesh position-y={.1}><boxGeometry args={[1.55,.15,1.05]} /><meshStandardMaterial color="#425861" roughness={.82} /></mesh></group>)}
     </group>
   );
 }
@@ -479,17 +432,21 @@ function GroveExterior({ responseColor, influence }: { responseColor: string; in
     <group>
       <mesh receiveShadow position-y={0.2}><cylinderGeometry args={[4.55, 4.9, 0.42, 12]} /><meshStandardMaterial color="#354b3e" roughness={1} /></mesh>
       <mesh receiveShadow position-y={0.44} rotation-x={-Math.PI / 2}><ringGeometry args={[2.1, 4.25, 18]} /><meshStandardMaterial color="#435746" roughness={0.94} /></mesh>
+      {[0,Math.PI/3,Math.PI*2/3].map((rotation)=><mesh key={rotation} position-y={.48} rotation-y={rotation}><boxGeometry args={[.12,.08,7.8]} /><meshStandardMaterial color="#6f7961" roughness={.74} /></mesh>)}
       <mesh position-y={0.46} rotation-x={-Math.PI / 2}><circleGeometry args={[2.05, 32]} /><meshStandardMaterial color="#213f3c" emissive={responseColor} emissiveIntensity={0.18 + influence.strength * 0.65} roughness={0.4} /></mesh>
       <mesh castShadow position={[0, 2.65, -.8]} scale={[1, .72, .78]}><sphereGeometry args={[4.2, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2]} /><meshStandardMaterial color="#78948a" transparent opacity={.13} metalness={.12} roughness={.22} side={THREE.DoubleSide} depthWrite={false} /></mesh>
       {[-3.15, -1.55, 1.55, 3.15].map((x, index) => (
         <group key={x} position={[x, 0, index % 2 ? -0.55 : -0.9]} rotation-z={x * -0.035}>
           <mesh castShadow position-y={2.65}><cylinderGeometry args={[0.18, 0.42, 5.3, 7]} /><meshStandardMaterial color="#594b3b" roughness={1} /></mesh>
           <mesh castShadow position={[x < 0 ? 0.25 : -0.25, 5.1, 0]} scale={[1.25, 0.86, 1.05]}><icosahedronGeometry args={[1.25, 1]} /><meshStandardMaterial color={index % 2 ? "#567258" : "#66805f"} roughness={0.96} /></mesh>
+          <mesh castShadow position={[x < 0 ? -.5 : .5,4.75,.32]} scale={[.72,.58,.68]}><dodecahedronGeometry args={[1.05,0]} /><meshStandardMaterial color={index%2 ? "#6f855f" : "#526c54"} roughness={1} /></mesh>
+          {[-1,1].map((side)=><mesh key={side} position={[side*.36,.3,0]} rotation-z={side*.8}><coneGeometry args={[.16,.95,6]} /><meshStandardMaterial color="#4d4436" roughness={1} /></mesh>)}
         </group>
       ))}
       {[-2.4, 0, 2.4].map((x) => <mesh key={x} position={[x, 3.35, -1.9]} rotation-z={x * -0.1}><torusGeometry args={[2.7, 0.09, 7, 42, Math.PI]} /><meshStandardMaterial color="#7d8972" metalness={0.18} roughness={0.65} /></mesh>)}
       {[-3.2,-1.6,0,1.6,3.2].map((x, index) => <group key={x} position={[x,.32,2.2]} rotation-z={x*.05}><mesh rotation-z={index%2 ? .72 : -.72}><cylinderGeometry args={[.09,.18,2.6,6]} /><meshStandardMaterial color="#68543d" roughness={1} /></mesh><mesh position={[index%2 ? .72 : -.72,.25,0]} rotation-z={index%2 ? -.5 : .5}><cylinderGeometry args={[.06,.12,1.85,6]} /><meshStandardMaterial color="#4f4335" roughness={1} /></mesh></group>)}
       {[-2.7,-.9,.9,2.7].map((x,index)=><group key={x} position={[x,3.65,2.05]}><mesh><cylinderGeometry args={[.025,.025,.7,5]} /><meshStandardMaterial color="#a8b29a" metalness={.35} /></mesh><mesh position-y={-.43}><coneGeometry args={[.16,.3,7]} /><meshStandardMaterial color={index%2 ? responseColor : "#d8c990"} emissive={responseColor} emissiveIntensity={.25 + influence.strength*.45} metalness={.25} /></mesh></group>)}
+      {[-3.35,-2.15,2.15,3.35].map((x,index)=><group key={`fern-${x}`} position={[x,.52,2.82]} rotation-y={index*.7}>{[-.32,0,.32].map((offset,leaf)=><mesh key={offset} position-x={offset} rotation-z={(leaf-1)*.48} scale={[.24,.72,.12]}><sphereGeometry args={[.42,7,5]} /><meshStandardMaterial color={leaf===1 ? "#789467" : "#607b5c"} roughness={1} /></mesh>)}</group>)}
       <mesh position={[0, 2.5, -2.65]}><planeGeometry args={[5.8, 4.4]} /><meshStandardMaterial color="#52706b" transparent opacity={0.18} roughness={0.25} side={THREE.DoubleSide} /></mesh>
       <GroveEchoCrown color={responseColor} strength={influence.strength} />
     </group>
