@@ -89,6 +89,12 @@ jobs:
           cd backend
           npm run check:world-content
 
+      - name: Validate artifact lifecycle and curation
+        run: |
+          cd backend
+          npm run check:gellaria-artifacts
+          npm run check:artifact-curation
+
       - name: Verify backend modules load
         run: npm run check:backend-routes
 

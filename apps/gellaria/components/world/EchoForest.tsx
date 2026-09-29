@@ -50,7 +50,7 @@ export function EchoForest({ landmark, moveIntent, paused, onExit }: ForestProps
       <div><p>WORDS IN THE WOODS</p><h1>回声林地</h1></div>
       <span className="hall-occupancy">{landmark.exhibits.length} 段回声</span>
     </header>
-    <aside className="forest-guide"><span>循环林径 · {Math.abs(lap) + 1} 段旅途</span><p>{landmark.exhibits.length ? "林径没有尽头。走近一段声音，停留片刻；回声会为你留住。" : "林间暂时安静，等待下一段公开回声。"}</p><small>WASD / 方向键行走 · 随时按 Esc 返回</small></aside>
+    <aside className="forest-guide"><span>循环林径 · {Math.abs(lap) + 1} 段旅途</span><p>{landmark.exhibits.length ? "留言与声音在林间浮现。沿循环小径漫步，靠近停留，回声会为你留住；也可以暂停后读完。" : "林间暂时安静，等待下一段公开回声。"}</p><small>WASD / 方向键行走 · 随时按 Esc 返回</small></aside>
     <div className="forest-controls">
       <button onClick={() => setStill(value => !value)} disabled={Boolean(reduced)} aria-pressed={still || Boolean(reduced)}>{still || reduced ? <Play size={15} /> : <Pause size={15} />}{reduced ? "静态阅读模式" : still ? "继续回声" : "暂停回声"}</button>
       <button onClick={() => setReading(true)}><BookOpen size={15} />阅读回声</button>

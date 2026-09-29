@@ -11,12 +11,14 @@ import type { Landmark } from "@/lib/content";
 import { buildMuseumPlan, constrainMuseumPosition, exhibitKindNames, getExhibitAction, getHallConfig, selectNearbyExhibit, type ExhibitSlot, type MuseumPlan } from "@/lib/exhibition";
 import { getCameraRelativeMovement } from "@/lib/movement";
 import { workspaceUrl } from "@/lib/workspace-url";
+import { gworkspaceMediaUrl } from "@/lib/gworkspace-resume";
 import { MuseumInterior } from "./MuseumInteriors";
 import { museumTheme } from "@/lib/museum-theme";
 import { MuseumExhibit } from "./MuseumExhibit";
 import { MuseumLighting } from "./MuseumLighting";
 import { InspectionCamera, InspectionContext, InspectionPanel, type ViewMove } from './ExhibitInspection';
 import { ExhibitionCatalog } from './ExhibitionCatalog';
+import { MuseumGuide } from './MuseumGuide';
 import { SpiritTraveler, type SpiritMotion } from "./SpiritTraveler";
 import { useWorldStore } from "./store";
 import type { MoveIntent } from "./WorldExperience";
@@ -28,7 +30,12 @@ function isTyping(target: EventTarget | null) {
 function publicLink(value?: string | null) {
   if (!value) return null;
   const resolved = workspaceUrl(value);
-  try { return /^https?:$/.test(new URL(resolved).protocol) ? resolved : null; } catch { return null; }
+  try { const url = new URL(resolved); return /^https?:$/.test(url.protocol) ? url.href : null; } catch { return null; }
+}
+function publicImage(value?: string | null) {
+  if (!value) return null;
+  const media = gworkspaceMediaUrl(value);
+  return media.startsWith('/api/gworkspace-media?') ? `/explore${media}` : publicLink(media);
 }
 
 export function ExhibitionHall({ landmark, moveIntent, paused = false, onExit }: ExhibitionHallProps) {
@@ -53,6 +60,7 @@ function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, 
   const [exitNearby, setExitNearby] = useState(false);
   const [roomId, setRoomId] = useState(plan.rooms[0].id);
   const [arrival, setArrival] = useState<[number, number] | undefined>();
+  const [guideOpen, setGuideOpen] = useState(false);
   const signals = useWorldStore((state) => state.signals);
   const sendSignal = useWorldStore((state) => state.sendSignal);
   const sendTag = useWorldStore((state) => state.sendTag);
@@ -71,7 +79,7 @@ function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, 
 
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
-      if (paused || isTyping(event.target)) return;
+      if (paused || guideOpen || isTyping(event.target)) return;
       if (event.code === "Escape") {
         event.preventDefault();
         if (active) setActive(null);
@@ -82,13 +90,13 @@ function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, 
     };
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [paused, active, inspection, activate, onExit]);
+  }, [paused, guideOpen, active, inspection, activate, onExit]);
 
   const currentRoom = plan.rooms.find((room) => room.id === roomId) ?? plan.rooms[0];
   const roomIndex = plan.rooms.indexOf(currentRoom);
   const visiblePlan = { ...plan, rooms: plan.rooms.slice(Math.max(0, roomIndex - 1), roomIndex + 2) };
   const activeSlots = plan.slots.slice(currentRoom.startIndex, currentRoom.startIndex + currentRoom.count);
-  return <section className={`exhibition-hall museum museum-${theme.layout}${active ? " museum-reading" : ""}${inspection ? " museum-inspecting" : ""}`} aria-label={`${landmark.name}${config.roomLabel}`} style={{ "--museum-accent": theme.accent, "--museum-panel": theme.background, "--museum-paper": theme.paper, "--museum-ink": theme.ink } as CSSProperties}>
+  return <section className={`exhibition-hall museum museum-${theme.layout}${active ? " museum-reading" : ""}${inspection ? " museum-inspecting" : ""}`} aria-label={`${landmark.name}${config.roomLabel}`} style={{ "--museum-accent": theme.accent, "--museum-panel": theme.panel, "--museum-paper": theme.paper, "--museum-ink": theme.ink } as CSSProperties}>
     <Canvas className="hall-canvas" shadows="percentage" dpr={[1, 1.4]} camera={{ position: [0, 9, 16], fov: 52, near: .1, far: 150 }} gl={{ antialias: true, alpha: false }} onCreated={({ gl }) => { gl.transmissionResolutionScale = .4; }}>
       <color attach="background" args={[theme.background]} />
       <MuseumLighting room={currentRoom} plan={visiblePlan} slots={activeSlots} theme={theme} selectedId={nearby?.id ?? active?.id} />
@@ -99,7 +107,7 @@ function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, 
       {visiblePlan.rooms.map((room) => <Html key={room.id} position={[0, .13, room.centerZ + room.depth / 2 - .85]} rotation-x={-Math.PI / 2} transform distanceFactor={8} className="museum-floor-label" zIndexRange={[1, 0]}>
         <span>{String(plan.rooms.indexOf(room) + 1).padStart(2, "0")} / {room.title}</span>
       </Html>)}
-      <MuseumTraveler plan={plan} arrival={arrival} paused={paused || Boolean(active) || Boolean(inspection)} cameraOwned={Boolean(inspection)} moveIntent={moveIntent} onNearby={setNearby} onExitNearby={setExitNearby} onRoom={setRoomId} />
+      <MuseumTraveler plan={plan} arrival={arrival} paused={paused || guideOpen || Boolean(active) || Boolean(inspection)} cameraOwned={Boolean(inspection)} moveIntent={moveIntent} onNearby={setNearby} onExitNearby={setExitNearby} onRoom={setRoomId} />
       {inspection && <InspectionCamera key={`${inspection.id}:${cameraReset}`} slot={inspection} move={viewMove}/>}
     </Canvas>
     <header className="hall-header" inert={Boolean(active)}>
@@ -110,6 +118,7 @@ function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, 
     <aside className="museum-location" hidden={Boolean(inspection)} inert={Boolean(active)}>
       <span>当前展室 {plan.rooms.findIndex((room) => room.id === roomId) + 1} / {plan.rooms.length}</span>
       <strong>{currentRoom.title}</strong>
+      <button className="catalog-open guide-open" onClick={() => setGuideOpen(true)}>{landmark.id === 'workshop' ? '从一件作品开始' : '选一篇文章'} · 参观指南</button>
       <button className="catalog-open" onClick={onCatalog}>{collectionLabel} · 查看全部收藏</button>
       <small>{plan.slots.length ? theme.route : "展馆已准备好，等待公开内容展出"}</small>
       <details className="museum-route"><summary>主题路线 · {plan.rooms.length} 个区域</summary><ol>{plan.rooms.map((room, index) => <li key={room.id} aria-current={room.id === currentRoom.id ? "location" : undefined}><button onClick={() => { setNearby(null); setPreview(null); setRoomId(room.id); setArrival([0, room.centerZ + room.depth / 2 - 2]); }}>{index + 1}. {room.title}</button><span>{room.count} 件</span></li>)}</ol><small>沿通道漫步，或直接进入选定的主题展室。</small></details>
@@ -118,6 +127,12 @@ function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, 
         {landmark.tagOptions.map((tag) => <button key={tag} onClick={() => sendTag(landmark.id, tag)}>{tag}</button>)}
       </details>
     </aside>
+    {guideOpen && <MuseumGuide plan={plan} kind={landmark.id} onClose={() => setGuideOpen(false)} onVisit={slot => {
+      const room = plan.rooms.find(item => slot.index >= item.startIndex && slot.index < item.startIndex + item.count)!;
+      setRoomId(room.id); setNearby(slot); setPreview(slot);
+      setArrival([slot.position[0] + (slot.position[0] < 0 ? 2.2 : -2.2), slot.position[2]]);
+      setGuideOpen(false); inspect(slot);
+    }}/>}
     <AnimatePresence mode="wait">
       {preview?.exhibit && !active && !inspection && !paused && <motion.aside key={preview.id} className="museum-preview" aria-label="附近展品" initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: reduceMotion ? 0 : .2 }}>
         <p>{exhibitKindNames[preview.kind]} · {preview.exhibit.label}</p>
@@ -158,30 +173,38 @@ function ExhibitDossier({ slot, onClose }: { slot: ExhibitSlot; onClose: () => v
   }, [onClose, present]);
   const exhibit = slot.exhibit!;
   const href = publicLink(exhibit.href);
-  const cover = exhibit.image?.startsWith("/api/gworkspace-media?") ? `/explore${exhibit.image}` : publicLink(exhibit.image);
+  const cover = publicImage(exhibit.image);
   const details = exhibit.details;
   return <motion.aside ref={panel} role="dialog" aria-modal="true" aria-label={`${exhibit.title}完整展签`} className="museum-dossier" initial={{ opacity: 0, x: reduced ? 0 : 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
     <button className="exhibit-close" aria-label="关闭展签" onClick={onClose}><X size={18} /></button>
-    <p className="museum-catalogue">{String(slot.index + 1).padStart(2, "0")} / {exhibitKindNames[slot.kind]} · {exhibit.label}</p>
+    <p className="museum-catalogue">{String(slot.index + 1).padStart(2, "0")} / {exhibitKindNames[slot.kind]}{slot.kind !== 'project-model' && ` · ${exhibit.label}`}</p>
     <h2>{exhibit.title}</h2>
     {cover && <figure><Image src={cover} alt={`${exhibit.title}封面`} width={720} height={400} unoptimized onError={(event) => { event.currentTarget.hidden = true; }} /></figure>}
+    {slot.kind === 'project-model' && <h3>它用来做什么</h3>}
     <p className="museum-body">{exhibit.summary}</p>
-    {exhibit.artifactSpec && <section className="museum-model-story">
-      <h3>{exhibit.artifactSpec.design?.name || '模型与内容'}</h3>
+    {details && <section className="museum-contribution"><h3>我的参与与实现</h3>
+      <p>{details.role}{details.involvement && ` · ${({ creator: '创建者', contributor: '参与贡献', collaborator: '协作开发' })[details.involvement]}`}</p>
+      {details.highlights.length > 0 && <ul>{details.highlights.map((item, index) => <li key={index}>{item}</li>)}</ul>}
+    </section>}
+    {href && <div className="museum-links"><a href={href}>{slot.kind === 'project-model' ? '打开实际项目' : getExhibitAction(slot.kind).destination}<ArrowUpRight size={15}/></a></div>}
+    {details?.gallery?.length ? <section><h3>项目图集</h3>{details.gallery.map((media, index) => {
+      const image = publicImage(media.url);
+      return image ? <figure key={`${media.url}:${index}`}><Image src={image} alt={media.alt} width={720} height={480} unoptimized loading="lazy" onError={event => { event.currentTarget.hidden = true; }}/><figcaption>{media.alt}</figcaption></figure> : null;
+    })}</section> : null}
+    {exhibit.artifactSpec && <details className="museum-model-story">
+      <summary>{exhibit.artifactSpec.design?.name || '模型与内容'} · 模型解读</summary>
       <p>{exhibit.artifactSpec.design?.tier === 'reading' && exhibit.artifactSpec.design.level === 0 ? '书页尚未展开。第一次阅读之后，这篇文章会拥有自己的立体意象。' : exhibit.artifactSpec.caption}</p>
       {exhibit.artifactSpec.design?.tier === 'kinetic' && <p>以{({ 'torus-knot': '环面纽结', superformula: '超公式曲线', lissajous: '李萨如曲线' })[exhibit.artifactSpec.design.geometry.family]}构成流动的数学雕塑。</p>}
       <small>{exhibit.artifactSpec.design?.tier === 'reading' ? `阅读雕刻 · 第 ${exhibit.artifactSpec.design.level} 阶${exhibit.artifactSpec.design.nextThreshold ? ` · ${exhibit.artifactSpec.design.nextThreshold.toLocaleString()} 次阅读后继续生长` : ''}` : `主题转译 · ${exhibit.artifactSpec.zone}`}</small>
       {exhibit.artifactSpec.design?.tier === 'reading' && exhibit.artifactSpec.design.narrative && <details><summary>文章如何长成这件展品</summary><p>首次阅读形成主题；10 次展开章节；50 次长出正文摘录节点；200 次连接阅读顺序。连线表示原文次序。</p><ol>{exhibit.artifactSpec.design.narrative.chapters.map((chapter, index) => <li key={index}><strong>{chapter.title}</strong>{exhibit.artifactSpec!.design!.level >= 3 && <p>{chapter.excerpt}</p>}</li>)}</ol></details>}
-    </section>}
+    </details>}
     <dl>
       {details?.role && <><dt>参与角色</dt><dd>{details.role}</dd></>}
       {details?.start ? <><dt>时间</dt><dd>{details.start} — {details.end || "至今"}</dd></> : exhibit.publishedAt && <><dt>记录日期</dt><dd>{exhibit.publishedAt.slice(0, 10)}</dd></>}
-      <dt>收藏来源</dt><dd>GWorkspace · {exhibit.label}</dd>
+      <dt>收藏来源</dt><dd>GWorkspace · {slot.kind === 'project-model' ? '项目档案' : exhibit.label}</dd>
     </dl>
-    {details?.highlights.length ? <section><h3>作品亮点</h3><ul>{details.highlights.map((item, index) => <li key={index}>{item}</li>)}</ul></section> : null}
     {exhibit.tags?.length ? <div className="exhibit-tags">{exhibit.tags.map((tag) => <span key={tag}>{tag}</span>)}</div> : null}
     <div className="museum-links">
-      {href && <a href={href}>{getExhibitAction(slot.kind).destination}<ArrowUpRight size={15} /></a>}
       {details && Object.entries(details.links).map(([key, url]) => {
         const link = publicLink(url);
         return link && link !== href ? <a key={key} href={link}>{({ source: "查看源码", demo: "体验作品", case_study: "阅读项目说明" } as Record<string, string>)[key]}<ArrowUpRight size={15} /></a> : null;

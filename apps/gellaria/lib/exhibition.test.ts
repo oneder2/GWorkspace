@@ -17,7 +17,7 @@ describe("museum planning", () => {
       ...source.exhibits,
     ] };
     const plan = buildMuseumPlan(landmark);
-    expect(plan.rooms.map((room) => room.kind)).toEqual(["daily-signal", "blog-constellation"]);
+    expect(plan.rooms.map((room) => room.kind)).toEqual(["blog-constellation", "daily-signal"]);
     expect(new Set(plan.slots.map((slot) => slot.id))).toEqual(new Set(landmark.exhibits.map((item) => item.id)));
   });
 

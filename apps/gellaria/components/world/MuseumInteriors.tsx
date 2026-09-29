@@ -14,38 +14,24 @@ function Laboratory({ room, palette }: { room: MuseumRoom; palette: MuseumTheme 
   const { width: w, depth: d } = room;
   return <group>
     <Block at={[0, -.18, 0]} size={[w, .3, d]} color={palette.floor} />
-    <Block at={[0, .005, 0]} size={[4.3, .035, d]} color={palette.dark} metal={.3} />
-    {[-2.18, 2.18].map((x) => <Block key={x} at={[x, .04, 0]} size={[.075, .04, d]} color={palette.accent} metal={.5} />)}
-    {Array.from({ length: Math.ceil(d / 1.5) }, (_, i) => <group key={i} position-z={d / 2 - .5 - i * 1.5}>
-      <Block at={[0, .02, 0]} size={[w - .6, .015, .025]} color={palette.wall} />
-      {[-2.4, 2.4].map((x) => <Block key={x} at={[x, .04, 0]} size={[.35, .03, .045]} color={palette.accent} />)}
-    </group>)}
+    {[-2.18, 2.18].map((x) => <Block key={x} at={[x, .015, 0]} size={[.025, .015, d]} color={palette.dark} />)}
     {[-1, 1].map((side) => <group key={side}>
       <SightlineCutaway>
-        <Block at={[side * (w / 2 - .15), 2.45, 0]} size={[.3, 4.9, d]} color={palette.wall} />
-        <Block at={[side * (w / 2 - .34), 1.05, 0]} size={[.1, 2.1, d - .2]} color={palette.dark} metal={.4} />
-        {[-.32, 0, .32].map((part) => <group key={part} position-z={d * part}>
-          <Block at={[side * (w / 2 - .42), 2.45, 0]} size={[.2, 4.9, .25]} color={palette.dark} metal={.7} />
-          <Block at={[side * (w / 2 - 1), 4.35, 0]} size={[1.5, .12, .45]} color={palette.accent} metal={.7} />
-          <Block at={[side * (w / 2 - 1), 4.25, 0]} size={[1.15, .06, .22]} color={palette.light} glow />
-        </group>)}
+        <Block at={[side * (w / 2 - .15), .65, 0]} size={[.22, 1.3, d]} color={palette.wall} />
+        <Block at={[side * (w / 2 - .15), 1.32, 0]} size={[.24, .045, d]} color={palette.dark} metal={.3} />
       </SightlineCutaway>
-      <Block at={[side * (w / 2 - .75), .45, 0]} size={[.85, .9, 2.1]} color={palette.dark} metal={.4} />
-      {[0, 1, 2].map((i) => <Block key={i} at={[side * (w / 2 - 1.19), .2 + i * .25, 0]} size={[.04, .035, 1.7]} color={palette.accent} />)}
     </group>)}
   </group>;
 }
 
 function Shelf({ z, side, palette, width }: { z: number; side: number; palette: MuseumTheme; width: number }) {
   return <SightlineCutaway><group position={[side * (width / 2 - .8), 0, z]} rotation-y={side > 0 ? -Math.PI / 2 : Math.PI / 2}>
-    <Block at={[0, 1.8, -.25]} size={[3.9, 3.6, .36]} color={palette.floor} />
-    {[-1.9, 1.9].map((x) => <Block key={x} at={[x, 1.75, .06]} size={[.13, 3.5, .65]} color={palette.wall} />)}
-    {[.35, 1.3, 2.25, 3.2].map((y, row) => <group key={y}>
+    <Block at={[0, .75, -.25]} size={[3.9, 1.5, .36]} color={palette.floor} />
+    {[-1.9, 1.9].map((x) => <Block key={x} at={[x, .75, .06]} size={[.1, 1.5, .65]} color={palette.wall} />)}
+    {[.2, .95].map((y, row) => <group key={y}>
       <Block at={[0, y, .08]} size={[3.9, .12, .72]} color={palette.wall} />
-      {row < 3 && Array.from({ length: 7 }, (_, i) => <Block key={i} at={[-1.55 + i * .48, y + .37, .14]} size={[.23 + (i % 2) * .12, .48 + (i % 3) * .11, .4]} color={[palette.dark, palette.paper, "#95656a", palette.accent][(i + row) % 4]} rotation={[0, 0, i % 4 === 0 ? .1 : 0]} />)}
+      {Array.from({ length: 4 }, (_, i) => <Block key={i} at={[-1.3 + i * .7, y + .26, .14]} size={[.24, .42, .4]} color={i % 2 ? palette.paper : palette.dark} rotation={[0, 0, row ? .05 : 0]} />)}
     </group>)}
-    <mesh position={[0, 3.22, -.12]}><torusGeometry args={[1.9, .12, 8, 40, Math.PI]} /><meshStandardMaterial color={palette.wall} /></mesh>
-    <Block at={[0, 3.5, .45]} size={[1.8, .08, .2]} color={palette.light} glow />
   </group></SightlineCutaway>;
 }
 
@@ -53,19 +39,12 @@ function Archive({ room, palette }: { room: MuseumRoom; palette: MuseumTheme }) 
   const { width: w, depth: d } = room;
   return <group>
     <Block at={[0, -.18, 0]} size={[w, .3, d]} color={palette.floor} />
-    {Array.from({ length: Math.ceil(d / .65) }, (_, i) => <Block key={i} at={[0, -.015, d / 2 - .32 - i * .65]} size={[w - .4, .012, .025]} color="#745858" />)}
-    <Block at={[0, .025, 0]} size={[3.8, .055, d]} color={palette.dark} />
-    {[-1.8, 1.8].map((x) => <Block key={x} at={[x, .058, 0]} size={[.045, .016, d]} color={palette.accent} />)}
-    <Disc at={[0, .055, -1]} radius={1.65} color={palette.floor} />
-    <mesh position={[0, .095, -1]} rotation-x={-Math.PI / 2}><ringGeometry args={[1.4, 1.44, 64]} /><meshStandardMaterial color={palette.accent} /></mesh>
+    {[-1.8, 1.8].map((x) => <Block key={x} at={[x, .015, 0]} size={[.025, .015, d]} color={palette.dark} />)}
     {[-1, 1].map((side) => <group key={side}>
       <SightlineCutaway>
-        <Block at={[side * (w / 2 - .15), 1.8, 0]} size={[.3, 3.6, d]} color={palette.wall} />
-        <Block at={[side * (w / 2 - .35), .6, 0]} size={[.16, 1.2, d]} color={palette.floor} />
+        <Block at={[side * (w / 2 - .15), .65, 0]} size={[.22, 1.3, d]} color={palette.wall} />
       </SightlineCutaway>
-      {[-.27, .27].map((fraction) => <Shelf key={fraction} z={d * fraction} side={side} width={w} palette={palette} />)}
-      <Disc at={[side * 7.7, .35, 0]} radius={.85} color={palette.dark} scale={[.7, 6, 1]} />
-      <Disc at={[side * 7.7, .65, 0]} radius={.7} color={palette.accent} />
+      <Shelf z={-d * .3} side={side} width={w} palette={palette} />
     </group>)}
   </group>;
 }
@@ -109,7 +88,7 @@ export function MuseumInterior({ plan, kind }: { plan: MuseumPlan; kind: string 
     {plan.rooms.map((room, i) => <group key={room.id} position-z={room.centerZ}>
       {room.layout === "fabrication" ? <Laboratory room={room} palette={palette} /> : room.layout === "archive" ? <Archive room={room} palette={palette} /> : <Garden room={room} palette={palette} />}
       {[-1, 1].map((side) => <SightlineCutaway key={side}>
-        <Block at={[side * (room.width / 4 + 1.35), room.layout === "garden" ? .25 : 1.4, -room.depth / 2 + .18]} size={[room.width / 2 - 2.7, room.layout === "garden" ? .5 : 2.8, .28]} color={room.layout === "archive" ? palette.floor : palette.wall} />
+        <Block at={[side * (room.width / 4 + 1.35), .25, -room.depth / 2 + .18]} size={[room.width / 2 - 2.7, .5, .22]} color={palette.wall} />
       </SightlineCutaway>)}
       {i < plan.rooms.length - 1 && <group position-z={-room.depth / 2 - 1.8}>
         <Block at={[0, -.12, 0]} size={[5.4, .24, 3.6]} color={palette.floor} />

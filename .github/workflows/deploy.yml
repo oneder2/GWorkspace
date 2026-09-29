@@ -236,6 +236,7 @@ jobs:
               --schema fixtures/resume-import/v1/schema/resume.schema.json \
               --no-copy-assets
             npm run gellaria:backfill-models
+            npm run gellaria:backfill-artifacts
             npm run db:check
             
             # 启动服务
@@ -243,8 +244,7 @@ jobs:
             pm2 save || true
 
             # 基础健康检查，避免“部署成功但服务未启动”被静默吞掉
-            sleep 3
-            HEALTH_OUTPUT="$(curl -fsS "http://127.0.0.1:3001/health")"
+            HEALTH_OUTPUT="$(curl --retry 15 --retry-delay 2 --retry-connrefused --max-time 5 -fsS "http://127.0.0.1:3001/health")"
             echo "$HEALTH_OUTPUT" | grep '"status":"ok"' >/dev/null
             echo "$HEALTH_OUTPUT" | grep '"database":"ok"' >/dev/null
             HEALTH_HEADERS="$(curl -sS "http://127.0.0.1:3001/health" -o /dev/null -D -)"

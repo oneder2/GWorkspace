@@ -724,7 +724,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #f0be82; outline-offs
 .museum .hall-header, .museum .museum-location, .museum .museum-preview, .museum .museum-object-label, .museum .museum-exit { background: color-mix(in srgb, var(--museum-panel) 94%, transparent); }
 .museum .museum-dossier { background: var(--museum-paper); color: var(--museum-ink); }
 .museum .museum-dossier :is(a, .exhibit-close) { color: var(--museum-ink); }
-.museum .museum-floor-label { color: var(--museum-accent); }
+.museum .museum-floor-label { color: var(--museum-ink); }
 .museum-fabrication .museum-location > strong, .museum-fabrication .museum-preview h2 { font-family: var(--mono); font-size: 18px; }
 .museum-archive .museum-location { border-left-width: 4px; }
 .museum-archive .museum-preview { border-top: 0; border-left: 3px solid var(--museum-accent); }
@@ -760,6 +760,26 @@ button:focus-visible, a:focus-visible { outline: 2px solid #f0be82; outline-offs
 }
 
 .museum-route ol { padding: 0; margin: 12px 0; list-style: none; max-height: 28vh; overflow: auto; }
+.museum-location .guide-open { display: block; margin: 10px 0 0; color: var(--museum-paper); border-color: var(--museum-accent); }
+.museum-guide article button { margin-top: 10px; }
+.museum-guide ul { list-style: none; padding: 0; }
+.museum-guide li button { width: 100%; text-align: left; margin: 4px 0; }
+.museum-guide .guide-note { font-size: 12px; color: #52656b; }
+.museum-contribution p,.museum-dossier figcaption { font-size: 12px; line-height: 1.8; }
+.museum-model-story > summary { cursor: pointer; line-height: 1.7; }
+.inspection-demo-note { display: block; margin-top: 6px; }
+.arrival-guide { background: transparent; border: 0; cursor: pointer; }
+.map-destinations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+.map-destinations button { display: grid; gap: 8px; text-align: left; padding: 14px; color: #e1e7dc; background: #14262e; border: 1px solid #8caaa666; cursor: pointer; }
+.map-destinations span,.map-destinations small { font-size: 11px; line-height: 1.6; }
+.map-destinations button:focus-visible { outline: 2px solid #efc18c; outline-offset: 3px; }
+@media (max-width: 640px) {
+  .map-destinations { grid-template-columns: 1fr; }
+  .map-modal:has(.map-destinations) .map-sheet { max-height: 90dvh; overflow: auto; }
+  .museum-location { max-width: min(250px, calc(100vw - 24px)); }
+  .museum-location > small { display: none; }
+  .museum-location .catalog-open { margin: 5px 0 0; padding: 6px 8px; }
+}
 .museum-route li { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; font-size: 11px; color: #a6b7b8; }
 .museum-route li[aria-current] { color: var(--museum-accent); }
 .museum-model-story { padding: 18px 0; border-block: 1px solid #727c7b33; }

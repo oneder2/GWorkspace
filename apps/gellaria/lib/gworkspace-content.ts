@@ -70,10 +70,12 @@ export function resumeProjectExhibits(resume: Pick<GWorkspaceResume, "projects">
     publishedAt: project.start,
     details: {
       role: project.role,
+      involvement: project.involvement,
       start: project.start,
       end: project.end,
       highlights: project.highlights,
       links: project.links,
+      gallery: project.gallery.map(media => ({ url: gworkspaceMediaUrl(media.url), alt: media.alt || project.name })),
     },
     modelSpec: deriveProjectModelSpec({
       slug: project.slug,
@@ -104,7 +106,7 @@ export function mergePublicWorld(payload: unknown, resume: GWorkspaceResume | nu
       const exhibits = landmark.id === "workshop"
         ? publicExhibits.map((worldProject) => {
             const project = resumeProjects.find((item) => item.sourceKey === worldProject.sourceKey || worldProject.id === `project:${item.sourceKey}`);
-            return project ? { ...project, ...worldProject, details: project.details, image: project.image || worldProject.image } : worldProject;
+            return project ? { ...project, ...worldProject, details: worldProject.details || project.details, image: project.image || worldProject.image } : worldProject;
           })
         : publicExhibits;
       return { ...landmark, exhibits };
