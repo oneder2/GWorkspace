@@ -10,6 +10,7 @@ import morgan from 'morgan'
 import dotenv from 'dotenv'
 import { getDatabase, closeDatabase } from './config/database.js'
 import { runMigrations } from './config/migrations.js'
+import { backfillArtifacts } from './services/gellariaArtifacts.js'
 import { checkDatabaseHealth } from './config/databaseHealth.js'
 import { validateAuthConfig } from './config/auth.js'
 
@@ -111,6 +112,7 @@ const db = getDatabase()
 
 try {
   runMigrations({ db })
+  backfillArtifacts(db)
 } catch (error) {
   console.error('Migration error:', error)
   process.exit(1)

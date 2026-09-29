@@ -1,7 +1,8 @@
 "use client";
 
 import { create } from "zustand";
-import type { PublicPlayer, ServerMessage } from "@/lib/protocol";
+import type { PlayerRoom, PublicPlayer, ServerMessage } from "@/lib/protocol";
+import { selectStudyCompanions } from "@/lib/study-presence";
 import { loadSpiritIdentity, saveSpiritAppearance, spiritPalette, type SpiritAppearance, type SpiritIdentity } from "@/lib/spirit-identity";
 
 type ConnectionState = "connecting" | "online" | "offline";
@@ -12,6 +13,9 @@ type WorldStore = {
   playerColor: string;
   playerAppearance: SpiritAppearance;
   players: Record<string, PublicPlayer>;
+  room: PlayerRoom;
+  studyCompanionIds: (string | null)[];
+  setRoom: (room: PlayerRoom) => void;
   signals: Record<string, number>;
   tags: Record<string, Record<string, number>>;
   connection: ConnectionState;
@@ -33,6 +37,8 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
   playerColor: "#f2a66f",
   playerAppearance: { palette: 0, form: 0 },
   players: {},
+  room: "island",
+  studyCompanionIds: [],
   signals: {},
   tags: {},
   connection: "connecting",
@@ -64,13 +70,14 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
         if (!disposed && activeSocket === socket) {
           set({ socket, connection: "online" });
           socket.send(JSON.stringify({ type: "appearance", appearance: get().playerAppearance }));
+          socket.send(JSON.stringify({ type: "presence", room: get().room }));
         }
       });
       socket.addEventListener("close", () => {
         if (activeSocket !== socket) return;
         activeSocket = null;
         set((state) => state.socket === socket
-          ? { connection: "offline", socket: null, players: {} }
+          ? { connection: "offline", socket: null, players: {}, studyCompanionIds: [] }
           : state);
         if (!disposed) reconnectTimer = window.setTimeout(openSocket, 2200);
       });
@@ -82,17 +89,30 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
       const message = JSON.parse(event.data) as ServerMessage;
       if (message.type === "welcome") {
         const currentAppearance = get().playerAppearance;
+        const players = Object.fromEntries(message.players.map((player) => [player.id, player]));
         set({
           playerId: message.id,
           playerColor: spiritPalette(currentAppearance).glow,
           playerAppearance: currentAppearance,
-          players: Object.fromEntries(message.players.map((player) => [player.id, player])),
+          players,
+          studyCompanionIds: get().room === "night-study" ? selectStudyCompanions([], players, message.id) : [],
           signals: message.world.signals,
           tags: message.world.tags,
         });
       }
       if (message.type === "joined") {
-        set((state) => ({ players: { ...state.players, [message.player.id]: message.player } }));
+        set((state) => {
+          const players = { ...state.players, [message.player.id]: message.player };
+          return { players, studyCompanionIds: state.room === "night-study" ? selectStudyCompanions(state.studyCompanionIds, players, state.playerId) : [] };
+        });
+      }
+      if (message.type === "presence") {
+        set((state) => {
+          const player = state.players[message.id];
+          if (!player) return state;
+          const players = { ...state.players, [message.id]: { ...player, room: message.room } };
+          return { players, studyCompanionIds: state.room === "night-study" ? selectStudyCompanions(state.studyCompanionIds, players, state.playerId) : [] };
+        });
       }
       if (message.type === "moved") {
         set((state) => {
@@ -122,7 +142,7 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
         set((state) => {
           const players = { ...state.players };
           delete players[message.id];
-          return { players };
+          return { players, studyCompanionIds: state.room === "night-study" ? selectStudyCompanions(state.studyCompanionIds, players, state.playerId) : [] };
         });
       }
       if (message.type === "signal") {
@@ -156,14 +176,20 @@ export const useWorldStore = create<WorldStore>((set, get) => ({
       activeSocket = null;
       socket?.close();
       set((state) => state.socket === socket
-        ? { socket: null, connection: "offline", players: {} }
+        ? { socket: null, connection: "offline", players: {}, studyCompanionIds: [] }
         : state);
     };
+  },
+  setRoom: (room) => {
+    const state = get();
+    if (state.room === room) return;
+    set({ room, studyCompanionIds: room === "night-study" ? selectStudyCompanions([], state.players, state.playerId) : [] });
+    if (state.socket?.readyState === WebSocket.OPEN) state.socket.send(JSON.stringify({ type: "presence", room }));
   },
   sendMove: (position, rotation) => {
     const now = performance.now();
     const socket = get().socket;
-    if (!socket || socket.readyState !== WebSocket.OPEN || now - lastMoveSent < 80) return;
+    if (get().room !== "island" || !socket || socket.readyState !== WebSocket.OPEN || now - lastMoveSent < 80) return;
     lastMoveSent = now;
     socket.send(JSON.stringify({ type: "move", position, rotation }));
   },

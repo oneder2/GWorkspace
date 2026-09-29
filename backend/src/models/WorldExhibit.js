@@ -1,4 +1,5 @@
 import { getDatabase } from '../config/database.js'
+import { syncArtifact } from '../services/gellariaArtifacts.js'
 
 const normalizeExhibit = (exhibit) => exhibit && ({
   ...exhibit,
@@ -45,6 +46,7 @@ export class WorldExhibit {
       now,
       now
     )
+    syncArtifact('placement', result.lastInsertRowid)
     return this.getById(result.lastInsertRowid)
   }
 
@@ -71,6 +73,7 @@ export class WorldExhibit {
     set('updated_at', new Date().toISOString())
     values.push(id)
     getDatabase().prepare(`UPDATE world_exhibits SET ${fields.join(', ')} WHERE id = ?`).run(...values)
+    syncArtifact('placement', id)
     return this.getById(id)
   }
 

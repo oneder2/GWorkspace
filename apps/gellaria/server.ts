@@ -80,6 +80,7 @@ socketServer.on("connection", (socket, request) => {
     appearance,
     position: [0, 0.7, 5],
     rotation: 0,
+    room: "island",
   };
   clients.set(socket, player);
   send(socket, {
@@ -112,7 +113,16 @@ socketServer.on("connection", (socket, request) => {
     const parsed = clientMessageSchema.safeParse(payload);
     if (!parsed.success) return send(socket, { type: "error", message: "无法识别这次行动" });
 
+    if (parsed.data.type === "presence") {
+      if (player.room !== parsed.data.room) {
+        player.room = parsed.data.room;
+        broadcast({ type: "presence", id: player.id, room: player.room });
+      }
+      return;
+    }
+
     if (parsed.data.type === "move") {
+      if (player.room !== "island") return;
       const [x, y, z] = parsed.data.position;
       if (Math.abs(x) > 24 || Math.abs(z) > 24 || y < -2 || y > 5) return;
       player.position = [x, y, z];
@@ -177,6 +187,10 @@ heartbeat.unref();
 
 server.on("upgrade", (request, socket, head) => {
   const pathname = new URL(request.url ?? "/", "http://gellaria.local").pathname;
+  if (dev && pathname.startsWith('/explore/_next/')) {
+    void app.getUpgradeHandler()(request, socket, head);
+    return;
+  }
   if (pathname !== "/ws/gellaria" && pathname !== "/ws/world") {
     socket.destroy();
     return;

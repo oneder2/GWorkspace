@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { projectModelSpecSchema } from "./project-model";
+import { artifactSpecSchema } from "./artifact";
 
 export const landmarkExhibitSchema = z.object({
   id: z.string(),
@@ -15,6 +16,17 @@ export const landmarkExhibitSchema = z.object({
   publishedAt: z.string().nullable().optional(),
   modelSpec: projectModelSpecSchema.nullable().optional(),
   modelRevision: z.number().int().positive().nullable().optional(),
+  artifactId: z.string().startsWith("artifact:").optional(),
+  artifactSpec: artifactSpecSchema.optional(),
+  artifactRevision: z.number().int().positive().optional(),
+  collection: z.enum(['auto', 'featured', 'archive']).optional(),
+  details: z.object({
+    role: z.string().nullable(),
+    start: z.string(),
+    end: z.string().nullable(),
+    highlights: z.array(z.string()),
+    links: z.object({ source: z.string().optional(), demo: z.string().optional(), case_study: z.string().optional() }),
+  }).optional(),
 });
 
 export const landmarkSchema = z.object({

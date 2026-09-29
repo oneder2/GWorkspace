@@ -10,6 +10,7 @@ import { isJourneyComplete } from "@/lib/journey";
 import { workspaceUrl } from "@/lib/workspace-url";
 import { CompletionMoment, JourneyJournal } from "./JourneyJournal";
 import { ExhibitionHall } from "./ExhibitionHall";
+import { EchoForest } from "./EchoForest";
 import { StudyArea } from "./StudyArea";
 import { SpiritCustomizer } from "./SpiritCustomizer";
 import { useJourneyStore } from "./journey-store";
@@ -41,6 +42,7 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [worldSpawn, setWorldSpawn] = useState<[number, number, number]>([0, 0.7, 5]);
   const connect = useWorldStore((state) => state.connect);
+  const setRoom = useWorldStore((state) => state.setRoom);
   const connection = useWorldStore((state) => state.connection);
   const players = useWorldStore((state) => state.players);
   const signals = useWorldStore((state) => state.signals);
@@ -56,6 +58,9 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
   const avatar = useGWorkspaceAvatar();
 
   useEffect(() => connect(), [connect]);
+  useEffect(() => {
+    setRoom(inStudy ? "night-study" : activeHall?.id === "workshop" ? "workshop" : activeHall?.id === "observatory" ? "observatory" : activeHall?.id === "memory-grove" ? "memory-grove" : "island");
+  }, [inStudy, activeHall, setRoom]);
   useAmbientSound(!muted && !inStudy);
   useEffect(() => {
     if (!notice) return;
@@ -126,7 +131,9 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
     <main className="world-shell">
       <div className="world-layer" aria-hidden={inStudy} inert={inStudy ? true : undefined}>
         {!inStudy && (activeHall ? (
-          <ExhibitionHall landmark={activeHall} moveIntent={moveIntent} paused={customizerOpen} onExit={() => setActiveHall(null)} />
+          activeHall.id === "memory-grove"
+            ? <EchoForest landmark={activeHall} moveIntent={moveIntent} paused={customizerOpen} onExit={() => setActiveHall(null)} />
+            : <ExhibitionHall landmark={activeHall} moveIntent={moveIntent} paused={customizerOpen} onExit={() => setActiveHall(null)} />
         ) : (
           <WorldCanvas landmarks={landmarks} active={entered && !customizerOpen} moveIntent={moveIntent} onNearby={handleNearby} onStudyNearby={(value) => { setStudyNearby(value); if (value) setNearby(null); }} nearbyId={nearby?.id ?? null} discoveredIds={discovered} collectedIds={collected} journeyComplete={journeyComplete} initialPlayerPosition={worldSpawn} studyNearby={studyNearby} onStudyEnter={enterStudy} onHallEnter={enterHall} />
         ))}
@@ -156,7 +163,7 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
                 <p className="eyebrow">GWORKSPACE / SPATIAL EXHIBITION</p>
                 <h1>内容不只被阅读，<br />也可以被抵达。</h1>
                 <p className="arrival-owner"><span>{profile.name}</span>{profile.status}</p>
-                <p className="arrival-intro">这里是 GWorkspace 的空间展览层。沿展馆之间的光路行走，靠近入口按 E 进入；项目、写作与回声会以各自的形态出现在展厅中。</p>
+                <p className="arrival-intro">这里是 GWorkspace 的空间展览层。沿光路行走，靠近入口按 E 进入；在展馆中探索项目与写作，在森林中遇见浮现的回声。</p>
                 <button className="enter-button" onClick={() => setEntered(true)}>开始参观 <ArrowRight size={18} /></button>
                 <a className="quiet-link" href={workspaceUrl("/")}>返回 GWorkspace</a>
               </motion.div>
@@ -175,7 +182,7 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
               <button onPointerDown={() => setDirection("x", 1)} onPointerUp={() => setDirection("x", 0)} onPointerCancel={() => setDirection("x", 0)} aria-label="向右"><ChevronRight /></button>
             </div>
             {!activeHall && studyNearby && <button className="nearby-prompt study-entry-prompt" onClick={enterStudy} aria-keyshortcuts="E"><kbd>E</kbd><span>进入功能附馆</span>{studyArea.name}<DoorOpen size={17} /></button>}
-            {!activeHall && nearby && <button className="nearby-prompt" onClick={() => enterHall(nearby)} aria-keyshortcuts="E"><kbd>E</kbd><span>进入展馆</span>{nearby.name}<DoorOpen size={17} /></button>}
+            {!activeHall && nearby && <button className="nearby-prompt" onClick={() => enterHall(nearby)} aria-keyshortcuts="E"><kbd>E</kbd><span>{nearby.id === "memory-grove" ? "步入林地" : "进入展馆"}</span>{nearby.name}<DoorOpen size={17} /></button>}
           </>
         )}
 
@@ -189,7 +196,7 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
                   <div className="map-path path-a" /><div className="map-path path-b" /><div className="map-path path-c" />
                   <div className={`map-node workshop static ${discovered.includes("workshop") ? "surveyed" : ""}`}><span />项目馆<small>{collected.includes("workshop") ? "已参观" : "原型陈列"} · {signals.workshop ?? 0} 道光迹</small></div>
                   <div className={`map-node observatory static ${discovered.includes("observatory") ? "surveyed" : ""}`}><span />写作馆<small>{collected.includes("observatory") ? "已参观" : "星图阅览"} · {signals.observatory ?? 0} 道光迹</small></div>
-                  <div className={`map-node grove static ${discovered.includes("memory-grove") ? "surveyed" : ""}`}><span />回声馆<small>{collected.includes("memory-grove") ? "已参观" : "记忆温室"} · {signals["memory-grove"] ?? 0} 道光迹</small></div>
+                  <div className={`map-node grove static ${discovered.includes("memory-grove") ? "surveyed" : ""}`}><span />回声林地<small>{collected.includes("memory-grove") ? "已走过" : "林间的声音"} · {signals["memory-grove"] ?? 0} 道光迹</small></div>
                   <div className="map-node study static"><span />夜航自习室<small>功能附馆 · 临时停泊</small></div>
                   <div className="map-origin"><Compass size={20} /><small>中央抵达庭院</small></div>
                 </div>

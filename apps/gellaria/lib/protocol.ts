@@ -1,7 +1,11 @@
 import { z } from "zod";
 import type { SpiritAppearance } from "./spirit-identity";
 
+export const playerRoomSchema = z.enum(["island", "workshop", "observatory", "memory-grove", "night-study"]);
+export type PlayerRoom = z.infer<typeof playerRoomSchema>;
+
 export const clientMessageSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("presence"), room: playerRoomSchema }),
   z.object({
     type: z.literal("move"),
     position: z.tuple([z.number(), z.number(), z.number()]),
@@ -33,6 +37,7 @@ export type PublicPlayer = {
   appearance?: SpiritAppearance;
   position: [number, number, number];
   rotation: number;
+  room?: PlayerRoom;
 };
 
 export type WorldState = {
@@ -43,6 +48,7 @@ export type WorldState = {
 export type ServerMessage =
   | { type: "welcome"; id: string; color: string; players: PublicPlayer[]; world: WorldState }
   | { type: "joined"; player: PublicPlayer }
+  | { type: "presence"; id: string; room: PlayerRoom }
   | { type: "moved"; id: string; position: [number, number, number]; rotation: number }
   | { type: "appearance"; id: string; appearance: SpiritAppearance; color: string }
   | { type: "left"; id: string }

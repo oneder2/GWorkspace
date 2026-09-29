@@ -4,6 +4,8 @@ import { Guestbook } from '../models/Guestbook.js'
 import { Project } from '../models/Project.js'
 import { WorldExhibit } from '../models/WorldExhibit.js'
 import { GellariaProjectModel } from '../models/GellariaProjectModel.js'
+import { DailyCapsule } from '../models/DailyCapsule.js'
+import { publicArtifact } from './gellariaArtifacts.js'
 
 const REGION_IDS = ['workshop', 'observatory', 'memory-grove']
 const MAX_EXHIBITS_PER_REGION = 12
@@ -27,7 +29,8 @@ const projectExhibit = (project, placement, locale, model = null) => ({
   tags: project.tags,
   publishedAt: null,
   modelSpec: model?.spec || null,
-  modelRevision: model?.revision || null
+  modelRevision: model?.revision || null,
+  ...publicArtifact('project', project.id)
 })
 
 const blogExhibit = (blog, placement, locale) => ({
@@ -41,7 +44,8 @@ const blogExhibit = (blog, placement, locale) => ({
   href: placement?.href || `/blog/${blog.slug || blog.id}`,
   image: blog.image || null,
   tags: Array.isArray(blog.tags) ? blog.tags : [],
-  publishedAt: blog.published_at || blog.created_at || null
+  publishedAt: blog.published_at || blog.created_at || null,
+  ...publicArtifact('blog', blog.id)
 })
 
 const guestbookExhibit = (entry, placement, locale) => ({
@@ -69,7 +73,8 @@ const externalExhibit = (placement, locale) => ({
   href: placement.href || null,
   image: null,
   tags: [],
-  publishedAt: null
+  publishedAt: null,
+  ...publicArtifact('placement', placement.id)
 })
 
 function selectProfile(settings, locale) {
@@ -89,11 +94,11 @@ function selectProfile(settings, locale) {
   }
 }
 
-export function buildPublicWorld({ locale = 'zh' } = {}) {
+export function buildPublicWorld({ locale = 'zh', fullCatalog = false } = {}) {
   const language = locale === 'en' ? 'en' : 'zh'
   const settings = AdminSettings.get()
   const projects = Project.getAll({ status: 'published', surface: 'gellaria' })
-  const blogs = Blog.getAll({ status: 'published', limit: MAX_EXHIBITS_PER_REGION, sortBy: 'published_at', sortOrder: 'desc' })
+  const blogs = Blog.getAll({ status: 'published', limit: null, sortBy: 'published_at', sortOrder: 'desc' })
   const guestbook = Guestbook.getAll({ status: 'approved', limit: MAX_EXHIBITS_PER_REGION, sortOrder: 'desc' })
   const placements = WorldExhibit.getAll({ status: 'published' })
   const projectBySlug = new Map(projects.map(project => [project.slug, project]))
@@ -102,6 +107,18 @@ export function buildPublicWorld({ locale = 'zh' } = {}) {
   const guestbookById = new Map(guestbook.map(entry => [String(entry.id), entry]))
   const regions = Object.fromEntries(REGION_IDS.map(id => [id, []]))
   const placedSourceIds = new Set()
+
+  const capsule = DailyCapsule.getLatest()
+  if (capsule?.status === 'active' && capsule.source_text?.trim()) {
+    regions.observatory.push({
+      id: `daily-capsule:${capsule.capsule_date}`, sourceType: 'external',
+      sourceKey: capsule.capsule_date, presentation: 'daily-signal', label: '今日赠语',
+      title: capsule.greeting || capsule.source_text,
+      summary: capsule.thesis || capsule.takeaway || capsule.source_text,
+      href: capsule.source_url || '/workspace', tags: capsule.source_label ? [capsule.source_label] : [],
+      publishedAt: capsule.capsule_date, ...publicArtifact('capsule', capsule.id)
+    })
+  }
 
   for (const placement of placements) {
     let exhibit = null
@@ -118,12 +135,12 @@ export function buildPublicWorld({ locale = 'zh' } = {}) {
   }
 
   for (const project of projects) {
-    if (regions.workshop.length >= MAX_EXHIBITS_PER_REGION || placedSourceIds.has(`project:${project.slug}`)) continue
+    if (placedSourceIds.has(`project:${project.slug}`)) continue
     regions.workshop.push(projectExhibit(project, null, language, projectModels.get(project.id)))
   }
   for (const blog of blogs) {
     const keys = [`blog:${blog.slug}`, `blog:${blog.id}`]
-    if (regions.observatory.length >= MAX_EXHIBITS_PER_REGION || keys.some(key => placedSourceIds.has(key))) continue
+    if (keys.some(key => placedSourceIds.has(key))) continue
     regions.observatory.push(blogExhibit(blog, null, language))
   }
   for (const entry of guestbook) {
@@ -131,7 +148,7 @@ export function buildPublicWorld({ locale = 'zh' } = {}) {
     regions['memory-grove'].push(guestbookExhibit(entry, null, language))
   }
 
-  const timestamps = [settings?.updated_at, ...projects.map(project => project.updated_at), ...blogs.map(blog => blog.updated_at)]
+  const timestamps = [settings?.updated_at, ...projects.map(project => project.updated_at), ...blogs.map(blog => blog.updated_at), ...Object.values(regions).flat().map(exhibit => exhibit.artifactUpdatedAt)]
     .filter(Boolean)
     .map(value => new Date(value).getTime())
     .filter(Number.isFinite)
@@ -141,8 +158,23 @@ export function buildPublicWorld({ locale = 'zh' } = {}) {
     locale: language,
     updatedAt: timestamps.length ? new Date(Math.max(...timestamps)).toISOString() : null,
     profile: selectProfile(settings, language),
-    regions: REGION_IDS.map(id => ({ id, exhibits: regions[id].slice(0, MAX_EXHIBITS_PER_REGION) }))
+    regions: REGION_IDS.map(id => {
+      const sorted = [...regions[id]].sort((a, b) => Number(b.collection === 'featured' || Boolean(b.artifactSpec?.featured)) - Number(a.collection === 'featured' || Boolean(a.artifactSpec?.featured)))
+      return { id, exhibits: fullCatalog ? sorted : sorted.filter(item => item.collection !== 'archive').slice(0, MAX_EXHIBITS_PER_REGION) }
+    })
   }
+}
+
+export function buildPublicCatalog({ region = 'workshop', page = 1, theme = '', search = '', collection = 'all', locale = 'zh' } = {}) {
+  if (!['workshop', 'observatory'].includes(region) || !['all', 'archive', 'featured'].includes(collection)) { const error = new Error('Invalid catalogue selection'); error.status = 400; throw error }
+  const world = buildPublicWorld({ locale, fullCatalog: true })
+  const exhibits = world.regions.find(item => item.id === region).exhibits
+  const featured = exhibits.filter(item => item.collection !== 'archive').slice(0, MAX_EXHIBITS_PER_REGION)
+  const featuredIds = new Set(featured.map(item => item.id))
+  const themes = [...new Set(exhibits.map(item => item.artifactSpec?.zone || '其他内容'))]
+  const filtered = exhibits.filter(item => (collection === 'all' || (collection === 'featured' ? featuredIds.has(item.id) : item.collection === 'archive' || !featuredIds.has(item.id))) && (!theme || (item.artifactSpec?.zone || '其他内容') === theme) && (!search || `${item.title} ${item.summary}`.toLowerCase().includes(search.toLowerCase())))
+  const pageSize = 8, pages = Math.max(1, Math.ceil(filtered.length / pageSize)), current = Math.max(1, Math.min(pages, Number.isSafeInteger(Number(page)) ? Number(page) : 1))
+  return { region, page: current, pages, pageSize, total: filtered.length, themes, exhibits: filtered.slice((current - 1) * pageSize, current * pageSize), updatedAt: world.updatedAt }
 }
 
 export function listPublicProjects({ locale = 'zh' } = {}) {

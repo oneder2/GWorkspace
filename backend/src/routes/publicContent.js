@@ -1,9 +1,16 @@
 import express from 'express'
-import { buildPublicWorld, listPublicProjects } from '../services/publicWorld.js'
+import { buildPublicWorld, buildPublicCatalog, listPublicProjects } from '../services/publicWorld.js'
 import { buildResumeResponse, ResumeNotPublishedError } from '../services/resumePublic.js'
 
 const router = express.Router()
 const localeFrom = (req) => req.query.locale === 'en' ? 'en' : 'zh'
+
+router.get('/world/catalog', (req, res) => {
+  try {
+    const data = buildPublicCatalog({ region: String(req.query.region || 'workshop'), page: req.query.page, theme: String(req.query.theme || '').slice(0, 40), search: String(req.query.search || '').slice(0, 100), collection: String(req.query.collection || 'all'), locale: localeFrom(req) })
+    return res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=120').json(data)
+  } catch (error) { return res.status(error.status || 500).set('Cache-Control', 'no-store').json({ error: error.status === 400 ? error.message : 'Catalogue unavailable' }) }
+})
 
 router.get('/v1/resume', (req, res) => {
   const locale = req.query.locale || null

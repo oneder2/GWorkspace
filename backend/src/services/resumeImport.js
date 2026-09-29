@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import Ajv2020 from 'ajv/dist/2020.js'
 import { parse } from 'yaml'
 import { getDatabase } from '../config/database.js'
+import { syncArtifact } from './gellariaArtifacts.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const workspaceRoot = resolve(__dirname, '../../..')
@@ -225,6 +226,7 @@ const upsertProjects = (db, projects, importedAt) => {
       )
       created += 1
     }
+    syncArtifact('project', findBySlug.get(project.id).id, db)
   })
   return { created, updated }
 }
