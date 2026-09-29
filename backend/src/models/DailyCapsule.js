@@ -1,4 +1,5 @@
 import { getDatabase } from '../config/database.js'
+import { syncArtifact } from '../services/gellariaArtifacts.js'
 
 const normalizeCapsuleRecord = (capsule) => (
   capsule
@@ -121,6 +122,8 @@ export class DailyCapsule {
       )
     }
 
-    return this.getByDate(capsule_date)
+    const capsule = this.getByDate(capsule_date)
+    syncArtifact('capsule', capsule.id, db)
+    return capsule
   }
 }

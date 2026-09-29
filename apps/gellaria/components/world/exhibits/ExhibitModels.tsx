@@ -5,6 +5,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { Exhibit, ExhibitKind } from "@/lib/exhibition";
 import { deriveProjectModelSpec, stableModelSeed, type ProjectModelSpec } from "@/lib/project-model";
+import { BoundArtifact } from "./BoundArtifact";
 
 type ModelProps = { exhibit: Exhibit; active: boolean; accent: string };
 
@@ -38,6 +39,7 @@ function ProjectSurface({ spec, tone = "primary", glow = 0.16 }: {
 }
 
 export function SemanticExhibitModel({ exhibit, kind, active, accent }: ModelProps & { kind: ExhibitKind }) {
+  if (exhibit.artifactId && exhibit.artifactSpec) return <BoundArtifact artifactId={exhibit.artifactId} spec={exhibit.artifactSpec} active={active} writing={kind === "blog-constellation" || kind === "daily-signal"} />;
   if (kind === "project-model") return <ProjectArtifact exhibit={exhibit} active={active} />;
   if (kind === "blog-constellation") return <BlogConstellation exhibit={exhibit} active={active} accent={accent} />;
   if (kind === "daily-signal") return <DailyLightPage exhibit={exhibit} active={active} accent={accent} />;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sparkles } from "@react-three/drei";
 import { motion } from "motion/react";
 import {
@@ -8,6 +8,8 @@ import {
   AudioLines,
   Calculator,
   CloudRain,
+  ChevronDown,
+  ChevronUp,
   MoonStar,
   Pause,
   PenLine,
@@ -28,6 +30,9 @@ import {
   type CalculatorKey,
 } from "@/lib/study-tools";
 import { workspaceUrl } from "@/lib/workspace-url";
+import { ReadingRoom } from "./MuseumArchitecture";
+import { StudyParticipants } from "./StudyParticipants";
+import { useWorldStore } from "./store";
 
 type StudyAtmosphere = "night" | "rain" | "dawn";
 type Soundscape = "focus" | "rain" | "embers";
@@ -56,6 +61,10 @@ const calculatorKeys: CalculatorKey[] = [
 ];
 
 export function StudyArea({ onExit }: { onExit: () => void }) {
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const [atmosphereOpen, setAtmosphereOpen] = useState(false);
+  const connection = useWorldStore((state) => state.connection);
+  const roomCount = useWorldStore((state) => Object.values(state.players).filter((player) => player.room === "night-study").length + 1);
   const [atmosphere, setAtmosphere] = useState<StudyAtmosphere>("night");
   const [soundscape, setSoundscape] = useState<Soundscape>("focus");
   const [soundEnabled, setSoundEnabled] = useState(false);
@@ -155,10 +164,11 @@ export function StudyArea({ onExit }: { onExit: () => void }) {
           <p>NIGHT WATCH / 04</p>
           <h1>夜航自习室</h1>
         </div>
-        <span className="study-session"><i /> 本次停泊</span>
+        <span className="study-session"><i />{connection === "online" ? `${roomCount} 人自习 · 显示 ${Math.min(6, roomCount)}/6 席` : "离线自习 · 仅显示你"}</span>
       </header>
 
-      <aside className="study-atmosphere" aria-label="自习氛围设置">
+      <button className="study-atmosphere-toggle" onClick={() => setAtmosphereOpen((open) => !open)} aria-expanded={atmosphereOpen} aria-controls="study-atmosphere-settings">窗景与声音{atmosphereOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</button>
+      <aside id="study-atmosphere-settings" className="study-atmosphere" aria-label="自习氛围设置" hidden={!atmosphereOpen}>
         <p>WINDOW LIGHT / 窗景</p>
         <div className="study-environment-options" role="group" aria-label="选择窗景">
           {atmosphereOptions.map(({ id, label, icon: Icon }) => (
@@ -187,19 +197,21 @@ export function StudyArea({ onExit }: { onExit: () => void }) {
         </label>
       </aside>
 
-      <motion.section className="study-drawer" initial={{ y: 70 }} animate={{ y: 0 }} transition={{ delay: 0.25, duration: 0.55 }}>
+      <p className="study-seating-note">01 号座位是你 · 其余席位随机展示同室旅人</p>
+      <motion.section className={`study-drawer${toolsOpen ? "" : " is-collapsed"}`} initial={{ y: 70 }} animate={{ y: 0 }} transition={{ delay: 0.25, duration: 0.55 }}>
         <header className="study-tool-tabs" role="tablist" aria-label="自习工具">
-          <span>DESK UTILITIES</span>
-          <button role="tab" aria-selected={activeTool === "timer"} className={activeTool === "timer" ? "active" : ""} onClick={() => setActiveTool("timer")}>
+          <span>{timerRunning ? formatTimer(remaining) : "自习工具"}</span>
+          <button role="tab" aria-selected={activeTool === "timer"} className={activeTool === "timer" ? "active" : ""} onClick={() => { setActiveTool("timer"); setToolsOpen(true); }}>
             <Timer size={15} /> 番茄钟
           </button>
-          <button role="tab" aria-selected={activeTool === "calculator"} className={activeTool === "calculator" ? "active" : ""} onClick={() => setActiveTool("calculator")}>
+          <button role="tab" aria-selected={activeTool === "calculator"} className={activeTool === "calculator" ? "active" : ""} onClick={() => { setActiveTool("calculator"); setToolsOpen(true); }}>
             <Calculator size={15} /> 计算器
           </button>
-          <button role="tab" aria-selected={activeTool === "writing"} className={activeTool === "writing" ? "active" : ""} onClick={() => setActiveTool("writing")}>
+          <button role="tab" aria-selected={activeTool === "writing"} className={activeTool === "writing" ? "active" : ""} onClick={() => { setActiveTool("writing"); setToolsOpen(true); }}>
             <PenLine size={15} /> 写作间
           </button>
         </header>
+        <button className="study-tools-toggle" onClick={() => setToolsOpen((open) => !open)} aria-expanded={toolsOpen} aria-label={toolsOpen ? "收起工具，查看同室旅人" : "展开自习工具"}>{toolsOpen ? <ChevronDown size={18} /> : <ChevronUp size={18} />}</button>
 
         {activeTool === "timer" ? (
           <div className="study-timer" role="tabpanel">
@@ -266,7 +278,7 @@ function StudyRoomCanvas({ atmosphere }: { atmosphere: StudyAtmosphere }) {
   return (
     <Canvas className="study-canvas" shadows="basic" dpr={[1, 1.5]} camera={{ position: [11, 7.5, 14], fov: 42, near: 0.1, far: 80 }} gl={{ antialias: true, powerPreference: "high-performance", alpha: false }}>
       <color attach="background" args={[palette.background]} />
-      <fog attach="fog" args={[palette.fog, 15, 38]} />
+      <fog attach="fog" args={[palette.fog, 50, 120]} />
       <StudyRoomScene atmosphere={atmosphere} palette={palette} />
     </Canvas>
   );
@@ -280,15 +292,19 @@ function StudyRoomScene({ atmosphere, palette }: { atmosphere: StudyAtmosphere; 
       <pointLight castShadow position={[1.5, 4.2, 2.4]} color={palette.lamp} intensity={8} distance={13} decay={2} />
       <StudyCamera />
       <StudyRoomGeometry palette={palette} atmosphere={atmosphere} />
+      <StudyParticipants />
       <Sparkles count={atmosphere === "rain" ? 18 : 42} scale={[14, 5, 9]} position={[0, 3, 0]} size={1.2} speed={0.12} opacity={0.22} color={atmosphere === "dawn" ? "#f0d3ae" : "#c8d8d2"} />
     </>
   );
 }
 
 function StudyCamera() {
-  const targetPosition = useMemo(() => new THREE.Vector3(7.4, 5.25, 8.7), []);
-  const lookTarget = useMemo(() => new THREE.Vector3(0, 1.25, 0.4), []);
+  const { size } = useThree();
+  const targetPosition = useMemo(() => new THREE.Vector3(), []);
+  const lookTarget = useMemo(() => new THREE.Vector3(0, .7, -.1), []);
   useFrame(({ camera }, delta) => {
+    const distance = Math.max(1, 1.05 / (size.width / size.height));
+    targetPosition.set(0, 10.5 * distance, 12 * distance);
     camera.position.lerp(targetPosition, 1 - Math.pow(0.015, delta));
     camera.lookAt(lookTarget);
   });
@@ -296,41 +312,12 @@ function StudyCamera() {
 }
 
 function StudyRoomGeometry({ palette, atmosphere }: { palette: typeof scenePalettes[StudyAtmosphere]; atmosphere: StudyAtmosphere }) {
-  return (
-    <group>
-      <mesh receiveShadow rotation-x={-Math.PI / 2} position-y={-0.04}><planeGeometry args={[24, 20]} /><meshStandardMaterial color="#27342f" roughness={0.94} /></mesh>
-      <mesh receiveShadow position={[0, 3.2, -4.2]}><boxGeometry args={[16, 6.5, 0.28]} /><meshStandardMaterial color="#273338" roughness={0.9} /></mesh>
-      <mesh receiveShadow position={[-7.9, 3.2, 1]}><boxGeometry args={[0.28, 6.5, 11]} /><meshStandardMaterial color="#202d2e" roughness={0.94} /></mesh>
-
-      <group position={[1.5, 3.25, -4.02]}>
-        <mesh><planeGeometry args={[7.2, 3.7]} /><meshStandardMaterial color={palette.window} emissive={palette.window} emissiveIntensity={atmosphere === "dawn" ? 1.5 : 0.75} /></mesh>
-        <mesh position-y={1.95}><boxGeometry args={[7.7, 0.18, 0.2]} /><meshStandardMaterial color="#121d20" /></mesh>
-        <mesh position-y={-1.95}><boxGeometry args={[7.7, 0.18, 0.2]} /><meshStandardMaterial color="#121d20" /></mesh>
-        <mesh position-x={-3.7}><boxGeometry args={[0.18, 4, 0.2]} /><meshStandardMaterial color="#121d20" /></mesh>
-        <mesh position-x={3.7}><boxGeometry args={[0.18, 4, 0.2]} /><meshStandardMaterial color="#121d20" /></mesh>
-        <mesh><boxGeometry args={[0.12, 3.8, 0.2]} /><meshStandardMaterial color="#142126" /></mesh>
-        {atmosphere === "rain" && <WindowRain />}
-        {atmosphere === "night" && <WindowStars />}
-      </group>
-
-      <group position={[0, 0, 0.7]}>
-        <mesh castShadow receiveShadow position-y={1.45}><boxGeometry args={[6.4, 0.3, 2.5]} /><meshStandardMaterial color="#695644" roughness={0.72} /></mesh>
-        {[-2.7, 2.7].map((x) => <mesh key={x} castShadow position={[x, 0.65, 0]}><boxGeometry args={[0.24, 1.55, 2]} /><meshStandardMaterial color="#443b34" /></mesh>)}
-        <mesh castShadow position={[0.2, 1.82, 0.15]} rotation-x={-0.12}><boxGeometry args={[2.2, 0.08, 1.45]} /><meshStandardMaterial color="#d9d2ba" roughness={0.9} /></mesh>
-        <mesh castShadow position={[-1.8, 1.82, 0.15]}><cylinderGeometry args={[0.34, 0.29, 0.62, 14]} /><meshStandardMaterial color="#7f8d7c" roughness={0.8} /></mesh>
-        <group position={[2.05, 1.6, -0.35]} rotation-z={-0.18}>
-          <mesh castShadow position-y={1.05}><cylinderGeometry args={[0.07, 0.1, 2.1, 8]} /><meshStandardMaterial color="#b88a5d" metalness={0.35} /></mesh>
-          <mesh castShadow position={[0, 2.05, 0]} rotation-z={0.18}><coneGeometry args={[0.62, 0.72, 12, 1, true]} /><meshStandardMaterial color="#d8a66e" emissive={palette.lamp} emissiveIntensity={0.65} side={THREE.DoubleSide} /></mesh>
-        </group>
-        {[0, 1, 2].map((index) => <mesh key={index} castShadow position={[-2.35 + index * 0.18, 1.82 + index * 0.13, -0.65]} rotation-y={0.08}><boxGeometry args={[1.45, 0.18, 0.58]} /><meshStandardMaterial color={["#755449", "#445f61", "#8b7753"][index]} /></mesh>)}
-      </group>
-
-      <group position={[0, 0, 3.2]}>
-        <mesh castShadow position-y={0.72}><boxGeometry args={[2.2, 0.24, 2.1]} /><meshStandardMaterial color="#3d4b48" /></mesh>
-        <mesh castShadow position={[0, 1.65, 0.85]} rotation-x={-0.2}><boxGeometry args={[2.2, 1.8, 0.22]} /><meshStandardMaterial color="#35413f" /></mesh>
-      </group>
+  return <group>
+    <ReadingRoom light={palette.lamp} />
+    <group position={[0, 2.8, -5.28]}>
+      {atmosphere === "rain" ? <WindowRain /> : <WindowStars />}
     </group>
-  );
+  </group>;
 }
 
 function WindowStars() {

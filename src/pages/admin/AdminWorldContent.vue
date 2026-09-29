@@ -67,7 +67,9 @@
       <RecordRow v-for="record in projects" :key="record.id" :record="record" :title="record.title.zh" :meta="`${record.slug} · ${record.start_date || '—'} · ${record.involvement} · 3D ${record.world_model ? `r${record.world_model.revision}` : 'pending'}`" :summary="record.summary.zh" @edit="editProject(record)" @remove="removeProject(record)" />
     </RecordSection>
 
-    <section v-else-if="activeTab === 'models'" class="admin-panel record-section">
+    <ArtifactManager v-else-if="activeTab === 'models'" @legacy="activeTab = 'legacy-models'" />
+    <section v-else-if="activeTab === 'legacy-models'" class="admin-panel record-section">
+      <button class="action-btn" @click="activeTab = 'models'">返回展品设计</button>
       <div class="section-heading section-pad"><div><span>AGENT MODEL PIPELINE</span><h3>{{ $t('admin.gellariaModels') }}</h3></div><small class="model-contract">MODEL SPEC v1</small></div>
       <div v-if="!projects.length" class="empty-state">{{ $t('admin.noProjects') }}</div>
       <div v-else class="model-register">
@@ -140,6 +142,7 @@ import { useI18n } from 'vue-i18n'
 import { contentAdminApi } from '../../utils/api'
 import ProjectCoverPicker from '../../components/admin/ProjectCoverPicker.vue'
 import SurfacePicker from '../../components/admin/SurfacePicker.vue'
+import ArtifactManager from '../../components/admin/ArtifactManager.vue'
 
 const { t } = useI18n()
 const activeTab = ref('profile')

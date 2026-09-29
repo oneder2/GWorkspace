@@ -201,6 +201,9 @@ export const publicContentApi = {
 }
 
 export const contentAdminApi = {
+  getArtifacts: () => request('/admin/content/artifacts'),
+  getArtifact: (id) => request(`/admin/content/artifacts/${encodeURIComponent(id)}`),
+  updateArtifact: (id, data) => request(`/admin/content/artifacts/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(data) }),
   getResume: () => request('/admin/content/resume'),
   updateResumeProfile: (data) => request('/admin/content/resume/profile', { method: 'PUT', body: JSON.stringify(data) }),
   createResumeContact: (data) => request('/admin/content/resume/contacts', { method: 'POST', body: JSON.stringify(data) }),

@@ -5,10 +5,23 @@ import { WorldExhibit } from '../models/WorldExhibit.js'
 import { GellariaProjectModel } from '../models/GellariaProjectModel.js'
 import { Resume, RESUME_SURFACES } from '../models/Resume.js'
 import { projectWithWorldModel, refreshProjectWorldModel } from '../services/gellariaModeling.js'
+import { listManagedArtifacts, managedArtifactDetail, updateManagedArtifact } from '../services/gellariaArtifacts.js'
 
 const router = express.Router()
 router.use(authenticate)
 router.use(requireAdmin)
+
+router.get('/artifacts', (req, res) => res.json(listManagedArtifacts()))
+router.get('/artifacts/:id', (req, res) => {
+  const record = managedArtifactDetail(req.params.id)
+  return record ? res.json(record) : res.status(404).json({ error: 'Model not found' })
+})
+router.put('/artifacts/:id', (req, res) => {
+  try {
+    const record = updateManagedArtifact(req.params.id, req.body || {})
+    return record ? res.json(record) : res.status(404).json({ error: 'Model not found' })
+  } catch (error) { return res.status(error.status || 400).json({ error: error.message }) }
+})
 
 const sendValidationError = (res, message) => res.status(400).json({ error: message })
 const sendRecord = (res, operation, { created = false } = {}) => {

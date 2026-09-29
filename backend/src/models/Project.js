@@ -1,5 +1,6 @@
 import { getDatabase } from '../config/database.js'
 import { randomUUID } from 'node:crypto'
+import { syncArtifact } from '../services/gellariaArtifacts.js'
 
 const parseArray = (value) => {
   if (Array.isArray(value)) return value
@@ -224,6 +225,7 @@ export class Project {
     const created = db.prepare('SELECT * FROM projects WHERE id = ?').get(result.lastInsertRowid)
     syncProjectMedia(db, created)
     syncProjectGallery(db, created, data.gallery)
+    syncArtifact('project', result.lastInsertRowid, db)
     return this.getById(result.lastInsertRowid)
   }
 
@@ -263,6 +265,7 @@ export class Project {
     const updated = getDatabase().prepare('SELECT * FROM projects WHERE id = ?').get(id)
     syncProjectMedia(getDatabase(), updated)
     syncProjectGallery(getDatabase(), updated, data.gallery)
+    syncArtifact('project', id)
     return this.getById(id)
   }
 

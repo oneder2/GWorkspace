@@ -26,7 +26,10 @@ export const MIGRATION_FILES = [
   '017_resume_portfolio_refresh.sql',
   '018_oceannect_resume_project.sql',
   '019_portfolio_media_refresh.sql',
-  '020_gellaria_project_models.sql'
+  '020_gellaria_project_models.sql',
+  '021_gellaria_artifacts.sql',
+  '022_artifact_evolution.sql',
+  '023_artifact_curation.sql'
 ]
 
 const isIgnorableMigrationError = (message = '') => (

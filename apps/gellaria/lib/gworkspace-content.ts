@@ -68,6 +68,13 @@ export function resumeProjectExhibits(resume: Pick<GWorkspaceResume, "projects">
     image: project.cover ? gworkspaceMediaUrl(project.cover.url) : null,
     tags: project.technologies,
     publishedAt: project.start,
+    details: {
+      role: project.role,
+      start: project.start,
+      end: project.end,
+      highlights: project.highlights,
+      links: project.links,
+    },
     modelSpec: deriveProjectModelSpec({
       slug: project.slug,
       title: project.name,
@@ -91,15 +98,14 @@ export function mergePublicWorld(payload: unknown, resume: GWorkspaceResume | nu
   return {
     landmarks: fallbackLandmarks.map((landmark) => {
       const publicExhibits = exhibitsByRegion.get(landmark.id) ?? [];
+      // World publication/placement is authoritative; resume only enriches
+      // details. Never replace a bound artifact with a browser-derived model.
+      const resumeProjects = resumeProjectExhibits(resume) ?? [];
       const exhibits = landmark.id === "workshop"
-        ? (resumeProjectExhibits(resume)?.map((project) => {
-            const worldProject = publicExhibits.find((item) => item.sourceKey === project.sourceKey || item.id === `project:${project.sourceKey}`);
-            return worldProject?.modelSpec ? {
-              ...project,
-              modelSpec: worldProject.modelSpec,
-              modelRevision: worldProject.modelRevision,
-            } : project;
-          }) ?? publicExhibits)
+        ? publicExhibits.map((worldProject) => {
+            const project = resumeProjects.find((item) => item.sourceKey === worldProject.sourceKey || worldProject.id === `project:${item.sourceKey}`);
+            return project ? { ...project, ...worldProject, details: project.details, image: project.image || worldProject.image } : worldProject;
+          })
         : publicExhibits;
       return { ...landmark, exhibits };
     }),
@@ -127,7 +133,7 @@ function prependExhibit(landmark: Landmark, exhibit: z.infer<typeof landmarkExhi
 export function applyWorkspacePulse(content: WorldContent, pulse: WorkspacePulse): WorldContent {
   let landmarks = content.landmarks;
   const capsule = pulse.dailyCapsule;
-  if (capsule?.source_text.trim()) {
+  if (capsule?.source_text.trim() && content.source === "fallback") {
     landmarks = landmarks.map((landmark) => landmark.id === "observatory"
       ? prependExhibit(landmark, {
           id: `daily-capsule:${capsule.capsule_date}`,

@@ -21,6 +21,9 @@
     "sync:oceanseo": "node scripts/oceanseo-project-sync.js",
     "import:resume": "node scripts/import-resume.js",
     "gellaria:backfill-models": "node scripts/backfill-gellaria-models.js",
+    "gellaria:backfill-artifacts": "node scripts/backfill-gellaria-artifacts.js",
+    "check:gellaria-artifacts": "node scripts/check-gellaria-artifacts.js",
+    "check:artifact-curation": "node scripts/check-artifact-curation.js",
     "create-admin": "node scripts/create-admin.js",
     "ai:build-catalog": "node scripts/build-ai-seed-catalog.js",
     "ai:import-catalog": "node scripts/import-ai-seed-catalog.js"

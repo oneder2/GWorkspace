@@ -65,7 +65,7 @@ describe("GWorkspace public world adapter", () => {
         { id: "memory-grove", exhibits: [] },
       ],
     });
-    const enriched = applyWorkspacePulse(content, {
+    const enriched = applyWorkspacePulse({ ...content, source: "fallback" }, {
       dailyCapsule: {
         capsule_date: "2026-08-31",
         source_text: "测试命题",
@@ -104,7 +104,7 @@ describe("GWorkspace public world adapter", () => {
       projects: [{
         id: "project:gworkspace", slug: "gworkspace", name: "GWorkspace", summary: "个人工作空间",
         role: "创建者", involvement: "creator", start: "2025-01", end: null,
-        technologies: ["Vue", "Three.js"], highlights: [],
+        technologies: ["Vue", "Three.js"], highlights: ["公开事实统一管理"],
         links: { source: "https://github.com/oneder2/GWorkspace", demo: "https://www.gellaronline.cc" },
         cover: { id: "cover", url: "https://www.gellaronline.cc/images/projects/gworkspace.webp", mime_type: "image/webp", alt: null, width: null, height: null },
         gallery: [], featured: true, status: "published", surfaces: ["gellaria"], updated_at: "2026-09-02T00:00:00.000Z",
@@ -118,6 +118,11 @@ describe("GWorkspace public world adapter", () => {
       image: "/api/gworkspace-media?path=%2Fimages%2Fprojects%2Fgworkspace.webp",
       tags: ["Vue", "Three.js"],
       presentation: "project-model",
+      details: {
+        role: "创建者", start: "2025-01", end: null,
+        highlights: ["公开事实统一管理"],
+        links: { source: "https://github.com/oneder2/GWorkspace", demo: "https://www.gellaronline.cc" },
+      },
     });
     expect(projects?.[0].modelSpec?.version).toBe(1);
   });

@@ -4,11 +4,13 @@
  */
 
 import express from 'express'
+import { createHmac } from 'node:crypto'
+import { getJwtSecret } from '../config/auth.js'
 import { Blog } from '../models/Blog.js'
 import { getDatabase } from '../config/database.js'
 import { generateBlogImage } from '../utils/imageGenerator.js'
 import { normalizePublishedAt } from '../utils/blogDate.js'
-import { authenticate, requireAdmin } from '../middleware/auth.js'
+import { authenticate, requireAdmin, optionalAuthenticate } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -496,7 +498,7 @@ router.delete('/:id', authenticate, requireAdmin, (req, res) => {
  * 增加浏览量
  * POST /api/blogs/:id/views
  */
-router.post('/:id/views', (req, res) => {
+router.post('/:id/views', optionalAuthenticate, (req, res) => {
   try {
     const id = parseInt(req.params.id)
     const existingBlog = Blog.getById(id)
@@ -504,7 +506,9 @@ router.post('/:id/views', (req, res) => {
       return res.status(404).json({ error: 'Blog not found' })
     }
 
-    const blog = Blog.incrementViews(id)
+    const identity = req.user ? `user:${req.user.id}` : `visitor:${req.ip}:${String(req.get('user-agent') || '').slice(0, 400)}`
+    const readerHash = createHmac('sha256', getJwtSecret()).update(identity).digest('hex')
+    const blog = Blog.incrementViews(id, readerHash)
 
     if (!blog) {
       return res.status(404).json({ error: 'Blog not found' })

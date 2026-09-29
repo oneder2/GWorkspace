@@ -6,6 +6,7 @@
 import { getDatabase } from '../config/database.js'
 import { getTodayDateString, normalizePublishedAt } from '../utils/blogDate.js'
 import { randomUUID } from 'node:crypto'
+import { syncArtifact } from '../services/gellariaArtifacts.js'
 
 const UNTITLED_DRAFT_TITLE = '未命名文件'
 
@@ -270,6 +271,7 @@ export class Blog {
       now
     )
 
+    syncArtifact('blog', result.lastInsertRowid, db)
     return this.getById(result.lastInsertRowid)
   }
 
@@ -348,6 +350,7 @@ export class Blog {
 
     const query = `UPDATE blogs SET ${updateFields.join(', ')} WHERE id = ?`
     db.prepare(query).run(...updateValues)
+    syncArtifact('blog', id, db)
 
     return this.getById(id)
   }
@@ -368,10 +371,22 @@ export class Blog {
    * @param {number} id - 文章ID
    * @returns {Object|null} 更新后的文章对象
    */
-  static incrementViews(id) {
+  static incrementViews(id, readerHash = null, now = Date.now()) {
     const db = getDatabase()
-    db.prepare('UPDATE blogs SET views = views + 1 WHERE id = ?').run(id)
-    return this.getById(id)
+    return db.transaction(() => {
+      if (readerHash) {
+        const existing = db.prepare("SELECT id FROM blogs WHERE id = ? AND status = 'published'").get(id)
+        if (!existing) return null
+        const receipt = db.prepare('SELECT counted_at FROM blog_read_receipts WHERE blog_id = ? AND reader_hash = ?').get(id, readerHash)
+        if (receipt && now - receipt.counted_at < 30 * 60 * 1000) return this.getById(id)
+        db.prepare('INSERT INTO blog_read_receipts (blog_id, reader_hash, counted_at) VALUES (?, ?, ?) ON CONFLICT(blog_id, reader_hash) DO UPDATE SET counted_at = excluded.counted_at').run(id, readerHash, now)
+        db.prepare('DELETE FROM blog_read_receipts WHERE counted_at < ?').run(now - 48 * 60 * 60 * 1000)
+      }
+      const result = db.prepare("UPDATE blogs SET views = views + 1 WHERE id = ? AND status = 'published'").run(id)
+      if (!result.changes) return null
+      syncArtifact('blog', id, db)
+      return this.getById(id)
+    })()
   }
 
   /**
