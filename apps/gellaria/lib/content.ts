@@ -22,10 +22,12 @@ export const landmarkExhibitSchema = z.object({
   collection: z.enum(['auto', 'featured', 'archive']).optional(),
   details: z.object({
     role: z.string().nullable(),
+    involvement: z.enum(['creator', 'contributor', 'collaborator']).optional(),
     start: z.string(),
     end: z.string().nullable(),
     highlights: z.array(z.string()),
     links: z.object({ source: z.string().optional(), demo: z.string().optional(), case_study: z.string().optional() }),
+    gallery: z.array(z.object({ url: z.string(), alt: z.string() })).optional(),
   }).optional(),
 });
 

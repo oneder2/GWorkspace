@@ -90,8 +90,12 @@ export function buildMuseumPlan(landmark: Landmark): MuseumPlan {
   const rooms: MuseumRoom[] = [];
   const slots: ExhibitSlot[] = [];
   let frontZ = 7;
-  for (const [groupKey, { kind, title, exhibits: unsorted }] of groups) {
-    const exhibits = [...unsorted].sort((a, b) => Number(Boolean(b.artifactSpec?.featured)) - Number(Boolean(a.artifactSpec?.featured)));
+  // The reading hall opens with long-form work. A daily fragment gets its own
+  // quieter room after the articles, regardless of API insertion order.
+  const orderedGroups = [...groups].sort((a, b) => landmark.id === 'observatory'
+    ? Number(b[1].kind === 'blog-constellation') - Number(a[1].kind === 'blog-constellation') : 0);
+  for (const [groupKey, { kind, title, exhibits: unsorted }] of orderedGroups) {
+    const exhibits = [...unsorted].sort((a, b) => Number(b.collection === 'featured' || Boolean(b.artifactSpec?.featured)) - Number(a.collection === 'featured' || Boolean(a.artifactSpec?.featured)));
     const reflective = /叙事|思想|札记|经验/.test(title);
     const capacity = reflective || kind === 'daily-signal' ? 2 : 4;
     for (let offset = 0; offset < exhibits.length; offset += capacity) {
@@ -114,7 +118,7 @@ export function buildMuseumPlan(landmark: Landmark): MuseumPlan {
         const row = Math.floor(index / 2);
         // Laboratory pairs, staggered reading bays, or loose garden clearings.
         const drift = layout === "garden" ? (index % 3 - 1) * .55 : 0;
-        const x = layout === "archive" ? side * (row === 0 ? 5.5 : 6.1) : layout === "garden" ? side * (5.5 + row * .35) : side * 6.1;
+        const x = layout === "archive" ? side * (row === 0 ? 4.5 : 5) : layout === "garden" ? side * (5.5 + row * .35) : side * 4.7;
         const z = frontZ - 4.2 - row * rowPitch - (layout === "archive" && side > 0 ? 1.25 : 0) + drift;
         slots.push({
           id: exhibit.id, index: slots.length, kind, exhibit,

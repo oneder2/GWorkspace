@@ -118,6 +118,7 @@ export function primaryProjectUrl(project: ResumeProject): string {
 }
 
 export function gworkspaceMediaUrl(url: string): string {
+  if (url.startsWith('/images/')) return `/api/gworkspace-media?path=${encodeURIComponent(url)}`;
   try {
     const parsed = new URL(url);
     if (!parsed.pathname.startsWith("/images/")) return url;

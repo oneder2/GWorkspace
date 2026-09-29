@@ -30,6 +30,15 @@ const projectExhibit = (project, placement, locale, model = null) => ({
   publishedAt: null,
   modelSpec: model?.spec || null,
   modelRevision: model?.revision || null,
+  details: {
+    role: localized(project.role, locale) || null,
+    involvement: project.involvement,
+    start: project.start_date,
+    end: project.end_date || null,
+    highlights: project.highlights?.[locale] || project.highlights?.zh || [],
+    links: Object.fromEntries(project.links.filter(link => ['source', 'demo', 'case_study'].includes(link.kind)).map(link => [link.kind, link.url])),
+    gallery: project.gallery.filter(media => media.status === 'published').map(media => ({ url: media.url, alt: localized(media.alt, locale) || localized(project.title, locale) })),
+  },
   ...publicArtifact('project', project.id)
 })
 

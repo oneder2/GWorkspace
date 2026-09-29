@@ -7,8 +7,8 @@ import type { ExhibitSlot, MuseumPlan, MuseumRoom } from "@/lib/exhibition";
 import type { MuseumTheme } from "@/lib/museum-theme";
 
 const lightProfiles = {
-  fabrication: { key: "#b5d7ee", focus: "#e4f5ed", ambient: .28, sky: .42, strength: 1.8, spot: 105, height: 5.6, angle: .46 },
-  archive: { key: "#a8badf", focus: "#ffdc9d", ambient: .32, sky: .38, strength: 1.5, spot: 78, height: 4.8, angle: .56 },
+  fabrication: { key: "#e1eef4", focus: "#e4f5ed", ambient: .62, sky: .7, strength: 1.5, spot: 80, height: 5.6, angle: .46 },
+  archive: { key: "#e7e9f4", focus: "#ffe5b8", ambient: .58, sky: .65, strength: 1.4, spot: 65, height: 4.8, angle: .56 },
   garden: { key: "#b2d8ee", focus: "#b9e9da", ambient: .25, sky: .4, strength: 2.1, spot: 62, height: 4.6, angle: .59 },
 };
 
@@ -36,14 +36,6 @@ function ExhibitLight({ slot, theme, selected }: { slot: ExhibitSlot; theme: Mus
     <primitive object={target} position={[0, .3, 0]} />
     <spotLight ref={lamp} target={target} position={[-side * .65, profile.height, 1.25]} color={profile.focus} intensity={profile.spot}
       angle={profile.angle} penumbra={.8} decay={2} distance={12} />
-    {/* Fixtures are outside the walking footprint and do not cross the view. */}
-    <mesh position={[-side * .65, profile.height, 1.25]} rotation-x={.2}>
-      <cylinderGeometry args={[.14, .24, .18, 16]} />
-      <meshStandardMaterial color={theme.dark} metalness={.55} roughness={.4} />
-    </mesh>
-    <mesh position={[-side * .65, profile.height - .105, 1.25]} rotation-x={Math.PI / 2}>
-      <circleGeometry args={[.19, 20]} /><meshBasicMaterial color={profile.focus} toneMapped={false} />
-    </mesh>
     <LightPool position={[0, .09, 0]} color={profile.focus} radius={2.6} opacity={selected ? .2 : .11} stretch={1.05} />
   </group>;
 }
@@ -71,18 +63,16 @@ export function MuseumLighting({ room, plan, slots, theme, selectedId }: { room:
       shadow-mapSize={size.width < 640 ? [1024, 1024] : [2048, 2048]} shadow-bias={-.00015} shadow-normalBias={.045}
       shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={16} shadow-camera-bottom={-16} shadow-camera-near={1} shadow-camera-far={45} />
     {slots.map((slot) => <ExhibitLight key={slot.id} slot={slot} theme={theme} selected={selectedId === slot.id} />)}
-    {[-1, 1].map((side) => <pointLight key={side} position={[side * 7.5, 2.8, room.centerZ - 1]} color={theme.accent} intensity={theme.layout === "archive" ? 13 : 8} distance={8} decay={2} />)}
     {plan.rooms.map((item) => <group key={item.id}>
-      {Array.from({ length: Math.ceil(item.depth / 3) }, (_, i) => {
-        const z = item.centerZ + item.depth / 2 - 1.4 - i * 3;
+      {Array.from({ length: Math.ceil(item.depth / 6) }, (_, i) => {
+        const z = item.centerZ + item.depth / 2 - 1.4 - i * 6;
         return <group key={i}>
-          <LightPool position={[0, .1, z]} radius={2.25} stretch={.7} color={theme.light} opacity={.16} />
           {[-1, 1].map((side) => <mesh key={side} position={[side * 1.65, .14, z]} rotation-x={-Math.PI / 2}>
             <planeGeometry args={[.07, .48]} /><meshBasicMaterial color={theme.accent} toneMapped={false} />
           </mesh>)}
         </group>;
       })}
-      <LightPool position={[0, .11, item.centerZ + item.depth / 2 - .5]} radius={2.45} color={theme.accent} opacity={.25} />
+      <LightPool position={[0, .11, item.centerZ + item.depth / 2 - .5]} radius={2.45} color={theme.accent} opacity={.1} />
     </group>)}
   </group>;
 }

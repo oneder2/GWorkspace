@@ -55,7 +55,7 @@ export function InspectionPanel({ slot, step, onStep, onReset, onMove, onClose, 
     return () => { observer.disconnect(); parent.style.removeProperty('--inspection-height'); if (previous?.isConnected) previous.focus(); };
   }, []);
   return <aside ref={panel} tabIndex={-1} className="museum-inspection" aria-label="驻足观看">
-    <div><small>驻足观看 · 拖动旋转 / 双指缩放</small><h2>{slot.exhibit?.title}</h2><p aria-live="polite">{interaction && step ? interaction.steps[step - 1] : recipe?.rationale || slot.exhibit?.summary}</p></div>
+    <div><small>驻足观看 · 拖动旋转 / 双指缩放</small><h2>{slot.exhibit?.title}</h2><p aria-live="polite">{interaction && step ? interaction.steps[step - 1] : slot.exhibit?.summary}</p>{slot.exhibit?.details?.role && <small>我的参与：{slot.exhibit.details.role}</small>}{interaction && <small className="inspection-demo-note">模型演示为功能示意 · 真实作品与实现记录见展签</small>}</div>
     <div className="inspection-actions">{interaction && <button onClick={() => onStep(step >= interaction.steps.length ? 0 : step + 1)}>{step === 0 ? interaction.action : step >= interaction.steps.length ? '重置演示' : '继续演示'}{step > 0 && ` · ${step}/${interaction.steps.length}`}</button>}<button onClick={onReset}>重置视角</button><button onClick={onRead}>阅读展签</button><button onClick={onClose}>继续漫步 <kbd>Esc</kbd></button></div>
     <details className="inspection-camera-controls"><summary>视角控制</summary><div className="inspection-actions">{([['left', '向左旋转'], ['right', '向右旋转'], ['up', '升高视角'], ['down', '降低视角'], ['in', '拉近'], ['out', '拉远']] as const).map(([action, label]) => <button key={action} onClick={() => onMove(action)}>{label}</button>)}</div></details>
   </aside>;

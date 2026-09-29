@@ -63,6 +63,17 @@ try {
   assert.equal(page.total, 25); assert.equal(page.pages, 4)
   const all = Array.from({ length: page.pages }, (_, i) => buildPublicCatalog({ region: 'workshop', search: '目录样本', page: i + 1 }).exhibits).flat()
   assert.equal(new Set(all.map(e => e.id)).size, 25)
+  // Catalogue visits have the same factual dossier as the default world,
+  // without relying on the resume endpoint or its item limit.
+  Project.update(ids[0], { role: { zh: '参与实现', en: 'Contributor' }, involvement: 'contributor', highlights: { zh: ['实现离线写作'], en: ['Offline writing'] }, links: [{ kind: 'source', url: 'https://example.test/source' }], gallery: [{ url: 'https://example.test/screen.png', alt: { zh: '文档截图', en: 'Document screenshot' } }] })
+  const dossier = buildPublicCatalog({ region: 'workshop', search: '目录样本 0' }).exhibits[0].details
+  assert.equal(dossier.role, '参与实现'); assert.equal(dossier.involvement, 'contributor')
+  assert.deepEqual(dossier.highlights, ['实现离线写作']); assert.equal(dossier.links.source, 'https://example.test/source')
+  assert.deepEqual(dossier.gallery, [{ url: 'https://example.test/screen.png', alt: '文档截图' }])
+  assert.equal(buildPublicCatalog({ region: 'workshop', search: '目录样本 0', locale: 'en' }).exhibits[0].details.role, 'Contributor')
+  assert.deepEqual(buildPublicWorld().regions[0].exhibits.find(e => e.sourceKey === 'catalog-0').details, dossier)
+  db.prepare("UPDATE public_media SET status = 'draft' WHERE url = ?").run('https://example.test/screen.png')
+  assert.deepEqual(buildPublicCatalog({ region: 'workshop', search: '目录样本 0' }).exhibits[0].details.gallery, [])
   Project.update(ids[24], { surfaces: ['resume_web'] })
   assert.equal(buildPublicCatalog({ region: 'workshop', search: '目录样本' }).total, 24)
   Blog.update(blog.id, { status: 'draft' })

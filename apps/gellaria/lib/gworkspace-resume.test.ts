@@ -37,6 +37,7 @@ describe("GWorkspace resume v1 adapter", () => {
 
   it("keeps GWorkspace images on the Gellaria origin", () => {
     expect(gworkspaceMediaUrl("https://www.gellaronline.cc/images/profile/avatar.jpg")).toBe("/api/gworkspace-media?path=%2Fimages%2Fprofile%2Favatar.jpg");
+    expect(gworkspaceMediaUrl('/images/portfolio/vana.webp')).toBe('/api/gworkspace-media?path=%2Fimages%2Fportfolio%2Fvana.webp');
     expect(gworkspaceMediaUrl("https://cdn.example.test/avatar.jpg")).toBe("https://cdn.example.test/avatar.jpg");
   });
 });

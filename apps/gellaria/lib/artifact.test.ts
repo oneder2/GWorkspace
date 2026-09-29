@@ -36,7 +36,9 @@ describe("bound museum artifacts", () => {
     const plan = buildMuseumPlan({ ...landmarks[0], exhibits: [bound, { ...bound, id: "book", artifactSpec: { ...spec, zone: "表达与记录", form: "publishing-press" } }, { ...bound, id: "featured", artifactSpec: { ...spec, featured: true } }] });
     expect(plan.rooms.map(room => room.title)).toEqual(["知识与推理", "表达与记录"]);
     expect(plan.slots.map(slot => slot.id)).toEqual(["featured", "project:bound", "book"]);
-    expect(plan.slots.every(slot => Math.abs(slot.position[0]) > 5)).toBe(true);
+    // Exhibit footprint plus traveler buffer must stay outside the 4.7-unit
+    // central route even when displays are brought closer to the visitor.
+    expect(plan.slots.every(slot => Math.abs(slot.position[0]) - 1.45 >= 2.35)).toBe(true);
   });
   it("rejects arbitrary geometry code and unbounded detail", () => {
     expect(artifactSpecSchema.safeParse({ ...spec, form: "eval(js)" }).success).toBe(false);

@@ -165,6 +165,7 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
                 <p className="arrival-owner"><span>{profile.name}</span>{profile.status}</p>
                 <p className="arrival-intro">这里是 GWorkspace 的空间展览层。沿光路行走，靠近入口按 E 进入；在展馆中探索项目与写作，在森林中遇见浮现的回声。</p>
                 <button className="enter-button" onClick={() => setEntered(true)}>开始参观 <ArrowRight size={18} /></button>
+                <button className="quiet-link arrival-guide" onClick={() => { setEntered(true); setMapOpen(true); }}>选择参观方向</button>
                 <a className="quiet-link" href={workspaceUrl("/")}>返回 GWorkspace</a>
               </motion.div>
               <div className="arrival-coordinate" aria-hidden="true"><span>EXHIBITION CAMPUS</span><i /><span>WORLD 001</span></div>
@@ -200,6 +201,7 @@ export function WorldExperience({ initialDestination, landmarks, profile }: { in
                   <div className="map-node study static"><span />夜航自习室<small>功能附馆 · 临时停泊</small></div>
                   <div className="map-origin"><Compass size={20} /><small>中央抵达庭院</small></div>
                 </div>
+                <nav className="map-destinations" aria-label="选择参观方向">{landmarks.map(landmark => <button key={landmark.id} onClick={() => { setMapOpen(false); setEntered(true); enterHall(landmark); }}><strong>{landmark.id === 'workshop' ? '看作品' : landmark.id === 'observatory' ? '读文章' : '听回声'}</strong><span>{landmark.id === 'workshop' ? '用途、实现与实际项目' : landmark.id === 'observatory' ? '长文与单独陈列的每日赠语' : '留言与声音，随走随停'}</span><small>{landmark.name} →</small></button>)}</nav>
                 <footer><span>世界总光迹</span><strong>{totalSignals.toLocaleString("zh-CN")}</strong></footer>
               </motion.section>
             </motion.div>
