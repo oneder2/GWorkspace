@@ -32,13 +32,13 @@ describe("bound museum artifacts", () => {
     const result = applyWorkspacePulse(content, { nowPlaying: null, dailyCapsule: { capsule_date: "2026-09-27", source_text: "text", greeting: "greeting", thesis: "thesis", boundary: "", takeaway: "" } });
     expect(result.landmarks[1].exhibits[0].artifactId).toBe("artifact:stable");
   });
-  it("groups topics separately, keeps featured pieces first and leaves an open route", () => {
+  it("groups related topics without isolated rooms and preserves model bindings", () => {
     const plan = buildMuseumPlan({ ...landmarks[0], exhibits: [bound, { ...bound, id: "book", artifactSpec: { ...spec, zone: "表达与记录", form: "publishing-press" } }, { ...bound, id: "featured", artifactSpec: { ...spec, featured: true } }] });
-    expect(plan.rooms.map(room => room.title)).toEqual(["知识与推理", "表达与记录"]);
-    expect(plan.slots.map(slot => slot.id)).toEqual(["featured", "project:bound", "book"]);
-    // Exhibit footprint plus traveler buffer must stay outside the 4.7-unit
-    // central route even when displays are brought closer to the visitor.
-    expect(plan.slots.every(slot => Math.abs(slot.position[0]) - 1.45 >= 2.35)).toBe(true);
+    expect(plan.rooms).toHaveLength(2);
+    expect(plan.slots.find(slot => slot.id === 'featured')?.site).toBe(0);
+    expect(plan.slots.find(slot => slot.id === 'project:bound')?.zoneId).toBe(plan.slots.find(slot => slot.id === 'featured')?.zoneId);
+    expect(plan.slots.every(slot => slot.exhibit?.artifactId === 'artifact:stable')).toBe(true);
+    expect(plan.slots.every(slot => Math.abs(slot.position[0]) - slot.footprint![0] / 2 - .35 >= 1.05 - 1e-8)).toBe(true);
   });
   it("rejects arbitrary geometry code and unbounded detail", () => {
     expect(artifactSpecSchema.safeParse({ ...spec, form: "eval(js)" }).success).toBe(false);

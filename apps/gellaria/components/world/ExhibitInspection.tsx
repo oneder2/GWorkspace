@@ -20,7 +20,7 @@ export function InspectionCamera({ slot, move }: { slot: ExhibitSlot; move: View
   const [settled, setSettled] = useState(false);
   const time = useRef(0);
   const target = useMemo(() => new THREE.Vector3(slot.position[0], slot.kind === 'blog-constellation' || slot.kind === 'daily-signal' ? 1.65 : 1.35, slot.position[2]), [slot]);
-  const destination = useMemo(() => target.clone().add(new THREE.Vector3(slot.position[0] < 0 ? 2.6 : -2.6, 1.1, 1.8)), [slot, target]);
+  const destination = useMemo(() => target.clone().add(new THREE.Vector3(slot.viewingPoint ? .8 : slot.position[0] < 0 ? 2.6 : -2.6, 1.35, slot.viewingPoint ? 3.1 : 1.8)), [slot, target]);
   useEffect(() => {
     if (!move) return;
     const offset = camera.position.clone().sub(target), spherical = new THREE.Spherical().setFromVector3(offset);

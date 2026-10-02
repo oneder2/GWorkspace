@@ -5,7 +5,7 @@ import { Html } from "@react-three/drei";
 import Image from "next/image";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowUpRight, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import * as THREE from "three";
 import type { Landmark } from "@/lib/content";
 import { buildMuseumPlan, constrainMuseumPosition, exhibitKindNames, getExhibitAction, getHallConfig, selectNearbyExhibit, type ExhibitSlot, type MuseumPlan } from "@/lib/exhibition";
@@ -22,8 +22,12 @@ import { MuseumGuide } from './MuseumGuide';
 import { SpiritTraveler, type SpiritMotion } from "./SpiritTraveler";
 import { useWorldStore } from "./store";
 import type { MoveIntent } from "./WorldExperience";
+import { GALLERY_CAPACITY, GALLERY_LAYOUT_VERSION, readGalleryPlacements } from '@/lib/compact-gallery';
 
 type ExhibitionHallProps = { landmark: Landmark; moveIntent: MoveIntent; paused?: boolean; onExit: () => void };
+const subscribeHydration = () => () => {};
+const browserSnapshot = () => true;
+const serverSnapshot = () => false;
 function isTyping(target: EventTarget | null) {
   return target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "SELECT", "TEXTAREA"].includes(target.tagName));
 }
@@ -41,13 +45,23 @@ function publicImage(value?: string | null) {
 export function ExhibitionHall({ landmark, moveIntent, paused = false, onExit }: ExhibitionHallProps) {
   const [selection, setSelection] = useState({ landmark, label: '入口精选', visit: 0 });
   const [catalogOpen, setCatalogOpen] = useState(false);
-  return <><MuseumVisit key={selection.visit} landmark={selection.landmark} moveIntent={moveIntent} paused={paused || catalogOpen} onExit={onExit} collectionLabel={selection.label} onCatalog={() => setCatalogOpen(true)}/>{catalogOpen && <ExhibitionCatalog landmark={landmark} onClose={() => setCatalogOpen(false)} onSelect={(next, label) => { setSelection(current => ({ landmark: next, label, visit: current.visit + 1 })); setCatalogOpen(false); }}/>}</>;
+  const [batch, setBatch] = useState(0);
+  const batches = Math.max(1, Math.ceil(selection.landmark.exhibits.length / GALLERY_CAPACITY));
+  const visibleLandmark = useMemo(() => ({ ...selection.landmark, exhibits: selection.landmark.exhibits.slice(batch * GALLERY_CAPACITY, (batch + 1) * GALLERY_CAPACITY) }), [selection.landmark, batch]);
+  return <><MuseumVisit key={`${selection.visit}:${batch}`} landmark={visibleLandmark} moveIntent={moveIntent} paused={paused || catalogOpen} onExit={onExit} collectionLabel={`${selection.label}${batches > 1 ? ` · ${batch + 1}/${batches}` : ''}`} onCatalog={() => setCatalogOpen(true)} onNextBatch={batches > 1 ? () => setBatch(value => (value + 1) % batches) : undefined}/>{catalogOpen && <ExhibitionCatalog landmark={landmark} onClose={() => setCatalogOpen(false)} onSelect={(next, label) => { setBatch(0); setSelection(current => ({ landmark: next, label, visit: current.visit + 1 })); setCatalogOpen(false); }}/>}</>;
 }
 
-function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, collectionLabel }: ExhibitionHallProps & { onCatalog: () => void; collectionLabel: string }) {
+function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, collectionLabel, onNextBatch }: ExhibitionHallProps & { onCatalog: () => void; collectionLabel: string; onNextBatch?: () => void }) {
   const config = getHallConfig(landmark.id);
   const theme = museumTheme(landmark.id);
-  const plan = useMemo(() => buildMuseumPlan(landmark), [landmark]);
+  const layoutKey = `gellaria:gallery:${GALLERY_LAYOUT_VERSION}:${landmark.id}:${collectionLabel}`;
+  const hydrated = useSyncExternalStore(subscribeHydration, browserSnapshot, serverSnapshot);
+  const plan = useMemo(() => {
+    if (!hydrated) return buildMuseumPlan(landmark);
+    try { return buildMuseumPlan(landmark, readGalleryPlacements(window.localStorage, layoutKey)); }
+    catch { return buildMuseumPlan(landmark); }
+  }, [hydrated, landmark, layoutKey]);
+  useEffect(() => { if (hydrated) try { localStorage.setItem(layoutKey, JSON.stringify(plan.placements)); } catch { /* Private browsing still permits a visit. */ } }, [hydrated, layoutKey, plan]);
   const [nearby, setNearby] = useState<ExhibitSlot | null>(null);
   const [preview, setPreview] = useState<ExhibitSlot | null>(null);
   const [active, setActive] = useState<ExhibitSlot | null>(null);
@@ -94,7 +108,7 @@ function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, 
 
   const currentRoom = plan.rooms.find((room) => room.id === roomId) ?? plan.rooms[0];
   const roomIndex = plan.rooms.indexOf(currentRoom);
-  const visiblePlan = { ...plan, rooms: plan.rooms.slice(Math.max(0, roomIndex - 1), roomIndex + 2) };
+  const visiblePlan = plan.shell ? plan : { ...plan, rooms: plan.rooms.slice(Math.max(0, roomIndex - 1), roomIndex + 2) };
   const activeSlots = plan.slots.slice(currentRoom.startIndex, currentRoom.startIndex + currentRoom.count);
   return <section className={`exhibition-hall museum museum-${theme.layout}${active ? " museum-reading" : ""}${inspection ? " museum-inspecting" : ""}`} aria-label={`${landmark.name}${config.roomLabel}`} style={{ "--museum-accent": theme.accent, "--museum-panel": theme.panel, "--museum-paper": theme.paper, "--museum-ink": theme.ink } as CSSProperties}>
     <Canvas className="hall-canvas" shadows="percentage" dpr={[1, 1.4]} camera={{ position: [0, 9, 16], fov: 52, near: .1, far: 150 }} gl={{ antialias: true, alpha: false }} onCreated={({ gl }) => { gl.transmissionResolutionScale = .4; }}>
@@ -102,9 +116,9 @@ function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, 
       <MuseumLighting room={currentRoom} plan={visiblePlan} slots={activeSlots} theme={theme} selectedId={nearby?.id ?? active?.id} />
       <MuseumInterior plan={visiblePlan} kind={landmark.id} />
       <InspectionContext.Provider value={{ artifactId: inspection?.exhibit?.artifactId || '', step: inspectionStep }}>
-        {activeSlots.map((slot) => <MuseumExhibit key={slot.id} slot={slot} theme={theme} inspecting={inspection?.id === slot.id} selected={nearby?.id === slot.id || active?.id === slot.id} />)}
+        {(plan.shell ? plan.slots : activeSlots).map((slot) => <MuseumExhibit key={slot.id} slot={slot} theme={theme} inspecting={inspection?.id === slot.id} selected={nearby?.id === slot.id || active?.id === slot.id} />)}
       </InspectionContext.Provider>
-      {visiblePlan.rooms.map((room) => <Html key={room.id} position={[0, .13, room.centerZ + room.depth / 2 - .85]} rotation-x={-Math.PI / 2} transform distanceFactor={8} className="museum-floor-label" zIndexRange={[1, 0]}>
+      {visiblePlan.rooms.map((room) => <Html key={room.id} position={[room.centerX || 0, .13, room.centerZ + room.depth / 2 - .85]} rotation-x={-Math.PI / 2} transform distanceFactor={8} className="museum-floor-label" zIndexRange={[1, 0]}>
         <span>{String(plan.rooms.indexOf(room) + 1).padStart(2, "0")} / {room.title}</span>
       </Html>)}
       <MuseumTraveler plan={plan} arrival={arrival} paused={paused || guideOpen || Boolean(active) || Boolean(inspection)} cameraOwned={Boolean(inspection)} moveIntent={moveIntent} onNearby={setNearby} onExitNearby={setExitNearby} onRoom={setRoomId} />
@@ -113,15 +127,16 @@ function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, 
     <header className="hall-header" inert={Boolean(active)}>
       <button className="hall-back" onClick={onExit}><ArrowLeft size={17} />返回中央岛</button>
       <div><p>{config.hallLabel}</p><h1>{config.roomLabel}</h1></div>
-      <span className="hall-occupancy">{plan.rooms.length} 个展室 · {plan.slots.length} 件展出</span>
+      <span className="hall-occupancy">{plan.shell ? '连续展厅' : `${plan.rooms.length} 个展室`} · {plan.slots.length} 件展出</span>
     </header>
     <aside className="museum-location" hidden={Boolean(inspection)} inert={Boolean(active)}>
-      <span>当前展室 {plan.rooms.findIndex((room) => room.id === roomId) + 1} / {plan.rooms.length}</span>
+      <span>当前展区 {roomIndex + 1} / {plan.rooms.length}</span>
       <strong>{currentRoom.title}</strong>
       <button className="catalog-open guide-open" onClick={() => setGuideOpen(true)}>{landmark.id === 'workshop' ? '从一件作品开始' : '选一篇文章'} · 参观指南</button>
       <button className="catalog-open" onClick={onCatalog}>{collectionLabel} · 查看全部收藏</button>
+      {onNextBatch && <button className="catalog-open" onClick={onNextBatch}>参观下一组展出</button>}
       <small>{plan.slots.length ? theme.route : "展馆已准备好，等待公开内容展出"}</small>
-      <details className="museum-route"><summary>主题路线 · {plan.rooms.length} 个区域</summary><ol>{plan.rooms.map((room, index) => <li key={room.id} aria-current={room.id === currentRoom.id ? "location" : undefined}><button onClick={() => { setNearby(null); setPreview(null); setRoomId(room.id); setArrival([0, room.centerZ + room.depth / 2 - 2]); }}>{index + 1}. {room.title}</button><span>{room.count} 件</span></li>)}</ol><small>沿通道漫步，或直接进入选定的主题展室。</small></details>
+      <details className="museum-route"><summary>主题路线 · {plan.rooms.length} 个区域</summary><ol>{plan.rooms.map((room, index) => <li key={room.id} aria-current={room.id === currentRoom.id ? "location" : undefined}><button onClick={() => { setNearby(null); setPreview(null); setRoomId(room.id); setArrival(room.arrival || [0, room.centerZ + room.depth / 2 - 2]); }}>{index + 1}. {room.title}</button><span>{room.count} 件</span></li>)}</ol><small>各展区相互开放，可以绕行，也可以穿过中间的捷径。</small></details>
       <details><summary>展厅生态 · {signals[landmark.id] ?? 0} 道光迹</summary>
         <button onClick={() => sendSignal(landmark.id)}>留下一道光迹</button>
         {landmark.tagOptions.map((tag) => <button key={tag} onClick={() => sendTag(landmark.id, tag)}>{tag}</button>)}
@@ -130,7 +145,7 @@ function MuseumVisit({ landmark, moveIntent, paused = false, onExit, onCatalog, 
     {guideOpen && <MuseumGuide plan={plan} kind={landmark.id} onClose={() => setGuideOpen(false)} onVisit={slot => {
       const room = plan.rooms.find(item => slot.index >= item.startIndex && slot.index < item.startIndex + item.count)!;
       setRoomId(room.id); setNearby(slot); setPreview(slot);
-      setArrival([slot.position[0] + (slot.position[0] < 0 ? 2.2 : -2.2), slot.position[2]]);
+      setArrival(slot.viewingPoint || [slot.position[0] + (slot.position[0] < 0 ? 2.2 : -2.2), slot.position[2]]);
       setGuideOpen(false); inspect(slot);
     }}/>}
     <AnimatePresence mode="wait">
@@ -279,13 +294,15 @@ export function MuseumTraveler({ plan, paused, moveIntent, onNearby, onExitNearb
       camera.position.lerp(cameraTarget, 1 - Math.pow(.001, dt));
       camera.lookAt(position.current.x * .85, forest ? 2.1 : .6, position.current.z - (forest ? 3 : mobile ? .1 : 1.4));
     }
-    const next = selectNearbyExhibit(plan.slots, position.current.x, position.current.z, nearby.current);
+    const direction: [number, number] | undefined = velocity.current.lengthSq() > .5 ? [velocity.current.x / velocity.current.length(), velocity.current.z / velocity.current.length()] : undefined;
+    const next = selectNearbyExhibit(plan.slots, position.current.x, position.current.z, nearby.current, direction);
     if (pending.current !== (next?.id ?? null)) { pending.current = next?.id ?? null; dwell.current = 0; }
     dwell.current += dt;
     if (dwell.current >= .16 && nearby.current !== pending.current) { nearby.current = pending.current; onNearby(next); }
     const nextExit = Math.hypot(position.current.x, position.current.z - plan.entranceZ) < 1.65;
     if (nextExit !== exit.current) { exit.current = nextExit; onExitNearby(nextExit); }
-    const nextRoom = plan.rooms.find((item) => position.current.z <= item.centerZ + item.depth / 2 && position.current.z >= item.centerZ - item.depth / 2);
+    const closestSlot = plan.shell ? plan.slots.reduce<ExhibitSlot | undefined>((best, slot) => !best || Math.hypot(slot.position[0] - position.current.x, slot.position[2] - position.current.z) < Math.hypot(best.position[0] - position.current.x, best.position[2] - position.current.z) ? slot : best, undefined) : undefined;
+    const nextRoom = plan.shell ? plan.rooms.find(item => item.id === closestSlot?.zoneId) : plan.rooms.find((item) => position.current.z <= item.centerZ + item.depth / 2 && position.current.z >= item.centerZ - item.depth / 2);
     if (nextRoom && nextRoom.id !== room.current) { room.current = nextRoom.id; onRoom(nextRoom.id); }
   });
   return <group name="museum-traveler" ref={root} visible={!cameraOwned}><SpiritTraveler appearance={appearance} motion={motionState} /></group>;

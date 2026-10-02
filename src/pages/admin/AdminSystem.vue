@@ -200,7 +200,7 @@
             <p class="text-sm text-secondary">{{ $t('admin.spotifyStatusCopy') }}</p>
           </div>
           <span class="status-pill" :class="statusClass(spotifyStatusTone)">
-            {{ health.spotify.configured ? $t('admin.connected') : $t('admin.notConfigured') }}
+            {{ spotifyHealthLabel }}
           </span>
         </div>
 
@@ -264,15 +264,15 @@
         </div>
 
         <div class="flex flex-wrap gap-3">
-          <a
+          <button
             v-if="health.spotify.login_url"
-            :href="health.spotify.login_url"
-            target="_blank"
-            rel="noreferrer"
+            :disabled="spotifyBusy"
+            @click="authorizeSpotify"
             class="action-btn action-btn-primary text-sm"
           >
             {{ $t('admin.spotifyAuthorize') }}
-          </a>
+          </button>
+          <button class="action-btn action-btn-secondary text-sm" :disabled="spotifyBusy" @click="checkSpotify">{{ $t('admin.spotifyCheckPlayback') }}</button>
           <a
             v-if="health.spotify.now_playing_url"
             :href="health.spotify.now_playing_url"
@@ -283,6 +283,7 @@
             {{ $t('admin.spotifyOpenNowPlaying') }}
           </a>
         </div>
+        <p v-if="spotifyMessage" role="status" class="text-sm text-secondary">{{ spotifyMessage }}</p>
       </div>
     </div>
 
@@ -391,9 +392,31 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { adminApi, adminSettingsApi } from '../../utils/api'
+import { adminApi, adminSettingsApi, API_BASE_URL } from '../../utils/api'
 
 const { t } = useI18n()
+const spotifyBusy = ref(false)
+const spotifyMessage = ref('')
+const spotifyHealthLabel = computed(() => {
+  const state = health.value.spotify.playback_health?.state
+  return t(state === 'available' ? 'admin.connected' : state === 'idle' ? 'home.spotifyIdle' : state === 'error' ? 'home.spotifyUnavailable' : 'admin.spotifyUnchecked')
+})
+async function authorizeSpotify() {
+  spotifyBusy.value = true
+  try { const result = await adminApi.authorizeSpotify(); window.location.assign(result.url) }
+  catch { spotifyMessage.value = t('admin.spotifyAuthFailed'); spotifyBusy.value = false }
+}
+async function checkSpotify() {
+  spotifyBusy.value = true
+  try {
+    const response = await fetch(`${API_BASE_URL}/spotify/now-playing`, { cache: 'no-store', signal: AbortSignal.timeout(15000) })
+    const payload = response.status === 204 ? {} : await response.json()
+    const key = response.ok ? (response.status === 204 ? 'home.spotifyIdle' : 'admin.connected') : payload.code === 'reauthorization_required' ? 'admin.spotifyReauthorize' : payload.code === 'rate_limited' ? 'admin.spotifyRateLimited' : 'admin.spotifyCheckFailed'
+    spotifyMessage.value = t(key)
+    await loadHealth()
+  } catch { spotifyMessage.value = t('admin.spotifyCheckFailed') }
+  finally { spotifyBusy.value = false }
+}
 
 const isLoadingHealth = ref(false)
 const isLoadingAssets = ref(false)
@@ -521,7 +544,7 @@ const summaryCards = computed(() => [
 ])
 
 const spotifyStatusTone = computed(() => {
-  if (health.value.spotify.configured) return 'success'
+  if (['available', 'idle'].includes(health.value.spotify.playback_health?.state)) return 'success'
   if (health.value.spotify.auth_configured || health.value.spotify.playback_configured) return 'warm'
   return 'danger'
 })

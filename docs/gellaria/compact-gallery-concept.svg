@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="940" viewBox="0 0 1400 940" role="img" aria-labelledby="title desc">
+  <title id="title">Gellaria 两馆紧凑空间概念平面</title>
+  <desc id="desc">左侧工坊：三个错位项目展岛与一处实验角；右侧阅览厅：三个开放阅读湾与赠语窗。两馆均为连续大厅，具有环路和中部捷径。非施工图，最终尺寸需在三维灰盒中验证。</desc>
+  <defs>
+    <style>
+      text { font-family: 'Noto Sans CJK SC','Microsoft YaHei',sans-serif; fill:#193340; }
+      .title { font-size:28px; font-weight:700; }
+      .sub { font-size:17px; fill:#53696f; }
+      .label { font-size:18px; font-weight:600; }
+      .small { font-size:14px; }
+      .wall { fill:none; stroke:#596f79; stroke-width:7; stroke-linejoin:round; }
+      .bay { fill:#c3b6a5; fill-opacity:.3; stroke:#a39789; stroke-width:1; stroke-dasharray:5 5; }
+      .plinth { fill:#f2f4ef; stroke:#627a82; stroke-width:2; }
+      .book { fill:#faf8f1; stroke:#73768f; stroke-width:2; }
+      .route { fill:none; stroke:#b47743; stroke-width:3; stroke-dasharray:8 7; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b47743"/></marker>
+  </defs>
+  <rect width="1400" height="940" fill="#f4f7f6"/>
+  <text x="55" y="50" class="title">一个完整的厅，用展品群落形成空间层次</text>
+  <text x="55" y="82" class="sub">概念平面 · 顶视示意 · 示意占位不等于最终模型尺寸 · 两馆入口均在下方</text>
+
+  <text x="65" y="136" class="title">造物工坊</text>
+  <text x="65" y="165" class="sub">9 件作品 / 三个展岛 + 一个实验角</text>
+  <rect x="65" y="195" width="545" height="555" rx="6" fill="#dce5e5"/>
+  <path d="M65 710 V195 H610 V710 M65 750 H275 M400 750 H610" class="wall"/>
+  <text x="275" y="224" class="small">连续外墙 / 远侧背景</text>
+
+  <rect x="92" y="255" width="190" height="205" rx="22" fill="#b7c9ce" fill-opacity=".55" stroke="#879da5" stroke-dasharray="5 5"/>
+  <text x="112" y="284" class="label">写作与表达</text>
+  <rect x="143" y="322" width="86" height="55" rx="4" class="plinth"/>
+  <text x="162" y="356" class="label">Vana</text>
+  <rect x="103" y="398" width="85" height="38" rx="3" class="plinth"/>
+  <text x="109" y="422" font-size="11">GWorkspace</text>
+  <rect x="202" y="398" width="62" height="38" rx="3" class="plinth"/>
+  <text x="218" y="422" class="small">简历</text>
+
+  <rect x="380" y="250" width="195" height="170" rx="22" fill="#b7c9ce" fill-opacity=".55" stroke="#879da5" stroke-dasharray="5 5"/>
+  <text x="402" y="280" class="label">知识与研究</text>
+  <rect x="397" y="310" width="85" height="55" rx="4" class="plinth"/>
+  <text x="406" y="344" class="label">CiteAI</text>
+  <rect x="497" y="347" width="67" height="45" rx="3" class="plinth"/>
+  <text x="501" y="375" font-size="12">SurfSmart</text>
+
+  <rect x="355" y="485" width="220" height="190" rx="22" fill="#b7c9ce" fill-opacity=".55" stroke="#879da5" stroke-dasharray="5 5"/>
+  <text x="383" y="514" class="label">日常与陪伴</text>
+  <rect x="397" y="538" width="119" height="51" rx="4" class="plinth"/>
+  <text x="407" y="570" class="label">Oceannect</text>
+  <rect x="372" y="614" width="81" height="40" rx="3" class="plinth"/>
+  <text x="385" y="640" class="small">Farivy</text>
+  <rect x="474" y="614" width="83" height="40" rx="3" class="plinth"/>
+  <text x="482" y="640" class="small">潮汐计划</text>
+
+  <path d="M103 565 V656 H231" fill="none" stroke="#879da5" stroke-width="5"/>
+  <text x="115" y="552" class="label">实验角</text>
+  <rect x="118" y="589" width="110" height="44" rx="3" class="plinth"/>
+  <text x="125" y="615" font-size="13">Twilight Zone</text>
+  <path d="M333 749 Q302 683 277 648 Q255 559 306 484 Q334 441 332 349 Q333 218 483 235 Q595 234 589 401 Q593 454 484 452 Q310 445 309 566 Q292 689 430 708 Q358 726 333 749" class="route"/>
+  <path d="M316 631 V465" class="route" marker-end="url(#arrow)"/>
+  <text x="290" y="790" class="label">偏轴入口</text>
+  <text x="92" y="827" class="sub">错位展岛可以绕行，中央可直接穿越。</text>
+  <text x="92" y="854" class="sub">虚线围合是策展组范围，不是实体隔墙。</text>
+
+  <text x="760" y="136" class="title">星图阅览厅</text>
+  <text x="760" y="165" class="sub">11 篇文章 + 1 条赠语 / 三处阅读湾</text>
+  <rect x="760" y="195" width="545" height="555" rx="6" fill="#e3ddd4"/>
+  <path d="M760 710 V195 H1305 V710 M760 750 H975 M1090 750 H1305" class="wall"/>
+  <rect x="791" y="244" width="200" height="180" rx="24" class="bay"/>
+  <path d="M801 395 V254 H963" fill="none" stroke="#8a889a" stroke-width="6"/>
+  <text x="823" y="282" class="label">阅读湾 A · 4 篇</text>
+  <rect x="821" y="306" width="58" height="37" rx="3" class="book"/><text x="840" y="331" class="small">文</text>
+  <rect x="902" y="306" width="58" height="37" rx="3" class="book"/><text x="921" y="331" class="small">文</text>
+  <rect x="840" y="370" width="58" height="37" rx="3" class="book"/><text x="859" y="395" class="small">文</text>
+  <rect x="921" y="370" width="58" height="37" rx="3" class="book"/><text x="940" y="395" class="small">文</text>
+
+  <rect x="1080" y="265" width="195" height="230" rx="24" class="bay"/>
+  <path d="M1094 276 H1264 V469" fill="none" stroke="#8a889a" stroke-width="6"/>
+  <text x="1095" y="310" class="label">阅读湾 B · 4 篇</text>
+  <rect x="1096" y="334" width="58" height="37" rx="3" class="book"/><text x="1115" y="359" class="small">文</text>
+  <rect x="1190" y="352" width="58" height="37" rx="3" class="book"/><text x="1209" y="377" class="small">文</text>
+  <rect x="1107" y="424" width="58" height="37" rx="3" class="book"/><text x="1126" y="449" class="small">文</text>
+  <rect x="1190" y="435" width="58" height="37" rx="3" class="book"/><text x="1209" y="460" class="small">文</text>
+
+  <rect x="796" y="511" width="198" height="183" rx="24" class="bay"/>
+  <path d="M807 521 V678 H926" fill="none" stroke="#8a889a" stroke-width="6"/>
+  <text x="819" y="550" class="label">阅读湾 C · 3 篇</text>
+  <rect x="820" y="572" width="58" height="37" rx="3" class="book"/><text x="839" y="597" class="small">文</text>
+  <rect x="912" y="572" width="58" height="37" rx="3" class="book"/><text x="931" y="597" class="small">文</text>
+  <rect x="859" y="629" width="58" height="37" rx="3" class="book"/><text x="878" y="654" class="small">文</text>
+  <rect x="1150" y="584" width="87" height="45" rx="12" fill="#f1e1b3" stroke="#bca477" stroke-width="2"/>
+  <text x="1167" y="612" class="small">赠语窗</text>
+  <rect x="1130" y="663" width="121" height="20" rx="5" fill="#b4a997"/>
+  <text x="1144" y="710" class="small">停留阅读位</text>
+  <path d="M1033 749 Q1031 698 1033 580 Q1025 458 1018 355 Q1020 218 1171 232 Q1292 223 1289 459 Q1288 533 1158 529 Q1010 492 1008 590 Q1006 715 1139 728" class="route"/>
+  <path d="M1027 587 L1007 449 Q905 445 786 474" class="route" marker-end="url(#arrow)"/>
+  <text x="1000" y="790" class="label">入口</text>
+  <text x="788" y="827" class="sub">短背衬提供观看背景，阅读湾保持开放。</text>
+  <text x="788" y="854" class="sub">每篇文章独立建模，赠语保持小尺度。</text>
+  <text x="55" y="915" class="small">目标：每馆约 360–400 场景单位²；模型、观看点、镜头包络与通行条件优先于面积数字。2026-09-29 / 设计提案，尚未实施。</text>
+</svg>

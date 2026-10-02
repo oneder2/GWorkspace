@@ -4,6 +4,14 @@ const TOKEN_URL = 'https://accounts.spotify.com/api/token'
 const DEFAULT_SPOTIFY_SCOPE = 'user-read-currently-playing user-read-playback-state'
 
 let runtimeRefreshToken = ''
+let refreshInFlight = null
+let accessTokenGeneration = 0
+let playbackHealth = { state: 'unchecked', checked_at: null, code: null }
+export const recordSpotifyPlaybackHealth = (state, code = null) => {
+  playbackHealth = { state, code, checked_at: new Date().toISOString() }
+}
+
+export const spotifyFetch = (url, options = {}) => fetch(url, { ...options, signal: AbortSignal.timeout(3500) })
 let accessTokenCache = {
   token: '',
   expiresAt: 0,
@@ -31,12 +39,9 @@ const getPersistedRefreshToken = () => {
 }
 
 const persistRefreshToken = (token) => {
-  try {
-    getDatabase().prepare('UPDATE admin_settings SET spotify_refresh_token = ?, updated_at = ? WHERE id = 1')
-      .run(token, new Date().toISOString())
-  } catch (error) {
-    console.error('Unable to persist Spotify refresh token:', error.message)
-  }
+  const result = getDatabase().prepare('UPDATE admin_settings SET spotify_refresh_token = ?, updated_at = ? WHERE id = 1')
+    .run(token, new Date().toISOString())
+  if (!result.changes) throw Object.assign(new Error('Spotify settings row is missing'), { code: 'persistence_failed' })
 }
 
 export const getSpotifyConfig = () => ({
@@ -74,8 +79,9 @@ export const buildSpotifyLoginUrl = (req) => {
 }
 
 export const setSpotifyRuntimeRefreshToken = (token) => {
-  runtimeRefreshToken = typeof token === 'string' ? token.trim() : ''
-  if (runtimeRefreshToken) persistRefreshToken(runtimeRefreshToken)
+  const next = typeof token === 'string' ? token.trim() : ''
+  if (next) persistRefreshToken(next)
+  runtimeRefreshToken = next
 }
 
 export const setSpotifyAccessTokenCache = ({
@@ -84,6 +90,7 @@ export const setSpotifyAccessTokenCache = ({
   expiresInSeconds = 0,
   scope = ''
 } = {}) => {
+  accessTokenGeneration++
   const nextExpiresAt = Number(expiresAt) > 0
     ? Number(expiresAt)
     : Date.now() + ((Number(expiresInSeconds) || 0) * 1000)
@@ -102,7 +109,7 @@ export const getSpotifyAccessTokenCacheSnapshot = () => ({
 })
 
 export const requestSpotifyToken = async (params, config) => {
-  const response = await fetch(TOKEN_URL, {
+  const response = await spotifyFetch(TOKEN_URL, {
     method: 'POST',
     headers: {
       Authorization: createBasicAuthHeader(config.clientId, config.clientSecret),
@@ -118,34 +125,44 @@ export const requestSpotifyToken = async (params, config) => {
     const error = new Error(message)
     error.status = response.status
     error.payload = payload
+    error.code = payload.error === 'invalid_grant' ? 'reauthorization_required' : payload.error === 'invalid_client' ? 'invalid_client' : 'token_error'
     throw error
   }
 
+  if (typeof payload.access_token !== 'string' || !payload.access_token) throw Object.assign(new Error('Spotify returned no access token'), { code: 'invalid_response' })
   return payload
 }
 
-export const getCachedSpotifyAccessToken = async (config) => {
+export const getCachedSpotifyAccessToken = async (config, rejectedToken = '') => {
+  // Only invalidate the token rejected by Spotify, not a newer refresh that
+  // another concurrent caller may already have completed.
+  if (rejectedToken && accessTokenCache.token === rejectedToken) accessTokenCache.expiresAt = 0
   const now = Date.now()
   if (accessTokenCache.token && accessTokenCache.expiresAt > now + 30_000) {
     return accessTokenCache.token
   }
 
-  const payload = await requestSpotifyToken({
-    grant_type: 'refresh_token',
-    refresh_token: config.refreshToken
-  }, config)
-
-  if (typeof payload.refresh_token === 'string' && payload.refresh_token.trim()) {
-    setSpotifyRuntimeRefreshToken(payload.refresh_token)
-  }
-
-  setSpotifyAccessTokenCache({
-    token: payload.access_token || '',
-    expiresInSeconds: Number(payload.expires_in) || 3600,
-    scope: payload.scope || ''
-  })
-
-  return accessTokenCache.token
+  if (refreshInFlight) return refreshInFlight
+  const generation = accessTokenGeneration
+  refreshInFlight = (async () => {
+    const payload = await requestSpotifyToken({
+      grant_type: 'refresh_token',
+      refresh_token: config.refreshToken
+    }, config)
+    // A completed OAuth callback may have replaced this connection while the
+    // refresh was in flight. Never persist the old account's rotated token.
+    if (generation !== accessTokenGeneration) return accessTokenCache.token
+    if (typeof payload.refresh_token === 'string' && payload.refresh_token.trim()) {
+      setSpotifyRuntimeRefreshToken(payload.refresh_token)
+    }
+    setSpotifyAccessTokenCache({
+      token: payload.access_token,
+      expiresInSeconds: Number(payload.expires_in) || 3600,
+      scope: payload.scope || ''
+    })
+    return accessTokenCache.token
+  })()
+  try { return await refreshInFlight } finally { refreshInFlight = null }
 }
 
 export const normalizeSpotifyCurrentlyPlayingPayload = (payload = {}) => {
@@ -157,9 +174,9 @@ export const normalizeSpotifyCurrentlyPlayingPayload = (payload = {}) => {
   return {
     ...payload,
     title: item.name || '',
-    artist: artists,
-    album: item?.album?.name || '',
-    coverUrl: item?.album?.images?.[0]?.url || '',
+    artist: artists || item.show?.publisher || item.show?.name || '',
+    album: item?.album?.name || item.show?.name || '',
+    coverUrl: item?.album?.images?.[0]?.url || item.images?.[0]?.url || '',
     externalUrl: item?.external_urls?.spotify || '',
     progressMs: Number.isFinite(payload?.progress_ms) ? payload.progress_ms : null,
     durationMs: Number.isFinite(item?.duration_ms) ? item.duration_ms : null,
@@ -183,6 +200,7 @@ export const getSpotifyStatus = (req) => {
 
   return {
     configured: missingFields.length === 0,
+    playback_health: { ...playbackHealth, state: playbackHealth.checked_at && Date.now() - Date.parse(playbackHealth.checked_at) > 120000 ? 'stale' : playbackHealth.state },
     auth_configured: authMissingFields.length === 0,
     playback_configured: playbackMissingFields.length === 0,
     missing_fields: missingFields,

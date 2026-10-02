@@ -109,7 +109,7 @@
             </template>
 
             <div v-else class="home-spotify-empty">
-              <p class="text-sm text-secondary leading-6">{{ $t('home.spotifyHint') }}</p>
+              <p class="text-sm text-secondary leading-6">{{ $t(spotifyNowPlaying.error.value ? 'home.spotifyErrorHint' : 'home.spotifyHint') }}</p>
             </div>
           </component>
         </article>
@@ -303,6 +303,7 @@ const hasSpotifyProgress = computed(() => Boolean(
 ))
 
 const spotifyStateTone = computed(() => {
+  if (spotifyNowPlaying.error.value) return 'status-pill-warm'
   if (spotifyNowPlaying.isLoading.value) return 'status-pill-neutral'
   if (!spotifyNowPlaying.hasEndpoint.value) return 'status-pill-neutral'
   if (!spotifyTrack.value) return 'status-pill-neutral'
@@ -310,6 +311,7 @@ const spotifyStateTone = computed(() => {
 })
 
 const spotifyStateLabel = computed(() => {
+  if (spotifyNowPlaying.error.value) return t('home.spotifyUnavailable')
   if (spotifyNowPlaying.isLoading.value) return t('common.loading')
   if (!spotifyNowPlaying.hasEndpoint.value) return t('home.spotifyIdle')
   if (!spotifyTrack.value) return t('home.spotifyIdle')

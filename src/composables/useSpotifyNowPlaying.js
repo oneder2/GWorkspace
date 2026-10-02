@@ -53,7 +53,7 @@ const pickImageUrl = (payload, source) => {
   return candidates.find(candidate => typeof candidate === 'string' && candidate.trim()) || ''
 }
 
-const normalizePayload = (payload) => {
+export const normalizePayload = (payload) => {
   if (!payload || typeof payload !== 'object') return null
 
   const source = payload.item || payload.track || payload.data || payload
@@ -68,8 +68,9 @@ const normalizePayload = (payload) => {
 
   if (!title) return null
 
-  const progressMs = Number(payload.progress_ms ?? payload.progressMs ?? source?.progress_ms ?? source?.progressMs)
-  const durationMs = Number(source?.duration_ms ?? source?.durationMs ?? payload.duration_ms ?? payload.durationMs)
+  const numeric = value => value == null ? NaN : Number(value)
+  const progressMs = numeric(payload.progress_ms ?? payload.progressMs ?? source?.progress_ms ?? source?.progressMs)
+  const durationMs = numeric(source?.duration_ms ?? source?.durationMs ?? payload.duration_ms ?? payload.durationMs)
   const isPlaying = Boolean(
     payload.is_playing ??
     payload.isPlaying ??
@@ -84,6 +85,7 @@ const normalizePayload = (payload) => {
     coverUrl: pickImageUrl(payload, source),
     externalUrl: pickString(
       source?.external_urls?.spotify,
+      payload.externalUrl,
       payload.url,
       payload.spotify_url,
       source?.url
@@ -101,8 +103,13 @@ export function useSpotifyNowPlaying() {
   const error = ref(null)
   const hasEndpoint = computed(() => Boolean(SPOTIFY_NOW_PLAYING_URL))
   let timerId = null
+  let activeController = null
+  let disposed = false
+  let retryAt = 0
 
   const loadNowPlaying = async () => {
+    if (disposed || activeController || Date.now() < retryAt) return track.value
+    clearTimeout(timerId)
     if (!hasEndpoint.value) {
       track.value = null
       return null
@@ -112,7 +119,9 @@ export function useSpotifyNowPlaying() {
     error.value = null
 
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 5000)
+    activeController = controller
+    // Allows one bounded refresh + a 401 retry on the backend.
+    const timeoutId = setTimeout(() => controller.abort(), 15000)
 
     try {
       const response = await fetch(SPOTIFY_NOW_PLAYING_URL, {
@@ -127,33 +136,46 @@ export function useSpotifyNowPlaying() {
       }
 
       if (!response.ok) {
-        throw new Error(`Spotify now-playing endpoint returned ${response.status}`)
+        const payload = await response.json().catch(() => ({}))
+        if (response.status === 429) retryAt = Date.now() + Math.max(15, Number(response.headers.get('retry-after')) || 30) * 1000
+        throw Object.assign(new Error('Spotify playback unavailable'), { code: payload.code || 'unavailable', status: response.status })
       }
 
       const payload = await response.json()
       track.value = normalizePayload(payload)
       return track.value
     } catch (loadError) {
-      error.value = loadError
-      track.value = null
+      if (!disposed) { error.value = loadError; track.value = null }
       return null
     } finally {
       clearTimeout(timeoutId)
-      isLoading.value = false
+      activeController = null
+      if (!disposed) {
+        isLoading.value = false
+        if (!document.hidden) timerId = setTimeout(loadNowPlaying, Math.max(SPOTIFY_REFRESH_MS, retryAt - Date.now()))
+      }
     }
   }
 
   onMounted(() => {
+    disposed = false
     loadNowPlaying()
-    if (hasEndpoint.value) {
-      timerId = setInterval(loadNowPlaying, SPOTIFY_REFRESH_MS)
-    }
+    document.addEventListener('visibilitychange', resume)
   })
 
-  onUnmounted(() => {
-    if (timerId) {
-      clearInterval(timerId)
+  const resume = () => {
+    clearTimeout(timerId)
+    if (!document.hidden) {
+      if (Date.now() < retryAt) timerId = setTimeout(loadNowPlaying, retryAt - Date.now())
+      else loadNowPlaying()
     }
+  }
+
+  onUnmounted(() => {
+    disposed = true
+    clearTimeout(timerId)
+    activeController?.abort()
+    document.removeEventListener('visibilitychange', resume)
   })
 
   return {

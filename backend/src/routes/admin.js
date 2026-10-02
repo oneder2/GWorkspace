@@ -72,9 +72,8 @@ const getSystemHealthPayload = (req) => {
     },
     spotify: {
       ...spotify,
-      status: spotify.configured
-        ? 'ok'
-        : (spotify.auth_configured || spotify.playback_configured ? 'degraded' : 'missing')
+      status: ['available', 'idle'].includes(spotify.playback_health.state) ? 'ok'
+        : spotify.playback_health.state === 'error' ? 'degraded' : 'unchecked'
     }
   }
 }

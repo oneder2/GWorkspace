@@ -50,8 +50,9 @@ export function MuseumLighting({ room, plan, slots, theme, selectedId }: { room:
   useFrame((_, delta) => {
     if (!key.current) return;
     const blend = initialized.current ? 1 - Math.exp(-delta * 4) : 1;
-    key.current.position.lerp(goal.set(-7, 11, room.centerZ + 7), blend);
-    target.position.lerp(goal.set(0, 0, room.centerZ), blend);
+    const centerZ = plan.shell ? (plan.shell.frontZ + plan.shell.backZ) / 2 : room.centerZ;
+    key.current.position.lerp(goal.set(-7, 11, centerZ + 7), blend);
+    target.position.lerp(goal.set(0, 0, centerZ), blend);
     target.updateMatrixWorld();
     initialized.current = true;
   });
@@ -62,7 +63,7 @@ export function MuseumLighting({ room, plan, slots, theme, selectedId }: { room:
     <directionalLight ref={key} target={target} color={profile.key} intensity={profile.strength} castShadow
       shadow-mapSize={size.width < 640 ? [1024, 1024] : [2048, 2048]} shadow-bias={-.00015} shadow-normalBias={.045}
       shadow-camera-left={-13} shadow-camera-right={13} shadow-camera-top={16} shadow-camera-bottom={-16} shadow-camera-near={1} shadow-camera-far={45} />
-    {slots.map((slot) => <ExhibitLight key={slot.id} slot={slot} theme={theme} selected={selectedId === slot.id} />)}
+    {slots.slice(0, 4).map((slot) => <ExhibitLight key={slot.id} slot={slot} theme={theme} selected={selectedId === slot.id} />)}
     {plan.rooms.map((item) => <group key={item.id}>
       {Array.from({ length: Math.ceil(item.depth / 6) }, (_, i) => {
         const z = item.centerZ + item.depth / 2 - 1.4 - i * 6;
@@ -72,7 +73,7 @@ export function MuseumLighting({ room, plan, slots, theme, selectedId }: { room:
           </mesh>)}
         </group>;
       })}
-      <LightPool position={[0, .11, item.centerZ + item.depth / 2 - .5]} radius={2.45} color={theme.accent} opacity={.1} />
+      <LightPool position={[item.centerX || 0, .11, item.centerZ + item.depth / 2 - .5]} radius={2.45} color={theme.accent} opacity={.1} />
     </group>)}
   </group>;
 }

@@ -31,6 +31,9 @@ jobs:
       - name: Check frontend debug logs
         run: npm run check:frontend-debug
 
+      - name: Check Spotify widget
+        run: npm run check:spotify-widget
+
       - name: Build frontend
         run: npm run build
 
@@ -97,6 +100,9 @@ jobs:
 
       - name: Verify backend modules load
         run: npm run check:backend-routes
+
+      - name: Check Spotify playback and authorization
+        run: npm run check:spotify
 
       - name: Check backend log hygiene
         run: npm run check:backend-logs
