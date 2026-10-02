@@ -1,5 +1,6 @@
 import type { Landmark } from "./content";
 import { museumTheme, type MuseumLayout } from "./museum-theme";
+import { buildCompactGallery } from "./compact-gallery";
 
 export type Exhibit = Landmark["exhibits"][number];
 export type ExhibitKind = "project-model" | "blog-constellation" | "daily-signal" | "echo-fragment" | "audio-echo" | "signal";
@@ -11,6 +12,10 @@ export type ExhibitSlot = {
   rotation: number;
   exhibit: Exhibit | null;
   kind: ExhibitKind;
+  viewingPoint?: [number, number];
+  footprint?: [number, number];
+  site?: number;
+  zoneId?: string;
 };
 
 export type HallConfig = {
@@ -59,6 +64,8 @@ export type MuseumRoom = {
   depth: number;
   startIndex: number;
   count: number;
+  centerX?: number;
+  arrival?: [number, number];
 };
 export type MuseumPlan = {
   rooms: MuseumRoom[];
@@ -66,6 +73,9 @@ export type MuseumPlan = {
   entranceZ: number;
   backZ: number;
   length: number;
+  shell?: { width: number; frontZ: number; backZ: number };
+  placements?: Record<string, number>;
+  furnishings?: { id: string; kind: 'reading-bench' | 'bay-screen'; position: [number, number]; size: [number, number]; height: number }[];
 };
 
 export const exhibitKindNames: Record<ExhibitKind, string> = {
@@ -76,7 +86,8 @@ export const exhibitKindNames: Record<ExhibitKind, string> = {
 
 // Curatorial grouping followed by footprint-aware room packing. A room holds at
 // most four objects; larger collections extend the spine instead of squeezing bays.
-export function buildMuseumPlan(landmark: Landmark): MuseumPlan {
+export function buildMuseumPlan(landmark: Landmark, placements?: Record<string, number>): MuseumPlan {
+  if (landmark.id === 'workshop' || landmark.id === 'observatory') return buildCompactGallery(landmark, getExhibitKind, placements);
   const layout = museumTheme(landmark.id).layout;
   const groups = new Map<string, { kind: ExhibitKind; title: string; exhibits: Exhibit[] }>();
   for (const exhibit of landmark.exhibits) {
@@ -138,39 +149,68 @@ export function buildMuseumPlan(landmark: Landmark): MuseumPlan {
 }
 
 export function museumWalkLimit(plan: MuseumPlan, z: number) {
+  if (plan.shell) return plan.shell.width / 2 - .55;
   const room = plan.rooms.find((item) => z <= item.centerZ + item.depth / 2 - .75 && z >= item.centerZ - item.depth / 2 + .75);
   return room ? room.width / 2 - 1 : 2.35;
 }
 
 export function constrainMuseumPosition(plan: MuseumPlan, x: number, z: number, previous?: readonly [number, number]): [number, number] {
-  let safeZ = Math.max(plan.backZ + 1, Math.min(6.8, z));
+  let safeZ = Math.max(plan.backZ + 1, Math.min(plan.shell ? plan.shell.frontZ - .55 : 6.8, z));
   // Meet a partition in place instead of snapping sideways into its doorway.
   if (previous && Math.abs(previous[0]) > museumWalkLimit(plan, safeZ) && museumWalkLimit(plan, safeZ) < museumWalkLimit(plan, previous[1])) safeZ = previous[1];
   const limit = museumWalkLimit(plan, safeZ);
   let safeX = Math.max(-limit, Math.min(limit, x));
   let resultZ = safeZ;
-  for (const slot of plan.slots) {
-    const dx = safeX - slot.position[0];
-    const dz = resultZ - slot.position[2];
+  const obstacles = [
+    ...plan.slots.map(slot => ({ x: slot.position[0], z: slot.position[2], size: slot.footprint || [2.2, 2.7] })),
+    ...(plan.furnishings || []).map(item => ({ x: item.position[0], z: item.position[1], size: item.size })),
+  ];
+  for (const obstacle of obstacles) {
+    const dx = safeX - obstacle.x;
+    const dz = resultZ - obstacle.z;
     // The footprint includes the display and a traveler-radius buffer.
-    const halfX = 1.45;
-    const halfZ = 1.7;
+    const halfX = obstacle.size[0] / 2 + .35;
+    const halfZ = obstacle.size[1] / 2 + .35;
     if (Math.abs(dx) < halfX && Math.abs(dz) < halfZ) {
-      if (halfX - Math.abs(dx) < halfZ - Math.abs(dz)) safeX = slot.position[0] + (dx < 0 ? -halfX : halfX);
-      else resultZ = slot.position[2] + (dz < 0 ? -halfZ : halfZ);
+      const faces: [number, number][] = [
+        [obstacle.x - halfX, resultZ], [obstacle.x + halfX, resultZ],
+        [safeX, obstacle.z - halfZ], [safeX, obstacle.z + halfZ],
+      ];
+      const valid = faces.filter(([faceX, faceZ]) => Math.abs(faceX) <= museumWalkLimit(plan, faceZ) && faceZ >= plan.backZ + 1 && faceZ <= (plan.shell ? plan.shell.frontZ - .55 : 6.8));
+      // Stay on the entry side of the furniture. Choosing only the nearest
+      // face can push a traveler through a thin screen or beyond an outer wall.
+      const entryFaces = previous ? valid.filter(([faceX, faceZ]) =>
+        (previous[0] <= obstacle.x - halfX && faceX === obstacle.x - halfX) ||
+        (previous[0] >= obstacle.x + halfX && faceX === obstacle.x + halfX) ||
+        (previous[1] <= obstacle.z - halfZ && faceZ === obstacle.z - halfZ) ||
+        (previous[1] >= obstacle.z + halfZ && faceZ === obstacle.z + halfZ)) : [];
+      const options = entryFaces.length ? entryFaces : valid;
+      options.sort((a, b) => Math.hypot(a[0] - safeX, a[1] - resultZ) - Math.hypot(b[0] - safeX, b[1] - resultZ));
+      if (options[0]) [safeX, resultZ] = options[0];
     }
   }
   return [safeX, resultZ];
 }
 
-export function selectNearbyExhibit(slots: ExhibitSlot[], x: number, z: number, currentId: string | null): ExhibitSlot | null {
+export function selectNearbyExhibit(slots: ExhibitSlot[], x: number, z: number, currentId: string | null, direction?: readonly [number, number]): ExhibitSlot | null {
+  // A standing visitor can read a nearby object; while moving, prefer the
+  // object ahead. Reject an object hidden behind another display's footprint.
+  const eligible = (slot: ExhibitSlot) => {
+    const dx = slot.position[0] - x, dz = slot.position[2] - z, distance = Math.hypot(dx, dz);
+    if (direction && distance && (dx * direction[0] + dz * direction[1]) / distance < -.15) return false;
+    return !slots.some(other => {
+      if (other === slot || !other.exhibit) return false;
+      const t = ((other.position[0] - x) * dx + (other.position[2] - z) * dz) / (distance * distance);
+      return t > .05 && t < .9 && Math.hypot(x + dx * t - other.position[0], z + dz * t - other.position[2]) < 1.2;
+    });
+  };
   const current = slots.find((slot) => slot.id === currentId && slot.exhibit);
   // A release radius prevents two adjacent labels flickering at the boundary.
-  if (current && Math.hypot(current.position[0] - x, current.position[2] - z) < 3.6) return current;
+  if (current && eligible(current) && Math.hypot(current.position[0] - x, current.position[2] - z) < 3.4) return current;
   let closest: ExhibitSlot | null = null;
   let distance = 3.1;
   for (const slot of slots) {
-    if (!slot.exhibit) continue;
+    if (!slot.exhibit || !eligible(slot)) continue;
     const next = Math.hypot(slot.position[0] - x, slot.position[2] - z);
     if (next < distance) { closest = slot; distance = next; }
   }

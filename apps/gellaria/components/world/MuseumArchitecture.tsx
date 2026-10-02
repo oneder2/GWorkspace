@@ -70,7 +70,7 @@ export function SightlineCutaway({ children, disabled = false }: { children: Rea
     if (!traveler) return;
     bounds.setFromObject(root.current);
     let blocked = false;
-    for (const offset of inspection ? [0] : [-.5, 0, .5]) for (const height of inspection ? [0] : [.25, 1, 1.8]) {
+    for (const offset of inspection ? [-.9, 0, .9] : [-.5, 0, .5]) for (const height of inspection ? [-.6, 0, .9] : [.25, 1, 1.8]) {
       traveler.getWorldPosition(target);
       target.set(target.x + offset, target.y + height, target.z);
       const distance = camera.position.distanceTo(target);

@@ -5,6 +5,7 @@ import * as THREE from "three";
 import type { MuseumPlan, MuseumRoom } from "@/lib/exhibition";
 import { museumTheme, type MuseumTheme } from "@/lib/museum-theme";
 import { Block, SightlineCutaway } from "./MuseumArchitecture";
+import { CompactGalleryInterior } from './CompactGalleryInterior';
 
 function Disc({ at, radius, color, scale = [1, 1, 1] }: { at: [number, number, number]; radius: number; color: string; scale?: [number, number, number] }) {
   return <mesh position={at} scale={scale} receiveShadow><cylinderGeometry args={[radius, radius, .07, 48]} /><meshStandardMaterial color={color} roughness={.9} /></mesh>;
@@ -84,6 +85,7 @@ function Garden({ room, palette }: { room: MuseumRoom; palette: MuseumTheme }) {
 
 export function MuseumInterior({ plan, kind }: { plan: MuseumPlan; kind: string }) {
   const palette = museumTheme(kind);
+  if (plan.shell) return <CompactGalleryInterior plan={plan} palette={palette}/>;
   return <group>
     {plan.rooms.map((room, i) => <group key={room.id} position-z={room.centerZ}>
       {room.layout === "fabrication" ? <Laboratory room={room} palette={palette} /> : room.layout === "archive" ? <Archive room={room} palette={palette} /> : <Garden room={room} palette={palette} />}

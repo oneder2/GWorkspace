@@ -17,6 +17,7 @@
     "check:world-content": "node scripts/check-world-content.js",
     "check:public-facts": "node scripts/check-public-facts.js",
     "check:resume": "node scripts/check-resume.js",
+    "check:spotify": "node scripts/check-spotify.js",
     "check:oceanseo-sync": "node scripts/check-oceanseo-project-sync.js",
     "sync:oceanseo": "node scripts/oceanseo-project-sync.js",
     "import:resume": "node scripts/import-resume.js",

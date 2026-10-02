@@ -267,6 +267,7 @@ export const adminApi = {
   },
   getStats: () => request('/admin/stats'),
   getSystemHealth: () => request('/admin/system/health'),
+  authorizeSpotify: () => request('/spotify/login', { method: 'POST' }),
   createSystemBackup: () => request('/admin/system/backup', { method: 'POST' }),
   getSystemAssets: () => request('/admin/system/assets'),
   deleteSystemAsset: (key) => request('/admin/system/assets', {
