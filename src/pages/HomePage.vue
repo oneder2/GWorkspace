@@ -136,7 +136,9 @@
         </article>
 
         <section class="home-outline-card home-solid-card home-owner-card">
+          <MathFieldBackground :mode="mathMode" />
           <div class="home-owner-head">
+            <button class="math-mode-toggle" type="button" @click="mathMode = 1 - mathMode" :aria-label="$t('mathField.switch')" :title="$t('mathField.hint')">{{ mathMode ? 'sin(3t) · sin(2t)' : '∇ψ · ↗' }}</button>
             <div>
               <div class="section-kicker">{{ $t('home.owner.kicker') }}</div>
               <h2 class="home-owner-section-title">{{ $t('home.owner.title') }}</h2>
@@ -214,6 +216,9 @@ import BrainIcon from '../components/icons/BrainIcon.vue'
 import FileTextIcon from '../components/icons/FileTextIcon.vue'
 import GitHubIcon from '../components/icons/GitHubIcon.vue'
 import GWorkspaceIcon from '../components/icons/GWorkspaceIcon.vue'
+import MathFieldBackground from '../components/MathFieldBackground.vue'
+
+const mathMode = ref(0)
 
 const { t, locale } = useI18n()
 const { todayEntries } = useWorkspaceJournal()
@@ -603,8 +608,8 @@ onMounted(() => {
 .home-solid-card.home-intro-card {
   background: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--surface-admin-panel) 94%, var(--theme-primary) 6%),
-    color-mix(in srgb, var(--surface-panel) 98%, white 2%)
+    color-mix(in srgb, var(--surface-elevated) 94%, var(--theme-primary) 6%),
+    var(--surface-panel)
   );
 }
 
@@ -637,10 +642,15 @@ onMounted(() => {
 .home-solid-card.home-owner-card {
   background: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--surface-admin-panel) 97%, transparent),
+    color-mix(in srgb, var(--surface-panel) 92%, transparent),
     color-mix(in srgb, var(--theme-primary) 5%, var(--surface-panel) 95%)
   );
 }
+
+.home-owner-card > .math-field { position: absolute; z-index: 0; }
+.home-owner-head, .home-owner-layout { z-index: 1; }
+.math-mode-toggle { flex-shrink: 0; order: 3; padding: 5px 9px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface-panel); color: var(--text-secondary); font: 11px 'JetBrains Mono', monospace; }
+.math-mode-toggle:focus-visible { outline: 2px solid var(--theme-primary); outline-offset: 3px; }
 
 .home-tasks-card { 
   grid-area: tasks;

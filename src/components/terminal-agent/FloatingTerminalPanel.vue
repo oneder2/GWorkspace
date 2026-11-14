@@ -19,7 +19,7 @@
           leave-from-class="opacity-100 translate-y-0 translate-x-0 scale-100"
           leave-to-class="opacity-0 translate-y-6 md:translate-y-4 md:translate-x-4 scale-[0.98]"
         >
-          <section v-if="open" class="terminal-panel surface-float">
+          <section v-if="open" class="terminal-panel surface-float" :style="panelStyle" role="dialog" :aria-label="copy.launcher.label" @keydown.esc.stop="$emit('close')">
             <TerminalHeader :copy="copy" :state="state" @close="$emit('close')" />
 
             <TerminalActionBar :copy="copy" @select="$emit('select-action', $event)" />
@@ -53,13 +53,14 @@
 </template>
 
 <script setup>
-import { nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import TerminalHeader from './TerminalHeader.vue'
 import TerminalActionBar from './TerminalActionBar.vue'
 import TerminalInput from './TerminalInput.vue'
 import TerminalOutput from './TerminalOutput.vue'
 
 const props = defineProps({
+  anchor: { type: Object, default: () => ({ x: window.innerWidth - 68, y: window.innerHeight - 88 }) },
   copy: {
     type: Object,
     required: true
@@ -97,6 +98,14 @@ const props = defineProps({
 defineEmits(['close', 'execute', 'link-activate', 'navigate-history', 'select-action', 'update:currentCommand'])
 
 const inputRef = ref(null)
+const viewport = ref({ width: window.innerWidth, height: window.innerHeight })
+function resize() { viewport.value = { width: window.visualViewport?.width || window.innerWidth, height: window.visualViewport?.height || window.innerHeight } }
+const panelStyle = computed(() => {
+  const width = Math.min(448, viewport.value.width - 24), height = Math.min(592, viewport.value.height - 32)
+  return { width: width + 'px', height: height + 'px', left: Math.max(12, Math.min(props.anchor.x - width + 56, viewport.value.width - width - 12)) + 'px', top: Math.max(16, Math.min(props.anchor.y - height + 56, viewport.value.height - height - 16)) + 'px', right: 'auto', bottom: 'auto' }
+})
+onMounted(() => { resize(); window.addEventListener('resize', resize); window.visualViewport?.addEventListener('resize', resize) })
+onUnmounted(() => { window.removeEventListener('resize', resize); window.visualViewport?.removeEventListener('resize', resize) })
 
 watch(
   () => props.open,
@@ -143,7 +152,7 @@ watch(
   height: min(37rem, calc(100vh - 8rem));
   flex-direction: column;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 20px;
   pointer-events: auto;
   border-color: color-mix(in srgb, var(--agent-signal) 16%, var(--border-base));
 }
@@ -165,7 +174,7 @@ watch(
     bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
     width: auto;
     height: min(76vh, 40rem);
-    border-radius: 8px;
+    border-radius: 20px;
   }
 }
 </style>

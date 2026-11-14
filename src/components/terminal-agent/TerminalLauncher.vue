@@ -1,191 +1,64 @@
 <template>
-  <button
-    type="button"
-    class="terminal-launcher"
-    :class="{ 'terminal-launcher-open': open }"
-    :aria-label="open ? copy.ui.dismissLabel : copy.ui.openLabel"
-    :title="open ? copy.ui.dismissLabel : copy.ui.openLabel"
-    @click="$emit('toggle')"
-  >
-    <span class="terminal-launcher-icon-shell" aria-hidden="true">
-      <span class="terminal-launcher-icon-glow"></span>
-      <span class="terminal-launcher-icon"></span>
-    </span>
-
-    <span class="terminal-launcher-copy">
-      <span class="terminal-launcher-label">{{ copy.launcher.label }}</span>
-      <span class="terminal-launcher-meta">
-        <span class="terminal-launcher-dot"></span>
-        <span>{{ state }}</span>
-      </span>
-    </span>
+  <button ref="button" type="button" class="terminal-orb" :class="{ dragging, open }" :style="{ left: position.x + 'px', top: position.y + 'px' }"
+    :aria-label="copy.ui.openLabel" :title="`${copy.launcher.label} · ${state}`" :aria-expanded="open"
+    @pointerdown="start" @pointermove="move" @pointerup="end" @pointercancel="cancel" @dragstart.prevent @click="activate">
+    <span class="orbit" aria-hidden="true"></span><span class="glyph" aria-hidden="true">&gt;_</span><span class="signal" aria-hidden="true"></span>
   </button>
 </template>
-
 <script setup>
-defineProps({
-  copy: {
-    type: Object,
-    required: true
-  },
-  open: {
-    type: Boolean,
-    default: false
-  },
-  state: {
-    type: String,
-    required: true
-  }
+import { ref, reactive, onMounted, onUnmounted, watch, nextTick } from 'vue'
+const props = defineProps({ copy: Object, open: Boolean, state: String })
+const emit = defineEmits(['toggle', 'position'])
+const button = ref(null), dragging = ref(false)
+const position = reactive({ x: window.innerWidth - 72, y: window.innerHeight - 88 })
+let dock = { edge: 'right', ratio: .92 }, gesture = null, suppress = false
+const bounds = () => ({ x: Math.max(12, window.innerWidth - 68), y: Math.max(12, window.innerHeight - 68) })
+function place() {
+  const b = bounds(), vertical = ['left', 'right'].includes(dock.edge)
+  position.x = vertical ? (dock.edge === 'left' ? 12 : b.x) : 12 + dock.ratio * (b.x - 12)
+  position.y = vertical ? 12 + dock.ratio * (b.y - 12) : (dock.edge === 'top' ? 12 : b.y)
+  emit('position', { ...position })
+}
+function snap() {
+  const b = bounds()
+  dock.edge = [['left', position.x - 12], ['right', b.x - position.x], ['top', position.y - 12], ['bottom', b.y - position.y]].sort((a,b) => a[1]-b[1])[0][0]
+  dock.ratio = ['left','right'].includes(dock.edge) ? (position.y-12)/Math.max(1,b.y-12) : (position.x-12)/Math.max(1,b.x-12)
+  place()
+  try { localStorage.setItem('terminal-orb-dock', JSON.stringify(dock)) } catch { /* Optional preference. */ }
+}
+function start(e) {
+  if (!e.isPrimary || e.button !== 0) return
+  e.preventDefault(); suppress = false
+  gesture = { id: e.pointerId, x: e.clientX, y: e.clientY, origin: { ...position } }
+  e.currentTarget.setPointerCapture(e.pointerId)
+}
+function move(e) {
+  if (!gesture || gesture.id !== e.pointerId) return
+  const dx=e.clientX-gesture.x, dy=e.clientY-gesture.y
+  if (Math.hypot(dx,dy)>6) dragging.value=true
+  if (!dragging.value) return
+  const b=bounds()
+  position.x=Math.max(12,Math.min(b.x,gesture.origin.x+dx)); position.y=Math.max(12,Math.min(b.y,gesture.origin.y+dy))
+}
+function end(e) { if (!gesture || gesture.id!==e.pointerId) return; suppress=dragging.value; gesture=null; dragging.value=false; snap() }
+function cancel() { gesture=null; dragging.value=false; suppress=true; place() }
+function activate(e) { if (suppress && e.detail!==0) { suppress=false; return }; emit('toggle') }
+watch(()=>props.open, async value=>{ if (!value) { await nextTick(); button.value?.focus({preventScroll:true}) } })
+onMounted(()=>{
+  try { const saved=JSON.parse(localStorage.getItem('terminal-orb-dock')); if (saved && ['left','right','top','bottom'].includes(saved.edge) && Number.isFinite(saved.ratio)) dock={edge:saved.edge,ratio:Math.max(0,Math.min(1,saved.ratio))} } catch { /* Use default dock. */ }
+  place(); window.addEventListener('resize',place)
 })
-
-defineEmits(['toggle'])
+onUnmounted(()=>window.removeEventListener('resize',place))
 </script>
-
 <style scoped>
-.terminal-launcher {
-  position: fixed;
-  right: 1.35rem;
-  bottom: calc(5.4rem + env(safe-area-inset-bottom, 0px));
-  z-index: 90;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.62rem;
-  width: 11.5rem;
-  min-height: 2.8rem;
-  padding: 0.3rem 0.65rem 0.3rem 0.38rem;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--agent-signal) 18%, var(--border-base));
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--surface-elevated) 94%, transparent), color-mix(in srgb, var(--surface-overlay) 90%, transparent)),
-    radial-gradient(circle at top left, color-mix(in srgb, var(--agent-signal) 16%, transparent), transparent 46%);
-  box-shadow:
-    0 18px 42px rgba(15, 23, 42, 0.16),
-    0 0 0 1px color-mix(in srgb, var(--agent-signal) 8%, transparent);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  transition: transform 0.26s ease, box-shadow 0.26s ease, border-color 0.26s ease, opacity 0.22s ease;
-}
-
-.terminal-launcher::before {
-  content: "";
-  position: absolute;
-  inset: auto 0.85rem -0.7rem 0.85rem;
-  height: 1.15rem;
-  border-radius: 999px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--agent-signal) 24%, transparent), transparent 72%);
-  filter: blur(12px);
-  opacity: 0.65;
-  pointer-events: none;
-}
-
-.terminal-launcher:hover {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--agent-signal) 30%, var(--border-base));
-  box-shadow:
-    0 24px 54px rgba(15, 23, 42, 0.2),
-    0 0 0 1px color-mix(in srgb, var(--agent-signal) 18%, transparent);
-}
-
-.terminal-launcher-open {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(8px) scale(0.98);
-}
-
-.terminal-launcher-icon-shell {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  flex-shrink: 0;
-  border-radius: 7px;
-  border: 1px solid color-mix(in srgb, var(--agent-signal) 18%, var(--border-base));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-elevated) 98%, transparent), color-mix(in srgb, var(--surface-panel) 90%, transparent));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.66), 0 10px 24px color-mix(in srgb, var(--agent-signal) 10%, transparent);
-  overflow: hidden;
-}
-
-.terminal-launcher-icon-glow {
-  position: absolute;
-  inset: -20%;
-  background: radial-gradient(circle at 28% 24%, color-mix(in srgb, var(--agent-signal) 25%, transparent), transparent 58%);
-  opacity: 0.95;
-}
-
-.terminal-launcher-icon {
-  position: relative;
-  width: 1.15rem;
-  height: 1.15rem;
-  background-color: var(--theme-primary-darker);
-  -webkit-mask: url('/images/icons/terminal.svg') center / contain no-repeat;
-  mask: url('/images/icons/terminal.svg') center / contain no-repeat;
-  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--agent-signal) 24%, transparent));
-  transition: transform 0.26s ease, background-color 0.26s ease, filter 0.26s ease;
-}
-
-.terminal-launcher:hover .terminal-launcher-icon {
-  transform: translateY(-1px) scale(1.03);
-  background-color: var(--agent-signal-deep);
-  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--agent-signal) 36%, transparent));
-}
-
-.terminal-launcher-copy {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.terminal-launcher-label {
-  max-width: 100%;
-  color: var(--text-main);
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.terminal-launcher-meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: var(--text-muted);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.terminal-launcher-dot {
-  width: 0.42rem;
-  height: 0.42rem;
-  border-radius: 999px;
-  background: var(--agent-signal);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--agent-signal) 44%, transparent);
-}
-
-@media (max-width: 767px) {
-  .terminal-launcher {
-    right: 0.85rem;
-    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
-    min-width: 0;
-    width: 2.65rem;
-    min-height: 2.65rem;
-    padding: 0.2rem;
-  }
-
-  .terminal-launcher-icon-shell {
-    width: 2.2rem;
-    height: 2.2rem;
-  }
-
-  .terminal-launcher-copy {
-    display: none;
-  }
-}
+.terminal-orb { position:fixed; z-index:90; width:56px; height:56px; border-radius:50%; display:grid; place-items:center; touch-action:none; user-select:none; cursor:grab; color:var(--text-main); background:radial-gradient(circle at 30% 20%,var(--surface-elevated),var(--surface-panel)); border:1px solid var(--border-strong); backdrop-filter:blur(14px); box-shadow:0 8px 24px #0f172a26,inset 0 1px 2px #ffffff55; transition:left .25s ease,top .25s ease,box-shadow .2s; }
+.terminal-orb > span { pointer-events:none; }
+.terminal-orb.dragging { transition:none; cursor:grabbing; }
+.terminal-orb.open { visibility:hidden; pointer-events:none; }
+.terminal-orb:focus-visible { outline:2px solid var(--theme-primary); outline-offset:4px; }
+.terminal-orb:hover { box-shadow:0 8px 30px color-mix(in srgb,var(--agent-signal) 25%,transparent); }
+.orbit { position:absolute; inset:5px; border:1px solid color-mix(in srgb,var(--agent-signal) 50%,transparent); border-right-color:transparent; border-radius:50%; transform:rotate(-35deg); }
+.glyph { font:700 18px 'JetBrains Mono',monospace; letter-spacing:-2px; }
+.signal { position:absolute; right:9px; bottom:10px; width:5px; height:5px; border-radius:50%; background:var(--accent-success); box-shadow:0 0 0 3px var(--surface-panel); }
+@media(prefers-reduced-motion:reduce) { .terminal-orb { transition:none; } }
 </style>
