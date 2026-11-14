@@ -106,7 +106,6 @@
           <router-view />
         </div>
 
-        <WorkShelf />
       </main>
 
       <TerminalAgent />
@@ -140,7 +139,6 @@ import {
 } from './config/backgroundScenes'
 import Sidebar from './components/Sidebar.vue'
 import Header from './components/Header.vue'
-import WorkShelf from './components/WorkShelf.vue'
 import AdminSidebar from './components/admin/AdminSidebar.vue'
 import TerminalAgent from './components/terminal-agent/TerminalAgent.vue'
 import ThemeCustomizer from './components/ThemeCustomizer.vue'

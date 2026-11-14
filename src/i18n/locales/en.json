@@ -1,4 +1,5 @@
 {
+  "mathField": { "switch": "Switch background: vector field or Lissajous curves", "hint": "Move to explore; click to switch curves" },
   "nav": {
     "home": "Desk",
     "workspace": "Studio",

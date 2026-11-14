@@ -24,15 +24,15 @@
   /* 固定景深系统：背景 < 导航/主壳体 < 内容 < 浮层 */
   --bg-app: rgb(248 250 252 / 0.72);
   --bg-surface: rgb(248 250 252 / 0.8);
-  --bg-card: rgb(255 255 255 / 0.86);
-  --bg-input: rgb(255 255 255 / 0.9);
+  --bg-card: rgb(224 232 227 / 0.72);
+  --bg-input: rgb(237 241 236 / 0.86);
   --surface-base: rgb(241 245 249 / 0.72);
-  --surface-panel: rgb(255 255 255 / 0.82);
-  --surface-elevated: rgb(255 255 255 / 0.94);
+  --surface-panel: rgb(226 233 227 / 0.65);
+  --surface-elevated: rgb(237 241 234 / 0.82);
   --surface-overlay: rgb(248 250 252 / 0.96);
   --surface-admin: rgb(241 245 249 / 0.88);
   --surface-admin-panel: rgb(255 255 255 / 0.96);
-  --surface-sidebar: rgb(255 255 255 / 0.88);
+  --surface-sidebar: rgb(218 229 222 / 0.62);
   --surface-shell-start: rgb(248 250 252 / 0.72);
   --surface-shell-end: rgb(241 245 249 / 0.64);
   --shell-ambient-blur: 6px;
@@ -124,15 +124,15 @@ body {
 }
 
 .app-frame[data-ambience="high"] {
-  --surface-shell-start: rgb(248 250 252 / 0.62);
-  --surface-shell-end: rgb(241 245 249 / 0.54);
-  --shell-ambient-blur: 4px;
+  --surface-shell-start: rgb(215 226 219 / 0.32);
+  --surface-shell-end: rgb(195 211 205 / 0.24);
+  --shell-ambient-blur: 2px;
 }
 
 .app-frame[data-ambience="medium"] {
-  --surface-shell-start: rgb(248 250 252 / 0.72);
-  --surface-shell-end: rgb(241 245 249 / 0.64);
-  --shell-ambient-blur: 6px;
+  --surface-shell-start: rgb(219 229 223 / 0.48);
+  --surface-shell-end: rgb(204 219 212 / 0.4);
+  --shell-ambient-blur: 4px;
 }
 
 .app-frame[data-ambience="low"] {
@@ -142,11 +142,13 @@ body {
 }
 
 .dark .app-frame[data-ambience="high"] {
+  --shell-ambient-blur: 4px;
   --surface-shell-start: rgb(15 23 42 / 0.62);
   --surface-shell-end: rgb(2 6 23 / 0.54);
 }
 
 .dark .app-frame[data-ambience="medium"] {
+  --shell-ambient-blur: 6px;
   --surface-shell-start: rgb(15 23 42 / 0.72);
   --surface-shell-end: rgb(2 6 23 / 0.64);
 }
@@ -816,13 +818,14 @@ body {
 
   .app-frame[data-ambience="high"],
   .app-frame[data-ambience="medium"] {
-    --surface-shell-start: rgb(248 250 252 / 0.74);
-    --surface-shell-end: rgb(241 245 249 / 0.66);
-    --shell-ambient-blur: 7px;
+    --surface-shell-start: rgb(219 229 223 / 0.5);
+    --surface-shell-end: rgb(204 219 212 / 0.42);
+    --shell-ambient-blur: 4px;
   }
 
   .dark .app-frame[data-ambience="high"],
   .dark .app-frame[data-ambience="medium"] {
+    --shell-ambient-blur: 7px;
     --surface-shell-start: rgb(15 23 42 / 0.76);
     --surface-shell-end: rgb(2 6 23 / 0.68);
   }

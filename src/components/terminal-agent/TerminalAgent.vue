@@ -5,10 +5,12 @@
       :open="isOpen"
       :state="launcherState"
       @toggle="togglePanel"
+      @position="anchor = $event"
     />
   </teleport>
 
   <FloatingTerminalPanel
+    :anchor="anchor"
     :copy="copy"
     :current-command="currentCommand"
     :empty-state="emptyState"
@@ -27,6 +29,8 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+const anchor = ref({ x: window.innerWidth - 68, y: window.innerHeight - 88 })
 import FloatingTerminalPanel from './FloatingTerminalPanel.vue'
 import TerminalLauncher from './TerminalLauncher.vue'
 import { useTerminalAgent } from '../../composables/useTerminalAgent'
