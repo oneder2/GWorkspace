@@ -33,6 +33,7 @@ lerna-debug.log*
 # Local tooling and generated assets
 .codex
 .playwright-cli/
+/apply/
 backend/public/cache/og-images/
 backend/node_modules_corrupt_backup/
 backend/node_modules_node22_incompatible/
