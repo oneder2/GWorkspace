@@ -1,4 +1,11 @@
 {
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "has": [{ "type": "host", "value": "(?<preview>.*)\\.vercel\\.app" }],
+      "destination": "https://workspace.gellaronline.cc/api/:path*"
+    }
+  ],
   "redirects": [
     {
       "source": "/sites",

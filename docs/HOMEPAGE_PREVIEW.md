@@ -25,17 +25,30 @@ desktop sidebar breakpoint.
 
 ## Isolated deployment
 
+The public frontend domain is served by Vercel, not the SSH server. Use the
+Vercel deployment attached to branch `preview/personal-landing-20261115` to
+review this change. Vercel Preview deployments automatically enable the preview
+banner, hash routing and noindex, disable the service worker, and read public
+API data through a same-origin rewrite. Production builds keep their existing
+API configuration. Backend CORS has not been broadened for preview domains.
+
+Vercel's existing deployment protection requires signing in with an authorized
+Vercel account. This protection has not been disabled. This is a visual preview
+using public production data, not an admin or backend sandbox. Authenticated
+mutations are not part of the preview validation.
+
+### Optional SSH build
+
 Dispatch `deploy-frontend.yml` with `preview=true` on the preview branch.
 The build uses `/previews/home-ascii/`, hash routing, a noindex meta tag, and no
 service worker. It publishes into a separate server preview directory and links
 that directory beneath the current frontend release. It does not switch the
 production release pointer or deploy the backend.
 
-Preview URL: `https://www.gellaronline.cc/previews/home-ascii/`
-
-This is a public visual preview using public production content. It is not a
-backend sandbox. A later production release may replace the containing directory;
-redispatch the preview if its link is removed.
+The SSH directory is not reachable through `www.gellaronline.cc` while that
+domain points to Vercel. Do not use `/previews/home-ascii/` on that domain as a
+review link. A later SSH production release may replace the containing directory;
+redispatch the SSH preview if its link is removed.
 
 ## Verification
 

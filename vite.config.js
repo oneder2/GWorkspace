@@ -6,13 +6,22 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const isVercelPreview = process.env.VERCEL_ENV === 'preview'
+const isHomePreview = isVercelPreview || process.env.VITE_HOME_PREVIEW === 'true'
+
 export default defineConfig({
-  base: process.env.VITE_PREVIEW_BASE || '/',
+  base: isVercelPreview ? '/' : process.env.VITE_PREVIEW_BASE || '/',
+  // Public preview reads go through Vercel instead of expanding backend CORS.
+  define: isVercelPreview ? {
+    'import.meta.env.VITE_HOME_PREVIEW': JSON.stringify('true'),
+    'import.meta.env.VITE_API_URL': JSON.stringify('/api'),
+    'import.meta.env.VITE_SPOTIFY_NOW_PLAYING_URL': JSON.stringify('/api/spotify/now-playing')
+  } : {},
   plugins: [
     vue(),
-    ...(process.env.VITE_HOME_PREVIEW === 'true' ? [{ name: 'preview-noindex', transformIndexHtml: () => [{ tag: 'meta', attrs: { name: 'robots', content: 'noindex, nofollow' }, injectTo: 'head' }] }] : []),
+    ...(isHomePreview ? [{ name: 'preview-noindex', transformIndexHtml: () => [{ tag: 'meta', attrs: { name: 'robots', content: 'noindex, nofollow' }, injectTo: 'head' }] }] : []),
     VitePWA({
-      disable: process.env.VITE_HOME_PREVIEW === 'true',
+      disable: isHomePreview,
       registerType: 'autoUpdate',
       scope: '/workspace',
       includeAssets: ['robots.txt', 'sitemap.xml', 'images/icons/favicon.ico', 'images/icons/*.svg', 'backgrounds/*.jpg', 'backgrounds/workplace/*.webp'],
