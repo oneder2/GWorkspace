@@ -24,7 +24,7 @@ const TERMINAL_AGENT_LOCALES = {
         '记录只保存在当前浏览器。'
       ],
       emptyTitle: '从一条真实记录开始',
-      emptyBody: '这里处理即时想法，不承担站内导航。你保存的内容会立即出现在工作台的“今日痕迹”中。',
+      emptyBody: '在这里记下即时想法，或拆解一个判断。保存后可以通过“回顾今天”查看。',
       hints: ['记：需要跟进的想法', '拆：需要验证的判断', '回顾今天']
     },
     ui: {
@@ -48,7 +48,7 @@ const TERMINAL_AGENT_LOCALES = {
       processingAnalysis: '正在拆解这条判断…',
       timeout: 'AI 请求超时，请稍后重试。',
       failure: '处理失败：{message}',
-      saved: '已写入今日痕迹。',
+      saved: '已保存到本地记录。',
       cleared: '当前会话已清空。'
     },
     commands: {
@@ -101,7 +101,7 @@ const TERMINAL_AGENT_LOCALES = {
     session: {
       bootLines: ['Workspace record layer connected.', 'Records stay in this browser.'],
       emptyTitle: 'Start with one real trace',
-      emptyBody: 'This surface handles immediate thoughts, not site navigation. Saved items appear in Today\'s traces on the Desk.',
+      emptyBody: 'Capture an idea or analyze a claim here. Use “review” to revisit saved records.',
       hints: ['note: something to follow up', 'analyze: a claim to test', 'review']
     },
     ui: {
@@ -125,7 +125,7 @@ const TERMINAL_AGENT_LOCALES = {
       processingAnalysis: 'Analyzing this claim…',
       timeout: 'The AI request timed out. Please try again.',
       failure: 'Failed: {message}',
-      saved: 'Saved to today\'s traces.',
+      saved: 'Saved to local records.',
       cleared: 'The current session has been cleared.'
     },
     commands: {

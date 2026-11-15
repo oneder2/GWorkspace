@@ -12,36 +12,6 @@
             <p class="section-copy home-copy">{{ $t('home.subtitle') }}</p>
           </div>
 
-          <section class="home-traces" :aria-label="traceCopy.title">
-            <div class="home-traces-head">
-              <div>
-                <span class="home-traces-kicker">{{ traceCopy.kicker }}</span>
-                <h2 class="home-traces-title">{{ traceCopy.title }}</h2>
-              </div>
-              <span class="home-traces-count">{{ todayEntries.length }}</span>
-            </div>
-
-            <div v-if="todayEntries.length" class="home-traces-list">
-              <button
-                v-for="entry in todayEntries.slice(0, 3)"
-                :key="entry.id"
-                type="button"
-                class="home-trace-item"
-                @click="openTerminal()"
-              >
-                <component :is="entry.type === 'analysis' ? BrainIcon : FileTextIcon" class="home-trace-icon" />
-                <span class="home-trace-copy">
-                  <span class="home-trace-summary">{{ entry.summary }}</span>
-                  <span class="home-trace-meta">{{ formatTraceTime(entry.createdAt) }} · {{ entry.type === 'analysis' ? traceCopy.analysis : traceCopy.note }}</span>
-                </span>
-              </button>
-            </div>
-
-            <button v-else type="button" class="home-traces-empty" @click="openTerminal('capture')">
-              <FileTextIcon class="home-trace-icon" />
-              <span>{{ traceCopy.empty }}</span>
-            </button>
-          </section>
         </header>
 
         <article class="home-outline-card home-status-card">
@@ -210,10 +180,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { homeProfileConfig } from '../config/home'
 import { useSpotifyNowPlaying } from '../composables/useSpotifyNowPlaying'
-import { useWorkspaceJournal } from '../composables/useWorkspaceJournal'
 import { adminSettingsApi } from '../utils/api'
-import BrainIcon from '../components/icons/BrainIcon.vue'
-import FileTextIcon from '../components/icons/FileTextIcon.vue'
 import GitHubIcon from '../components/icons/GitHubIcon.vue'
 import GWorkspaceIcon from '../components/icons/GWorkspaceIcon.vue'
 import MathFieldBackground from '../components/MathFieldBackground.vue'
@@ -221,7 +188,6 @@ import MathFieldBackground from '../components/MathFieldBackground.vue'
 const mathMode = ref(0)
 
 const { t, locale } = useI18n()
-const { todayEntries } = useWorkspaceJournal()
 
 const profileLocale = computed(() => {
   const current = String(locale.value || 'zh').toLowerCase()
@@ -256,35 +222,6 @@ const ownerProfile = computed(() => ({
   responsibilities: resolveLocalizedList(profileContent.value?.owner?.responsibilities || homeProfileConfig.owner.responsibilities),
   contacts: profileContent.value?.owner?.contacts || homeProfileConfig.owner.contacts
 }))
-
-const traceCopy = computed(() => profileLocale.value === 'zh'
-  ? {
-      kicker: 'WORK LOG',
-      title: '今日痕迹',
-      note: '记录',
-      analysis: 'AI 拆解',
-      empty: '还没有记录。写下第一条需要继续推进的线索。'
-    }
-  : {
-      kicker: 'WORK LOG',
-      title: 'Today\'s traces',
-      note: 'Record',
-      analysis: 'AI analysis',
-      empty: 'No records yet. Capture the first thread you want to continue.'
-    })
-
-const formatTraceTime = (value) => {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  return new Intl.DateTimeFormat(profileLocale.value === 'zh' ? 'zh-CN' : 'en-US', {
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date)
-}
-
-const openTerminal = (action) => {
-  window.dispatchEvent(new CustomEvent('gworkspace:terminal-open', { detail: { action } }))
-}
 
 const displayTasks = computed(() => {
   return profileTasks.value.map((text, index) => ({
@@ -490,7 +427,7 @@ onMounted(() => {
 .home-intro-card { 
   grid-area: intro; 
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.72fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: clamp(1.25rem, 2.4vw, 2.5rem);
   background: linear-gradient(135deg, color-mix(in srgb, var(--theme-primary) 8%, var(--surface-panel) 26%), color-mix(in srgb, var(--surface-panel) 24%, transparent));
@@ -498,111 +435,6 @@ onMounted(() => {
 
 .home-intro-copy {
   min-width: 0;
-}
-
-.home-traces {
-  min-width: 0;
-  padding-left: clamp(1rem, 2vw, 1.75rem);
-  border-left: 1px solid color-mix(in srgb, var(--theme-primary) 15%, var(--border-strong));
-}
-
-.home-traces-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.55rem;
-}
-
-.home-traces-kicker {
-  display: block;
-  color: var(--text-muted);
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-}
-
-.home-traces-title {
-  margin-top: 0.12rem;
-  color: var(--text-main);
-  font-size: 0.92rem;
-  font-weight: 800;
-}
-
-.home-traces-count {
-  display: inline-flex;
-  width: 1.7rem;
-  height: 1.7rem;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid color-mix(in srgb, var(--theme-primary) 20%, var(--border-strong));
-  border-radius: 50%;
-  color: var(--theme-primary-darker);
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-
-.home-traces-list {
-  display: grid;
-}
-
-.home-trace-item,
-.home-traces-empty {
-  display: grid;
-  width: 100%;
-  grid-template-columns: 1.2rem minmax(0, 1fr);
-  align-items: start;
-  gap: 0.6rem;
-  padding: 0.42rem 0;
-  color: var(--text-secondary);
-  text-align: left;
-}
-
-.home-trace-item + .home-trace-item {
-  border-top: 1px solid color-mix(in srgb, var(--border-strong) 72%, transparent);
-}
-
-.home-trace-item:hover .home-trace-summary,
-.home-traces-empty:hover {
-  color: var(--theme-primary-darker);
-}
-
-.home-trace-icon {
-  width: 0.95rem;
-  height: 0.95rem;
-  margin-top: 0.15rem;
-  color: var(--theme-primary-darker);
-}
-
-.home-trace-copy {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.08rem;
-}
-
-.home-trace-summary {
-  overflow: hidden;
-  color: var(--text-main);
-  font-size: 0.78rem;
-  font-weight: 700;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: color 0.2s ease;
-}
-
-.home-trace-meta {
-  color: var(--text-muted);
-  font-size: 0.64rem;
-}
-
-.home-traces-empty {
-  border-top: 1px solid color-mix(in srgb, var(--border-strong) 72%, transparent);
-  font-size: 0.74rem;
-  line-height: 1.45;
-  transition: color 0.2s ease;
 }
 
 .home-solid-card.home-intro-card {
@@ -1150,12 +982,6 @@ a.home-spotify-panel:focus-visible {
     gap: 1rem;
   }
 
-  .home-traces {
-    padding-top: 0.85rem;
-    padding-left: 0;
-    border-top: 1px solid color-mix(in srgb, var(--theme-primary) 15%, var(--border-strong));
-    border-left: 0;
-  }
 
   .home-intro-card,
   .home-status-card,
@@ -1227,9 +1053,6 @@ a.home-spotify-panel:focus-visible {
     order: 1;
   }
 
-  .home-trace-summary {
-    white-space: normal;
-  }
 
   .home-owner-card {
     order: 2;
