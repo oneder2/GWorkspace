@@ -8,40 +8,13 @@
     class="app-sidebar-shell rounded-none md:rounded-[28px] flex flex-col shrink-0 transition-all duration-300 h-full overflow-hidden"
     :class="collapsed ? 'w-16 sm:w-20' : 'w-full md:w-64'"
   >
-    <!-- 头部 Logo - 点击可收起/展开（桌面端）或关闭（移动端） -->
-    <div class="py-5 px-4 flex flex-col items-center relative border-b border-[color:var(--border-strong)]">
-      <div 
-        @click="$emit('toggle-collapse')" 
-        class="flex items-center gap-3 transition-opacity duration-300 cursor-pointer group hover:opacity-80 active:scale-95 transition-all w-full"
-        v-if="!collapsed"
-        :title="$t('common.collapse')"
-      >
-        <!-- Logo图标：亮色模式使用黑色，暗色模式使用白色 -->
-        <GWorkspaceIcon :size="60" variant="black" class="dark:brightness-0 dark:invert" />
-        <div class="min-w-0">
-          <span class="font-bold text-xl tracking-tight text-main transition-colors group-hover:[color:var(--theme-primary)]">GWorkspace</span>
-        </div>
-        <!-- 移动端关闭按钮 -->
-        <button
-          @click.stop="$emit('nav-click')"
-          class="md:hidden ml-auto icon-btn p-2"
-          :title="$t('common.close')"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-secondary">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <div 
-        @click="$emit('toggle-collapse')" 
-        v-else
-        class="cursor-pointer group hover:opacity-80 active:scale-95 transition-all"
-        :title="$t('common.expand')"
-      >
-        <!-- Logo图标（折叠状态）：亮色模式使用黑色，暗色模式使用白色 -->
-        <GWorkspaceIcon :size="48" variant="black" class="dark:brightness-0 dark:invert" />
-      </div>
+    <div class="py-5 px-4 flex flex-col items-center gap-3 border-b border-[color:var(--border-strong)]">
+      <router-link to="/" @click="$emit('nav-click')" class="sidebar-home-link flex items-center gap-3 w-full hover:opacity-80" :aria-label="$t('homeV2.backHome')">
+        <GWorkspaceIcon :size="collapsed ? 44 : 54" variant="black" class="dark:brightness-0 dark:invert shrink-0" />
+        <span v-if="!collapsed" class="font-bold text-xl tracking-tight text-main">GWorkspace</span>
+      </router-link>
+      <button type="button" @click="$emit('toggle-collapse')" class="hidden xl:block text-xs text-secondary self-end p-2" :aria-label="$t(collapsed ? 'common.expand' : 'common.collapse')">{{ collapsed ? '→' : '←' }}</button>
+      <button type="button" @click="$emit('nav-click')" class="xl:hidden text-sm text-secondary self-end p-2">{{ $t('common.close') }}</button>
     </div>
 
     <!-- 导航菜单 -->

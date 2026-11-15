@@ -8,7 +8,7 @@
     :data-ambience="ambienceLevel"
   >
     <!-- 全局背景图 -->
-    <div class="app-background fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div v-if="!isHomeRoute" class="app-background fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
       <div
         class="app-background-image absolute inset-0 bg-cover transition-all duration-1000"
         :style="backgroundImageStyle"
@@ -32,7 +32,11 @@
       </main>
     </div>
 
-    <!-- 普通路由：使用标准布局（侧边栏 + 顶部栏） -->
+    <main v-else-if="isHomeRoute" id="main-scroll" class="landing-viewport">
+      <router-view :is-dark="isDark" @toggle-theme="toggleTheme" @toggle-lang="toggleLanguage" />
+    </main>
+
+    <!-- 工作间路由：使用标准布局（侧边栏 + 顶部栏） -->
     <div v-else class="relative z-10 flex h-full w-full p-1.5 sm:p-3 xl:p-4 gap-2.5 sm:gap-3 box-border">
       <!-- 左侧导航栏 - 移动端隐藏，平板和桌面显示 -->
       <Sidebar 
@@ -124,8 +128,13 @@
   </div>
 </template>
 
+<style>
+.landing-viewport { height: 100%; width: 100%; overflow-y: auto; background: #e8ece5; }
+.dark .landing-viewport { background: #172725; }
+</style>
+
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useTheme } from './composables/useTheme'
 import { useKeyboard } from './composables/useKeyboard'
@@ -274,7 +283,7 @@ useKeyboard({
 onMounted(() => {
   syncBackgroundHour()
   backgroundPhaseTimer = window.setInterval(syncBackgroundHour, 60_000)
-  loadWeather()
+  if (!isHomeRoute.value) loadWeather()
   const currentLocale = localStorage.getItem('locale') || 'zh'
   document.documentElement.lang = currentLocale === 'zh' ? 'zh-CN' : 'en'
 })
@@ -283,6 +292,11 @@ onUnmounted(() => {
   if (backgroundPhaseTimer !== null) {
     window.clearInterval(backgroundPhaseTimer)
   }
+})
+
+watch(() => route.path, () => {
+  showMobileMenu.value = false
+  if (!isHomeRoute.value && !weatherInfo.value) loadWeather()
 })
 </script>
 

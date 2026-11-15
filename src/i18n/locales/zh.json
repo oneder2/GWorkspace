@@ -1,4 +1,13 @@
 {
+  "homeV2": {
+    "enter": "进入工作间", "backHome": "返回个人首页", "light": "切换到亮色模式", "dark": "切换到暗色模式",
+    "statement": "写作、代码，与正在发生的生活。",
+    "explore": "看看我的作品", "work": "写下的，做出的", "allProjects": "全部作品",
+    "writing": "最近的一篇", "writingTitle": "想法在文字里慢慢成形", "writingEmpty": "文章暂时未能加载，可以前往文章页继续阅读。", "read": "接着读", "allWriting": "浏览文章",
+    "life": "最近的日常", "lifeNote": "一些仍在继续的小事", "progress": "歌曲播放进度",
+    "colophon": "这个角落，还在慢慢生长。", "pause": "暂停动画", "play": "继续动画", "touch": "移动或轻触，拨动这片字符。",
+    "preview": "首页设计预览", "live": "返回正式站点"
+  },
   "mathField": { "switch": "切换数学背景：向量场或李萨如曲线", "hint": "移动指针探索，点击切换曲线" },
   "nav": {
     "home": "桌面",

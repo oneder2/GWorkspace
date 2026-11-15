@@ -3,7 +3,7 @@
  * 定义应用的所有路由规则
  * 使用懒加载优化性能，减少初始包大小
  */
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 import { useAuth } from '../composables/useAuth.js'
 import { i18n } from '../i18n/index.js'
 
@@ -156,7 +156,9 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: import.meta.env.VITE_HOME_PREVIEW === 'true'
+    ? createWebHashHistory(import.meta.env.BASE_URL)
+    : createWebHistory(import.meta.env.BASE_URL),
   routes,
   // 滚动行为：切换路由时滚动到顶部
   scrollBehavior(to, from, savedPosition) {

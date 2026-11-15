@@ -1,4 +1,13 @@
 {
+  "homeV2": {
+    "enter": "Enter workspace", "backHome": "Back to the personal homepage", "light": "Switch to light mode", "dark": "Switch to dark mode",
+    "statement": "Writing, code, and life in between.",
+    "explore": "Explore my work", "work": "Written & built", "allProjects": "All projects",
+    "writing": "The latest entry", "writingTitle": "Ideas take shape in words", "writingEmpty": "The latest entry could not load. You can still browse the writing archive.", "read": "Keep reading", "allWriting": "Browse writing",
+    "life": "Life lately", "lifeNote": "A few things in progress", "progress": "Song playback progress",
+    "colophon": "A corner that keeps growing.", "pause": "Pause motion", "play": "Resume motion", "touch": "Move or tap to stir the characters.",
+    "preview": "Homepage design preview", "live": "Back to the live site"
+  },
   "mathField": { "switch": "Switch background: vector field or Lissajous curves", "hint": "Move to explore; click to switch curves" },
   "nav": {
     "home": "Desk",

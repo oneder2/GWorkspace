@@ -11,7 +11,7 @@
       <!-- 移动端菜单按钮 -->
       <button
         @click="$emit('toggle-mobile-menu')"
-        class="md:hidden icon-btn flex-shrink-0 !bg-transparent !border-0"
+        class="xl:hidden icon-btn flex-shrink-0 !bg-transparent !border-0"
         :title="$t('common.menu')"
       >
         <svg 
