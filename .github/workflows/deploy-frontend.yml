@@ -13,6 +13,11 @@ on:
       - 'tailwind.config.js'
       - 'postcss.config.js'
   workflow_dispatch:
+    inputs:
+      preview:
+        description: 'Publish an isolated homepage preview instead of replacing production'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -24,6 +29,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      VITE_HOME_PREVIEW: ${{ inputs.preview && 'true' || 'false' }}
+      VITE_PREVIEW_BASE: ${{ inputs.preview && '/previews/home-ascii/' || '/' }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -47,15 +55,29 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         env:
           RELEASE_SHA: ${{ github.sha }}
+          PREVIEW_MODE: ${{ inputs.preview && 'true' || 'false' }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: RELEASE_SHA
+          envs: RELEASE_SHA,PREVIEW_MODE
           script: |
             set -euo pipefail
             FRONTEND_ROOT="$HOME/gworkspace/frontend"
+            if [ "$PREVIEW_MODE" = "true" ]; then
+              test -f "$FRONTEND_ROOT/current/index.html"
+              PREVIEW_DIR="$FRONTEND_ROOT/previews/$RELEASE_SHA"
+              mkdir -p "$PREVIEW_DIR"
+              tar -xzf /tmp/workspace-frontend.tar.gz -C "$PREVIEW_DIR"
+              test -f "$PREVIEW_DIR/index.html"
+              mkdir -p "$FRONTEND_ROOT/current/previews"
+              ln -sfn "$PREVIEW_DIR" "$FRONTEND_ROOT/current/previews/home-ascii-next"
+              mv -Tf "$FRONTEND_ROOT/current/previews/home-ascii-next" "$FRONTEND_ROOT/current/previews/home-ascii"
+              rm -f /tmp/workspace-frontend.tar.gz
+              echo "Preview published at /previews/home-ascii/"
+              exit 0
+            fi
             RELEASE_DIR="$FRONTEND_ROOT/releases/$RELEASE_SHA"
             mkdir -p "$RELEASE_DIR"
             tar -xzf /tmp/workspace-frontend.tar.gz -C "$RELEASE_DIR"

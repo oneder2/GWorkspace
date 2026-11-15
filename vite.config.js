@@ -7,9 +7,12 @@ import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: process.env.VITE_PREVIEW_BASE || '/',
   plugins: [
     vue(),
+    ...(process.env.VITE_HOME_PREVIEW === 'true' ? [{ name: 'preview-noindex', transformIndexHtml: () => [{ tag: 'meta', attrs: { name: 'robots', content: 'noindex, nofollow' }, injectTo: 'head' }] }] : []),
     VitePWA({
+      disable: process.env.VITE_HOME_PREVIEW === 'true',
       registerType: 'autoUpdate',
       scope: '/workspace',
       includeAssets: ['robots.txt', 'sitemap.xml', 'images/icons/favicon.ico', 'images/icons/*.svg', 'backgrounds/*.jpg', 'backgrounds/workplace/*.webp'],
